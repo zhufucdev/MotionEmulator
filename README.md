@@ -10,7 +10,7 @@ If you study in universities in China, there'll be
 no necessity to explain it.
 
 Despite how hard the faculty tries to make us take an
-after-dinner sunny long run at dusk every one thirds day,
+after-dinner sunny long run at dusk every three days,
 we always want to create something innovative to make the life a little
 bit easier.
 
