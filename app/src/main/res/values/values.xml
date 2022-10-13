@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="icon_margin">4dp</dimen>
+    <dimen name="card_margin">12dp</dimen>
+    <dimen name="card_radius">8dp</dimen>
+    <dimen name="card_padding_inside">20dp</dimen>
+    <dimen name="common_padding">12dp</dimen>
+    <dimen name="extended_fab_margin">16dp</dimen>
+    <dimen name="chart_height">100dp</dimen>
+    <style name="BaseCardLayout">
+        <item name="android:layout_marginTop">@dimen/card_margin</item>
+        <item name="android:layout_marginLeft">@dimen/card_margin</item>
+        <item name="android:layout_marginRight">@dimen/card_margin</item>
+    </style>
+</resources>

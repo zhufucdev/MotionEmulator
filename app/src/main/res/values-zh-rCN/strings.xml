@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">运动模拟器</string>
+    <string name="title_status_activated">模块已激活</string>
+    <string name="text_status_activated">调整下列选项来开始</string>
+    <string name="title_status_inactivated">模块未激活</string>
+    <string name="text_status_inactivated">检查框架设置</string>
+    <string name="title_record">记录</string>
+    <string name="text_record">采集用于运动模拟的数据</string>
+    <string name="title_activity_record">记录</string>
+    <string name="title_record_sensor">选择要使用的传感器</string>
+    <string name="name_sensor_acc">加速计</string>
+    <string name="name_sensor_step_counter">计步器</string>
+    <string name="name_sensor_gyroscope">陀螺仪</string>
+    <string name="name_sensor_step_detec">模拟计步器</string>
+    <string name="name_sensor_light">光线传感器</string>
+    <string name="action_continue">继续</string>
+    <string name="title_charts">收集到的数据</string>
+    <string name="action_stop">停止</string>
+    <string name="text_body_sensor_not_granted">读取计步器的权限未获批准</string>
+    <string name="action_grant">授权</string>
+</resources>

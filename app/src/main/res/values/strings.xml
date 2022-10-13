@@ -1,0 +1,21 @@
+<resources>
+    <string name="app_name">Motion Emulator</string>
+    <string name="title_status_activated">Module Is Activated</string>
+    <string name="text_status_activated">Tune the following options to get started</string>
+    <string name="title_status_inactivated">Module Not Activated</string>
+    <string name="text_status_inactivated">Check your framework options</string>
+    <string name="title_record">Record</string>
+    <string name="text_record">Collect sensor data with which the motion is simulated</string>
+    <string name="title_activity_record">Record</string>
+    <string name="title_record_sensor">Choose the Sensors Involved</string>
+    <string name="name_sensor_acc">Accelerometer</string>
+    <string name="name_sensor_step_counter">Step counter</string>
+    <string name="name_sensor_gyroscope">Gyroscope</string>
+    <string name="name_sensor_step_detec">Step detector</string>
+    <string name="name_sensor_light">Light sensor</string>
+    <string name="action_continue">Continue</string>
+    <string name="title_charts">Data Collected</string>
+    <string name="action_stop">Stop</string>
+    <string name="text_body_sensor_not_granted">Permissions to read step counter aren\'t granted</string>
+    <string name="action_grant">Grant</string>
+</resources>

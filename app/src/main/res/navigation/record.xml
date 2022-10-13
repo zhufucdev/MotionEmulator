@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            xmlns:tools="http://schemas.android.com/tools"
+            android:id="@+id/record"
+            app:startDestination="@id/recordSensorFragment">
+
+    <fragment
+            android:id="@+id/recordSensorFragment"
+            android:name="com.zhufucdev.motion_emulator.collect.RecordSensorFragment"
+            android:label="fragment_record_sensor"
+            tools:layout="@layout/fragment_record_sensor">
+        <action
+                android:id="@+id/action_recordSensorFragment_to_recordDataFragment"
+                app:destination="@id/recordDataFragment"
+                app:enterAnim="@anim/nav_default_enter_anim"
+                app:exitAnim="@anim/nav_default_exit_anim">
+        </action>
+    </fragment>
+    <fragment
+            android:id="@+id/recordDataFragment"
+            android:name="com.zhufucdev.motion_emulator.collect.RecordDataFragment"
+            android:label="fragment_record_data"
+            tools:layout="@layout/fragment_record_data"/>
+</navigation>
