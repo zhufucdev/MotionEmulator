@@ -18,4 +18,9 @@
     <string name="action_stop">Stop</string>
     <string name="text_body_sensor_not_granted">Permissions to read step counter aren\'t granted</string>
     <string name="action_grant">Grant</string>
+    <string name="action_move">Move Viewpoint</string>
+    <string name="action_draw">Draw Trace</string>
+    <string name="action_save">Save</string>
+    <string name="title_draw_trace">Draw Trace</string>
+    <string name="text_draw_trace">Mark out the lane you want to run on on the map</string>
 </resources>

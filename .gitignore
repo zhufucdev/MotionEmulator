@@ -13,3 +13,6 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# API Key
+/app/src/main/res/values/amap.xml

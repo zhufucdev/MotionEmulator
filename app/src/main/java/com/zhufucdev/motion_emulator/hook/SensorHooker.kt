@@ -8,25 +8,13 @@ import android.os.Handler
 import com.highcapable.yukihookapi.hook.core.YukiMemberHookCreator
 import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.highcapable.yukihookapi.hook.factory.classOf
+import com.highcapable.yukihookapi.hook.param.HookParam
 import com.highcapable.yukihookapi.hook.type.java.BooleanType
 import com.highcapable.yukihookapi.hook.type.java.IntType
 import com.highcapable.yukihookapi.hook.type.java.UnitType
 import com.zhufucdev.motion_emulator.hooking
 
 object SensorHooker : YukiBaseHooker() {
-    private fun YukiMemberHookCreator.hookRegisterMethod(vararg paramType: Any) {
-        injectMember {
-            method {
-                name = "registerListener"
-                param(*paramType)
-                returnType = BooleanType
-            }
-            beforeHook {
-                hookEventListener(args(0))
-            }
-        }
-    }
-
     override fun onHook() {
         classOf<SensorManager>().hook {
             hookRegisterMethod(classOf<SensorEventListener>(), classOf<Sensor>(), IntType, classOf<Handler>())
@@ -38,20 +26,28 @@ object SensorHooker : YukiBaseHooker() {
         }
     }
 
-    private fun hookEventListener(instance: Any) {
-        instance::class.java.hook {
-            injectMember {
-                method {
-                    name ="onSensorChanged"
-                    param(classOf<SensorEvent>())
-                    returnType = UnitType
-                }
-                beforeHook {
-                    if (!hooking) return@beforeHook
-                    val event = args(0).any() as SensorEvent
+    private fun YukiMemberHookCreator.hookRegisterMethod(vararg paramType: Any) {
+        injectMember {
+            method {
+                name = "registerListener"
+                param(*paramType)
+                returnType = BooleanType
+            }
+            replaceAny {
 
-                }
+                if (!hooking)
+                    return@replaceAny callOriginal()
+                redirectToFakeHandler()
             }
         }
+    }
+
+    private fun HookParam.redirectToFakeHandler(): Boolean {
+        val type = args(1).cast<Sensor>()?.type ?: return false
+        val listener = args(0).cast<SensorEventListener>() ?: return false
+        SensorHandler.addRedirectedListener(type) {
+            listener.onSensorChanged(it)
+        }
+        return true
     }
 }

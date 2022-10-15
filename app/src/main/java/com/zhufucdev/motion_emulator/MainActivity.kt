@@ -7,6 +7,7 @@ import android.util.Log
 import com.highcapable.yukihookapi.YukiHookAPI
 import com.zhufucdev.motion_emulator.data.Records
 import com.zhufucdev.motion_emulator.databinding.ActivityMainBinding
+import com.zhufucdev.motion_emulator.hook.SensorHandler
 
 class MainActivity : AppCompatActivity(R.layout.activity_main) {
     private lateinit var binding: ActivityMainBinding
@@ -18,6 +19,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         registerListeners()
         Records.readAll(this)
         Log.d("Serialization", "Loaded ${Records.list().size} pieces.")
+        SensorHandler.init(this)
     }
 
     private fun updateStatus() {
@@ -38,6 +40,11 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         binding.recordCard.setOnClickListener {
             startActivity(
                 Intent(this, RecordActivity::class.java)
+            )
+        }
+        binding.traceCard.setOnClickListener {
+            startActivity(
+                Intent(this, TraceDrawingActivity::class.java)
             )
         }
     }

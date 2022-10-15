@@ -10,7 +10,7 @@ If you study in universities in China, there'll be
 no necessity to explain it.
 
 Despite how hard the faculty tries to make us take an
-after-dinner sunny long run at dusk every three days,
+after-dinner sunny long run every three days,
 we always want to create something innovative to make the life a little
 bit easier.
 
@@ -22,6 +22,22 @@ bit easier.
 revolves around the mainland, probably using polyline
 * Set time limit and repeat count
 * Make more time
+
+## Build Instructions
+
+Build and maintain this project with Android Studio
+or Intellij IDEA.
+
+This app contains sdk from Amap, thus an **api key** is
+required.
+Obtain one from [here](https://console.amap.com/dev/key/app)
+and create a xml file under `app/src/main/res/values`
+```shell
+cd app/src/main/res/values
+touch amap.xml
+echo "<?xml version=\"1.0\" encoding=\"utf-8\"?>" >> amap.xml
+echo "<resources><string name=\"amap_api_key\" translatable=\"false\">$yourkey</dimen></resources>" >> amap.xml
+```
 
 ## License
 

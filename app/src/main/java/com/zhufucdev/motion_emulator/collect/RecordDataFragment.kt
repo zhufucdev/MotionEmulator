@@ -25,6 +25,7 @@ import com.zhufucdev.motion_emulator.data.Motion
 import com.zhufucdev.motion_emulator.data.RecordCallback
 import com.zhufucdev.motion_emulator.data.Recorder
 import com.zhufucdev.motion_emulator.data.Records
+import com.zhufucdev.motion_emulator.getAttrColor
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 
@@ -104,7 +105,7 @@ class RecordDataFragment : Fragment() {
     }
 
     private fun LineChart.stylize() {
-        val onSurface = getAttrColor(com.google.android.material.R.attr.colorOnSurface)
+        val onSurface = getAttrColor(com.google.android.material.R.attr.colorOnSurface, requireContext())
         setBorderColor(onSurface)
         description.textColor = onSurface
         legend.textColor = onSurface
@@ -113,13 +114,6 @@ class RecordDataFragment : Fragment() {
             it.axisLineColor = onSurface
         }
         axisRight.isEnabled = false
-    }
-
-    private fun getAttrColor(@AttrRes id: Int): Int {
-        val typedValue = TypedValue()
-        requireContext().theme
-            .resolveAttribute(id, typedValue, true)
-        return typedValue.data
     }
 
     private fun LineChart.layout() {

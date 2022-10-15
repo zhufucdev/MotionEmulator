@@ -32,6 +32,10 @@ object Recorder {
         var callbackListener: ((Moment) -> Unit)? = null
         val typedListeners = hashMapOf<Int, (Moment) -> Unit>()
 
+        // turn off redirection for newly coming listeners
+        // to register for the original system events
+        hooking = false
+
         val listener = object : SensorEventListener {
             override fun onSensorChanged(event: SensorEvent) {
                 fun typedFeedback(moment: Moment) {
@@ -86,7 +90,6 @@ object Recorder {
 
         synchronized(this) {
             callbacks.add(result)
-            hooking = false
         }
 
         return result

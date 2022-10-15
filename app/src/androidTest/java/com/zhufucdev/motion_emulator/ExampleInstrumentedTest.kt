@@ -19,6 +19,6 @@ class ExampleInstrumentedTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("com.zhufucdev.motionemulator", appContext.packageName)
+        assertEquals("com.zhufucdev.motion_emulator", appContext.packageName)
     }
 }

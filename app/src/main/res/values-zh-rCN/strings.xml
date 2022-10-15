@@ -19,4 +19,9 @@
     <string name="action_stop">停止</string>
     <string name="text_body_sensor_not_granted">读取计步器的权限未获批准</string>
     <string name="action_grant">授权</string>
+    <string name="action_move">移动视图</string>
+    <string name="action_draw">绘制路径</string>
+    <string name="action_save">保存</string>
+    <string name="title_draw_trace">绘制路径</string>
+    <string name="text_draw_trace">在地图上标出你的跑道</string>
 </resources>

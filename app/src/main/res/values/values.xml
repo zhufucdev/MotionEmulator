@@ -3,6 +3,7 @@
     <dimen name="icon_margin">4dp</dimen>
     <dimen name="card_margin">12dp</dimen>
     <dimen name="card_radius">8dp</dimen>
+    <dimen name="slot_radius">100dp</dimen>
     <dimen name="card_padding_inside">20dp</dimen>
     <dimen name="common_padding">12dp</dimen>
     <dimen name="extended_fab_margin">16dp</dimen>

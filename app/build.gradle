@@ -60,7 +60,12 @@ dependencies {
     implementation "androidx.navigation:navigation-dynamic-features-fragment:$nav_version"
     implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.0'
 
+    implementation "org.jetbrains.kotlin:kotlin-reflect:1.7.20"
     implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
+
+    // AMap canvas
+    implementation 'com.amap.api:3dmap:9.5.0'
+    implementation 'com.amap.api:search:9.4.5'
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'

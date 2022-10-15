@@ -21,7 +21,6 @@ class HookEntry : IYukiHookXposedInit {
     override fun onHook() = YukiHookAPI.encase {
         loadSystem {
             loadHooker(SensorHooker)
-
         }
     }
 }

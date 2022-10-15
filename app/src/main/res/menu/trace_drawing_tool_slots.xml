@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+            android:id="@+id/slot_hand"
+            android:icon="@drawable/ic_baseline_pan_tool_24"
+            android:title="@string/action_move"/>
+    <item
+            android:id="@+id/slot_draw"
+            android:icon="@drawable/ic_baseline_edit_24"
+            android:title="@string/action_draw"/>
+    <item
+            android:id="@+id/slot_save"
+            android:icon="@drawable/ic_baseline_save_24"
+            android:title="@string/action_save"/>
+</menu>
