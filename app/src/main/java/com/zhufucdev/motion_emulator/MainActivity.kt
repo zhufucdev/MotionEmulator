@@ -5,7 +5,8 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import com.highcapable.yukihookapi.YukiHookAPI
-import com.zhufucdev.motion_emulator.data.Records
+import com.zhufucdev.motion_emulator.data.Motions
+import com.zhufucdev.motion_emulator.data.Traces
 import com.zhufucdev.motion_emulator.databinding.ActivityMainBinding
 import com.zhufucdev.motion_emulator.hook.SensorHandler
 
@@ -17,8 +18,8 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         setContentView(binding.root)
         updateStatus()
         registerListeners()
-        Records.readAll(this)
-        Log.d("Serialization", "Loaded ${Records.list().size} pieces.")
+        Motions.readAll(this)
+        Traces.readAll(this)
         SensorHandler.init(this)
     }
 

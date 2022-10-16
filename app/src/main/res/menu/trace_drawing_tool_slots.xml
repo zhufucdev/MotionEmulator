@@ -9,6 +9,10 @@
             android:icon="@drawable/ic_baseline_edit_24"
             android:title="@string/action_draw"/>
     <item
+            android:id="@+id/slot_undo"
+            android:icon="@drawable/ic_baseline_undo_24"
+            android:title="@string/action_undo"/>
+    <item
             android:id="@+id/slot_save"
             android:icon="@drawable/ic_baseline_save_24"
             android:title="@string/action_save"/>

@@ -24,4 +24,13 @@
     <string name="action_save">保存</string>
     <string name="title_draw_trace">绘制路径</string>
     <string name="text_draw_trace">在地图上标出你的跑道</string>
+    <string name="action_search">搜索</string>
+    <string name="name_location">%1$s, %2$s</string>
+    <string name="name_map_common">常规地图</string>
+    <string name="name_map_satellite">卫星地图</string>
+    <string name="name_map_night">暗色模式地图</string>
+    <string name="text_near">%s附近</string>
+    <string name="action_undo">橡皮</string>
+    <string name="text_trace_name">标记为\"%s\"</string>
+    <string name="text_trace_saved">成功保存了%d条路径</string>
 </resources>

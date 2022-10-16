@@ -5,6 +5,9 @@ plugins {
     id 'com.google.devtools.ksp'
 }
 
+def localProperties = new Properties()
+localProperties.load(new FileReader("local.properties"))
+
 android {
     compileSdk 32
 
@@ -26,6 +29,11 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            buildConfigField("string", "AMAP_WEB_KEY", localProperties["amap.web.key"])
+        }
+
+        debug {
+            buildConfigField("String", "AMAP_WEB_KEY", localProperties["amap.web.key"])
         }
     }
     compileOptions {
@@ -43,6 +51,7 @@ android {
 ext {
     yuki_version = '1.1.4'
     nav_version = '2.5.2'
+    ktor_version = '2.1.2'
 }
 
 dependencies {
@@ -58,12 +67,19 @@ dependencies {
     implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
     implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
     implementation "androidx.navigation:navigation-dynamic-features-fragment:$nav_version"
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4'
     implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.0'
 
     implementation "org.jetbrains.kotlin:kotlin-reflect:1.7.20"
     implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
+    // Ktor
+    implementation "io.ktor:ktor-client-core:$ktor_version"
+    implementation "io.ktor:ktor-client-android:$ktor_version"
+    implementation "io.ktor:ktor-client-serialization:$ktor_version"
+    implementation "io.ktor:ktor-client-content-negotiation:$ktor_version"
+    implementation "io.ktor:ktor-serialization-kotlinx-json:$ktor_version"
 
-    // AMap canvas
+    // AMap SDK
     implementation 'com.amap.api:3dmap:9.5.0'
     implementation 'com.amap.api:search:9.4.5'
 

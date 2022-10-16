@@ -28,15 +28,18 @@ revolves around the mainland, probably using polyline
 Build and maintain this project with Android Studio
 or Intellij IDEA.
 
-This app contains sdk from Amap, thus an **api key** is
+This app contains sdk from Amap, thus **api keys** are
 required.
-Obtain one from [here](https://console.amap.com/dev/key/app)
+Obtain them from [here](https://console.amap.com/dev/key/app)
 and create a xml file under `app/src/main/res/values`
 ```shell
 cd app/src/main/res/values
 touch amap.xml
+## Android SDK ##
 echo "<?xml version=\"1.0\" encoding=\"utf-8\"?>" >> amap.xml
-echo "<resources><string name=\"amap_api_key\" translatable=\"false\">$yourkey</dimen></resources>" >> amap.xml
+echo "<resources><string name=\"amap_api_key\" translatable=\"false\">$android_sdk_key</dimen></resources>" >> amap.xml
+## REST API ##
+echo $rest_api >> local.properties
 ```
 
 ## License

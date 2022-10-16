@@ -2,32 +2,23 @@ package com.zhufucdev.motion_emulator.collect
 
 import android.hardware.Sensor
 import android.os.Bundle
-import android.util.Log
-import android.util.TypedValue
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ScrollView
-import androidx.annotation.AttrRes
 import androidx.appcompat.widget.LinearLayoutCompat
-import androidx.core.content.withStyledAttributes
 import androidx.core.view.setMargins
 import androidx.core.view.updateLayoutParams
+import androidx.fragment.app.Fragment
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton.OnChangedCallback
 import com.zhufucdev.motion_emulator.R
-import com.zhufucdev.motion_emulator.data.Motion
 import com.zhufucdev.motion_emulator.data.RecordCallback
 import com.zhufucdev.motion_emulator.data.Recorder
-import com.zhufucdev.motion_emulator.data.Records
+import com.zhufucdev.motion_emulator.data.Motions
 import com.zhufucdev.motion_emulator.getAttrColor
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.serializer
 
 /**
  * To display current motion data.
@@ -56,7 +47,7 @@ class RecordDataFragment : Fragment() {
         }
         fab.setOnClickListener {
             val summary = recorder.summarize()
-            Records.store(summary, requireContext())
+            Motions.store(summary)
             requireActivity().finish()
         }
         return root

@@ -23,4 +23,13 @@
     <string name="action_save">Save</string>
     <string name="title_draw_trace">Draw Trace</string>
     <string name="text_draw_trace">Mark out the lane you want to run on on the map</string>
+    <string name="action_search">Search</string>
+    <string name="name_location">%2$s, %1$s</string>
+    <string name="name_map_common">Common Map</string>
+    <string name="name_map_satellite">Satellite Map</string>
+    <string name="name_map_night">Dark Mode Map</string>
+    <string name="text_near">Near %s</string>
+    <string name="action_undo">Undo</string>
+    <string name="text_trace_name">Marked as \"%s\"</string>
+    <string name="text_trace_saved">Successfully saved %d traces</string>
 </resources>
