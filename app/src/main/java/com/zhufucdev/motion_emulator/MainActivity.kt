@@ -3,12 +3,12 @@ package com.zhufucdev.motion_emulator
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import com.highcapable.yukihookapi.YukiHookAPI
 import com.zhufucdev.motion_emulator.data.Motions
+import com.zhufucdev.motion_emulator.data.Point
 import com.zhufucdev.motion_emulator.data.Traces
 import com.zhufucdev.motion_emulator.databinding.ActivityMainBinding
-import com.zhufucdev.motion_emulator.hook.SensorHandler
+import com.zhufucdev.motion_emulator.hook.Fake
 
 class MainActivity : AppCompatActivity(R.layout.activity_main) {
     private lateinit var binding: ActivityMainBinding
@@ -20,7 +20,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         registerListeners()
         Motions.readAll(this)
         Traces.readAll(this)
-        SensorHandler.init(this)
+        Fake.init(this)
     }
 
     private fun updateStatus() {
