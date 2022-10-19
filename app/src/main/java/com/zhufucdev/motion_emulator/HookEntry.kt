@@ -2,11 +2,8 @@ package com.zhufucdev.motion_emulator
 
 import com.highcapable.yukihookapi.YukiHookAPI
 import com.highcapable.yukihookapi.annotation.xposed.InjectYukiHookWithXposed
-import com.highcapable.yukihookapi.hook.log.loggerD
 import com.highcapable.yukihookapi.hook.log.loggerI
 import com.highcapable.yukihookapi.hook.xposed.proxy.IYukiHookXposedInit
-import com.zhufucdev.motion_emulator.data.Point
-import com.zhufucdev.motion_emulator.hook.Fake
 import com.zhufucdev.motion_emulator.hook.LocationHooker
 import com.zhufucdev.motion_emulator.hook.SensorHooker
 
@@ -26,5 +23,10 @@ class HookEntry : IYukiHookXposedInit {
 
 /**
  * This variable determines whether the sensor hooks work.
+ *
+ * Defaults to false. Use content provider to set.
  */
-var hooking = true
+var hooking = false
+
+const val COMMAND_EMULATION_START = 0x00
+const val COMMAND_EMULATION_STOP = 0x01

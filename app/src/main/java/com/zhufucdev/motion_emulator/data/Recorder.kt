@@ -6,6 +6,7 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.util.Log
+import com.aventrix.jnanoid.jnanoid.NanoIdUtils
 import com.zhufucdev.motion_emulator.hooking
 import kotlin.math.abs
 
@@ -31,10 +32,6 @@ object Recorder {
         val moments = arrayListOf<Moment>()
         var callbackListener: ((Moment) -> Unit)? = null
         val typedListeners = hashMapOf<Int, (Moment) -> Unit>()
-
-        // turn off redirection for newly coming listeners
-        // to register for the original system events
-        hooking = false
 
         val listener = object : SensorEventListener {
             override fun onSensorChanged(event: SensorEvent) {
@@ -73,10 +70,9 @@ object Recorder {
                 sensors.unregisterListener(listener)
                 synchronized(Recorder) {
                     callbacks.remove(this)
-                    hooking = callbacks.isEmpty()
                 }
 
-                return Motion(start, moments)
+                return Motion(NanoIdUtils.randomNanoId(), start, moments, sensorsRequired)
             }
 
             override fun onUpdate(l: (Moment) -> Unit) {

@@ -9,4 +9,10 @@
     <color name="white">#FFFFFFFF</color>
     <color name="error">#E57373</color>
     <color name="success">#66BB6A</color>
+    
+    <color name="orange_500">#FF5722</color>
+    <color name="yellow_500">#FFEB3B</color>
+    <color name="green_500">#8BC34A</color>
+    <color name="aqua_500">#3F51B5</color>
+    <color name="pink_500">#D81B60</color>
 </resources>

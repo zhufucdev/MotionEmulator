@@ -35,6 +35,7 @@ import com.amap.api.services.core.LatLonPoint
 import com.amap.api.services.core.PoiItemV2
 import com.amap.api.services.poisearch.PoiResultV2
 import com.amap.api.services.poisearch.PoiSearchV2
+import com.aventrix.jnanoid.jnanoid.NanoIdUtils
 import com.google.android.material.snackbar.Snackbar
 import com.zhufucdev.motion_emulator.data.Trace
 import com.zhufucdev.motion_emulator.data.Traces
@@ -51,8 +52,7 @@ class TraceDrawingActivity : AppCompatActivity(R.layout.activity_trace_drawing) 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        MapsInitializer.updatePrivacyShow(this, true, true)
-        MapsInitializer.updatePrivacyAgree(this, true)
+        skipAmapFuckingLicense(this)
 
         binding = ActivityTraceDrawingBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -62,6 +62,7 @@ class TraceDrawingActivity : AppCompatActivity(R.layout.activity_trace_drawing) 
         amap.stylize()
 
         locationManager = getSystemService(LocationManager::class.java)
+        Traces.require(this)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             requestPermissions(arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION), 0)
@@ -258,7 +259,8 @@ class TraceDrawingActivity : AppCompatActivity(R.layout.activity_trace_drawing) 
                 }
 
                 R.id.slot_save -> {
-                    if (!traces.isEmpty())  {
+                    currentTool.complete()
+                    if (traces.isNotEmpty())  {
                         traces.forEach { t ->
                             Traces.store(t)
                         }
@@ -346,6 +348,7 @@ class TraceDrawingActivity : AppCompatActivity(R.layout.activity_trace_drawing) 
                         ?: dateString()
                     traces.add(
                         Trace(
+                            NanoIdUtils.randomNanoId(),
                             name,
                             points.points.map { com.zhufucdev.motion_emulator.data.Point(it.latitude, it.longitude) }
                         )

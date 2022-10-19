@@ -14,18 +14,41 @@ import android.telephony.PhoneStateListener
 import android.telephony.TelephonyManager
 import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.highcapable.yukihookapi.hook.factory.classOf
+import com.highcapable.yukihookapi.hook.log.loggerD
+import com.highcapable.yukihookapi.hook.log.loggerI
 import com.highcapable.yukihookapi.hook.type.android.LooperClass
 import com.highcapable.yukihookapi.hook.type.java.IntType
 import com.highcapable.yukihookapi.hook.type.java.StringType
 import com.highcapable.yukihookapi.hook.type.java.UnitType
+import com.zhufucdev.motion_emulator.data.Point
 import com.zhufucdev.motion_emulator.hooking
 import java.util.concurrent.Executor
 import java.util.function.Consumer
 
 object LocationHooker : YukiBaseHooker() {
+    private val listeners = arrayListOf<(Point) -> Unit>()
     override fun onHook() {
+        onAppLifecycle {
+            attachBaseContext { baseContext, _ ->
+                Scheduler.init(baseContext)
+                loggerD(msg = "scheduler initialized")
+            }
+        }
+
         invalidateOthers()
         hookGPS()
+    }
+
+    fun raise(point: Point) {
+        listeners.forEach {
+            it.invoke(point)
+            loggerD(tag = "Location Hooker", "received $it")
+        }
+    }
+
+    private fun addListener(l: (Point) -> Unit) {
+        listeners.add(l)
+        loggerD(tag = "Location Hooker", "listener $l registered")
     }
 
     /**
@@ -39,10 +62,7 @@ object LocationHooker : YukiBaseHooker() {
                     emptyParam()
                     returnType(classOf<CellLocation>())
                 }
-                replaceAny {
-                    if (hooking) null
-                    else callOriginal()
-                }
+                replaceTo(null)
             }
 
             injectMember {
@@ -51,10 +71,7 @@ object LocationHooker : YukiBaseHooker() {
                     emptyParam()
                     returnType(classOf<List<CellInfo>>())
                 }
-                replaceAny {
-                    if (hooking) null
-                    else callOriginal()
-                }
+                replaceTo(null)
             }
 
             injectMember {
@@ -77,11 +94,8 @@ object LocationHooker : YukiBaseHooker() {
                     returnType = classOf<Location>()
                 }
                 replaceAny {
-                    if (hooking) {
-                        Fake.location.android(args(0).string())
-                    } else {
-                        callOriginal()
-                    }
+                    loggerD("Location Hooker", "getLastKnownLocation = ${Scheduler.location}")
+                    Scheduler.location.android(args(0).string())
                 }
             }
 
@@ -92,11 +106,7 @@ object LocationHooker : YukiBaseHooker() {
                     returnType = classOf<Location>()
                 }
                 replaceAny {
-                    if (hooking) {
-                        Fake.location.android()
-                    } else {
-                        callOriginal()
-                    }
+                    Scheduler.location.android()
                 }
             }
 
@@ -107,16 +117,13 @@ object LocationHooker : YukiBaseHooker() {
                     returnType = UnitType
                 }
                 replaceAny {
-                    if (hooking) {
-                        val listener = args(3).cast<LocationListener>()
-                        val provider = args(0).string()
-                        Fake.addLocationListener {
-                            val location = it.android(provider)
-                            listener?.onLocationChanged(location)
-                        }
-                    } else {
-                        callOriginal()
+                    val listener = args(3).cast<LocationListener>()
+                    val provider = args(0).string()
+                    addListener {
+                        val location = it.android(provider)
+                        listener?.onLocationChanged(location)
                     }
+                    listener?.onLocationChanged(Scheduler.location.android(provider))
                 }
             }
 
@@ -126,11 +133,7 @@ object LocationHooker : YukiBaseHooker() {
                     param(StringType, classOf<LocationRequest>(), classOf<PendingIntent>())
                     returnType = UnitType
                 }
-                replaceAny {
-                    if (!hooking) {
-                        callOriginal()
-                    }
-                }
+                replaceAny {}
             }
 
             injectMember {
@@ -140,13 +143,12 @@ object LocationHooker : YukiBaseHooker() {
                     returnType = UnitType
                 }
                 replaceAny {
-                    if (hooking) {
-                        val listener = args(1).cast<LocationListener>()
-                        val provider = args(0).string()
-                        Fake.addLocationListener {
-                            listener?.onLocationChanged(it.android(provider))
-                        }
+                    val listener = args(1).cast<LocationListener>()
+                    val provider = args(0).string()
+                    addListener {
+                        listener?.onLocationChanged(it.android(provider))
                     }
+                    listener?.onLocationChanged(Scheduler.location.android(provider))
                 }
             }
 
@@ -157,12 +159,11 @@ object LocationHooker : YukiBaseHooker() {
                     returnType = UnitType
                 }
                 replaceAny {
-                    if (hooking) {
-                        val listener = args(1).cast<LocationListener>()
-                        Fake.addLocationListener {
-                            listener?.onLocationChanged(it.android())
-                        }
+                    val listener = args(1).cast<LocationListener>()
+                    addListener {
+                        listener?.onLocationChanged(it.android())
                     }
+                    listener?.onLocationChanged(Scheduler.location.android())
                 }
             }
 
@@ -171,11 +172,7 @@ object LocationHooker : YukiBaseHooker() {
                     name = "requestSingleUpdate"
                     param(StringType, classOf<PendingIntent>())
                 }
-                replaceAny {
-                    if (!hooking) {
-                        callOriginal()
-                    }
-                }
+                replaceAny {}
             }
 
             injectMember {
@@ -183,11 +180,7 @@ object LocationHooker : YukiBaseHooker() {
                     name = "requestSingleUpdate"
                     param(classOf<Criteria>(), classOf<PendingIntent>())
                 }
-                replaceAny {
-                    if (!hooking) {
-                        callOriginal()
-                    }
-                }
+                replaceAny {}
             }
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
@@ -204,14 +197,10 @@ object LocationHooker : YukiBaseHooker() {
                         returnType = UnitType
                     }
                     replaceAny {
-                        if (hooking) {
-                            args(4).cast<Consumer<Location>>()
-                                ?.accept(
-                                    Fake.location.android(args(0).string())
-                                )
-                        } else {
-                            callOriginal()
-                        }
+                        args(4).cast<Consumer<Location>>()
+                            ?.accept(
+                                Scheduler.location.android(args(0).string())
+                            )
                     }
                 }
             }

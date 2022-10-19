@@ -32,4 +32,23 @@
     <string name="action_undo">Undo</string>
     <string name="text_trace_name">Marked as \"%s\"</string>
     <string name="text_trace_saved">Successfully saved %d traces</string>
+    <string name="title_select_motion_data">Motion Data</string>
+    <string name="text_trace_selected">Trace \"%s\" selected</string>
+    <string name="action_start_emulation">Start Emulation</string>
+    <string name="title_repeat">Repeat Count</string>
+    <string name="title_velocity">Velocity</string>
+    <string name="text_field_must_not_empty">must not be empty</string>
+    <string name="text_field_must_not_neg_or_zero">must not be zero or negative</string>
+    <string name="suffix_velocity" translatable="false">m/s</string>
+    <string name="title_channel_emulation">Emulation Activity</string>
+    <string name="title_emulation_ongoing">Emulation Ongoing</string>
+    <string name="text_emulation_ongoing">Click here to see more detail</string>
+    <string name="text_channel_emulation">background indicator for active emulations</string>
+    <string name="name_sensor_magnetic">Magnetic field sensor</string>
+    <string name="name_sensor_acc_uncal">Uncalibrated accelerometer</string>
+    <string name="name_sensor_gyroscope_uncal">Uncalibrated gyroscope</string>
+    <string name="name_sensor_magnetic_uncal">Uncalibrated magnetic sensor</string>
+    <string name="name_sensor_linear_acc">Linear accelerometer</string>
+    <string name="title_emulate">Emulate</string>
+    <string name="text_emulate">Direct your sensors and GPS</string>
 </resources>

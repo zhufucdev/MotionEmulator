@@ -11,6 +11,7 @@
     <application
             android:name="com.highcapable.yukihookapi.hook.xposed.application.ModuleApplication"
             android:allowBackup="true"
+            android:allowNativeHeapPointerTagging="false"
             android:dataExtractionRules="@xml/data_extraction_rules"
             android:fullBackupContent="@xml/backup_rules"
             android:icon="@mipmap/ic_launcher"
@@ -18,8 +19,11 @@
             android:roundIcon="@mipmap/ic_launcher_round"
             android:supportsRtl="true"
             android:theme="@style/Theme.MotionEmulator"
-            tools:targetApi="32"
-            android:allowNativeHeapPointerTagging="false">
+            tools:targetApi="32">
+
+        <activity
+                android:name=".EmulateActivity"
+                android:exported="false"/>
         <activity
                 android:name=".TraceDrawingActivity"
                 android:exported="false"/>
@@ -36,6 +40,11 @@
                 android:name=".RecordActivity"
                 android:exported="false"
                 android:label="@string/title_activity_record"/>
+        
+        <provider
+                android:authorities="com.zhufucdev.motion_emulator.event_provider"
+                android:name=".hook_frontend.EventProvider"
+                android:exported="true"/>
 
         <meta-data
                 android:name="xposedmodule"
@@ -53,4 +62,5 @@
                 android:name="com.amap.api.v2.apikey"
                 android:value="@string/amap_api_key"/>
     </application>
+
 </manifest>

@@ -1,7 +1,9 @@
 package com.zhufucdev.motion_emulator.collect
 
 import android.hardware.Sensor
+import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -130,9 +132,19 @@ val defaultSensors
 val sensorNames = mapOf(
     Sensor.TYPE_ACCELEROMETER to R.string.name_sensor_acc,
     Sensor.TYPE_GYROSCOPE to R.string.name_sensor_gyroscope,
+    Sensor.TYPE_GYROSCOPE_UNCALIBRATED to R.string.name_sensor_gyroscope_uncal,
     Sensor.TYPE_STEP_COUNTER to R.string.name_sensor_step_counter,
     Sensor.TYPE_STEP_DETECTOR to R.string.name_sensor_step_detec,
+    Sensor.TYPE_MAGNETIC_FIELD to R.string.name_sensor_magnetic,
+    Sensor.TYPE_MAGNETIC_FIELD_UNCALIBRATED to R.string.name_sensor_magnetic_uncal,
+    Sensor.TYPE_LINEAR_ACCELERATION to R.string.name_sensor_linear_acc,
     Sensor.TYPE_LIGHT to R.string.name_sensor_light
-)
+).let {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        it.plus(Sensor.TYPE_ACCELEROMETER_UNCALIBRATED to R.string.name_sensor_acc_uncal)
+    } else {
+        it
+    }
+}
 
-val sensorValueLabels = listOf("x", "y", "z", "w")
+val sensorValueLabels = listOf("x", "y", "z", "v", "h", "w", "i", "j")

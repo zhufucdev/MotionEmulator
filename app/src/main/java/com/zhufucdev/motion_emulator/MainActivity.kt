@@ -5,10 +5,10 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import com.highcapable.yukihookapi.YukiHookAPI
 import com.zhufucdev.motion_emulator.data.Motions
-import com.zhufucdev.motion_emulator.data.Point
 import com.zhufucdev.motion_emulator.data.Traces
 import com.zhufucdev.motion_emulator.databinding.ActivityMainBinding
-import com.zhufucdev.motion_emulator.hook.Fake
+import com.zhufucdev.motion_emulator.hook_frontend.Emulation
+import com.zhufucdev.motion_emulator.hook_frontend.Scheduler
 
 class MainActivity : AppCompatActivity(R.layout.activity_main) {
     private lateinit var binding: ActivityMainBinding
@@ -18,9 +18,9 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         setContentView(binding.root)
         updateStatus()
         registerListeners()
-        Motions.readAll(this)
-        Traces.readAll(this)
-        Fake.init(this)
+
+        Traces.require(this)
+        Motions.require(this)
     }
 
     private fun updateStatus() {
@@ -46,6 +46,11 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         binding.traceCard.setOnClickListener {
             startActivity(
                 Intent(this, TraceDrawingActivity::class.java)
+            )
+        }
+        binding.emulateCard.setOnClickListener {
+            startActivity(
+                Intent(this, EmulateActivity::class.java)
             )
         }
     }

@@ -20,31 +20,43 @@ data class Point(val latitude: Double, val longitude: Double)
  * @param points to describe the trace's shape and direction
  */
 @Serializable
-data class Trace(val name: String, val points: List<Point>)
+data class Trace(val id: String, val name: String, val points: List<Point>)
 
 @OptIn(ExperimentalSerializationApi::class)
 object Traces {
     private val records = arrayListOf<Trace>()
     private lateinit var rootDir: File
 
-    fun readAll(context: Context) {
+    /**
+     * Make sure it works
+     *
+     * Should be called before any read operation
+     */
+    fun require(context: Context) {
         rootDir = context.getDir("record", Context.MODE_PRIVATE)
-        rootDir.listFiles()?.forEach { file ->
-            if (file.extension != "json") {
-                return@forEach
-            }
-            file.inputStream().use {
-                val record = Json.decodeFromStream<Trace>(it)
-                records.add(record)
+        val list = rootDir.listFiles() ?: emptyArray<File>()
+        if (list.map { it.nameWithoutExtension }.toSet() != records.map { it.id }.toSet()) {
+            records.clear()
+            list.forEach { file ->
+                if (file.extension != "json") {
+                    return@forEach
+                }
+                file.inputStream().use {
+                    val record = Json.decodeFromStream<Trace>(it)
+                    records.add(record)
+                }
             }
         }
     }
 
     fun store(record: Trace) {
-        File(rootDir, "${record.name}.json").outputStream().use {
+        if (records.contains(record)) return
+        File(rootDir, "${record.id}.json").outputStream().use {
             Json.encodeToStream(record, it)
         }
+        records.add(record)
     }
 
     fun list() = records.toList()
+    operator fun get(id: String) = list().firstOrNull { it.id == id }
 }

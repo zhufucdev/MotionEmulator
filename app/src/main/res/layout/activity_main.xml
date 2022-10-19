@@ -150,4 +150,54 @@
                     app:layout_constraintEnd_toEndOf="parent"/>
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
+
+    <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/emulate_card"
+            style="@style/BaseCardLayout"
+            android:foreground="?android:attr/selectableItemBackgroundBorderless"
+            app:cardCornerRadius="@dimen/card_radius">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="@dimen/card_padding_inside">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/emulate_icon"
+                    android:tint="?attr/colorOnSurface"
+                    app:srcCompat="@drawable/ic_baseline_auto_fix_high_24"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"/>
+
+            <androidx.appcompat.widget.AppCompatTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/emulate_title"
+                    style="@style/TextAppearance.AppCompat.Title"
+                    android:text="@string/title_emulate"
+                    app:layout_constraintStart_toEndOf="@id/emulate_icon"
+                    app:layout_constraintTop_toTopOf="parent"
+                    android:layout_marginStart="@dimen/icon_margin"/>
+
+            <androidx.appcompat.widget.AppCompatTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/text_emulate"
+                    android:layout_marginTop="@dimen/common_padding"
+                    app:layout_constraintTop_toBottomOf="@id/emulate_icon"
+                    app:layout_constraintStart_toStartOf="parent"/>
+
+            <androidx.appcompat.widget.AppCompatImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:tint="?attr/colorOnSurface"
+                    app:srcCompat="@drawable/ic_baseline_open_in_new_24"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"/>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
 </androidx.appcompat.widget.LinearLayoutCompat>

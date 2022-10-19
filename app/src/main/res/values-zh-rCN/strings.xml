@@ -33,4 +33,22 @@
     <string name="action_undo">橡皮</string>
     <string name="text_trace_name">标记为\"%s\"</string>
     <string name="text_trace_saved">成功保存了%d条路径</string>
+    <string name="title_select_motion_data">运动数据</string>
+    <string name="action_start_emulation">开始模拟</string>
+    <string name="text_trace_selected">选择轨迹\"%s\"</string>
+    <string name="title_repeat">重复次数</string>
+    <string name="title_velocity">速度</string>
+    <string name="text_field_must_not_empty">不能为空</string>
+    <string name="text_field_must_not_neg_or_zero">不能为零或负</string>
+    <string name="title_channel_emulation">模拟活动</string>
+    <string name="title_emulation_ongoing">模拟正在进行</string>
+    <string name="text_emulation_ongoing">点击此处显示更多</string>
+    <string name="text_channel_emulation">模拟进行的标志</string>
+    <string name="name_sensor_magnetic">磁场传感器</string>
+    <string name="name_sensor_acc_uncal">未校准的加速计</string>
+    <string name="name_sensor_gyroscope_uncal">未校准的陀螺仪</string>
+    <string name="name_sensor_magnetic_uncal">未校准的磁场传感器</string>
+    <string name="name_sensor_linear_acc">线性加速计</string>
+    <string name="title_emulate">模拟</string>
+    <string name="text_emulate">指挥你的传感器和GPS</string>
 </resources>

@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import com.google.android.material.snackbar.Snackbar
+import com.zhufucdev.motion_emulator.data.Motions
 import com.zhufucdev.motion_emulator.data.Recorder
 import com.zhufucdev.motion_emulator.databinding.ActivityRecordBinding
 
@@ -23,6 +24,7 @@ class RecordActivity : AppCompatActivity() {
     private lateinit var navController: NavController
     override fun onCreate(savedInstanceState: Bundle?) {
         Recorder.init(this)
+        Motions.require(this)
         super.onCreate(savedInstanceState)
 
         binding = ActivityRecordBinding.inflate(layoutInflater)
