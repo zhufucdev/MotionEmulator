@@ -73,6 +73,7 @@ fun Trace.at(progress: Float, from: TraceInterp? = null): TraceInterp {
             }
         }
     } else {
+        totalLength = from.cache.last()
         from.cache
     }
     val required = totalLength * progress
@@ -88,7 +89,7 @@ fun Trace.at(progress: Float, from: TraceInterp? = null): TraceInterp {
         } else if (current > required) {
             val a = points[i - 1]
             val b = points[i]
-            val f = (current - required) / (cache[i] - cache[i - 1])
+            val f = (required - cache[i - 1]) / (cache[i] - cache[i - 1])
             return TraceInterp(
                 point = Point(
                     latitude = (b.latitude - a.latitude) * f + a.latitude,
