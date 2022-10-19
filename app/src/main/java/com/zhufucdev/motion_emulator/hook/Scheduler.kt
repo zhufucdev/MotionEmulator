@@ -14,6 +14,7 @@ import com.zhufucdev.motion_emulator.hook_frontend.AUTHORITY
 import com.zhufucdev.motion_emulator.hooking
 import kotlinx.coroutines.*
 import kotlinx.serialization.json.Json
+import kotlin.coroutines.suspendCoroutine
 import kotlin.math.roundToLong
 import kotlin.random.Random
 
@@ -28,11 +29,11 @@ object Scheduler {
     fun init(context: Context) {
         eventResolver = context.contentResolver
         GlobalScope.launch {
-            eventLoop(context)
+            eventLoop()
         }
     }
 
-    private suspend fun eventLoop(context: Context) {
+    private suspend fun eventLoop() {
         while (true) {
             eventResolver.query(nextUri, null, null, null, null)?.use { cursor ->
                 cursor.moveToNext()
@@ -66,7 +67,7 @@ object Scheduler {
     private val progress get() = (elapsed / duration / 1000).toFloat()
     val location get() = mLocation ?: Point(39.989410, 116.480881)
 
-    private suspend fun startEmulation(traceData: String, motionData: String, velocity: Double): Boolean {
+    private fun startEmulation(traceData: String, motionData: String, velocity: Double): Boolean {
         val trace = Json.decodeFromString(Trace.serializer(), traceData)
         val motion = Json.decodeFromString(Motion.serializer(), motionData)
         val steps = intArrayOf(Sensor.TYPE_STEP_COUNTER, Sensor.TYPE_STEP_DETECTOR)
@@ -79,7 +80,8 @@ object Scheduler {
             elapsed = SystemClock.elapsedRealtime() - start
         }
 
-        coroutineScope {
+        val scope = CoroutineScope(Dispatchers.Default)
+        scope.launch {
             val jobs = arrayListOf<Job>()
             if (steps.any { motion.sensorsInvolved.contains(it) }) {
                 val stepMoments = motion.moments.filter { m -> steps.any { m.data.containsKey(it) } }
@@ -145,6 +147,7 @@ object Scheduler {
                 Scheduler.jobs.addAll(jobs)
                 jobs.forEach { it.join() }
                 Scheduler.jobs.removeAll(jobs.toSet())
+                scope.cancel()
             }
         }
 
