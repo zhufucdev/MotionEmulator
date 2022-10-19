@@ -5,13 +5,9 @@ import android.util.Log
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.doAfterTextChanged
-import androidx.lifecycle.LiveData
-import androidx.work.*
 import com.amap.api.maps.AMap
 import com.amap.api.maps.CameraUpdateFactory
-import com.amap.api.maps.model.LatLng
-import com.amap.api.maps.model.Polyline
-import com.amap.api.maps.model.PolylineOptions
+import com.amap.api.maps.model.*
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.zhufucdev.motion_emulator.data.Motion
@@ -20,9 +16,7 @@ import com.zhufucdev.motion_emulator.data.Trace
 import com.zhufucdev.motion_emulator.data.Traces
 import com.zhufucdev.motion_emulator.databinding.ActivityEmulateBinding
 import com.zhufucdev.motion_emulator.hook_frontend.Emulation
-import com.zhufucdev.motion_emulator.hook_frontend.EmulationWorker
 import com.zhufucdev.motion_emulator.hook_frontend.Scheduler
-import java.util.*
 
 class EmulateActivity : AppCompatActivity(R.layout.activity_emulate) {
     private lateinit var binding: ActivityEmulateBinding
@@ -89,7 +83,7 @@ class EmulateActivity : AppCompatActivity(R.layout.activity_emulate) {
             velocity = if (it.isNullOrEmpty()) {
                 Double.NaN
             } else {
-                it.toString().toDouble()
+                it.toString().toDoubleOrNull() ?: Double.NaN
             }
             binding.inputVelocity.error =
                 if (velocity.isNaN()) getString(R.string.text_field_must_not_empty)
@@ -101,7 +95,7 @@ class EmulateActivity : AppCompatActivity(R.layout.activity_emulate) {
             repeatCount = if (it.isNullOrEmpty()) {
                 null
             } else {
-                it.toString().toInt()
+                it.toString().toIntOrNull()
             }
             binding.inputRepeatCount.error =
                 if (repeatCount == null) getString(R.string.text_field_must_not_empty)
@@ -119,6 +113,7 @@ class EmulateActivity : AppCompatActivity(R.layout.activity_emulate) {
 
         amap.uiSettings.isZoomControlsEnabled = false
         amap.mapType = if (isDarkModeEnabled(resources)) AMap.MAP_TYPE_NIGHT else AMap.MAP_TYPE_NORMAL
+        amap.isMyLocationEnabled = false
 
         val traces = hashMapOf<Polyline, Trace>()
         val selectedColors = hashMapOf<Polyline, Int>()
@@ -147,6 +142,17 @@ class EmulateActivity : AppCompatActivity(R.layout.activity_emulate) {
         if (traces.isNotEmpty()) {
             val camera = CameraUpdateFactory.newLatLngZoom(traces.keys.first().points.first(), 10F)
             amap.moveCamera(camera)
+        }
+
+        val naviArrow = NavigateArrowOptions()
+        var lastNavi: NavigateArrow? = null
+        Scheduler.addIntermediateListener {
+            lastNavi?.remove()
+            naviArrow.add(it.location.toLatLng())
+            if (naviArrow.points.size > 10) {
+                naviArrow.points = naviArrow.points.dropLast(naviArrow.points.size - 10)
+            }
+            lastNavi = amap.addNavigateArrow(naviArrow)
         }
     }
 
