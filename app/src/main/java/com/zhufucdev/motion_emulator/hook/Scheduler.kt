@@ -14,7 +14,6 @@ import com.zhufucdev.motion_emulator.hook_frontend.AUTHORITY
 import com.zhufucdev.motion_emulator.hooking
 import kotlinx.coroutines.*
 import kotlinx.serialization.json.Json
-import kotlin.coroutines.suspendCoroutine
 import kotlin.math.roundToLong
 import kotlin.random.Random
 
@@ -69,11 +68,11 @@ object Scheduler {
 
     private fun startEmulation(traceData: String, motionData: String, velocity: Double): Boolean {
         val trace = Json.decodeFromString(Trace.serializer(), traceData)
-        val motion = Json.decodeFromString(Motion.serializer(), motionData)
+        val motion = Json.decodeFromString(Motion.serializer(), motionData).validPart()
         val steps = intArrayOf(Sensor.TYPE_STEP_COUNTER, Sensor.TYPE_STEP_DETECTOR)
 
         var traceInterp = trace.at(0F)
-        duration = traceInterp.totalLength / velocity // in seconds
+        duration = traceInterp.totalLen / velocity // in seconds
 
         val start = SystemClock.elapsedRealtime()
         fun updateElapsed() {
@@ -147,6 +146,8 @@ object Scheduler {
                 Scheduler.jobs.addAll(jobs)
                 jobs.forEach { it.join() }
                 Scheduler.jobs.removeAll(jobs.toSet())
+
+                updateState(false)
                 scope.cancel()
             }
         }

@@ -5,6 +5,7 @@ import android.location.Location
 import android.location.LocationManager
 import android.os.Build
 import android.os.SystemClock
+import android.util.Log
 import com.amap.api.maps.AMapUtils
 import com.zhufucdev.motion_emulator.*
 import com.zhufucdev.motion_emulator.data.Moment
@@ -27,7 +28,7 @@ fun Point.android(provider: String = LocationManager.GPS_PROVIDER): Location {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             verticalAccuracyMeters = Random.nextFloat() * 10
         }
-        accuracy = Random.nextFloat() * 10
+        accuracy = 1F
     }
 
     result.latitude = latitude
@@ -41,10 +42,17 @@ fun Point.android(provider: String = LocationManager.GPS_PROVIDER): Location {
  *
  * @param point the interpolated point
  * @param index the bigger index between which the point was interpolated
- * @param totalLength length of the [Trace] used to interpolate
+ * @param totalDeg length of the [Trace] used to interpolate, in degrees
+ * @param totalLen length of the [Trace], in meters
  * @param cache some distance cache humans don't really care
  */
-data class TraceInterp(val point: Point, val index: Int, val totalLength: Double, val cache: List<Double>)
+data class TraceInterp(
+    val point: Point,
+    val index: Int,
+    val totalDeg: Double,
+    val totalLen: Double,
+    val cache: List<Double>
+)
 
 /**
  * Interpolate a point, give [progress] valued
@@ -58,25 +66,28 @@ data class TraceInterp(val point: Point, val index: Int, val totalLength: Double
  */
 fun Trace.at(progress: Float, from: TraceInterp? = null): TraceInterp {
     if (progress >= 1) {
-        return TraceInterp(points.last(), points.lastIndex, 0.0, emptyList())
+        return TraceInterp(points.last(), points.lastIndex, 0.0, 0.0, emptyList())
     } else if (progress < 0) {
-        return TraceInterp(points.first(), 0, 0.0, emptyList())
+        return TraceInterp(points.first(), 0, 0.0, 0.0, emptyList())
     }
 
-    var totalLength = 0.0
+    var totalDeg = 0.0
+    var totalLen = 0.0
     val cache = if (from == null || from.cache.isEmpty()) {
         buildList {
             add(0.0)
             for (i in 1 until points.size) {
-                totalLength += AMapUtils.calculateLineDistance(points[i].toLatLng(), points[i - 1].toLatLng())
-                add(totalLength)
+                totalDeg += points[i].lenTo(points[i - 1])
+                totalLen += AMapUtils.calculateLineDistance(points[i].toLatLng(), points[i - 1].toLatLng())
+                add(totalDeg)
             }
         }
     } else {
-        totalLength = from.cache.last()
+        totalDeg = from.totalDeg
+        totalLen = from.totalLen
         from.cache
     }
-    val required = totalLength * progress
+    val required = totalDeg * progress
     val range = if (from == null) {
         1 until points.size
     } else {
@@ -85,7 +96,7 @@ fun Trace.at(progress: Float, from: TraceInterp? = null): TraceInterp {
     for (i in range) {
         val current = cache[i]
         if (required == current) {
-            return TraceInterp(points[i], i, totalLength, cache)
+            return TraceInterp(points[i], i, totalDeg, totalLen, cache)
         } else if (current > required) {
             val a = points[i - 1]
             val b = points[i]
@@ -96,11 +107,11 @@ fun Trace.at(progress: Float, from: TraceInterp? = null): TraceInterp {
                     longitude = (b.longitude - a.longitude) * f + a.longitude
                 ),
                 index = i,
-                totalLength, cache
+                totalDeg, totalLen, cache
             )
         }
     }
-    return TraceInterp(points.last(), points.lastIndex, totalLength, cache)
+    return TraceInterp(points.last(), points.lastIndex, totalDeg, totalLen, cache)
 }
 
 /**
@@ -306,3 +317,34 @@ fun Motion.estimateSpeed(): Double? {
 
     return sum / count
 }
+
+/**
+ * Get the geometric center of a trace.
+ * @param length length of the trace if known. Will
+ * help the algorithm run faster
+ */
+fun Trace.center(length: Double = 0.0): Point {
+    val calcSamples = if (length <= 0) {
+        var sum = 0.0
+        for (i in 1 until points.size) {
+            sum += AMapUtils.calculateLineDistance(points[i].toLatLng(), points[i - 1].toLatLng())
+        }
+        sum
+    } else {
+        length
+    } / 50
+    val sampleCount = (if (calcSamples < 10) 10 else calcSamples).toInt()
+    Log.d("center", "length = $length, samples = $sampleCount")
+    var lastInterp = at(0F)
+    var laSum = 0.0
+    var lgSum = 0.0
+    for (i in 1 .. sampleCount) {
+        val sample = at(i * 1F / sampleCount, lastInterp)
+        laSum += sample.point.latitude
+        lgSum += sample.point.longitude
+        lastInterp = sample
+    }
+
+    return Point(laSum / sampleCount, lgSum / sampleCount)
+}
+

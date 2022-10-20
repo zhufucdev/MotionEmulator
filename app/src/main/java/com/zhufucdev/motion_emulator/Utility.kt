@@ -143,3 +143,10 @@ fun skipAmapFuckingLicense(context: Context) {
     MapsInitializer.updatePrivacyShow(context, true, true)
     MapsInitializer.updatePrivacyAgree(context, true)
 }
+
+/**
+ * Treat [Point] as a 2d vector and calculate
+ * the length
+ */
+fun Point.lenTo(other: Point): Double =
+    sqrt((latitude - other.latitude).pow(2) + (longitude - other.longitude).pow(2))

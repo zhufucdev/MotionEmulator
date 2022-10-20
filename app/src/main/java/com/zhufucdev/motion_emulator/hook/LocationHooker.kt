@@ -42,13 +42,11 @@ object LocationHooker : YukiBaseHooker() {
     fun raise(point: Point) {
         listeners.forEach {
             it.invoke(point)
-            loggerD(tag = "Location Hooker", "received $it")
         }
     }
 
     private fun addListener(l: (Point) -> Unit) {
         listeners.add(l)
-        loggerD(tag = "Location Hooker", "listener $l registered")
     }
 
     /**

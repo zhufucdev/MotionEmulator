@@ -1,11 +1,11 @@
 package com.zhufucdev.motion_emulator
 
 import android.os.Bundle
-import android.util.Log
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.doAfterTextChanged
 import com.amap.api.maps.AMap
+import com.amap.api.maps.AMapUtils
 import com.amap.api.maps.CameraUpdateFactory
 import com.amap.api.maps.model.*
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
@@ -15,6 +15,7 @@ import com.zhufucdev.motion_emulator.data.Motions
 import com.zhufucdev.motion_emulator.data.Trace
 import com.zhufucdev.motion_emulator.data.Traces
 import com.zhufucdev.motion_emulator.databinding.ActivityEmulateBinding
+import com.zhufucdev.motion_emulator.hook.center
 import com.zhufucdev.motion_emulator.hook_frontend.Emulation
 import com.zhufucdev.motion_emulator.hook_frontend.Scheduler
 
@@ -48,14 +49,12 @@ class EmulateActivity : AppCompatActivity(R.layout.activity_emulate) {
     private fun toggleEmulation() {
         if (Scheduler.emulation != null) {
             Scheduler.emulation = null
-            disableEmulationMonitor()
         } else {
             val repeat = repeatCount
             if (repeat == null || repeat <= 0 || velocity.isNaN() || velocity <= 0 || trace == null) {
                 return
             }
             Scheduler.emulation = Emulation(trace!!, motion!!, velocity)
-            initEmulationMonitor()
         }
     }
 
@@ -73,7 +72,7 @@ class EmulateActivity : AppCompatActivity(R.layout.activity_emulate) {
 
     private fun initializeOthers() {
         fun notifyFab() {
-            if (binding.inputVelocity.error.isNotEmpty() || binding.inputRepeatCount.error.isNotEmpty())
+            if (!binding.inputVelocity.error.isNullOrEmpty() && !binding.inputRepeatCount.error.isNullOrEmpty())
                 binding.btnStartEmulation.hide()
             else
                 binding.btnStartEmulation.show()
@@ -103,8 +102,18 @@ class EmulateActivity : AppCompatActivity(R.layout.activity_emulate) {
                 else null
             notifyFab()
         }
+
         binding.btnStartEmulation.setOnClickListener {
             toggleEmulation()
+        }
+        Scheduler.onEmulationStateChanged { running ->
+            runOnUiThread {
+                if (running) {
+                    disableEmulationMonitor()
+                } else {
+                    enableEmulationMonitor()
+                }
+            }
         }
     }
 
@@ -115,51 +124,63 @@ class EmulateActivity : AppCompatActivity(R.layout.activity_emulate) {
         amap.mapType = if (isDarkModeEnabled(resources)) AMap.MAP_TYPE_NIGHT else AMap.MAP_TYPE_NORMAL
         amap.isMyLocationEnabled = false
 
-        val traces = hashMapOf<Polyline, Trace>()
+        val traceByLine = hashMapOf<Polyline, Trace>()
+        val traceByMarker = hashMapOf<Marker, Trace>()
         val selectedColors = hashMapOf<Polyline, Int>()
 
         Traces.list().forEachIndexed { index, trace ->
-            val polyline = trace.drawOnMap(amap, index)
-            traces[polyline] = trace
-            selectedColors[polyline] = polyline.color
+            val result = trace.drawOnMap(amap, index)
+            traceByLine[result.first] = trace
+            traceByMarker[result.second] = trace
+            selectedColors[result.first] = result.first.color
         }
 
-        amap.setOnPolylineClickListener {
-            val selected = traces[it]!!
-            trace = selected
+        fun select(trace: Trace) {
+            this.trace = trace
+            val polyline = traceByLine.entries.first { it.value == trace }.key
             Snackbar
-                .make(binding.root, getString(R.string.text_trace_selected, selected.name), Snackbar.LENGTH_LONG)
+                .make(binding.root, getString(R.string.text_trace_selected, trace.name), Snackbar.LENGTH_LONG)
                 .setAnchorView(binding.btnStartEmulation)
                 .show()
-            it.color = getColor(R.color.teal_700)
-            traces.entries.forEach { (e, _) ->
-                if (it.id != e.id) {
+            polyline.color = getColor(R.color.teal_700)
+            traceByLine.entries.forEach { (e, _) ->
+                if (polyline.id != e.id) {
                     e.color = selectedColors[e]!!
                 }
             }
         }
 
-        if (traces.isNotEmpty()) {
-            val camera = CameraUpdateFactory.newLatLngZoom(traces.keys.first().points.first(), 10F)
+        amap.setOnPolylineClickListener {
+            val selected = traceByLine[it]!!
+            select(selected)
+        }
+
+        amap.setOnMarkerClickListener {
+            val selected = traceByMarker[it]!!
+            select(selected)
+            true
+        }
+
+        if (traceByLine.isNotEmpty()) {
+            val camera = CameraUpdateFactory.newLatLngZoom(traceByLine.keys.first().points.first(), 10F)
             amap.moveCamera(camera)
         }
 
         val naviArrow = NavigateArrowOptions()
-        var lastNavi: NavigateArrow? = null
+        var lastNav: NavigateArrow? = null
         Scheduler.addIntermediateListener {
-            lastNavi?.remove()
+            lastNav?.remove()
             naviArrow.add(it.location.toLatLng())
-            if (naviArrow.points.size > 10) {
-                naviArrow.points = naviArrow.points.dropLast(naviArrow.points.size - 10)
+            runOnUiThread {
+                lastNav = amap.addNavigateArrow(naviArrow)
             }
-            lastNavi = amap.addNavigateArrow(naviArrow)
         }
     }
 
     private val inputWrappers
         get() = listOf(binding.wrapperDropdown, binding.wrapperVelocity, binding.wrapperRepeatCount)
 
-    private fun initEmulationMonitor() {
+    private fun enableEmulationMonitor() {
         binding.btnStartEmulation.hide(object : ExtendedFloatingActionButton.OnChangedCallback() {
             override fun onHidden(fab: ExtendedFloatingActionButton) {
                 fab.setIconResource(R.drawable.ic_baseline_stop_24)
@@ -181,15 +202,26 @@ class EmulateActivity : AppCompatActivity(R.layout.activity_emulate) {
         inputWrappers.forEach { it.isEnabled = true }
     }
 
-    private fun Trace.drawOnMap(amap: AMap, index: Int): Polyline {
+    private fun Trace.drawOnMap(amap: AMap, index: Int): Pair<Polyline, Marker> {
         val polyline = PolylineOptions()
         polyline.color(getColor(lineColor(index)))
         polyline.zIndex(index.toFloat())
 
-        points.forEach {
-            polyline.add(LatLng(it.latitude, it.longitude))
+        var length = 0.0
+        points.forEachIndexed { i, point ->
+            polyline.add(point.toLatLng())
+            if (i > 0) {
+                length += AMapUtils.calculateLineDistance(point.toLatLng(), points[i - 1].toLatLng())
+            }
         }
-        return amap.addPolyline(polyline)
+        val center = center(length)
+        val marker = amap.addMarker(
+            MarkerOptions()
+                .position(center.toLatLng())
+                .draggable(false)
+        )
+        val polylineInstance = amap.addPolyline(polyline)
+        return polylineInstance to marker
     }
 
     private fun lineColor(index: Int) = when (index % 6) {
@@ -214,9 +246,5 @@ class EmulateActivity : AppCompatActivity(R.layout.activity_emulate) {
     override fun onPause() {
         super.onPause()
         binding.mapMotionPreview.onPause()
-    }
-
-    companion object {
-        const val workName = "emulation"
     }
 }

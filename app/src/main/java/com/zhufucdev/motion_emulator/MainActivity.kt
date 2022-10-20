@@ -1,14 +1,12 @@
 package com.zhufucdev.motion_emulator
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import com.highcapable.yukihookapi.YukiHookAPI
 import com.zhufucdev.motion_emulator.data.Motions
 import com.zhufucdev.motion_emulator.data.Traces
 import com.zhufucdev.motion_emulator.databinding.ActivityMainBinding
-import com.zhufucdev.motion_emulator.hook_frontend.Emulation
-import com.zhufucdev.motion_emulator.hook_frontend.Scheduler
 
 class MainActivity : AppCompatActivity(R.layout.activity_main) {
     private lateinit var binding: ActivityMainBinding

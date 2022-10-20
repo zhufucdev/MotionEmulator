@@ -1,6 +1,5 @@
 package com.zhufucdev.motion_emulator.hook_frontend
 
-import com.highcapable.yukihookapi.hook.log.loggerD
 import com.zhufucdev.motion_emulator.data.Motion
 import com.zhufucdev.motion_emulator.data.Point
 import com.zhufucdev.motion_emulator.data.Trace
@@ -8,7 +7,7 @@ import java.util.concurrent.FutureTask
 
 data class Emulation(val trace: Trace, val motion: Motion, val velocity: Double)
 
-data class Intermediate(val position: Point, val progress: Float)
+data class Intermediate(val location: Point, val progress: Float)
 
 object Scheduler {
     private var fts = mutableSetOf<FutureTask<Unit>>()
@@ -44,5 +43,9 @@ object Scheduler {
     
     fun onEmulationStateChanged(l: (Boolean) -> Unit) {
         stateListeners.add(l)
+    }
+
+    fun addIntermediateListener(l: (Intermediate) -> Unit) {
+        intermediateListeners.add(l)
     }
 }
