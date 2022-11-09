@@ -5,37 +5,35 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
-import android.util.Log
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils
-import com.zhufucdev.motion_emulator.hooking
 import kotlin.math.abs
 
-interface RecordCallback {
+interface MotionCallback {
     fun summarize(): Motion
-    fun onUpdate(l: (Moment) -> Unit)
-    fun onUpdate(type: Int, l: (Moment) -> Unit)
+    fun onUpdate(l: (MotionMoment) -> Unit)
+    fun onUpdate(type: Int, l: (MotionMoment) -> Unit)
 }
 
 const val VERTICAL_PERIOD = 0.01F
 
-object Recorder {
+object MotionRecorder {
     private lateinit var sensors: SensorManager
 
-    private val callbacks = arrayListOf<RecordCallback>()
+    private val callbacks = arrayListOf<MotionCallback>()
 
     fun init(context: Context) {
         sensors = context.getSystemService(SensorManager::class.java)
     }
 
-    fun start(sensorsRequired: List<Int>): RecordCallback {
+    fun start(sensorsRequired: List<Int>): MotionCallback {
         val start = System.currentTimeMillis()
-        val moments = arrayListOf<Moment>()
-        var callbackListener: ((Moment) -> Unit)? = null
-        val typedListeners = hashMapOf<Int, (Moment) -> Unit>()
+        val moments = arrayListOf<MotionMoment>()
+        var callbackListener: ((MotionMoment) -> Unit)? = null
+        val typedListeners = hashMapOf<Int, (MotionMoment) -> Unit>()
 
         val listener = object : SensorEventListener {
             override fun onSensorChanged(event: SensorEvent) {
-                fun typedFeedback(moment: Moment) {
+                fun typedFeedback(moment: MotionMoment) {
                     typedListeners[event.sensor.type]?.invoke(moment)
                 }
 
@@ -52,7 +50,7 @@ object Recorder {
                         }
                     }
                 }
-                val newMoment = Moment(elapsed, mutableMapOf(event.sensor.type to event.values))
+                val newMoment = MotionMoment(elapsed, mutableMapOf(event.sensor.type to event.values))
                 moments.add(newMoment)
                 typedFeedback(newMoment)
             }
@@ -65,21 +63,21 @@ object Recorder {
             sensors.registerListener(listener, sensor, SensorManager.SENSOR_DELAY_NORMAL)
         }
 
-        val result = object : RecordCallback {
+        val result = object : MotionCallback {
             override fun summarize(): Motion {
                 sensors.unregisterListener(listener)
-                synchronized(Recorder) {
+                synchronized(MotionRecorder) {
                     callbacks.remove(this)
                 }
 
                 return Motion(NanoIdUtils.randomNanoId(), start, moments, sensorsRequired)
             }
 
-            override fun onUpdate(l: (Moment) -> Unit) {
+            override fun onUpdate(l: (MotionMoment) -> Unit) {
                 callbackListener = l
             }
 
-            override fun onUpdate(type: Int, l: (Moment) -> Unit) {
+            override fun onUpdate(type: Int, l: (MotionMoment) -> Unit) {
                 typedListeners[type] = l
             }
         }

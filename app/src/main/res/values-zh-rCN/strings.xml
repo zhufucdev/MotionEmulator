@@ -51,4 +51,5 @@
     <string name="name_sensor_linear_acc">线性加速计</string>
     <string name="title_emulate">模拟</string>
     <string name="text_emulate">指挥你的传感器和GPS</string>
+    <string name="name_cell">基站</string>
 </resources>

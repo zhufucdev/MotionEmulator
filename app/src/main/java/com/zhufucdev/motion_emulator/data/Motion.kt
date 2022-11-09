@@ -1,14 +1,12 @@
 package com.zhufucdev.motion_emulator.data
 
 import android.content.Context
-import com.zhufucdev.motion_emulator.dateString
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import kotlinx.serialization.json.encodeToStream
 import java.io.File
-import java.util.UUID
 
 /**
  * Basic motion record unit
@@ -17,17 +15,17 @@ import java.util.UUID
  * @param elapsed Time from start (in sec.)
  */
 @Serializable
-data class Moment(val elapsed: Float, val data: MutableMap<Int, FloatArray>)
+data class MotionMoment(val elapsed: Float, val data: MutableMap<Int, FloatArray>)
 
 /**
- * Motion record, composed with series of [Moment]s.
+ * Motion record, composed with series of [MotionMoment]s.
  * @param time Time when it was recorded in millis.
  * @param moments The series.
  * @param sensorsInvolved types of sensor that's possibly present in the [moments].
  * Notice that not every moment includes all the sensors.
  */
 @Serializable
-data class Motion(val id: String, val time: Long, val moments: List<Moment>, val sensorsInvolved: List<Int>)
+data class Motion(val id: String, val time: Long, val moments: List<MotionMoment>, val sensorsInvolved: List<Int>)
 
 @OptIn(ExperimentalSerializationApi::class)
 object Motions {

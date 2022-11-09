@@ -51,4 +51,5 @@
     <string name="name_sensor_linear_acc">Linear accelerometer</string>
     <string name="title_emulate">Emulate</string>
     <string name="text_emulate">Direct your sensors and GPS</string>
+    <string name="name_cell">Cell Station</string>
 </resources>

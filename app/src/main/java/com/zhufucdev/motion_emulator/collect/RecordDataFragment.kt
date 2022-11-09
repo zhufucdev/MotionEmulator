@@ -3,7 +3,6 @@ package com.zhufucdev.motion_emulator.collect
 import android.hardware.Sensor
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,24 +16,27 @@ import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.zhufucdev.motion_emulator.R
-import com.zhufucdev.motion_emulator.data.RecordCallback
-import com.zhufucdev.motion_emulator.data.Recorder
-import com.zhufucdev.motion_emulator.data.Motions
+import com.zhufucdev.motion_emulator.data.*
 import com.zhufucdev.motion_emulator.getAttrColor
 
 /**
  * To display current motion data.
  */
 class RecordDataFragment : Fragment() {
-    private lateinit var recorder: RecordCallback
+    private lateinit var motion: MotionCallback
+    private lateinit var telephony: TelephonyRecordCallback
     private lateinit var fab: ExtendedFloatingActionButton
     private lateinit var types: ArrayList<Int>
+    private var useTelephony = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         types = arguments?.getIntegerArrayList("types") ?: defaultSensors
-        recorder = Recorder.start(types)
+        useTelephony = arguments?.getBoolean("telephony") ?: false
+        motion = MotionRecorder.start(types)
+        if (useTelephony)
+            telephony = TelephonyRecorder.start()
     }
 
     override fun onCreateView(
@@ -47,9 +49,13 @@ class RecordDataFragment : Fragment() {
         types.forEach {
             records.addView(generateChart(it))
         }
+        if (useTelephony)
+            records.addView(telephonyChart())
         fab.setOnClickListener {
-            val summary = recorder.summarize()
-            Motions.store(summary)
+            val motions = motion.summarize()
+            val cellTimeline = telephony.summarize()
+            Motions.store(motions)
+            Cells.store(cellTimeline)
             requireActivity().finish()
         }
         return root
@@ -61,7 +67,7 @@ class RecordDataFragment : Fragment() {
         chart.stylize()
         chart.description.text = getString(sensorNames[type]!!)
 
-        recorder.onUpdate(type) { moment ->
+        motion.onUpdate(type) { moment ->
             val values = moment.data[type]!!
             if (data.dataSets.isEmpty()) {
                 values.forEachIndexed { index, v ->
@@ -97,6 +103,13 @@ class RecordDataFragment : Fragment() {
         return chart
     }
 
+    private fun telephonyChart(): View {
+        
+        telephony.onUpdate {
+
+        }
+    }
+
     private fun LineChart.stylize() {
         val onSurface = getAttrColor(com.google.android.material.R.attr.colorOnSurface, requireContext())
         setBorderColor(onSurface)
@@ -120,7 +133,7 @@ class RecordDataFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        recorder.summarize()
+        motion.summarize()
     }
 }
 

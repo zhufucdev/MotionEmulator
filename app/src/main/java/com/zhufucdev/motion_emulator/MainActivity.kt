@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.highcapable.yukihookapi.YukiHookAPI
+import com.zhufucdev.motion_emulator.data.Cells
 import com.zhufucdev.motion_emulator.data.Motions
 import com.zhufucdev.motion_emulator.data.Traces
 import com.zhufucdev.motion_emulator.databinding.ActivityMainBinding
@@ -19,6 +20,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
         Traces.require(this)
         Motions.require(this)
+        Cells.require(this)
     }
 
     private fun updateStatus() {
@@ -51,5 +53,10 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
                 Intent(this, EmulateActivity::class.java)
             )
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        updateStatus()
     }
 }

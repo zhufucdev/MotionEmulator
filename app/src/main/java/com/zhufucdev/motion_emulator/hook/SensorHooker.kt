@@ -12,16 +12,15 @@ import com.highcapable.yukihookapi.hook.factory.classOf
 import com.highcapable.yukihookapi.hook.param.HookParam
 import com.highcapable.yukihookapi.hook.type.java.BooleanType
 import com.highcapable.yukihookapi.hook.type.java.IntType
-import com.zhufucdev.motion_emulator.data.Moment
-import com.zhufucdev.motion_emulator.hooking
-import kotlin.reflect.full.defaultType
-import kotlin.reflect.full.starProjectedType
+import com.zhufucdev.motion_emulator.data.MotionMoment
 
 object SensorHooker : YukiBaseHooker() {
     private val listeners = arrayListOf<Pair<Int, SensorEventListener>>()
     private lateinit var sensorManager: SensorManager
 
     override fun onHook() {
+        loadHooker(Scheduler.hook)
+
         classOf<SensorManager>().hook {
             hookRegisterMethod(classOf<SensorEventListener>(), classOf<Sensor>(), IntType, classOf<Handler>())
             hookRegisterMethod(classOf<SensorEventListener>(), classOf<Sensor>(), IntType, IntType)
@@ -38,7 +37,7 @@ object SensorHooker : YukiBaseHooker() {
         }
     }
 
-    fun raise(moment: Moment, typeFilter: Array<Int> = emptyArray()) {
+    fun raise(moment: MotionMoment, typeFilter: Array<Int> = emptyArray()) {
         val eventConstructor =
             SensorEvent::class.constructors.firstOrNull { it.parameters.size == 4 }
                 ?: error("sensor event constructor not available")

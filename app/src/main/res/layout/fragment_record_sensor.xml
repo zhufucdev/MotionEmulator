@@ -99,6 +99,13 @@
                         android:text="@string/name_sensor_light"
                         android:checked="true"/>
 
+                <androidx.appcompat.widget.SwitchCompat
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/switch_telephony"
+                        android:text="@string/name_cell"
+                        android:checked="true"/>
+
                 <androidx.appcompat.widget.AppCompatButton
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"

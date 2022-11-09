@@ -30,7 +30,10 @@ class RecordSensorFragment : Fragment() {
             findNavController()
                 .navigate(
                     R.id.action_recordSensorFragment_to_recordDataFragment,
-                    bundleOf("types" to getSensorTypes())
+                    bundleOf(
+                        "types" to getSensorTypes(),
+                        "telephony" to binding.switchTelephony.isChecked
+                    )
                 )
         }
         return binding.root

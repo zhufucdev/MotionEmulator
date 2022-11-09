@@ -7,15 +7,14 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
-import android.view.View
-import android.view.View.OnClickListener
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import com.google.android.material.snackbar.Snackbar
+import com.zhufucdev.motion_emulator.data.Cells
 import com.zhufucdev.motion_emulator.data.Motions
-import com.zhufucdev.motion_emulator.data.Recorder
+import com.zhufucdev.motion_emulator.data.MotionRecorder
+import com.zhufucdev.motion_emulator.data.TelephonyRecorder
 import com.zhufucdev.motion_emulator.databinding.ActivityRecordBinding
 
 class RecordActivity : AppCompatActivity() {
@@ -23,8 +22,10 @@ class RecordActivity : AppCompatActivity() {
     private lateinit var binding: ActivityRecordBinding
     private lateinit var navController: NavController
     override fun onCreate(savedInstanceState: Bundle?) {
-        Recorder.init(this)
+        MotionRecorder.init(this)
+        TelephonyRecorder.init(this)
         Motions.require(this)
+        Cells.require(this)
         super.onCreate(savedInstanceState)
 
         binding = ActivityRecordBinding.inflate(layoutInflater)

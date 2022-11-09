@@ -3,9 +3,13 @@ package com.zhufucdev.motion_emulator.hook
 import android.content.ContentResolver
 import android.content.ContentValues
 import android.content.Context
+import android.content.ContextWrapper
 import android.hardware.Sensor
 import android.net.Uri
 import android.os.SystemClock
+import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
+import com.highcapable.yukihookapi.hook.factory.classOf
+import com.highcapable.yukihookapi.hook.log.loggerE
 import com.highcapable.yukihookapi.hook.log.loggerI
 import com.zhufucdev.motion_emulator.COMMAND_EMULATION_START
 import com.zhufucdev.motion_emulator.COMMAND_EMULATION_STOP
@@ -18,6 +22,8 @@ import kotlin.math.roundToLong
 import kotlin.random.Random
 
 object Scheduler {
+    private const val TAG = "Scheduler"
+
     private lateinit var eventResolver: ContentResolver
     private val nextUri = Uri.parse("content://$AUTHORITY/next")
     private val stateUri = Uri.parse("content://$AUTHORITY/state")
@@ -26,9 +32,37 @@ object Scheduler {
 
     @OptIn(DelicateCoroutinesApi::class)
     fun init(context: Context) {
+        if (::eventResolver.isInitialized) return
         eventResolver = context.contentResolver
         GlobalScope.launch {
             eventLoop()
+        }
+        loggerI(TAG, "Event loop started")
+    }
+
+    /**
+     * To initialize the scheduler
+     */
+    val hook = object : YukiBaseHooker() {
+        override fun onHook() {
+            classOf<ContextWrapper>().hook {
+                injectMember {
+                    method {
+                        name = "getApplicationContext"
+                        emptyParam()
+                        returnType = classOf<Context>()
+                    }
+
+                    afterHook {
+                        val ctx = result<Context>()
+                        if (ctx == null) {
+                            loggerE(tag = TAG, "Failed to initialize: context unavailable")
+                            return@afterHook
+                        }
+                        init(ctx)
+                    }
+                }
+            }
         }
     }
 
@@ -52,7 +86,7 @@ object Scheduler {
                         jobs.forEach {
                             it.join()
                         }
-                        loggerI(tag = "Emulation Scheduler", msg = "emulation stopped")
+                        loggerI(tag = TAG, msg = "emulation stopped")
                         updateState(false)
                     }
                 }
@@ -143,9 +177,9 @@ object Scheduler {
 
             launch {
                 // to clear current jobs
-                Scheduler.jobs.addAll(jobs)
+                jobs.addAll(jobs)
                 jobs.forEach { it.join() }
-                Scheduler.jobs.removeAll(jobs.toSet())
+                jobs.removeAll(jobs.toSet())
 
                 updateState(false)
                 scope.cancel()

@@ -6,9 +6,10 @@ import android.location.LocationManager
 import android.os.Build
 import android.os.SystemClock
 import android.util.Log
+import com.amap.api.location.AMapLocation
 import com.amap.api.maps.AMapUtils
 import com.zhufucdev.motion_emulator.*
-import com.zhufucdev.motion_emulator.data.Moment
+import com.zhufucdev.motion_emulator.data.MotionMoment
 import com.zhufucdev.motion_emulator.data.Motion
 import com.zhufucdev.motion_emulator.data.Point
 import com.zhufucdev.motion_emulator.data.Trace
@@ -36,6 +37,8 @@ fun Point.android(provider: String = LocationManager.GPS_PROVIDER): Location {
 
     return result
 }
+
+fun Point.amap(): AMapLocation = AMapLocation(android())
 
 /**
  * Result for [Trace.at]
@@ -120,7 +123,7 @@ fun Trace.at(progress: Float, from: TraceInterp? = null): TraceInterp {
  * @param moment the interpolated data
  * @param index bigger index between which the moment was interpolated
  */
-data class MotionInterp(val moment: Moment, val index: Int)
+data class MotionInterp(val moment: MotionMoment, val index: Int)
 
 /**
  * Interpolate a moment, given a [progress] valued between
@@ -142,7 +145,7 @@ suspend fun Motion.at(progress: Float, from: Int = 0): MotionInterp {
         ) {
             continue
         }
-        var last: Moment? = null
+        var last: MotionMoment? = null
         for (j in i - 1 downTo 0) {
             if (moments[j].data.keys.containsAll(current.data.keys)) {
                 last = moments[j]
@@ -161,8 +164,8 @@ suspend fun Motion.at(progress: Float, from: Int = 0): MotionInterp {
             }
 
         suspend fun align(intendedType: Int): Map<Int, FloatArray> {
-            var left: Moment? = null
-            var right: Moment? = null
+            var left: MotionMoment? = null
+            var right: MotionMoment? = null
             return coroutineScope {
                 val forward = launch {
                     // combo forwards
@@ -212,7 +215,7 @@ suspend fun Motion.at(progress: Float, from: Int = 0): MotionInterp {
             }
 
             return MotionInterp(
-                moment = Moment(
+                moment = MotionMoment(
                     elapsed = elapsed,
                     data = data
                 ),
@@ -220,7 +223,7 @@ suspend fun Motion.at(progress: Float, from: Int = 0): MotionInterp {
             )
         }
     }
-    return MotionInterp(Moment(elapsed, data), moments.lastIndex)
+    return MotionInterp(MotionMoment(elapsed, data), moments.lastIndex)
 }
 
 /**
@@ -280,7 +283,7 @@ fun Motion.estimateSpeed(): Double? {
     if (!counter && !detector)
         return null //TODO use more sensor types
 
-    var lastMoment: Moment? = null
+    var lastMoment: MotionMoment? = null
     var sum = 0.0
     var count = 0
     if (counter) {
