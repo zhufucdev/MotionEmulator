@@ -8,9 +8,9 @@ import android.database.MatrixCursor
 import android.hardware.SensorManager
 import android.net.Uri
 import android.util.Log
-import com.zhufucdev.motion_emulator.COMMAND_EMULATION_START
-import com.zhufucdev.motion_emulator.COMMAND_EMULATION_STOP
 import com.zhufucdev.motion_emulator.data.Point
+import com.zhufucdev.motion_emulator.hook.COMMAND_EMULATION_START
+import com.zhufucdev.motion_emulator.hook.COMMAND_EMULATION_STOP
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 

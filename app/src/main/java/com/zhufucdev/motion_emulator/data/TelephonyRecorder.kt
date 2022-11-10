@@ -1,6 +1,9 @@
 package com.zhufucdev.motion_emulator.data
 
+import android.Manifest
+import android.app.ActivityManager
 import android.content.Context
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
@@ -22,9 +25,17 @@ object TelephonyRecorder {
     private lateinit var manager: TelephonyManager
     fun init(context: Context) {
         manager = context.getSystemService(TelephonyManager::class.java)
+        checkPermission = {
+            context.checkCallingOrSelfPermission(Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED
+                    && context.checkCallingOrSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+        }
     }
 
     fun start(): TelephonyRecordCallback {
+        if (!checkPermission()) {
+            return noop()
+        }
+
         val start = System.currentTimeMillis()
         val timeline = arrayListOf<CellMoment>()
 
@@ -121,6 +132,16 @@ object TelephonyRecorder {
             handler.post {
                 command?.run()
             }
+        }
+    }
+
+    private lateinit var checkPermission: () -> Boolean
+    private fun noop() = object : TelephonyRecordCallback {
+        override fun onUpdate(l: (CellMoment) -> Unit) {
+        }
+
+        override fun summarize(): CellTimeline {
+            return CellTimeline(NanoIdUtils.randomNanoId(), 0, emptyList())
         }
     }
 }

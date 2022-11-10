@@ -60,7 +60,7 @@ object MotionRecorder {
 
         sensorsRequired.forEach {
             val sensor = sensors.getDefaultSensor(it)
-            sensors.registerListener(listener, sensor, SensorManager.SENSOR_DELAY_NORMAL)
+            sensors.registerListener(listener, sensor, SensorManager.SENSOR_DELAY_UI)
         }
 
         val result = object : MotionCallback {

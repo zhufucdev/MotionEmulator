@@ -16,7 +16,7 @@
     <string name="action_continue">Continue</string>
     <string name="title_charts">Data Collected</string>
     <string name="action_stop">Stop</string>
-    <string name="text_body_sensor_not_granted">Permissions to read step counter aren\'t granted</string>
+    <string name="text_permission_not_granted">Necessary permits not granted</string>
     <string name="action_grant">Grant</string>
     <string name="action_move">Move Viewpoint</string>
     <string name="action_draw">Draw Trace</string>
@@ -52,4 +52,8 @@
     <string name="title_emulate">Emulate</string>
     <string name="text_emulate">Direct your sensors and GPS</string>
     <string name="name_cell">Cell Station</string>
+    <string name="title_telephony_recording">Recording cell information. %s seconds until first update</string>
+    <string name="text_telephony_recording_neighboring">Capturing %d neighboring infos</string>
+    <string name="text_telephony_recording_location">Cell location is present</string>
+    <string name="name_cell_signal">Signal Strength</string>
 </resources>

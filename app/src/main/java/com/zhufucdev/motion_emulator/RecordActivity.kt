@@ -33,7 +33,14 @@ class RecordActivity : AppCompatActivity() {
 
         navController = findNavController(R.id.nav_host_fragment_activity_record)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            requestPermissions(arrayOf(Manifest.permission.ACTIVITY_RECOGNITION), 0)
+            requestPermissions(
+                arrayOf(
+                    Manifest.permission.ACTIVITY_RECOGNITION,
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.READ_PHONE_STATE
+                ),
+                0
+            )
         }
     }
 
@@ -46,9 +53,9 @@ class RecordActivity : AppCompatActivity() {
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == 0 && grantResults.first() != PackageManager.PERMISSION_GRANTED) {
+        if (requestCode == 0 && grantResults.any { it != PackageManager.PERMISSION_GRANTED }) {
             Snackbar
-                .make(binding.root, R.string.text_body_sensor_not_granted, Snackbar.LENGTH_LONG)
+                .make(binding.root, R.string.text_permission_not_granted, Snackbar.LENGTH_LONG)
                 .setAction(R.string.action_grant) { requirePermissions() }
                 .show()
         }

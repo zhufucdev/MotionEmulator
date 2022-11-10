@@ -17,7 +17,7 @@
     <string name="action_continue">继续</string>
     <string name="title_charts">收集到的数据</string>
     <string name="action_stop">停止</string>
-    <string name="text_body_sensor_not_granted">读取计步器的权限未获批准</string>
+    <string name="text_permission_not_granted">必要权限未获得</string>
     <string name="action_grant">授权</string>
     <string name="action_move">移动视图</string>
     <string name="action_draw">绘制路径</string>
@@ -52,4 +52,8 @@
     <string name="title_emulate">模拟</string>
     <string name="text_emulate">指挥你的传感器和GPS</string>
     <string name="name_cell">基站</string>
+    <string name="title_telephony_recording">正在记录基站信息。最近一次更新在第%s秒</string>
+    <string name="text_telephony_recording_neighboring">找到了%d条基站信息</string>
+    <string name="text_telephony_recording_location">记录将包括基站定位</string>
+    <string name="name_cell_signal">信号强度</string>
 </resources>

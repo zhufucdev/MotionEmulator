@@ -1,16 +1,27 @@
 package com.zhufucdev.motion_emulator.collect
 
+import android.annotation.SuppressLint
 import android.hardware.Sensor
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
+import androidx.annotation.RequiresApi
 import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.core.view.setMargins
 import androidx.core.view.updateLayoutParams
+import androidx.core.widget.TextViewCompat
 import androidx.fragment.app.Fragment
+import com.github.mikephil.charting.charts.BarChart
+import com.github.mikephil.charting.charts.BarLineChartBase
+import com.github.mikephil.charting.charts.Chart
 import com.github.mikephil.charting.charts.LineChart
+import com.github.mikephil.charting.components.Description
+import com.github.mikephil.charting.data.BarData
+import com.github.mikephil.charting.data.BarDataSet
+import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
@@ -103,14 +114,57 @@ class RecordDataFragment : Fragment() {
         return chart
     }
 
+    @SuppressLint("NewApi")
     private fun telephonyChart(): View {
-        
-        telephony.onUpdate {
+        fun generateData(moment: CellMoment) = BarData(
+            BarDataSet(
+                moment.cell.mapIndexed { i, c ->
+                    BarEntry(i.toFloat(), c.cellSignalStrength.dbm.toFloat())
+                },
+                "BarDataSet"
+            )
+        )
 
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            LinearLayoutCompat(requireContext()).apply {
+                orientation = LinearLayoutCompat.VERTICAL
+                val title = TextView(requireContext()).apply {
+                    text = getString(R.string.title_telephony_recording, "-1")
+                }
+                addView(title)
+                addView(
+                    BarChart(requireContext()).apply {
+                        telephony.onUpdate {
+                            data = generateData(it)
+                            invalidate()
+                            title.text = getString(R.string.title_telephony_recording, it.elapsed.toString())
+                        }
+                        stylize()
+                        description.text = getString(R.string.name_cell_signal)
+                        setFitBars(true)
+                        layout()
+                    }
+                )
+            }
+        } else {
+            TextView(requireContext()).apply {
+                text = getString(R.string.title_telephony_recording, "-1")
+                var containsLocation = false
+                telephony.onUpdate {
+                    text = buildString {
+                        appendLine(getString(R.string.title_telephony_recording, it.elapsed.toString()))
+                        appendLine(getString(R.string.text_telephony_recording_neighboring, it.neighboring.size))
+                        if (it.location != null || containsLocation) {
+                            appendLine(getString(R.string.text_telephony_recording_location))
+                            containsLocation = true
+                        }
+                    }
+                }
+            }
         }
     }
 
-    private fun LineChart.stylize() {
+    private fun BarLineChartBase<*>.stylize() {
         val onSurface = getAttrColor(com.google.android.material.R.attr.colorOnSurface, requireContext())
         setBorderColor(onSurface)
         description.textColor = onSurface
@@ -122,7 +176,7 @@ class RecordDataFragment : Fragment() {
         axisRight.isEnabled = false
     }
 
-    private fun LineChart.layout() {
+    private fun View.layout() {
         val matchParent = LinearLayoutCompat.LayoutParams.MATCH_PARENT
         layoutParams =
             LinearLayoutCompat.LayoutParams(matchParent, resources.getDimensionPixelSize(R.dimen.chart_height))

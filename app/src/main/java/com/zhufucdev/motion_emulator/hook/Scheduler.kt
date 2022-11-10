@@ -11,11 +11,8 @@ import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.highcapable.yukihookapi.hook.factory.classOf
 import com.highcapable.yukihookapi.hook.log.loggerE
 import com.highcapable.yukihookapi.hook.log.loggerI
-import com.zhufucdev.motion_emulator.COMMAND_EMULATION_START
-import com.zhufucdev.motion_emulator.COMMAND_EMULATION_STOP
 import com.zhufucdev.motion_emulator.data.*
 import com.zhufucdev.motion_emulator.hook_frontend.AUTHORITY
-import com.zhufucdev.motion_emulator.hooking
 import kotlinx.coroutines.*
 import kotlinx.serialization.json.Json
 import kotlin.math.roundToLong

@@ -3,22 +3,14 @@ package com.zhufucdev.motion_emulator.hook_frontend
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
-import android.hardware.Sensor
-import android.os.*
-import android.util.Log
+import android.os.Build
 import androidx.core.app.NotificationCompat
-import androidx.work.*
+import androidx.work.CoroutineWorker
+import androidx.work.ForegroundInfo
+import androidx.work.WorkManager
+import androidx.work.WorkerParameters
 import com.zhufucdev.motion_emulator.R
-import com.zhufucdev.motion_emulator.data.Motions
-import com.zhufucdev.motion_emulator.data.Point
-import com.zhufucdev.motion_emulator.data.Traces
-import com.zhufucdev.motion_emulator.hooking
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
-import kotlin.math.roundToLong
 
 class EmulationWorker(appContext: Context, workerParameters: WorkerParameters) :
     CoroutineWorker(appContext, workerParameters) {
