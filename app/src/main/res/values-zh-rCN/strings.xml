@@ -57,4 +57,5 @@
     <string name="text_telephony_recording_location">记录将包括基站定位</string>
     <string name="name_cell_signal">信号强度</string>
     <string name="title_cells_data">基站数据</string>
+    <string name="title_satellite_count">卫星数量</string>
 </resources>

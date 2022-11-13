@@ -82,6 +82,23 @@
                         android:inputType="number"/>
             </com.google.android.material.textfield.TextInputLayout>
 
+            <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/wrapper_satellite"
+                    android:hint="@string/title_satellite_count"
+                    android:layout_marginBottom="@dimen/common_padding"
+                    app:startIconDrawable="@drawable/ic_baseline_satellite_alt_24">
+
+                <com.google.android.material.textfield.TextInputEditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/input_satellite"
+                        android:text="10"
+                        android:inputType="number"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+
             <com.amap.api.maps.MapView
                     android:layout_width="match_parent"
                     android:layout_height="400dp"

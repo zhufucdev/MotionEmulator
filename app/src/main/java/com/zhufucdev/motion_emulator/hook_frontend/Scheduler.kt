@@ -11,7 +11,8 @@ data class Emulation(
     val motion: Motion,
     val cells: CellTimeline,
     val velocity: Double,
-    val repeat: Int
+    val repeat: Int,
+    val satelliteCount: Int
 )
 
 data class Intermediate(val location: Point, val progress: Float)

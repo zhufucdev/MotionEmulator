@@ -39,20 +39,31 @@ class EventProvider : ContentProvider() {
         selectionArgs: Array<out String>?,
         sortOrder: String?
     ): Cursor? {
-        if (matcher.match(uri) == REQUEST_NEXT) {
-            val emulation = Scheduler.queue()
-            return if (emulation == null) {
-                val cursor = MatrixCursor(arrayOf("command"))
-                cursor.addRow(arrayOf(COMMAND_EMULATION_STOP))
-                cursor
-            } else {
-                val cursor = MatrixCursor(arrayOf("trace", "motion", "cells", "velocity", "repeat"))
-                cursor.addRow(arrayOf(COMMAND_EMULATION_START, 0, 0, 0, 0))
-                val traceData = Json.encodeToString(emulation.trace)
-                val motionData = Json.encodeToString(emulation.motion)
-                val cellsData = Json.encodeToString(emulation.cells)
-                cursor.addRow(arrayOf(traceData, motionData, cellsData, emulation.velocity, emulation.repeat))
-                cursor
+        when (matcher.match(uri)) {
+            REQUEST_NEXT -> {
+                val emulation = Scheduler.queue()
+                return if (emulation == null) {
+                    val cursor = MatrixCursor(arrayOf("command"))
+                    cursor.addRow(arrayOf(COMMAND_EMULATION_STOP))
+                    cursor
+                } else {
+                    val cursor = MatrixCursor(arrayOf("trace", "motion", "cells", "velocity", "repeat", "satellites"))
+                    cursor.addRow(arrayOf(COMMAND_EMULATION_START, 0, 0, 0, 0, 0))
+                    val traceData = Json.encodeToString(emulation.trace)
+                    val motionData = Json.encodeToString(emulation.motion)
+                    val cellsData = Json.encodeToString(emulation.cells)
+                    cursor.addRow(
+                        arrayOf(
+                            traceData,
+                            motionData,
+                            cellsData,
+                            emulation.velocity,
+                            emulation.repeat,
+                            emulation.satelliteCount
+                        )
+                    )
+                    cursor
+                }
             }
         }
         return null

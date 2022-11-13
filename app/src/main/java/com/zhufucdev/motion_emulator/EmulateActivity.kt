@@ -10,6 +10,7 @@ import com.amap.api.maps.CameraUpdateFactory
 import com.amap.api.maps.model.*
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.textfield.TextInputEditText
 import com.zhufucdev.motion_emulator.data.*
 import com.zhufucdev.motion_emulator.databinding.ActivityEmulateBinding
 import com.zhufucdev.motion_emulator.hook.center
@@ -23,6 +24,7 @@ class EmulateActivity : AppCompatActivity(R.layout.activity_emulate) {
     private var cells: CellTimeline? = null
     private var repeatCount: Int? = 1
     private var velocity: Double? = 3.0
+    private var satelliteCount: Int? = 10
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,17 +57,20 @@ class EmulateActivity : AppCompatActivity(R.layout.activity_emulate) {
             val trace = this.trace
             val cells = this.cells
             val velocity = this.velocity
+            val satellites = this.satelliteCount
             if (repeat == null
                 || repeat <= 0
                 || velocity == null
                 || velocity <= 0
+                || satellites == null
+                || satellites < 0
                 || trace == null
                 || cells == null
                 || motion == null
             ) {
                 return
             }
-            Scheduler.emulation = Emulation(trace, motion, cells, velocity, repeat)
+            Scheduler.emulation = Emulation(trace, motion, cells, velocity, repeat, satellites)
         }
     }
 
@@ -78,6 +83,7 @@ class EmulateActivity : AppCompatActivity(R.layout.activity_emulate) {
         binding.dropdownMotion.apply {
             setOnItemClickListener { _, _, position, _ ->
                 motion = motions[position]
+                notifyFab()
             }
             setAdapter(adapter)
         }
@@ -92,19 +98,27 @@ class EmulateActivity : AppCompatActivity(R.layout.activity_emulate) {
         binding.dropdownCells.apply {
             setOnItemClickListener { _, _, position, _ ->
                 cells = timelines[position]
+                notifyFab()
             }
             setAdapter(adapter)
         }
     }
 
-    private fun initializeOthers() {
-        fun notifyFab() {
-            if (!binding.inputVelocity.error.isNullOrEmpty() && !binding.inputRepeatCount.error.isNullOrEmpty())
-                binding.btnStartEmulation.hide()
-            else
-                binding.btnStartEmulation.show()
-        }
+    private fun notifyFab() {
+        if (!binding.inputVelocity.error.isNullOrEmpty()
+            || !binding.inputRepeatCount.error.isNullOrEmpty()
+            || !binding.inputSatellite.error.isNullOrBlank()
+            || motion == null
+            || trace == null
+            || cells == null
+        )
+            binding.btnStartEmulation.hide()
+        else
+            binding.btnStartEmulation.show()
+    }
 
+
+    private fun initializeOthers() {
         binding.inputVelocity.doAfterTextChanged {
             velocity = if (it.isNullOrEmpty()) {
                 null
@@ -117,16 +131,30 @@ class EmulateActivity : AppCompatActivity(R.layout.activity_emulate) {
                 else null
             notifyFab()
         }
+
+        fun setError(input: TextInputEditText, value: Int?, filterNegative: Boolean) {
+            input.error =
+                if (value == null) getString(R.string.text_field_must_not_empty)
+                else if (filterNegative && value <= 0) getString(R.string.text_field_must_not_neg_or_zero)
+                else null
+            notifyFab()
+        }
         binding.inputRepeatCount.doAfterTextChanged {
             repeatCount = if (it.isNullOrEmpty()) {
                 null
             } else {
                 it.toString().toIntOrNull()
             }
-            binding.inputRepeatCount.error =
-                if (repeatCount == null) getString(R.string.text_field_must_not_empty)
-                else if (repeatCount!! <= 0) getString(R.string.text_field_must_not_neg_or_zero)
-                else null
+            setError(binding.inputRepeatCount, repeatCount, true)
+            notifyFab()
+        }
+        binding.inputSatellite.doAfterTextChanged {
+            satelliteCount = if (it.isNullOrEmpty()) {
+                null
+            } else {
+                it.toString().toIntOrNull()
+            }
+            setError(binding.inputSatellite, satelliteCount, false)
             notifyFab()
         }
 
@@ -209,7 +237,8 @@ class EmulateActivity : AppCompatActivity(R.layout.activity_emulate) {
             binding.wrapperDropdown,
             binding.wrapperVelocity,
             binding.wrapperRepeatCount,
-            binding.wrapperCellsDropdown
+            binding.wrapperCellsDropdown,
+            binding.wrapperSatellite
         )
 
     private fun enableEmulationMonitor() {

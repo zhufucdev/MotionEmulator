@@ -57,4 +57,5 @@
     <string name="text_telephony_recording_location">Cell location is present</string>
     <string name="name_cell_signal">Signal Strength</string>
     <string name="title_cells_data">Base Station Data</string>
+    <string name="title_satellite_count">Satellites Count</string>
 </resources>

@@ -76,7 +76,8 @@ object Scheduler {
                         val cells = cursor.getString(2)
                         val velocity = cursor.getDouble(3)
                         val repeat = cursor.getInt(4)
-                        val started = startEmulation(trace, motion, cells, velocity, repeat)
+                        val satellites = cursor.getInt(5)
+                        val started = startEmulation(trace, motion, cells, velocity, repeat, satellites)
                         updateState(started)
                     }
 
@@ -102,6 +103,14 @@ object Scheduler {
     private var duration = -1.0
     private var mLocation: Point? = null
     private var mCellMoment: CellMoment? = null
+
+    /**
+     * How many satellites to simulate
+     *
+     * 0 to not simulate
+     */
+    var satellites: Int = 0
+        private set
     private val progress get() = (elapsed / duration / 1000).toFloat()
     val location get() = mLocation ?: Point(39.989410, 116.480881)
     val cells get() = mCellMoment ?: CellMoment(0F)
@@ -112,7 +121,8 @@ object Scheduler {
         motionData: String,
         cellsData: String,
         velocity: Double,
-        repeat: Int
+        repeat: Int,
+        satellites: Int
     ): Boolean {
         val trace = Json.decodeFromString(Trace.serializer(), traceData)
         val motion = Json.decodeFromString(Motion.serializer(), motionData).validPart()
@@ -121,6 +131,7 @@ object Scheduler {
         val fullTrace = trace.at(0F)
         duration = fullTrace.totalLen / velocity // in seconds
         start = SystemClock.elapsedRealtime()
+        this.satellites = satellites
 
         val scope = CoroutineScope(Dispatchers.Default)
         scope.launch {

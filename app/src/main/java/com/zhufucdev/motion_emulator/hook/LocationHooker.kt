@@ -33,7 +33,6 @@ import kotlin.reflect.jvm.isAccessible
 
 object LocationHooker : YukiBaseHooker() {
     private const val TAG = "Location Hook"
-    private const val SATELLITES = 25
 
     private val listeners = arrayListOf<(Point) -> Unit>()
     override fun onHook() {
@@ -180,25 +179,15 @@ object LocationHooker : YukiBaseHooker() {
             }
 
             injectMember {
-                members(*classOfLM.methods.filter { it.name == "requestLocationUpdates" }.toTypedArray())
+                members(*classOfLM.methods.filter { it.name == "requestLocationUpdates" || it.name == "requestSingleUpdate" }.toTypedArray())
                 replaceAny {
+                    if (Scheduler.satellites <= 0) return@replaceAny callOriginal()
+
                     val listener = args.firstOrNull { it is LocationListener } as LocationListener?
                     val provider = args.firstOrNull { it is String } as String? ?: LocationManager.GPS_PROVIDER
                     redirectListener {
                         val location = it.android(provider)
                         listener?.onLocationChanged(location)
-                    }
-                    listener?.onLocationChanged(Scheduler.location.android(provider))
-                }
-            }
-
-            injectMember {
-                members(*classOfLM.methods.filter { it.name == "requestSingleUpdate" }.toTypedArray())
-                replaceAny {
-                    val listener = args.firstOrNull { it is LocationListener } as LocationListener?
-                    val provider = args.firstOrNull { it is String } as String? ?: LocationManager.GPS_PROVIDER
-                    redirectListener {
-                        listener?.onLocationChanged(it.android(provider))
                     }
                     listener?.onLocationChanged(Scheduler.location.android(provider))
                 }
@@ -212,6 +201,8 @@ object LocationHooker : YukiBaseHooker() {
                     returnType = classOf<GpsStatus>()
                 }
                 afterHook {
+                    if (Scheduler.satellites <= 0) return@afterHook
+                    
                     val info = args(0).cast<GpsStatus>() ?: result as GpsStatus
                     val method7 =
                         GpsStatus::class.members.firstOrNull { it.name == "setStatus" && it.parameters.size == 8 }
@@ -219,18 +210,18 @@ object LocationHooker : YukiBaseHooker() {
                     if (method7 != null) {
                         method7.isAccessible = true
 
-                        val prns = IntArray(SATELLITES) { it }
-                        val ones = FloatArray(SATELLITES) { 1f }
-                        val zeros = FloatArray(SATELLITES) { 0f }
+                        val prns = IntArray(Scheduler.satellites) { it }
+                        val ones = FloatArray(Scheduler.satellites) { 1f }
+                        val zeros = FloatArray(Scheduler.satellites) { 0f }
                         val ephemerisMask = 0x1f
                         val almanacMask = 0x1f
 
-                        //5 satellites are fixed
+                        //5 Scheduler.satellites are fixed
                         val usedInFixMask = 0x1f
 
                         method7.call(
                             info,
-                            SATELLITES,
+                            Scheduler.satellites,
                             prns,
                             ones,
                             zeros,
@@ -266,6 +257,9 @@ object LocationHooker : YukiBaseHooker() {
                 }
 
                 replaceAny {
+                    if (Scheduler.satellites <= 0) {
+                        return@replaceAny callOriginal()
+                    }
                     val listener = args(0).cast<GpsStatus.Listener>()
                     listener?.onGpsStatusChanged(GpsStatus.GPS_EVENT_STARTED)
                     listener?.onGpsStatusChanged(GpsStatus.GPS_EVENT_FIRST_FIX)
@@ -283,7 +277,12 @@ object LocationHooker : YukiBaseHooker() {
                     returnType = BooleanType
                 }
 
-                replaceTo(false)
+                replaceAny {
+                    if (Scheduler.satellites <= 0) {
+                        return@replaceAny callOriginal()
+                    }
+                    false
+                }
             }
 
             injectMember {
@@ -293,7 +292,12 @@ object LocationHooker : YukiBaseHooker() {
                     returnType = BooleanType
                 }
 
-                replaceTo(false)
+                replaceAny {
+                    if (Scheduler.satellites <= 0) {
+                        return@replaceAny callOriginal()
+                    }
+                    false
+                }
             }
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -347,8 +351,10 @@ object LocationHooker : YukiBaseHooker() {
                 }
 
                 afterHook {
+                    if (Scheduler.satellites <= 0) return@afterHook
+
                     result = fakeSatellites.also {
-                        loggerD(TAG, "${it.count()} satellites are fixed")
+                        loggerD(TAG, "${it.count()} Scheduler.satellites are fixed")
                     }
                 }
             }
@@ -360,7 +366,10 @@ object LocationHooker : YukiBaseHooker() {
                     returnType = IntType
                 }
 
-                replaceTo(SATELLITES)
+                replaceAny {
+                    if (Scheduler.satellites <= 0) callOriginal()
+                    else Scheduler.satellites
+                }
             }
         }
 
@@ -372,7 +381,10 @@ object LocationHooker : YukiBaseHooker() {
                     returnType = BooleanType
                 }
 
-                replaceToTrue()
+                replaceAny {
+                    if (Scheduler.satellites <= 0) callOriginal()
+                    else true
+                }
             }
         }
     }
@@ -467,9 +479,9 @@ object LocationHooker : YukiBaseHooker() {
     @get:RequiresApi(Build.VERSION_CODES.N)
     val fakeGnssStatus: GnssStatus?
         get() {
-            val svid = IntArray(SATELLITES) { it }
-            val zeros = FloatArray(SATELLITES) { 0f }
-            val ones = FloatArray(SATELLITES) { 1f }
+            val svid = IntArray(Scheduler.satellites) { it }
+            val zeros = FloatArray(Scheduler.satellites) { 0f }
+            val ones = FloatArray(Scheduler.satellites) { 1f }
 
             val constructor = GnssStatus::class.constructors.firstOrNull { it.parameters.size == 7 }
             if (constructor == null) {
@@ -477,13 +489,13 @@ object LocationHooker : YukiBaseHooker() {
                 return null
             }
 
-            return constructor.call(SATELLITES, svid, ones, zeros, zeros, zeros, zeros)
+            return constructor.call(Scheduler.satellites, svid, ones, zeros, zeros, zeros, zeros)
         }
 
     private val fakeSatellites: Iterable<GpsSatellite> =
         buildList {
             val clz = classOf<GpsSatellite>()
-            for (i in 1..SATELLITES) {
+            for (i in 1..Scheduler.satellites) {
                 val instance =
                         clz.constructor {
                             param(IntType)
