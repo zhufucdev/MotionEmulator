@@ -61,7 +61,8 @@ class EmulateActivity : AppCompatActivity(R.layout.activity_emulate) {
                 || velocity <= 0
                 || trace == null
                 || cells == null
-                || motion == null) {
+                || motion == null
+            ) {
                 return
             }
             Scheduler.emulation = Emulation(trace, motion, cells, velocity, repeat)
@@ -204,7 +205,12 @@ class EmulateActivity : AppCompatActivity(R.layout.activity_emulate) {
     }
 
     private val inputWrappers
-        get() = listOf(binding.wrapperDropdown, binding.wrapperVelocity, binding.wrapperRepeatCount)
+        get() = listOf(
+            binding.wrapperDropdown,
+            binding.wrapperVelocity,
+            binding.wrapperRepeatCount,
+            binding.wrapperCellsDropdown
+        )
 
     private fun enableEmulationMonitor() {
         binding.btnStartEmulation.hide(object : ExtendedFloatingActionButton.OnChangedCallback() {
