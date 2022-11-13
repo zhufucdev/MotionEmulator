@@ -6,6 +6,7 @@ import android.os.Parcelable.Creator
 import android.telephony.*
 import android.telephony.cdma.CdmaCellLocation
 import android.telephony.gsm.GsmCellLocation
+import com.zhufucdev.motion_emulator.hook.Moment
 import kotlinx.serialization.*
 import kotlinx.serialization.builtins.ByteArraySerializer
 import kotlinx.serialization.builtins.ListSerializer
@@ -24,11 +25,11 @@ import java.io.File
  */
 @Serializable(CellSerializer::class)
 data class CellMoment(
-    val elapsed: Float,
+    override val elapsed: Float,
     val cell: List<CellInfo> = emptyList(),
     val neighboring: List<NeighboringCellInfo> = emptyList(),
     val location: CellLocation? = null
-)
+) : Moment
 
 @Serializable
 data class CellTimeline(val id: String, val time: Long, val moments: List<CellMoment>)

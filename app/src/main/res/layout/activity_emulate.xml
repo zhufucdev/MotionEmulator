@@ -22,7 +22,7 @@
                     android:layout_height="wrap_content"
                     android:id="@+id/wrapper_dropdown"
                     style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu"
-                    android:hint="@string/title_select_motion_data"
+                    android:hint="@string/title_motion_data"
                     android:layout_marginBottom="@dimen/common_padding"
                     app:startIconDrawable="@drawable/ic_baseline_smartphone_24">
 
@@ -30,6 +30,22 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:id="@+id/dropdown_motion"
+                        android:inputType="none"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/wrapper_cells_dropdown"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu"
+                    android:hint="@string/title_cells_data"
+                    android:layout_marginBottom="@dimen/common_padding"
+                    app:startIconDrawable="@drawable/ic_baseline_cell_tower_24">
+
+                <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/dropdown_cells"
                         android:inputType="none"/>
             </com.google.android.material.textfield.TextInputLayout>
 

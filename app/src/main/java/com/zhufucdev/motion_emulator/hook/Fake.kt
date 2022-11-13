@@ -1,20 +1,37 @@
 package com.zhufucdev.motion_emulator.hook
 
+import android.annotation.SuppressLint
 import android.hardware.Sensor
 import android.location.Location
 import android.location.LocationManager
 import android.os.Build
+import android.os.Bundle
 import android.os.SystemClock
+import android.telephony.CellIdentityCdma
+import android.telephony.CellIdentityGsm
+import android.telephony.CellIdentityNr
+import android.telephony.CellInfo
+import android.telephony.CellInfoCdma
+import android.telephony.CellInfoGsm
+import android.telephony.CellInfoLte
+import android.telephony.CellInfoNr
+import android.telephony.CellInfoWcdma
+import android.telephony.CellLocation
+import android.telephony.CellSignalStrengthNr
+import android.telephony.NeighboringCellInfo
+import android.telephony.PhoneStateListener
+import android.telephony.TelephonyCallback
+import android.telephony.cdma.CdmaCellLocation
+import android.telephony.gsm.GsmCellLocation
 import android.util.Log
+import androidx.core.os.bundleOf
 import com.amap.api.location.AMapLocation
 import com.amap.api.maps.AMapUtils
 import com.zhufucdev.motion_emulator.*
-import com.zhufucdev.motion_emulator.data.MotionMoment
-import com.zhufucdev.motion_emulator.data.Motion
-import com.zhufucdev.motion_emulator.data.Point
-import com.zhufucdev.motion_emulator.data.Trace
+import com.zhufucdev.motion_emulator.data.*
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import kotlin.math.round
 import kotlin.random.Random
 
 
@@ -341,7 +358,7 @@ fun Trace.center(length: Double = 0.0): Point {
     var lastInterp = at(0F)
     var laSum = 0.0
     var lgSum = 0.0
-    for (i in 1 .. sampleCount) {
+    for (i in 1..sampleCount) {
         val sample = at(i * 1F / sampleCount, lastInterp)
         laSum += sample.point.latitude
         lgSum += sample.point.longitude
@@ -351,3 +368,94 @@ fun Trace.center(length: Double = 0.0): Point {
     return Point(laSum / sampleCount, lgSum / sampleCount)
 }
 
+interface Moment {
+    val elapsed: Float
+}
+
+/**
+ * Get the timespan of a timeline
+ *
+ * @return duration in seconds
+ */
+fun List<Moment>.timespan(): Float {
+    if (isEmpty()) return 0F
+    if (size == 1) return first().elapsed
+    return last().elapsed - first().elapsed
+}
+
+@SuppressLint("NewApi")
+fun CellInfo.cellLocation(): CellLocation? =
+    when (val id = cellIdentity) {
+        is CellIdentityCdma ->
+            CdmaCellLocation(
+                bundleOf(
+                    "baseStationId" to id.basestationId,
+                    "baseStationLatitude" to id.latitude,
+                    "baseStationLongitude" to id.longitude,
+                    "systemId" to id.systemId,
+                    "networkId" to id.networkId
+                )
+            )
+
+        is CellIdentityGsm ->
+            GsmCellLocation(
+                bundleOf(
+                    "lac" to id.lac,
+                    "cid" to id.cid,
+                    "psc" to id.psc
+                )
+            )
+
+        else -> null
+    }
+
+@SuppressLint("NewApi")
+fun CellMoment.cellLocation(): CellLocation? {
+    if (location != null) return location
+    return if (cell.isNotEmpty()) {
+        cell.first().cellLocation()
+    } else {
+        null
+    }
+}
+
+@SuppressLint("NewApi")
+fun CellMoment.neighboringInfo(): List<NeighboringCellInfo> {
+    if (neighboring.isNotEmpty()) return neighboring
+    if (cell.isNotEmpty()) {
+        return cell.mapNotNull {
+            when (it) {
+                is CellInfoCdma -> NeighboringCellInfo(it.cellSignalStrength.dbm, it.cellIdentity.basestationId)
+                is CellInfoGsm -> NeighboringCellInfo(it.cellSignalStrength.rssi, it.cellIdentity.cid)
+                is CellInfoLte -> NeighboringCellInfo(it.cellSignalStrength.rssi, it.cellIdentity.ci)
+                is CellInfoWcdma -> NeighboringCellInfo(it.cellSignalStrength.dbm, it.cellIdentity.cid)
+                else -> null
+            }
+        }
+    }
+    return emptyList()
+}
+
+@SuppressLint("MissingPermission")
+fun PhoneStateListener.treatWith(moment: CellMoment, mode: Int) {
+    var mask = PhoneStateListener.LISTEN_CELL_INFO
+    if (mode and mask == mask) {
+        onCellInfoChanged(moment.cell)
+    }
+    mask = PhoneStateListener.LISTEN_CELL_LOCATION
+    if (mode and mask == mask) {
+        onCellLocationChanged(moment.cellLocation())
+    }
+}
+
+@SuppressLint("NewApi", "MissingPermission")
+fun TelephonyCallback.treatWith(moment: CellMoment) {
+    if (this is TelephonyCallback.CellInfoListener) {
+        onCellInfoChanged(moment.cell)
+    }
+    if (this is TelephonyCallback.CellLocationListener) {
+        moment.cellLocation()?.let {
+            onCellLocationChanged(it)
+        }
+    }
+}

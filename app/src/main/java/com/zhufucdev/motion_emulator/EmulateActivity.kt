@@ -10,10 +10,7 @@ import com.amap.api.maps.CameraUpdateFactory
 import com.amap.api.maps.model.*
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.snackbar.Snackbar
-import com.zhufucdev.motion_emulator.data.Motion
-import com.zhufucdev.motion_emulator.data.Motions
-import com.zhufucdev.motion_emulator.data.Trace
-import com.zhufucdev.motion_emulator.data.Traces
+import com.zhufucdev.motion_emulator.data.*
 import com.zhufucdev.motion_emulator.databinding.ActivityEmulateBinding
 import com.zhufucdev.motion_emulator.hook.center
 import com.zhufucdev.motion_emulator.hook_frontend.Emulation
@@ -23,8 +20,9 @@ class EmulateActivity : AppCompatActivity(R.layout.activity_emulate) {
     private lateinit var binding: ActivityEmulateBinding
     private var motion: Motion? = null
     private var trace: Trace? = null
+    private var cells: CellTimeline? = null
     private var repeatCount: Int? = 1
-    private var velocity: Double = 3.0
+    private var velocity: Double? = 3.0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,8 +33,10 @@ class EmulateActivity : AppCompatActivity(R.layout.activity_emulate) {
 
         Traces.require(this)
         Motions.require(this)
+        Cells.require(this)
 
         initMotionDropdown()
+        initCellsDropdown()
         initializeMap()
         initializeOthers()
     }
@@ -50,11 +50,21 @@ class EmulateActivity : AppCompatActivity(R.layout.activity_emulate) {
         if (Scheduler.emulation != null) {
             Scheduler.emulation = null
         } else {
-            val repeat = repeatCount
-            if (repeat == null || repeat <= 0 || velocity.isNaN() || velocity <= 0 || trace == null) {
+            val repeat = this.repeatCount
+            val motion = this.motion
+            val trace = this.trace
+            val cells = this.cells
+            val velocity = this.velocity
+            if (repeat == null
+                || repeat <= 0
+                || velocity == null
+                || velocity <= 0
+                || trace == null
+                || cells == null
+                || motion == null) {
                 return
             }
-            Scheduler.emulation = Emulation(trace!!, motion!!, velocity)
+            Scheduler.emulation = Emulation(trace, motion, cells, velocity, repeat)
         }
     }
 
@@ -64,10 +74,26 @@ class EmulateActivity : AppCompatActivity(R.layout.activity_emulate) {
         motions.forEach {
             adapter.add(dateString(it.time))
         }
-        binding.dropdownMotion.setOnItemClickListener { _, _, position, _ ->
-            motion = motions[position]
+        binding.dropdownMotion.apply {
+            setOnItemClickListener { _, _, position, _ ->
+                motion = motions[position]
+            }
+            setAdapter(adapter)
         }
-        binding.dropdownMotion.setAdapter(adapter)
+    }
+
+    private fun initCellsDropdown() {
+        val adapter = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1)
+        val timelines = Cells.list()
+        timelines.forEach {
+            adapter.add(dateString(it.time))
+        }
+        binding.dropdownCells.apply {
+            setOnItemClickListener { _, _, position, _ ->
+                cells = timelines[position]
+            }
+            setAdapter(adapter)
+        }
     }
 
     private fun initializeOthers() {
@@ -80,13 +106,13 @@ class EmulateActivity : AppCompatActivity(R.layout.activity_emulate) {
 
         binding.inputVelocity.doAfterTextChanged {
             velocity = if (it.isNullOrEmpty()) {
-                Double.NaN
+                null
             } else {
                 it.toString().toDoubleOrNull() ?: Double.NaN
             }
             binding.inputVelocity.error =
-                if (velocity.isNaN()) getString(R.string.text_field_must_not_empty)
-                else if (velocity <= 0) getString(R.string.text_field_must_not_neg_or_zero)
+                if (velocity == null) getString(R.string.text_field_must_not_empty)
+                else if (velocity!! <= 0) getString(R.string.text_field_must_not_neg_or_zero)
                 else null
             notifyFab()
         }

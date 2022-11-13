@@ -17,6 +17,8 @@ import kotlinx.coroutines.*
 import kotlinx.serialization.json.Json
 import kotlin.math.roundToLong
 import kotlin.random.Random
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 object Scheduler {
     private const val TAG = "Scheduler"
@@ -75,7 +77,8 @@ object Scheduler {
                         val motion = cursor.getString(1)
                         val cells = cursor.getString(2)
                         val velocity = cursor.getDouble(3)
-                        val started = startEmulation(trace, motion, cells, velocity)
+                        val repeat = cursor.getInt(4)
+                        val started = startEmulation(trace, motion, cells, velocity, repeat)
                         updateState(started)
                     }
 
@@ -94,13 +97,25 @@ object Scheduler {
 
     private var start = 0L
     private val elapsed get() = SystemClock.elapsedRealtime() - start
+
+    /**
+     * Duration of this emulation in seconds
+     */
     private var duration = -1.0
     private var mLocation: Point? = null
+    private var mCellMoment: CellMoment? = null
     private val progress get() = (elapsed / duration / 1000).toFloat()
     val location get() = mLocation ?: Point(39.989410, 116.480881)
+    val cells get() = mCellMoment ?: CellMoment(0F)
 
     private val stepSensors = intArrayOf(Sensor.TYPE_STEP_COUNTER, Sensor.TYPE_STEP_DETECTOR)
-    private fun startEmulation(traceData: String, motionData: String, cellsData: String, velocity: Double): Boolean {
+    private fun startEmulation(
+        traceData: String,
+        motionData: String,
+        cellsData: String,
+        velocity: Double,
+        repeat: Int
+    ): Boolean {
         val trace = Json.decodeFromString(Trace.serializer(), traceData)
         val motion = Json.decodeFromString(Motion.serializer(), motionData).validPart()
         val cells = Json.decodeFromString(CellTimeline.serializer(), cellsData)
@@ -111,19 +126,22 @@ object Scheduler {
 
         val scope = CoroutineScope(Dispatchers.Default)
         scope.launch {
-            val jobs = mutableSetOf<Job>()
-            startStepsEmulation(motion)?.let { jobs.add(it) }
-            startMotionSimulation(motion)?.let { jobs.add(it) }
-            startTraceEmulation(trace, fullTrace).let { jobs.add(it) }
+            for (i in 0 until repeat) {
+                val jobs = mutableSetOf<Job>()
+                startStepsEmulation(motion)?.let { jobs.add(it) }
+                startMotionSimulation(motion)?.let { jobs.add(it) }
+                startTraceEmulation(trace, fullTrace).let { jobs.add(it) }
+                startCellEmulation(cells).let { jobs.add(it) }
 
-            launch {
-                // to clear current jobs
-                jobs.addAll(jobs)
-                jobs.forEach { it.join() }
-                jobs.removeAll(jobs.toSet())
+                launch {
+                    // to clear current jobs
+                    jobs.addAll(jobs)
+                    jobs.forEach { it.join() }
+                    jobs.removeAll(jobs.toSet())
 
-                updateState(false)
-                scope.cancel()
+                    updateState(false)
+                    scope.cancel()
+                }
             }
         }
 
@@ -133,7 +151,7 @@ object Scheduler {
     private fun CoroutineScope.startStepsEmulation(motion: Motion): Job? =
         if (stepSensors.any { motion.sensorsInvolved.contains(it) }) {
             val stepMoments = motion.moments.filter { m -> stepSensors.any { m.data.containsKey(it) } }
-            val pause = (duration / stepMoments.size * 1000).roundToLong()
+            val pause = (duration / stepMoments.size).seconds
             launch {
                 var stepsCount = Random.nextFloat() * 5000 + 2000 // beginning with a random steps count
                 while (progress <= 1) {
@@ -184,6 +202,28 @@ object Scheduler {
 
                 notifyProgress()
                 delay(1000)
+            }
+        }
+
+    private fun CoroutineScope.startCellEmulation(cells: CellTimeline): Job =
+        launch {
+            var ptr = 0
+            val timespan = cells.moments.timespan()
+            while (hooking && progress <= 1 && ptr < cells.moments.size) {
+                val current = cells.moments[ptr]
+                mCellMoment = current
+                CellHooker.raise(current)
+
+                if (cells.moments.size == 1) {
+                    delay(duration.seconds) // halt
+                } else {
+                    if (ptr == cells.moments.lastIndex - 1) {
+                        break
+                    }
+                    val pause = (cells.moments[ptr].elapsed - cells.moments[ptr + 1].elapsed) / timespan * duration
+                    ptr++
+                    delay(pause.seconds)
+                }
             }
         }
 

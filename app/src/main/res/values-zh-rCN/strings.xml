@@ -33,7 +33,7 @@
     <string name="action_undo">橡皮</string>
     <string name="text_trace_name">标记为\"%s\"</string>
     <string name="text_trace_saved">成功保存了%d条路径</string>
-    <string name="title_select_motion_data">运动数据</string>
+    <string name="title_motion_data">运动数据</string>
     <string name="action_start_emulation">开始模拟</string>
     <string name="text_trace_selected">选择轨迹\"%s\"</string>
     <string name="title_repeat">重复次数</string>
@@ -56,4 +56,5 @@
     <string name="text_telephony_recording_neighboring">找到了%d条基站信息</string>
     <string name="text_telephony_recording_location">记录将包括基站定位</string>
     <string name="name_cell_signal">信号强度</string>
+    <string name="title_cells_data">基站数据</string>
 </resources>

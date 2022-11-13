@@ -1,11 +1,18 @@
 package com.zhufucdev.motion_emulator.hook_frontend
 
+import com.zhufucdev.motion_emulator.data.CellTimeline
 import com.zhufucdev.motion_emulator.data.Motion
 import com.zhufucdev.motion_emulator.data.Point
 import com.zhufucdev.motion_emulator.data.Trace
 import java.util.concurrent.FutureTask
 
-data class Emulation(val trace: Trace, val motion: Motion, val velocity: Double)
+data class Emulation(
+    val trace: Trace,
+    val motion: Motion,
+    val cells: CellTimeline,
+    val velocity: Double,
+    val repeat: Int
+)
 
 data class Intermediate(val location: Point, val progress: Float)
 
@@ -40,7 +47,7 @@ object Scheduler {
         ft.get()
         return emulation
     }
-    
+
     fun onEmulationStateChanged(l: (Boolean) -> Unit) {
         stateListeners.add(l)
     }

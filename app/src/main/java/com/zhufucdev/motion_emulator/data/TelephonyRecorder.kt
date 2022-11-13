@@ -44,23 +44,31 @@ object TelephonyRecorder {
         val cancel: () -> Unit
 
         @Synchronized
-        fun mergeIfPossible(moment: CellMoment) {
+        fun mergeIfPossible(moment: CellMoment): CellMoment {
             if (timeline.isNotEmpty() && abs(moment.elapsed - timeline.last().elapsed) <= VERTICAL_PERIOD) {
                 val target = timeline.last()
                 if (!target.isSameTypeOf(moment)) {
-                    timeline.add(target.merge(moment))
-                    return
+                    val merged = target.merge(moment)
+                    timeline.add(merged)
+                    return merged
                 }
             }
             timeline.add(moment)
+            return moment
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val telephonyCallback = object : TelephonyCallback(), TelephonyCallback.CellInfoListener {
+            val telephonyCallback = object : TelephonyCallback(), TelephonyCallback.CellInfoListener, TelephonyCallback.CellLocationListener {
                 override fun onCellInfoChanged(cellInfo: MutableList<CellInfo>) {
                     val moment = CellMoment(elapsed(), cellInfo)
-                    mergeIfPossible(moment)
-                    updateListener?.invoke(moment)
+                    val merged = mergeIfPossible(moment)
+                    updateListener?.invoke(merged)
+                }
+
+                override fun onCellLocationChanged(location: CellLocation) {
+                    val moment = CellMoment(elapsed(), location = location)
+                    val merged = mergeIfPossible(moment)
+                    updateListener?.invoke(merged)
                 }
             }
 
@@ -83,8 +91,8 @@ object TelephonyRecorder {
                 override fun onCellLocationChanged(location: CellLocation?) {
                     if (location != null) {
                         val moment = CellMoment(elapsed(), location = location)
-                        mergeIfPossible(moment)
-                        updateListener?.invoke(moment)
+                        val merged = mergeIfPossible(moment)
+                        updateListener?.invoke(merged)
                     }
                 }
             }
@@ -98,7 +106,8 @@ object TelephonyRecorder {
                     timer = timer("neighboring daemon", period = 1500L) {
                         val infos = method.call(manager) as List<NeighboringCellInfo>? ?: return@timer
                         val moment = CellMoment(elapsed(), neighboring = infos)
-                        mergeIfPossible(moment)
+                        val merged = mergeIfPossible(moment)
+                        updateListener?.invoke(merged)
                     }
                 }
             }
