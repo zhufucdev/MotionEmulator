@@ -48,6 +48,7 @@ object TelephonyRecorder {
             if (timeline.isNotEmpty() && abs(moment.elapsed - timeline.last().elapsed) <= VERTICAL_PERIOD) {
                 val target = timeline.last()
                 if (!target.isSameTypeOf(moment)) {
+                    timeline.removeLast()
                     val merged = target.merge(moment)
                     timeline.add(merged)
                     return merged
