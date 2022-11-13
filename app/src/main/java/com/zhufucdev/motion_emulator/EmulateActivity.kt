@@ -192,6 +192,7 @@ class EmulateActivity : AppCompatActivity(R.layout.activity_emulate) {
 
         fun select(trace: Trace) {
             this.trace = trace
+            notifyFab()
             val polyline = traceByLine.entries.first { it.value == trace }.key
             Snackbar
                 .make(binding.root, getString(R.string.text_trace_selected, trace.name), Snackbar.LENGTH_LONG)
