@@ -19,7 +19,6 @@ import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.highcapable.yukihookapi.hook.factory.classOf
 import com.highcapable.yukihookapi.hook.factory.constructor
 import com.highcapable.yukihookapi.hook.factory.field
-import com.highcapable.yukihookapi.hook.factory.method
 import com.highcapable.yukihookapi.hook.log.loggerD
 import com.highcapable.yukihookapi.hook.log.loggerE
 import com.highcapable.yukihookapi.hook.log.loggerI
@@ -34,6 +33,7 @@ import kotlin.reflect.jvm.isAccessible
 
 object LocationHooker : YukiBaseHooker() {
     private const val TAG = "Location Hook"
+    private const val SATELLITES = 25
 
     private val listeners = arrayListOf<(Point) -> Unit>()
     override fun onHook() {
@@ -219,11 +219,9 @@ object LocationHooker : YukiBaseHooker() {
                     if (method7 != null) {
                         method7.isAccessible = true
 
-                        val svCount = 5
-                        val prns = intArrayOf(1, 2, 3, 4, 5)
-                        val snrs = floatArrayOf(0f, 0f, 0f, 0f, 0f)
-                        val elevations = floatArrayOf(0f, 0f, 0f, 0f, 0f)
-                        val azimuths = floatArrayOf(0f, 0f, 0f, 0f, 0f)
+                        val prns = IntArray(SATELLITES) { it }
+                        val ones = FloatArray(SATELLITES) { 1f }
+                        val zeros = FloatArray(SATELLITES) { 0f }
                         val ephemerisMask = 0x1f
                         val almanacMask = 0x1f
 
@@ -232,11 +230,11 @@ object LocationHooker : YukiBaseHooker() {
 
                         method7.call(
                             info,
-                            svCount,
+                            SATELLITES,
                             prns,
-                            snrs,
-                            elevations,
-                            azimuths,
+                            ones,
+                            zeros,
+                            zeros,
                             ephemerisMask,
                             almanacMask,
                             usedInFixMask
@@ -309,8 +307,9 @@ object LocationHooker : YukiBaseHooker() {
                         val callback = args(1).cast<GnssStatus.Callback>()
                         callback?.onStarted()
                         callback?.onFirstFix(1000 + Random.nextInt(-500, 500))
-
-                        callback?.onSatelliteStatusChanged(fakeGnssStatus ?: return@replaceAny true)
+                        timer(name = "satellite heartbeat", period = 1000) {
+                            callback?.onSatelliteStatusChanged(fakeGnssStatus ?: return@timer)
+                        }
                         true
                     }
                 }
@@ -361,7 +360,7 @@ object LocationHooker : YukiBaseHooker() {
                     returnType = IntType
                 }
 
-                replaceTo(5)
+                replaceTo(SATELLITES)
             }
         }
 
@@ -468,9 +467,9 @@ object LocationHooker : YukiBaseHooker() {
     @get:RequiresApi(Build.VERSION_CODES.N)
     val fakeGnssStatus: GnssStatus?
         get() {
-            val sv = 5
-            val svid = intArrayOf(1, 2, 3, 4, 5)
-            val cn = floatArrayOf(0f, 0f, 0f, 0f, 0f)
+            val svid = IntArray(SATELLITES) { it }
+            val zeros = FloatArray(SATELLITES) { 0f }
+            val ones = FloatArray(SATELLITES) { 1f }
 
             val constructor = GnssStatus::class.constructors.firstOrNull { it.parameters.size == 7 }
             if (constructor == null) {
@@ -478,13 +477,13 @@ object LocationHooker : YukiBaseHooker() {
                 return null
             }
 
-            return constructor.call(sv, svid, cn, cn, cn, cn, cn)
+            return constructor.call(SATELLITES, svid, ones, zeros, zeros, zeros, zeros)
         }
 
     private val fakeSatellites: Iterable<GpsSatellite> =
         buildList {
             val clz = classOf<GpsSatellite>()
-            for (i in 1..5) {
+            for (i in 1..SATELLITES) {
                 val instance =
                         clz.constructor {
                             param(IntType)
