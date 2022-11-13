@@ -47,7 +47,7 @@ class EventProvider : ContentProvider() {
                 cursor
             } else {
                 val cursor = MatrixCursor(arrayOf("trace", "motion", "cells", "velocity", "repeat"))
-                cursor.addRow(arrayOf(COMMAND_EMULATION_START, 0, 0))
+                cursor.addRow(arrayOf(COMMAND_EMULATION_START, 0, 0, 0, 0))
                 val traceData = Json.encodeToString(emulation.trace)
                 val motionData = Json.encodeToString(emulation.motion)
                 val cellsData = Json.encodeToString(emulation.cells)
