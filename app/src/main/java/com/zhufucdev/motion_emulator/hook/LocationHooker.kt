@@ -17,12 +17,18 @@ import com.amap.api.location.AMapLocationListener
 import com.highcapable.yukihookapi.hook.core.YukiMemberHookCreator
 import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.highcapable.yukihookapi.hook.factory.classOf
+import com.highcapable.yukihookapi.hook.factory.constructor
+import com.highcapable.yukihookapi.hook.factory.field
+import com.highcapable.yukihookapi.hook.factory.method
+import com.highcapable.yukihookapi.hook.log.loggerD
 import com.highcapable.yukihookapi.hook.log.loggerE
 import com.highcapable.yukihookapi.hook.log.loggerI
 import com.highcapable.yukihookapi.hook.type.java.*
 import com.zhufucdev.motion_emulator.data.Point
+import io.ktor.http.*
 import java.util.concurrent.Executor
 import java.util.function.Consumer
+import kotlin.concurrent.timer
 import kotlin.random.Random
 import kotlin.reflect.jvm.isAccessible
 
@@ -265,6 +271,9 @@ object LocationHooker : YukiBaseHooker() {
                     val listener = args(0).cast<GpsStatus.Listener>()
                     listener?.onGpsStatusChanged(GpsStatus.GPS_EVENT_STARTED)
                     listener?.onGpsStatusChanged(GpsStatus.GPS_EVENT_FIRST_FIX)
+                    timer(name = "satellite heartbeat", period = 1000) {
+                        listener?.onGpsStatusChanged(GpsStatus.GPS_EVENT_SATELLITE_STATUS)
+                    }
                     true
                 }
             }
@@ -327,6 +336,44 @@ object LocationHooker : YukiBaseHooker() {
                             )
                     }
                 }
+            }
+        }
+
+        classOf<GpsStatus>().hook {
+            injectMember {
+                method {
+                    name = "getSatellites"
+                    emptyParam()
+                    returnType = classOf<Iterable<GpsSatellite>>()
+                }
+
+                afterHook {
+                    result = fakeSatellites.also {
+                        loggerD(TAG, "${it.count()} satellites are fixed")
+                    }
+                }
+            }
+
+            injectMember {
+                method {
+                    name = "getMaxSatellites"
+                    emptyParam()
+                    returnType = IntType
+                }
+
+                replaceTo(5)
+            }
+        }
+
+        classOf<GnssStatus>().hook {
+            injectMember {
+                method {
+                    name = "usedInFix"
+                    param(IntType)
+                    returnType = BooleanType
+                }
+
+                replaceToTrue()
             }
         }
     }
@@ -423,7 +470,7 @@ object LocationHooker : YukiBaseHooker() {
         get() {
             val sv = 5
             val svid = intArrayOf(1, 2, 3, 4, 5)
-            val cn = floatArrayOf(0f, 0f, 0f, 0f)
+            val cn = floatArrayOf(0f, 0f, 0f, 0f, 0f)
 
             val constructor = GnssStatus::class.constructors.firstOrNull { it.parameters.size == 7 }
             if (constructor == null) {
@@ -432,5 +479,25 @@ object LocationHooker : YukiBaseHooker() {
             }
 
             return constructor.call(sv, svid, cn, cn, cn, cn, cn)
+        }
+
+    private val fakeSatellites: Iterable<GpsSatellite> =
+        buildList {
+            val clz = classOf<GpsSatellite>()
+            for (i in 1..5) {
+                val instance =
+                        clz.constructor {
+                            param(IntType)
+                        }
+                        .get()
+                        .newInstance<GpsSatellite>(i) ?: return@buildList
+                listOf("mValid", "mHasEphemeris", "mHasAlmanac", "mUsedInFix").forEach {
+                    clz.field { name = it }.get(instance).setTrue()
+                }
+                listOf("mSnr", "mElevation", "mAzimuth").forEach {
+                    clz.field { name = it }.get(instance).set(1F)
+                }
+                add(instance)
+            }
         }
 }

@@ -15,9 +15,7 @@ import com.zhufucdev.motion_emulator.data.*
 import com.zhufucdev.motion_emulator.hook_frontend.AUTHORITY
 import kotlinx.coroutines.*
 import kotlinx.serialization.json.Json
-import kotlin.math.roundToLong
 import kotlin.random.Random
-import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
 object Scheduler {
