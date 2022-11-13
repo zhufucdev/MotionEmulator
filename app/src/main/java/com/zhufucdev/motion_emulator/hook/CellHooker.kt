@@ -18,8 +18,8 @@ object CellHooker : YukiBaseHooker() {
                     emptyParam()
                     returnType(classOf<CellLocation>())
                 }
-                replaceAny {
-                    Scheduler.cells.cellLocation()
+                afterHook {
+                    result = Scheduler.cells.cellLocation()
                 }
             }
 
@@ -29,8 +29,8 @@ object CellHooker : YukiBaseHooker() {
                     emptyParam()
                     returnType(classOf<List<CellInfo>>())
                 }
-                replaceAny {
-                    Scheduler.cells.cell
+                afterHook {
+                    result = Scheduler.cells.cell.takeIf { it.isNotEmpty() }
                 }
             }
 
@@ -40,8 +40,8 @@ object CellHooker : YukiBaseHooker() {
                     emptyParam()
                     returnType = classOf<List<NeighboringCellInfo>>()
                 }
-                replaceAny {
-                    Scheduler.cells.neighboringInfo()
+                afterHook {
+                    result = Scheduler.cells.neighboringInfo().takeIf { it.isNotEmpty() }
                 }
             }
 
@@ -51,7 +51,7 @@ object CellHooker : YukiBaseHooker() {
                     param(classOf<PhoneStateListener>(), IntType)
                     returnType = UnitType
                 }
-                replaceAny {
+                replaceUnit {
                     val listener = args(0).cast<PhoneStateListener>()
                     val mode = args(1).int()
                     addListener {
@@ -66,7 +66,7 @@ object CellHooker : YukiBaseHooker() {
                     param(classOf<Executor>(), classOf<TelephonyCallback>())
                     returnType = UnitType
                 }
-                replaceAny {
+                replaceUnit {
                     val executor = args(0).cast<Executor>()
                     val callback = args(1).cast<TelephonyCallback>()
                     addListener {
