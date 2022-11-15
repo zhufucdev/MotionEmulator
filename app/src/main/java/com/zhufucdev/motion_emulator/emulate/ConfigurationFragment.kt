@@ -265,6 +265,7 @@ class ConfigurationFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         binding.mapTracePreview.onResume()
+        notifyFab()
     }
 
     override fun onPause() {

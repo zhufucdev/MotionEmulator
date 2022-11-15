@@ -12,7 +12,11 @@ import java.io.File
  * A location on earth.
  */
 @Serializable
-data class Point(val latitude: Double, val longitude: Double)
+data class Point(val latitude: Double, val longitude: Double) {
+    companion object {
+        val zero get() = Point(0.0, 0.0)
+    }
+}
 
 /**
  * Composed of series of [Point]s.
@@ -20,7 +24,7 @@ data class Point(val latitude: Double, val longitude: Double)
  * @param points to describe the trace's shape and direction
  */
 @Serializable
-data class Trace(val id: String, val name: String, val points: List<Point>)
+data class Trace(val id: String, val name: String, val points: List<Point>, val offset: Point = Point.zero)
 
 @OptIn(ExperimentalSerializationApi::class)
 object Traces {

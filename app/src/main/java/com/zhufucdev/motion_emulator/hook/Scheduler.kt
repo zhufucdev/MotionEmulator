@@ -95,9 +95,7 @@ object Scheduler {
                     EMULATION_START -> handleStart(cursor)
                     EMULATION_STOP -> {
                         hooking = false
-                        jobs.forEach {
-                            it.join()
-                        }
+                        jobs.joinAll()
                         loggerI(tag = TAG, msg = "emulation stopped")
                         updateState(false)
                     }
@@ -161,9 +159,10 @@ object Scheduler {
                 // to clear current jobs
                 jobs.removeAll(jobs.toSet())
 
-                updateState(false)
-                scope.cancel()
+                if (!hooking) break
             }
+            updateState(false)
+            scope.cancel()
         }.start()
 
         return true
@@ -175,7 +174,7 @@ object Scheduler {
             val pause = (duration / stepMoments.size).seconds
             launch {
                 var stepsCount = Random.nextFloat() * 5000 + 2000 // beginning with a random steps count
-                while (progress <= 1) {
+                while (hooking && progress <= 1) {
                     var index = 0
                     while (hooking && index < stepMoments.size) {
                         val moment = stepMoments[index]
@@ -196,7 +195,7 @@ object Scheduler {
         if (motion.sensorsInvolved.any { !stepSensors.contains(it) }) {
             launch {
                 // data other than steps
-                while (progress <= 1) {
+                while (hooking && progress <= 1) {
                     var lastIndex = 0
                     while (hooking && lastIndex < motion.moments.size) {
                         val interp = motion.at(progress, lastIndex)

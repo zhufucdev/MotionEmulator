@@ -2,7 +2,6 @@ package com.zhufucdev.motion_emulator.emulate
 
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -22,7 +21,6 @@ class EmulateStatusFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         skipAmapFuckingLicense(requireContext())
-        emulation = Scheduler.emulation!!
     }
 
     override fun onCreateView(
@@ -48,7 +46,7 @@ class EmulateStatusFragment : Fragment() {
 
         val naviArrow = NavigateArrowOptions()
         var lastNav: NavigateArrow? = null
-        addEmulationListener {
+        addIntermediateListener {
             lastNav?.remove()
             naviArrow.add(it.location.toLatLng())
             requireActivity().runOnUiThread {
@@ -92,6 +90,8 @@ class EmulateStatusFragment : Fragment() {
         }
 
         fun notifyStarted(info: EmulationInfo) {
+            emulation = Scheduler.emulation!!
+
             title.setText(R.string.title_emulation_ongoing)
             velocity.text =
                 context.getString(
@@ -117,14 +117,16 @@ class EmulateStatusFragment : Fragment() {
         }
 
         fun notifyPending() {
+            emulation = Scheduler.emulation!!
             title.setText(R.string.title_emulation_pending)
             caption.setText(R.string.text_emulation_pending)
             expander.root.isVisible = false
             btnAction.isVisible = false
             progressBar.isIndeterminate = true
+            progressBar.isVisible = true
         }
 
-        addEmulationListener {
+        addIntermediateListener {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 progressBar.setProgress((span * it.progress).roundToInt(), true)
             } else {
@@ -147,14 +149,16 @@ class EmulateStatusFragment : Fragment() {
         }
 
         stateListener(true)
-        Scheduler.onEmulationStateChanged { running ->
-            requireActivity().runOnUiThread {
-                stateListener(running)
+        listeners.add(
+            Scheduler.onEmulationStateChanged { running ->
+                activity?.runOnUiThread {
+                    stateListener(running)
+                }
             }
-        }
+        )
     }
 
-    private fun addEmulationListener(l: (Intermediate) -> Unit) {
+    private fun addIntermediateListener(l: (Intermediate) -> Unit) {
         listeners.add(Scheduler.addIntermediateListener(l))
     }
 
@@ -166,6 +170,7 @@ class EmulateStatusFragment : Fragment() {
     override fun onDestroy() {
         super.onDestroy()
         binding.mapMotionPreview.onDestroy()
+        Scheduler.emulation = null
         listeners.forEach { it.cancel() }
     }
 

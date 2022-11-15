@@ -49,9 +49,8 @@ fun Point.android(provider: String = LocationManager.GPS_PROVIDER): Location {
         accuracy = 1F
     }
 
-    val fixed = MapFixUtil.transform(latitude, longitude)
-    result.latitude = fixed[0]
-    result.longitude = fixed[1]
+    result.latitude = latitude
+    result.longitude = longitude
 
     return result
 }
