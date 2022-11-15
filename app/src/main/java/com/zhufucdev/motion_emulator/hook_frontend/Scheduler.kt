@@ -1,5 +1,6 @@
 package com.zhufucdev.motion_emulator.hook_frontend
 
+import android.util.Log
 import com.zhufucdev.motion_emulator.data.CellTimeline
 import com.zhufucdev.motion_emulator.data.Motion
 import com.zhufucdev.motion_emulator.data.Point
@@ -15,7 +16,9 @@ data class Emulation(
     val satelliteCount: Int
 )
 
-data class Intermediate(val location: Point, val progress: Float)
+data class Intermediate(val location: Point, val elapsed: Double, val progress: Float)
+
+data class EmulationInfo(val duration: Double, val length: Double)
 
 object Scheduler {
     private var fts = mutableSetOf<FutureTask<Unit>>()
@@ -23,6 +26,7 @@ object Scheduler {
     private val intermediateListeners = mutableSetOf<(Intermediate) -> Unit>()
 
     private var mEmulation: Emulation? = null
+    private var mInfo: EmulationInfo? = null
     private var mIntermediate: Intermediate? = null
 
     var intermediate: Intermediate?
@@ -33,12 +37,22 @@ object Scheduler {
             mIntermediate = value
         }
         get() = mIntermediate
+    var info: EmulationInfo?
+        set(value) {
+            mInfo = value
+            Log.d("Scheduler", "info updated with $value")
+            stateListeners.forEach { it.invoke(emulation != null) }
+        }
+        get() = mInfo
 
     var emulation: Emulation?
         set(value) {
             mEmulation = value
+            if (value == null) {
+                mInfo = null
+            }
             fts.forEach { it.run() }
-            stateListeners.forEach { it.invoke(value == null) }
+            stateListeners.forEach { it.invoke(value != null) }
         }
         get() = mEmulation
 
@@ -49,11 +63,27 @@ object Scheduler {
         return emulation
     }
 
-    fun onEmulationStateChanged(l: (Boolean) -> Unit) {
+    fun onEmulationStateChanged(l: (Boolean) -> Unit): ListenCallback {
         stateListeners.add(l)
+
+        return object : ListenCallback {
+            override fun cancel() {
+                stateListeners.remove(l)
+            }
+        }
     }
 
-    fun addIntermediateListener(l: (Intermediate) -> Unit) {
+    fun addIntermediateListener(l: (Intermediate) -> Unit): ListenCallback {
         intermediateListeners.add(l)
+
+        return object : ListenCallback {
+            override fun cancel() {
+                intermediateListeners.remove(l)
+            }
+        }
     }
+}
+
+interface ListenCallback {
+    fun cancel()
 }

@@ -4,6 +4,7 @@ import android.content.ContentResolver
 import android.content.ContentValues
 import android.content.Context
 import android.content.ContextWrapper
+import android.database.Cursor
 import android.hardware.Sensor
 import android.net.Uri
 import android.os.SystemClock
@@ -24,6 +25,7 @@ object Scheduler {
     private lateinit var eventResolver: ContentResolver
     private val nextUri = Uri.parse("content://$AUTHORITY/next")
     private val stateUri = Uri.parse("content://$AUTHORITY/state")
+    private val currentUri = Uri.parse("content://$AUTHORITY/current")
 
     private val jobs = arrayListOf<Job>()
 
@@ -64,24 +66,34 @@ object Scheduler {
     }
 
     private suspend fun eventLoop() {
+        fun handleStart(cursor: Cursor) {
+            cursor.moveToNext()
+            hooking = true
+            val trace = cursor.getString(0)
+            val motion = cursor.getString(1)
+            val cells = cursor.getString(2)
+            val velocity = cursor.getDouble(3)
+            val repeat = cursor.getInt(4)
+            val satellites = cursor.getInt(5)
+            val started = startEmulation(trace, motion, cells, velocity, repeat, satellites)
+            updateState(started)
+        }
+
+        // query existing state
+        eventResolver.query(currentUri, null, null, null, null)?.use { cursor ->
+            cursor.moveToNext()
+            if (cursor.getInt(0) == EMULATION_START) {
+                handleStart(cursor)
+            }
+        }
+
+        // enter event loop
         while (true) {
             eventResolver.query(nextUri, null, null, null, null)?.use { cursor ->
                 cursor.moveToNext()
                 when (cursor.getInt(0)) {
-                    COMMAND_EMULATION_START -> {
-                        cursor.moveToNext()
-                        hooking = true
-                        val trace = cursor.getString(0)
-                        val motion = cursor.getString(1)
-                        val cells = cursor.getString(2)
-                        val velocity = cursor.getDouble(3)
-                        val repeat = cursor.getInt(4)
-                        val satellites = cursor.getInt(5)
-                        val started = startEmulation(trace, motion, cells, velocity, repeat, satellites)
-                        updateState(started)
-                    }
-
-                    COMMAND_EMULATION_STOP -> {
+                    EMULATION_START -> handleStart(cursor)
+                    EMULATION_STOP -> {
                         hooking = false
                         jobs.forEach {
                             it.join()
@@ -101,6 +113,7 @@ object Scheduler {
      * Duration of this emulation in seconds
      */
     private var duration = -1.0
+    private var length = 0.0
     private var mLocation: Point? = null
     private var mCellMoment: CellMoment? = null
 
@@ -129,12 +142,13 @@ object Scheduler {
         val cells = Json.decodeFromString(CellTimeline.serializer(), cellsData)
 
         val fullTrace = trace.at(0F)
-        duration = fullTrace.totalLen / velocity // in seconds
+        length = fullTrace.totalLen
+        duration = length / velocity // in seconds
         start = SystemClock.elapsedRealtime()
         this.satellites = satellites
 
         val scope = CoroutineScope(Dispatchers.Default)
-        scope.launch {
+        scope.async {
             for (i in 0 until repeat) {
                 val jobs = mutableSetOf<Job>()
                 startStepsEmulation(motion)?.let { jobs.add(it) }
@@ -142,17 +156,15 @@ object Scheduler {
                 startTraceEmulation(trace, fullTrace).let { jobs.add(it) }
                 startCellEmulation(cells).let { jobs.add(it) }
 
-                launch {
-                    // to clear current jobs
-                    jobs.addAll(jobs)
-                    jobs.forEach { it.join() }
-                    jobs.removeAll(jobs.toSet())
+                jobs.addAll(jobs)
+                jobs.joinAll()
+                // to clear current jobs
+                jobs.removeAll(jobs.toSet())
 
-                    updateState(false)
-                    scope.cancel()
-                }
+                updateState(false)
+                scope.cancel()
             }
-        }
+        }.start()
 
         return true
     }
@@ -242,12 +254,18 @@ object Scheduler {
         values.put("progress", progress)
         values.put("pos_la", mLocation!!.latitude)
         values.put("pos_lg", mLocation!!.longitude)
+        values.put("elapsed", elapsed / 1000.0)
         eventResolver.update(stateUri, values, "progress", null)
     }
 
     private fun updateState(running: Boolean) {
         val values = ContentValues()
+        loggerI(TAG, "updated state = $running")
         values.put("state", running)
+        if (running) {
+            values.put("duration", duration)
+            values.put("length", length)
+        }
         eventResolver.update(stateUri, values, "state", null)
     }
 }

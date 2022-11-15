@@ -7,10 +7,9 @@ import android.database.Cursor
 import android.database.MatrixCursor
 import android.hardware.SensorManager
 import android.net.Uri
-import android.util.Log
 import com.zhufucdev.motion_emulator.data.Point
-import com.zhufucdev.motion_emulator.hook.COMMAND_EMULATION_START
-import com.zhufucdev.motion_emulator.hook.COMMAND_EMULATION_STOP
+import com.zhufucdev.motion_emulator.hook.EMULATION_START
+import com.zhufucdev.motion_emulator.hook.EMULATION_STOP
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
@@ -25,6 +24,7 @@ class EventProvider : ContentProvider() {
         matcher = UriMatcher(UriMatcher.NO_MATCH)
         matcher.addURI(AUTHORITY, "next", REQUEST_NEXT)
         matcher.addURI(AUTHORITY, "state", REQUEST_STATE)
+        matcher.addURI(AUTHORITY, "current", REQUEST_CURRENT)
         sensorManager = context?.getSystemService(SensorManager::class.java) ?: error("context unavailable")
         return true
     }
@@ -39,34 +39,34 @@ class EventProvider : ContentProvider() {
         selectionArgs: Array<out String>?,
         sortOrder: String?
     ): Cursor? {
-        when (matcher.match(uri)) {
-            REQUEST_NEXT -> {
-                val emulation = Scheduler.queue()
-                return if (emulation == null) {
-                    val cursor = MatrixCursor(arrayOf("command"))
-                    cursor.addRow(arrayOf(COMMAND_EMULATION_STOP))
-                    cursor
-                } else {
-                    val cursor = MatrixCursor(arrayOf("trace", "motion", "cells", "velocity", "repeat", "satellites"))
-                    cursor.addRow(arrayOf(COMMAND_EMULATION_START, 0, 0, 0, 0, 0))
-                    val traceData = Json.encodeToString(emulation.trace)
-                    val motionData = Json.encodeToString(emulation.motion)
-                    val cellsData = Json.encodeToString(emulation.cells)
-                    cursor.addRow(
-                        arrayOf(
-                            traceData,
-                            motionData,
-                            cellsData,
-                            emulation.velocity,
-                            emulation.repeat,
-                            emulation.satelliteCount
-                        )
-                    )
-                    cursor
-                }
-            }
+        fun cursor(e: Emulation?) = if (e == null) {
+            val cursor = MatrixCursor(arrayOf("command"))
+            cursor.addRow(arrayOf(EMULATION_STOP))
+            cursor
+        } else {
+            val cursor = MatrixCursor(arrayOf("trace", "motion", "cells", "velocity", "repeat", "satellites"))
+            cursor.addRow(arrayOf(EMULATION_START, 0, 0, 0, 0, 0))
+            val traceData = Json.encodeToString(e.trace)
+            val motionData = Json.encodeToString(e.motion)
+            val cellsData = Json.encodeToString(e.cells)
+            cursor.addRow(
+                arrayOf(
+                    traceData,
+                    motionData,
+                    cellsData,
+                    e.velocity,
+                    e.repeat,
+                    e.satelliteCount
+                )
+            )
+            cursor
         }
-        return null
+
+        return when (matcher.match(uri)) {
+            REQUEST_NEXT -> cursor(Scheduler.queue())
+            REQUEST_CURRENT -> cursor(Scheduler.emulation)
+            else -> null
+        }
     }
 
     override fun getType(uri: Uri): String? {
@@ -91,6 +91,10 @@ class EventProvider : ContentProvider() {
                     val running = values.getAsBoolean("state")
                     if (!running) {
                         Scheduler.emulation = null
+                    } else {
+                        val duration = values.getAsDouble("duration")
+                        val length = values.getAsDouble("length")
+                        Scheduler.info = EmulationInfo(duration, length)
                     }
                     return 0
                 }
@@ -98,7 +102,8 @@ class EventProvider : ContentProvider() {
                 "progress" -> {
                     val progress = values.getAsFloat("progress")
                     val position = Point(values.getAsDouble("pos_la"), values.getAsDouble("pos_lg"))
-                    Scheduler.intermediate = Intermediate(position, progress)
+                    val elapsed = values.getAsDouble("elapsed")
+                    Scheduler.intermediate = Intermediate(position, elapsed, progress)
                     return 0
                 }
             }
@@ -109,5 +114,6 @@ class EventProvider : ContentProvider() {
     companion object {
         private const val REQUEST_NEXT = 0x10
         private const val REQUEST_STATE = 0x11
+        private const val REQUEST_CURRENT = 0x12
     }
 }

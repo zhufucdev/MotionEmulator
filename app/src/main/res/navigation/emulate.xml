@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            xmlns:tools="http://schemas.android.com/tools"
+            android:id="@+id/emulate"
+            app:startDestination="@id/configurationFragment">
+    <fragment
+            android:id="@+id/emulateStatusFragment"
+            android:name="com.zhufucdev.motion_emulator.emulate.EmulateStatusFragment"
+            android:label="fragment_emulate_status"
+            tools:layout="@layout/fragment_emulate_status"/>
+    <fragment
+            android:id="@+id/configurationFragment"
+            android:name="com.zhufucdev.motion_emulator.emulate.ConfigurationFragment"
+            android:label="fragment_configuration"
+            tools:layout="@layout/fragment_configuration">
+        <action
+                android:id="@+id/action_configurationFragment_to_emulateStatusFragment"
+                app:destination="@id/emulateStatusFragment"
+                app:enterAnim="@android:anim/fade_in"
+                app:exitAnim="@android:anim/fade_out"
+                app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+                app:popExitAnim="@anim/nav_default_pop_exit_anim"/>
+    </fragment>
+</navigation>

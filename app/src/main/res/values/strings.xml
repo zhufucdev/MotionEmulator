@@ -58,4 +58,15 @@
     <string name="name_cell_signal">Signal Strength</string>
     <string name="title_cells_data">Base Station Data</string>
     <string name="title_satellite_count">Satellites Count</string>
+    <string name="title_trace">Trace</string>
+    <string name="status_velocity">running at %s</string>
+    <string name="status_total">%s in total</string>
+    <string name="status_remaining">%s to go</string>
+    <string name="action_determine">determine</string>
+    <string name="suffix_meter">m</string>
+    <string name="suffix_second">s</string>
+    <string name="title_emulation_stopped">Emulation Stopped</string>
+    <string name="title_emulation_pending">Emulation Pending</string>
+    <string name="text_emulation_pending">waiting for an app to pick up</string>
+    <string name="action_restart">restart</string>
 </resources>

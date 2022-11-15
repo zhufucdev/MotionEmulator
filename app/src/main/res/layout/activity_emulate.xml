@@ -7,109 +7,18 @@
         android:layout_height="match_parent"
         tools:context=".EmulateActivity">
 
-    <ScrollView
+    <fragment
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-        <androidx.appcompat.widget.LinearLayoutCompat
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="@dimen/common_padding">
-
-            <com.google.android.material.textfield.TextInputLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/wrapper_dropdown"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu"
-                    android:hint="@string/title_motion_data"
-                    android:layout_marginBottom="@dimen/common_padding"
-                    app:startIconDrawable="@drawable/ic_baseline_smartphone_24">
-
-                <com.google.android.material.textfield.MaterialAutoCompleteTextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/dropdown_motion"
-                        android:inputType="none"/>
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/wrapper_cells_dropdown"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu"
-                    android:hint="@string/title_cells_data"
-                    android:layout_marginBottom="@dimen/common_padding"
-                    app:startIconDrawable="@drawable/ic_baseline_cell_tower_24">
-
-                <com.google.android.material.textfield.MaterialAutoCompleteTextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/dropdown_cells"
-                        android:inputType="none"/>
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/wrapper_repeat_count"
-                    android:hint="@string/title_repeat"
-                    android:layout_marginBottom="@dimen/common_padding"
-                    app:startIconDrawable="@drawable/ic_baseline_repeat_24">
-
-                <com.google.android.material.textfield.TextInputEditText
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/input_repeat_count"
-                        android:text="1"
-                        android:inputType="numberDecimal"/>
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/wrapper_velocity"
-                    android:hint="@string/title_velocity"
-                    android:layout_marginBottom="@dimen/common_padding"
-                    app:startIconDrawable="@drawable/ic_baseline_directions_run_24"
-                    app:suffixText="@string/suffix_velocity">
-
-                <com.google.android.material.textfield.TextInputEditText
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/input_velocity"
-                        android:text="3"
-                        android:inputType="number"/>
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/wrapper_satellite"
-                    android:hint="@string/title_satellite_count"
-                    android:layout_marginBottom="@dimen/common_padding"
-                    app:startIconDrawable="@drawable/ic_baseline_satellite_alt_24">
-
-                <com.google.android.material.textfield.TextInputEditText
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/input_satellite"
-                        android:text="10"
-                        android:inputType="number"/>
-            </com.google.android.material.textfield.TextInputLayout>
-
-
-            <com.amap.api.maps.MapView
-                    android:layout_width="match_parent"
-                    android:layout_height="400dp"
-                    android:id="@+id/map_motion_preview"/>
-        </androidx.appcompat.widget.LinearLayoutCompat>
-    </ScrollView>
+            android:layout_height="match_parent"
+            android:id="@+id/nav_host_fragment_activity_emulate"
+            android:name="androidx.navigation.fragment.NavHostFragment"
+            app:defaultNavHost="true"
+            app:navGraph="@navigation/emulate"/>
 
     <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/btn_start_emulation"
+            android:id="@+id/btn_run_emulation"
             android:layout_marginBottom="@dimen/extended_fab_margin"
             android:text="@string/action_start_emulation"
             app:icon="@drawable/ic_baseline_auto_fix_high_24"
