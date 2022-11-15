@@ -68,4 +68,5 @@
     <string name="title_emulation_stopped">模拟已停止</string>
     <string name="title_emulation_pending">正在等待模拟</string>
     <string name="text_emulation_pending">等待其他应用响应</string>
+    <string name="action_restart">重启</string>
 </resources>
