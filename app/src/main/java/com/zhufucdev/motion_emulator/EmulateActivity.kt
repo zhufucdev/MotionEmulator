@@ -10,7 +10,6 @@ import com.zhufucdev.motion_emulator.databinding.ActivityEmulateBinding
 
 class EmulateActivity : AppCompatActivity() {
     private lateinit var binding: ActivityEmulateBinding
-    private var onReady: ((ExtendedFloatingActionButton) -> Unit)? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -20,10 +19,5 @@ class EmulateActivity : AppCompatActivity() {
         Traces.require(this)
         Motions.require(this)
         Cells.require(this)
-        onReady?.invoke(binding.btnRunEmulation)
-    }
-
-    fun ready(l: (ExtendedFloatingActionButton) -> Unit) {
-        onReady = l
     }
 }

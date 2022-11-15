@@ -142,12 +142,13 @@ object Scheduler {
         val fullTrace = trace.at(0F)
         length = fullTrace.totalLen
         duration = length / velocity // in seconds
-        start = SystemClock.elapsedRealtime()
         this.satellites = satellites
 
         val scope = CoroutineScope(Dispatchers.Default)
         scope.async {
             for (i in 0 until repeat) {
+                start = SystemClock.elapsedRealtime()
+
                 val jobs = mutableSetOf<Job>()
                 startStepsEmulation(motion)?.let { jobs.add(it) }
                 startMotionSimulation(motion)?.let { jobs.add(it) }
@@ -156,8 +157,7 @@ object Scheduler {
 
                 jobs.addAll(jobs)
                 jobs.joinAll()
-                // to clear current jobs
-                jobs.removeAll(jobs.toSet())
+                jobs.clear()
 
                 if (!hooking) break
             }
@@ -168,17 +168,20 @@ object Scheduler {
         return true
     }
 
+    private var stepsCount: Int = -1
     private fun CoroutineScope.startStepsEmulation(motion: Motion): Job? =
         if (stepSensors.any { motion.sensorsInvolved.contains(it) }) {
             val stepMoments = motion.moments.filter { m -> stepSensors.any { m.data.containsKey(it) } }
             val pause = (duration / stepMoments.size).seconds
             launch {
-                var stepsCount = Random.nextFloat() * 5000 + 2000 // beginning with a random steps count
+                if (stepsCount == -1) {
+                    stepsCount = (Random.nextFloat() * 5000).toInt() + 2000 // beginning with a random steps count
+                }
                 while (hooking && progress <= 1) {
                     var index = 0
                     while (hooking && index < stepMoments.size) {
                         val moment = stepMoments[index]
-                        moment.data[Sensor.TYPE_STEP_COUNTER] = floatArrayOf(stepsCount++)
+                        moment.data[Sensor.TYPE_STEP_COUNTER] = floatArrayOf(1F * stepsCount++)
                         SensorHooker.raise(moment)
                         index++
 

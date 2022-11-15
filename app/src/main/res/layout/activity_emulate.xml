@@ -14,15 +14,4 @@
             android:name="androidx.navigation.fragment.NavHostFragment"
             app:defaultNavHost="true"
             app:navGraph="@navigation/emulate"/>
-
-    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/btn_run_emulation"
-            android:layout_marginBottom="@dimen/extended_fab_margin"
-            android:text="@string/action_start_emulation"
-            app:icon="@drawable/ic_baseline_auto_fix_high_24"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
 </androidx.constraintlayout.widget.ConstraintLayout>
