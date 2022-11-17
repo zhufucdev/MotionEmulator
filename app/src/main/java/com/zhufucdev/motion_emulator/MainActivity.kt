@@ -38,6 +38,11 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     }
 
     private fun registerListeners() {
+        binding.statusCard.setOnClickListener {
+            startActivity(
+                Intent(this, AppStrategyActivity::class.java)
+            )
+        }
         binding.recordCard.setOnClickListener {
             startActivity(
                 Intent(this, RecordActivity::class.java)

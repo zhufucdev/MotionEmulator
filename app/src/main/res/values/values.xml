@@ -13,4 +13,9 @@
         <item name="android:layout_marginLeft">@dimen/card_margin</item>
         <item name="android:layout_marginRight">@dimen/card_margin</item>
     </style>
+    <style name="BaseIcon">
+        <item name="android:layout_width">36dp</item>
+        <item name="android:layout_height">36dp</item>
+        <item name="android:layout_margin">6dp</item>
+    </style>
 </resources>

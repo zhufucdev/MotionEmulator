@@ -4,20 +4,28 @@ import com.highcapable.yukihookapi.YukiHookAPI
 import com.highcapable.yukihookapi.annotation.xposed.InjectYukiHookWithXposed
 import com.highcapable.yukihookapi.hook.log.loggerI
 import com.highcapable.yukihookapi.hook.xposed.proxy.IYukiHookXposedInit
+import com.zhufucdev.motion_emulator.apps.AppMetas
+import com.zhufucdev.motion_emulator.apps.hooked
 
 @InjectYukiHookWithXposed
 class HookEntry : IYukiHookXposedInit {
     override fun onHook() = YukiHookAPI.encase {
-        loadApp("com.totoro.school") {
-            loadHooker(SensorHooker)
-            loadHooker(LocationHooker)
-            loadHooker(CellHooker)
-            loadHooker(Scheduler.hook)
-        }
-    }
+        onAppLifecycle {
+            attachBaseContext { baseContext, _ ->
+                AppMetas.require(baseContext)
+                AppMetas.list().forEach {
+                    if (!it.hooked) return@forEach
 
-    init {
-        loggerI(msg = "Greetings from MotionEmulator")
+                    loadApp(it.packageName) {
+                        loadHooker(SensorHooker)
+                        loadHooker(LocationHooker)
+                        loadHooker(CellHooker)
+                        loadHooker(Scheduler.hook)
+                    }
+                    loggerI("MotionEmulator", "Hooked ${it.packageName}")
+                }
+            }
+        }
     }
 }
 

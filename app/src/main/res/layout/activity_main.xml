@@ -13,6 +13,7 @@
             android:layout_height="wrap_content"
             android:id="@+id/status_card"
             style="@style/BaseCardLayout"
+            android:foreground="?attr/selectableItemBackgroundBorderless"
             app:cardBackgroundColor="@color/success"
             app:cardCornerRadius="@dimen/card_radius">
 
@@ -48,6 +49,14 @@
                     android:layout_marginTop="@dimen/common_padding"
                     app:layout_constraintTop_toBottomOf="@id/status_icon"
                     app:layout_constraintLeft_toLeftOf="parent"/>
+
+            <androidx.appcompat.widget.AppCompatImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:tint="?attr/colorOnSurface"
+                    app:srcCompat="@drawable/ic_baseline_open_in_new_24"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"/>
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 

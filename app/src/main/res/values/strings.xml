@@ -69,4 +69,7 @@
     <string name="title_emulation_pending">Emulation Pending</string>
     <string name="text_emulation_pending">waiting for an app to pick up</string>
     <string name="action_restart">restart</string>
+    <string name="title_unknown">Unknown</string>
+    <string name="action_show_system_apps">Show system apps</string>
+    <string name="action_bypass_mode">Bypass mode</string>
 </resources>

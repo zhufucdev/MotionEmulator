@@ -1,6 +1,7 @@
 package com.zhufucdev.motion_emulator
 
 import android.content.Context
+import android.content.pm.ApplicationInfo
 import android.content.res.Configuration
 import android.content.res.Resources
 import android.util.TypedValue
@@ -157,3 +158,5 @@ fun Point.lenTo(other: Point): Double =
 fun AMap.unifyTheme(resources: Resources) {
     mapType = if (isDarkModeEnabled(resources)) AMap.MAP_TYPE_NIGHT else AMap.MAP_TYPE_NORMAL
 }
+
+val ApplicationInfo.isSystemApp get() = flags and ApplicationInfo.FLAG_SYSTEM != 0
