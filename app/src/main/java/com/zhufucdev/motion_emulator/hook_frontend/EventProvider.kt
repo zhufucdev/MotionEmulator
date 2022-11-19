@@ -7,6 +7,9 @@ import android.database.Cursor
 import android.database.MatrixCursor
 import android.hardware.SensorManager
 import android.net.Uri
+import android.util.Log
+import com.zhufucdev.motion_emulator.apps.AppMetas
+import com.zhufucdev.motion_emulator.apps.hooked
 import com.zhufucdev.motion_emulator.data.Point
 import com.zhufucdev.motion_emulator.hook.EMULATION_START
 import com.zhufucdev.motion_emulator.hook.EMULATION_STOP
@@ -39,7 +42,7 @@ class EventProvider : ContentProvider() {
         selectionArgs: Array<out String>?,
         sortOrder: String?
     ): Cursor? {
-        fun cursor(e: Emulation?) = if (e == null) {
+        fun present(e: Emulation?) = if (e == null) {
             val cursor = MatrixCursor(arrayOf("command"))
             cursor.addRow(arrayOf(EMULATION_STOP))
             cursor
@@ -63,8 +66,8 @@ class EventProvider : ContentProvider() {
         }
 
         return when (matcher.match(uri)) {
-            REQUEST_NEXT -> cursor(Scheduler.queue())
-            REQUEST_CURRENT -> cursor(Scheduler.emulation)
+            REQUEST_NEXT -> present(Scheduler.queue())
+            REQUEST_CURRENT -> present(Scheduler.emulation)
             else -> null
         }
     }

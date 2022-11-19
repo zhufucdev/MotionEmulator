@@ -44,22 +44,9 @@ object Scheduler {
      */
     val hook = object : YukiBaseHooker() {
         override fun onHook() {
-            classOf<ContextWrapper>().hook {
-                injectMember {
-                    method {
-                        name = "getApplicationContext"
-                        emptyParam()
-                        returnType = classOf<Context>()
-                    }
-
-                    afterHook {
-                        val ctx = result<Context>()
-                        if (ctx == null) {
-                            loggerE(tag = TAG, "Failed to initialize: context unavailable")
-                            return@afterHook
-                        }
-                        init(ctx)
-                    }
+            onAppLifecycle {
+                onCreate {
+                    init(applicationContext)
                 }
             }
         }

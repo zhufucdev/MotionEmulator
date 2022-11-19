@@ -5,6 +5,12 @@ import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.graphics.drawable.Drawable
+import com.highcapable.yukihookapi.YukiHookAPI
+import com.highcapable.yukihookapi.hook.factory.modulePrefs
+import com.highcapable.yukihookapi.hook.param.PackageParam
+import com.highcapable.yukihookapi.hook.xposed.bridge.YukiHookBridge
+import com.highcapable.yukihookapi.hook.xposed.prefs.YukiHookModulePrefs
+import com.zhufucdev.motion_emulator.BuildConfig
 import com.zhufucdev.motion_emulator.isSystemApp
 import io.ktor.utils.io.core.*
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -38,13 +44,30 @@ data class AppMeta(val name: String?, val icon: Drawable?, val packageName: Stri
 
 val AppMeta.hooked get() = (AppMetas.bypassMode && !positive) || (!AppMetas.bypassMode && positive)
 
+fun PackageParam.isHooked(): Boolean {
+    if (packageName == BuildConfig.APPLICATION_ID) return false
+
+    val positiveApps = prefs.getStringSet("positive_apps", emptySet())
+    val bypassMode = prefs.getBoolean("bypass", true)
+    val showSystemApps = prefs.getBoolean("use_system")
+
+    if (!bypassMode) {
+        return positiveApps.contains(packageName)
+    }
+
+    if (!showSystemApps && appInfo.isSystemApp) {
+        return false
+    }
+
+    return !positiveApps.contains(packageName)
+}
+
 @Serializable
 data class AppStrategy(var showSystemApps: Boolean = false, var bypassMode: Boolean = true)
 
 object AppMetas {
     private lateinit var pm: PackageManager
-    private lateinit var infoStore: File
-    private lateinit var configStore: File
+    private lateinit var prefs: YukiHookModulePrefs
 
     private val positiveApps = mutableSetOf<String>()
     private lateinit var config: AppStrategy
@@ -64,20 +87,15 @@ object AppMetas {
         }
 
     fun require(context: Context) {
+        prefs = context.modulePrefs
         pm = context.packageManager
-        val dataDir = context.getDir("apps", Context.MODE_PRIVATE)
-        infoStore = File(dataDir, "infos.json")
-        configStore = File(dataDir, "config.json")
 
-        val record: List<String> =
-            if (infoStore.exists()) {
-                Json.decodeFromString(serializer(), infoStore.readText())
-            } else {
-                emptyList()
-            }
+        val record = prefs.getStringSet("positive_apps", emptySet())
+        config = AppStrategy(
+            showSystemApps = prefs.getBoolean("use_system"),
+            bypassMode = prefs.getBoolean("bypass", true)
+        )
         positiveApps.addAll(record)
-
-        config = if (configStore.exists()) Json.decodeFromString(configStore.readText()) else AppStrategy()
     }
 
     fun list(): List<AppMeta> = buildList {
@@ -103,17 +121,12 @@ object AppMetas {
         saveInfos()
     }
 
-    @OptIn(ExperimentalSerializationApi::class)
     private fun saveInfos() {
-        infoStore.outputStream().use { stream ->
-            Json.encodeToStream(positiveApps, stream)
-        }
+        prefs.putStringSet("positive_apps", positiveApps)
     }
 
-    @OptIn(ExperimentalSerializationApi::class)
     private fun saveStrategy() {
-        configStore.outputStream().use {
-            Json.encodeToStream(config, it)
-        }
+        prefs.putBoolean("use_system", showSystemApps)
+        prefs.putBoolean("bypass", bypassMode)
     }
 }
