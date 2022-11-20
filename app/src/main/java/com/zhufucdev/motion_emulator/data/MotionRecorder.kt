@@ -14,7 +14,7 @@ interface MotionCallback {
     fun onUpdate(type: Int, l: (MotionMoment) -> Unit)
 }
 
-const val VERTICAL_PERIOD = 0.01F
+const val VERTICAL_PERIOD = 0.05F
 
 object MotionRecorder {
     private lateinit var sensors: SensorManager
@@ -39,18 +39,21 @@ object MotionRecorder {
 
                 val elapsed = (System.currentTimeMillis() - start) / 1000F
                 if (moments.isNotEmpty()) {
-                    for (i in moments.lastIndex downTo 0) {
-                        if (abs(moments[i].elapsed - elapsed) < VERTICAL_PERIOD) {
-                            moments[i].data[event.sensor.type] = event.values
-                            typedFeedback(moments[i])
-                            if (moments[i].data.size == sensorsRequired.size) {
-                                callbackListener?.invoke(moments[i])
-                            }
-                            return
+                    val last = moments.last()
+                    if (
+                        abs(last.elapsed - elapsed) < VERTICAL_PERIOD
+                        && !last.data.containsKey(event.sensor.type)
+                    ) {
+                        last.data[event.sensor.type] = event.values
+                        typedFeedback(last)
+                        if (last.data.size == sensorsRequired.size) {
+                            callbackListener?.invoke(last)
                         }
+                        return
                     }
                 }
-                val newMoment = MotionMoment(elapsed, mutableMapOf(event.sensor.type to event.values))
+
+                val newMoment = MotionMoment(elapsed, mutableMapOf(event.sensor.type to event.values.clone()))
                 moments.add(newMoment)
                 typedFeedback(newMoment)
             }

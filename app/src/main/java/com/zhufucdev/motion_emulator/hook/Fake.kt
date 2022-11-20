@@ -34,7 +34,6 @@ import kotlinx.coroutines.launch
 import kotlin.math.round
 import kotlin.random.Random
 
-
 fun Point.android(provider: String = LocationManager.GPS_PROVIDER): Location {
     val result = Location(provider).apply {
         // fake some data
@@ -151,96 +150,75 @@ data class MotionInterp(val moment: MotionMoment, val index: Int)
  *
  * @see [MotionInterp]
  */
-suspend fun Motion.at(progress: Float, from: Int = 0): MotionInterp {
+fun Motion.at(progress: Float, from: Int = 0): MotionInterp {
+    fun interp(progr: Float, current: FloatArray, last: FloatArray) =
+        (current - last) * progr + current
+
     val duration = moments.last().elapsed - moments.first().elapsed
-    val elapsed = duration * progress
+    val start = moments.first().elapsed
+    val targetElapsed = duration * progress
     val data = hashMapOf<Int, FloatArray>()
-    for (i in from + 1 until moments.size) {
-        val current = moments[i]
-        if (current.data.containsKey(Sensor.TYPE_STEP_COUNTER) || current.data.containsKey(Sensor.TYPE_STEP_DETECTOR)
-            && current.data.size <= 2
-        ) {
-            continue
-        }
+
+    val stepTypes = listOf(Sensor.TYPE_STEP_COUNTER, Sensor.TYPE_STEP_DETECTOR)
+    val targetTypes = sensorsInvolved - stepTypes
+
+    var minIndex = moments.lastIndex
+
+    targetTypes.forEach { type ->
         var last: MotionMoment? = null
-        for (j in i - 1 downTo 0) {
-            if (moments[j].data.keys.containsAll(current.data.keys)) {
-                last = moments[j]
-                break
-            }
-        }
-        if (last == null) {
-            continue // to ensure sensor types are aligned
-        }
-
-        fun interp(period: Float, pass: Float, type: Int, current: FloatArray, last: FloatArray) =
-            when (type) {
-                Sensor.TYPE_STEP_DETECTOR -> null
-                Sensor.TYPE_STEP_COUNTER -> null // filter out these types
-                else -> (current - last) * (pass / period) + current
+        for (i in from until moments.size) {
+            val current = moments[i]
+            if (!current.data.containsKey(type)) {
+                continue
             }
 
-        suspend fun align(intendedType: Int): Map<Int, FloatArray> {
-            var left: MotionMoment? = null
-            var right: MotionMoment? = null
-            return coroutineScope {
-                val forward = launch {
-                    // combo forwards
-                    for (j in i - 1 downTo 0) {
-                        if (moments[j].data.keys.contains(intendedType)) {
-                            left = moments[j]
+            if (current.elapsed - start <= targetElapsed) {
+                last = current
+                continue
+            }
+
+            // current is later than target elapsed
+            if (from > 0) {
+                if (last == null) {
+                    // try to find a moment with specific type
+                    // and is earlier than the current one
+                    for (j in from - 1 downTo 0) {
+                        if (moments[i].data.containsKey(type)) {
+                            last = moments[i]
                             break
                         }
                     }
                 }
-                val backward = launch {
-                    // combo backwards
-                    for (j in i + 1 until moments.lastIndex) {
-                        if (moments[j].data.keys.contains(intendedType)) {
-                            right = moments[j]
-                            break
-                        }
+                if (last != null) {
+                    data[type] = interp(
+                        (targetElapsed - last.elapsed + start) / (current.elapsed - last.elapsed),
+                        current.data[type]!!,
+                        last.data[type]!!
+                    )
+                }
+            } else {
+                // if the current one is the first element
+                // do a reverse interpolation
+                for (j in i + 1 until moments.size) {
+                    val next = moments[j]
+                    if (next.data.containsKey(type) && next.elapsed - start > targetElapsed) {
+                        data[type] = interp(
+                            (targetElapsed - next.elapsed + start) / (next.elapsed - current.elapsed),
+                            next.data[type]!!,
+                            current.data[type]!!
+                        )
+                        break
                     }
                 }
-                forward.join()
-                backward.join()
-                if (left == null || right == null) return@coroutineScope emptyMap<Int, FloatArray>()
-
-                val period = right!!.elapsed - left!!.elapsed
-                val pass = elapsed - left!!.elapsed
-                val result = hashMapOf<Int, FloatArray>()
-                right!!.data.forEach { (e, v) ->
-                    result[e] = interp(period, pass, e, v, left!!.data[e]!!) ?: return@forEach
-                }
-                result
-            }
-        }
-
-        if (elapsed > last.elapsed && elapsed <= current.elapsed) {
-            val period = current.elapsed - last.elapsed
-            val pass = elapsed - last.elapsed
-            current.data.forEach { (e, v) ->
-                data[e] = interp(period, pass, e, v, last.data[e]!!) ?: return@forEach
             }
 
-            sensorsInvolved.forEach { s ->
-                if (s == Sensor.TYPE_STEP_DETECTOR || s == Sensor.TYPE_STEP_COUNTER) return@forEach
-                if (s !in current.data.keys && s !in data.keys) {
-                    val aligned = align(s)
-                    data.putAll(aligned)
-                }
+            if (i < minIndex) {
+                minIndex = i
             }
-
-            return MotionInterp(
-                moment = MotionMoment(
-                    elapsed = elapsed,
-                    data = data
-                ),
-                index = i
-            )
+            break
         }
     }
-    return MotionInterp(MotionMoment(elapsed, data), moments.lastIndex)
+    return MotionInterp(MotionMoment(targetElapsed, data), minIndex)
 }
 
 /**
@@ -283,7 +261,7 @@ fun Motion.validPart(): Motion {
     }
 
     val start = lookup(false)
-    val end = lookup(false)
+    val end = lookup(true)
 
     return Motion(
         id = id,

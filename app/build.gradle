@@ -16,7 +16,7 @@ android {
         minSdk 23
         targetSdk 32
         versionCode 1
-        versionName "1.0.2 prerelease"
+        versionName "1.0.3 prerelease"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -71,9 +71,9 @@ dependencies {
     implementation "androidx.navigation:navigation-dynamic-features-fragment:$nav_version"
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4'
     implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1'
-    implementation("androidx.work:work-runtime-ktx:$work_version")
+    implementation "androidx.work:work-runtime-ktx:$work_version"
 
-    implementation "org.jetbrains.kotlin:kotlin-reflect:1.7.20"
+    implementation "org.jetbrains.kotlin:kotlin-reflect:1.7.21"
     implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
     implementation 'com.aventrix.jnanoid:jnanoid:2.0.0'
     // Ktor

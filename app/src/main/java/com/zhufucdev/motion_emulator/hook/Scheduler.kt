@@ -10,10 +10,12 @@ import android.net.Uri
 import android.os.SystemClock
 import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.highcapable.yukihookapi.hook.factory.classOf
+import com.highcapable.yukihookapi.hook.log.loggerD
 import com.highcapable.yukihookapi.hook.log.loggerE
 import com.highcapable.yukihookapi.hook.log.loggerI
 import com.zhufucdev.motion_emulator.data.*
 import com.zhufucdev.motion_emulator.hook_frontend.AUTHORITY
+import io.ktor.http.*
 import kotlinx.coroutines.*
 import kotlinx.serialization.json.Json
 import kotlin.random.Random
@@ -55,7 +57,6 @@ object Scheduler {
     private suspend fun eventLoop() {
         fun handleStart(cursor: Cursor) {
             cursor.moveToNext()
-            hooking = true
             val trace = cursor.getString(0)
             val motion = cursor.getString(1)
             val cells = cursor.getString(2)
@@ -132,12 +133,13 @@ object Scheduler {
         this.satellites = satellites
 
         val scope = CoroutineScope(Dispatchers.Default)
+        hooking = true
         scope.async {
             for (i in 0 until repeat) {
                 start = SystemClock.elapsedRealtime()
 
                 val jobs = mutableSetOf<Job>()
-                startStepsEmulation(motion)?.let { jobs.add(it) }
+                startStepsEmulation(motion, velocity)?.let { jobs.add(it) }
                 startMotionSimulation(motion)?.let { jobs.add(it) }
                 startTraceEmulation(trace, fullTrace).let { jobs.add(it) }
                 startCellEmulation(cells).let { jobs.add(it) }
@@ -148,6 +150,7 @@ object Scheduler {
 
                 if (!hooking) break
             }
+            hooking = false
             updateState(false)
             scope.cancel()
         }.start()
@@ -156,25 +159,28 @@ object Scheduler {
     }
 
     private var stepsCount: Int = -1
-    private fun CoroutineScope.startStepsEmulation(motion: Motion): Job? =
-        if (stepSensors.any { motion.sensorsInvolved.contains(it) }) {
-            val stepMoments = motion.moments.filter { m -> stepSensors.any { m.data.containsKey(it) } }
-            val pause = (duration / stepMoments.size).seconds
+    private fun CoroutineScope.startStepsEmulation(motion: Motion, velocity: Double): Job? =
+        if (motion.sensorsInvolved.any { it in stepSensors }) {
+            val pause = (1.2 / velocity).seconds
             launch {
                 if (stepsCount == -1) {
                     stepsCount = (Random.nextFloat() * 5000).toInt() + 2000 // beginning with a random steps count
                 }
                 while (hooking && progress <= 1) {
-                    var index = 0
-                    while (hooking && index < stepMoments.size) {
-                        val moment = stepMoments[index]
-                        moment.data[Sensor.TYPE_STEP_COUNTER] = floatArrayOf(1F * stepsCount++)
-                        SensorHooker.raise(moment)
-                        index++
-
-                        notifyProgress()
-                        delay(pause)
+                    val moment =
+                        MotionMoment(
+                            elapsed / 1000F,
+                            mutableMapOf(
+                                Sensor.TYPE_STEP_COUNTER to floatArrayOf(1F * stepsCount++),
+                                Sensor.TYPE_STEP_DETECTOR to floatArrayOf(1F)
+                            )
+                        )
+                    SensorHooker.raise(moment)
+                    supervisorScope {
                     }
+
+                    notifyProgress()
+                    delay(pause)
                 }
             }
         } else {
@@ -182,18 +188,19 @@ object Scheduler {
         }
 
     private fun CoroutineScope.startMotionSimulation(motion: Motion): Job? =
-        if (motion.sensorsInvolved.any { !stepSensors.contains(it) }) {
+        if (motion.sensorsInvolved.any { it !in stepSensors }) {
             launch {
                 // data other than steps
                 while (hooking && progress <= 1) {
                     var lastIndex = 0
-                    while (hooking && lastIndex < motion.moments.size) {
+                    while (hooking && lastIndex < motion.moments.size && progress <= 1) {
                         val interp = motion.at(progress, lastIndex)
+
                         SensorHooker.raise(interp.moment)
                         lastIndex = interp.index
 
                         notifyProgress()
-                        delay(500)
+                        delay(100)
                     }
                 }
             }
