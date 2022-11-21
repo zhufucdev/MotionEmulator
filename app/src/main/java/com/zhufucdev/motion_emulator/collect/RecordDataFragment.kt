@@ -64,9 +64,11 @@ class RecordDataFragment : Fragment() {
             records.addView(telephonyChart())
         fab.setOnClickListener {
             val motions = motion.summarize()
-            val cellTimeline = telephony.summarize()
             Motions.store(motions)
-            Cells.store(cellTimeline)
+            if (useTelephony) {
+                val cellTimeline = telephony.summarize()
+                Cells.store(cellTimeline)
+            }
             requireActivity().finish()
         }
         return root
@@ -82,10 +84,16 @@ class RecordDataFragment : Fragment() {
             val values = moment.data[type]!!
             if (data.dataSets.isEmpty()) {
                 values.forEachIndexed { index, v ->
-                    data.addDataSet(
+                    if (index < sensorValueLabels.size) data.addDataSet(
                         LineDataSet(
                             arrayListOf(Entry(moment.elapsed, v)),
                             sensorValueLabels[index]
+                        )
+                    )
+                    else data.addDataSet(
+                        LineDataSet(
+                            arrayListOf(Entry(moment.elapsed, v)),
+                            "U"
                         )
                     )
                 }
