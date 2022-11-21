@@ -84,18 +84,21 @@ class RecordDataFragment : Fragment() {
             val values = moment.data[type]!!
             if (data.dataSets.isEmpty()) {
                 values.forEachIndexed { index, v ->
-                    if (index < sensorValueLabels.size) data.addDataSet(
-                        LineDataSet(
-                            arrayListOf(Entry(moment.elapsed, v)),
-                            sensorValueLabels[index]
+                    if (index < sensorValueLabels.size) {
+                        data.addDataSet(
+                            LineDataSet(
+                                arrayListOf(Entry(moment.elapsed, v)),
+                                sensorValueLabels[index]
+                            )
                         )
-                    )
-                    else data.addDataSet(
-                        LineDataSet(
-                            arrayListOf(Entry(moment.elapsed, v)),
-                            "U"
+                    } else {
+                        data.addDataSet(
+                            LineDataSet(
+                                arrayListOf(Entry(moment.elapsed, v)),
+                                "U"
+                            )
                         )
-                    )
+                    }
                 }
             } else {
                 values.forEachIndexed { index, v ->
