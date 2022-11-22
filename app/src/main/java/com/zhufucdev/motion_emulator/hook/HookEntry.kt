@@ -3,15 +3,22 @@ package com.zhufucdev.motion_emulator.hook
 import android.net.Uri
 import com.highcapable.yukihookapi.YukiHookAPI
 import com.highcapable.yukihookapi.annotation.xposed.InjectYukiHookWithXposed
+import com.highcapable.yukihookapi.hook.factory.configs
 import com.highcapable.yukihookapi.hook.log.loggerD
 import com.highcapable.yukihookapi.hook.log.loggerI
 import com.highcapable.yukihookapi.hook.param.PackageParam
 import com.highcapable.yukihookapi.hook.xposed.proxy.IYukiHookXposedInit
+import com.zhufucdev.motion_emulator.BuildConfig
 import com.zhufucdev.motion_emulator.apps.isHooked
 import com.zhufucdev.motion_emulator.hook_frontend.AUTHORITY
 
 @InjectYukiHookWithXposed
 class HookEntry : IYukiHookXposedInit {
+    override fun onInit() = configs {
+        isDebug = BuildConfig.DEBUG
+        debugLog { tag = "MotionEmulator" }
+    }
+
     override fun onHook() = YukiHookAPI.encase {
         loadApp {
             if (isHooked()) {
