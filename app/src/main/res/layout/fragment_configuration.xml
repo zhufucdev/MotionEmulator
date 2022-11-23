@@ -96,7 +96,7 @@
                         android:layout_height="wrap_content"
                         android:id="@+id/input_velocity"
                         android:text="3"
-                        android:inputType="number"/>
+                        android:inputType="numberDecimal"/>
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
