@@ -5,12 +5,14 @@ import android.os.Bundle
 import android.view.*
 import androidx.fragment.app.Fragment
 import android.widget.ArrayAdapter
+import androidx.core.os.bundleOf
 import androidx.core.view.MenuProvider
 import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.findNavController
 import com.amap.api.maps.AMap
 import com.amap.api.maps.AMapUtils
+import com.amap.api.maps.CameraUpdateFactory
 import com.amap.api.maps.model.*
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.snackbar.Snackbar
@@ -105,7 +107,16 @@ class ConfigurationFragment : Fragment(), MenuProvider {
 
     private fun startEmulation() {
         Scheduler.emulation = emulation() ?: return
-        findNavController().navigate(R.id.action_configurationFragment_to_emulateStatusFragment)
+        val camera = binding.mapTracePreview.map.cameraPosition
+        findNavController()
+            .navigate(
+                R.id.action_configurationFragment_to_emulateStatusFragment,
+                bundleOf(
+                    "cam_center_lat" to camera.target.latitude,
+                    "cam_center_lng" to camera.target.longitude,
+                    "cam_zoom" to camera.zoom
+                )
+            )
         btnRun.hide()
     }
 
@@ -169,6 +180,10 @@ class ConfigurationFragment : Fragment(), MenuProvider {
         val drawn = trace.drawOnMap(map)
         drawn.second.position
         drawnTrace = drawn
+        map.animateCamera(
+            CameraUpdateFactory
+                .newLatLngBounds(trace.points.bounds(), 400)
+        )
     }
 
     private fun initTracesDropdown() {

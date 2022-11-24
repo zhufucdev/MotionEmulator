@@ -9,6 +9,8 @@ import androidx.annotation.AttrRes
 import com.amap.api.maps.AMap
 import com.amap.api.maps.MapsInitializer
 import com.amap.api.maps.model.LatLng
+import com.amap.api.maps.model.LatLngBounds
+import com.amap.api.maps.model.LatLngBoundsCreator
 import com.zhufucdev.motion_emulator.data.Point
 import io.ktor.client.*
 import io.ktor.client.call.*
@@ -160,3 +162,14 @@ fun AMap.unifyTheme(resources: Resources) {
 }
 
 val ApplicationInfo.isSystemApp get() = flags and ApplicationInfo.FLAG_SYSTEM != 0
+
+/**
+ * Get the [LatLngBounds] from a trace
+ */
+fun List<Point>.bounds(): LatLngBounds =
+    LatLngBounds
+        .builder()
+        .apply {
+            forEach { include(it.toLatLng()) }
+        }
+        .build()

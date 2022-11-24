@@ -7,6 +7,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import com.amap.api.maps.CameraUpdateFactory
+import com.amap.api.maps.model.LatLng
 import com.amap.api.maps.model.NavigateArrow
 import com.amap.api.maps.model.NavigateArrowOptions
 import com.zhufucdev.motion_emulator.*
@@ -51,6 +53,22 @@ class EmulateStatusFragment : Fragment() {
             naviArrow.add(it.location.toLatLng())
             requireActivity().runOnUiThread {
                 lastNav = map.addNavigateArrow(naviArrow)
+            }
+        }
+
+        addEmulationStateListener {
+            lastNav?.remove()
+        }
+
+        arguments?.let {
+            val lat = it.getDouble("cam_center_lat")
+            val lng = it.getDouble("cam_center_lng")
+            val zoom = it.getFloat("cam_zoom")
+            if (zoom > 0) {
+                map.animateCamera(
+                    CameraUpdateFactory
+                        .newLatLngZoom(LatLng(lat, lng), zoom)
+                )
             }
         }
     }
@@ -149,17 +167,19 @@ class EmulateStatusFragment : Fragment() {
         }
 
         stateListener(true)
-        listeners.add(
-            Scheduler.onEmulationStateChanged { running ->
-                activity?.runOnUiThread {
-                    stateListener(running)
-                }
+        addEmulationStateListener { running ->
+            activity?.runOnUiThread {
+                stateListener(running)
             }
-        )
+        }
     }
 
     private fun addIntermediateListener(l: (Intermediate) -> Unit) {
         listeners.add(Scheduler.addIntermediateListener(l))
+    }
+
+    private fun addEmulationStateListener(l: (Boolean) -> Unit) {
+        listeners.add(Scheduler.onEmulationStateChanged(l))
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
