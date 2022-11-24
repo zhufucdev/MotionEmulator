@@ -72,4 +72,6 @@
     <string name="title_unknown">Unknown</string>
     <string name="action_show_system_apps">Show system apps</string>
     <string name="action_bypass_mode">Bypass mode</string>
+    <string name="action_set_as_default">Set as default</string>
+    <string name="text_saved_as_default">Saved current configuration as default</string>
 </resources>

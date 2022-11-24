@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<androidx.coordinatorlayout.widget.CoordinatorLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
         xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -128,9 +128,7 @@
             android:layout_height="wrap_content"
             android:id="@+id/btn_run_emulation"
             android:layout_marginBottom="@dimen/extended_fab_margin"
+            android:layout_gravity="bottom|center_horizontal"
             android:text="@string/action_start_emulation"
-            app:icon="@drawable/ic_baseline_auto_fix_high_24"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
-</androidx.constraintlayout.widget.ConstraintLayout>
+            app:icon="@drawable/ic_baseline_auto_fix_high_24"/>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

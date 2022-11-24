@@ -72,4 +72,6 @@
     <string name="title_unknown">未知</string>
     <string name="action_show_system_apps">显示系统应用</string>
     <string name="action_bypass_mode">黑名单模式</string>
+    <string name="action_set_as_default">设为默认</string>
+    <string name="text_saved_as_default">已将当前配置存为默认</string>
 </resources>

@@ -20,6 +20,7 @@
         <entry key="app/src/main/res/layout/item_app.xml" value="0.34852844238281255" />
         <entry key="app/src/main/res/layout/stack_monitor.xml" value="0.2411604714415231" />
         <entry key="app/src/main/res/menu/app_selector_actionbar.xml" value="0.2935897435897436" />
+        <entry key="app/src/main/res/menu/config_actionbar.xml" value="0.2935897435897436" />
         <entry key="app/src/main/res/menu/trace_drawing_actionbar.xml" value="0.2937152629328773" />
         <entry key="app/src/main/res/menu/trace_drawing_tool_slots.xml" value="0.2935897435897436" />
       </map>
