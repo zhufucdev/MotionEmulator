@@ -47,7 +47,6 @@ object SensorHooker : YukiBaseHooker() {
             val event = eventConstructor.call(sensor, SensorManager.SENSOR_STATUS_ACCURACY_HIGH, elapsed, v)
             listeners.forEach { (lt, l, h) ->
                 if (lt == t) {
-                    loggerD(TAG, "Sensor typed $lt invoked with data [${v.joinToString()}]")
                     supervisorScope {
                         async {
                             h?.post { l.onSensorChanged(event) } ?: l.onSensorChanged(event)
@@ -55,7 +54,6 @@ object SensorHooker : YukiBaseHooker() {
                     }.start()
                 }
             }
-            loggerD(TAG, "Sensor invoke ended")
         }
     }
 
@@ -99,11 +97,6 @@ object SensorHooker : YukiBaseHooker() {
         val listener = args(0).cast<SensorEventListener>() ?: return false
         val handler = args.lastOrNull() as? Handler
         listeners.add(SensorListener(type, listener, handler))
-        loggerD(TAG, buildString {
-            append("Registered type $type")
-            if (handler != null)
-                append(" with custom handler")
-        })
         return true
     }
 }
