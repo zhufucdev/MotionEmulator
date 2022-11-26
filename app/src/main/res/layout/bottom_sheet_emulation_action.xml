@@ -43,13 +43,12 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/common_padding"/>
 
-            <androidx.appcompat.widget.AppCompatButton
+            <com.google.android.material.button.MaterialButton
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:id="@+id/btn_determine"
                     android:layout_gravity="end"
-                    android:text="@string/action_determine"
-                    style="@style/Widget.AppCompat.Button.Colored"/>
+                    android:text="@string/action_determine"/>
         </androidx.appcompat.widget.LinearLayoutCompat>
     </FrameLayout>
 </androidx.cardview.widget.CardView>

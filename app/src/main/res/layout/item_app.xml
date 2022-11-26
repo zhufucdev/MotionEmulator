@@ -39,7 +39,7 @@
             android:text="com.zhufucdev.motion_emulator"
             style="@style/TextAppearance.AppCompat.Caption"/>
 
-    <androidx.appcompat.widget.AppCompatCheckBox
+    <com.google.android.material.checkbox.MaterialCheckBox
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/toggle_app"
