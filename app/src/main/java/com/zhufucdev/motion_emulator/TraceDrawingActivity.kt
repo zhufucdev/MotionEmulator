@@ -41,7 +41,7 @@ import com.zhufucdev.motion_emulator.data.Traces
 import com.zhufucdev.motion_emulator.databinding.ActivityTraceDrawingBinding
 import kotlinx.coroutines.launch
 
-class TraceDrawingActivity : AppCompatActivity(R.layout.activity_trace_drawing) {
+class TraceDrawingActivity : AppCompatActivity() {
     private lateinit var binding: ActivityTraceDrawingBinding
     private lateinit var amap: AMap
     private lateinit var locationManager: LocationManager
@@ -55,6 +55,7 @@ class TraceDrawingActivity : AppCompatActivity(R.layout.activity_trace_drawing) 
 
         binding = ActivityTraceDrawingBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        setSupportActionBar(binding.appBarToolbar)
 
         binding.mapCanvas.onCreate(savedInstanceState)
         amap = binding.mapCanvas.map
@@ -341,7 +342,9 @@ class TraceDrawingActivity : AppCompatActivity(R.layout.activity_trace_drawing) 
 
                 val target = amap.cameraPosition.target
                 lifecycleScope.launch {
+                    val p = points.points
                     val address = getAddress(target)
+                    val offset = offsetPatch(binding.mapCanvas, p)
                     val name = address
                         ?.let { getString(R.string.text_near, it) }
                         ?: dateString()
@@ -349,7 +352,8 @@ class TraceDrawingActivity : AppCompatActivity(R.layout.activity_trace_drawing) 
                         Trace(
                             NanoIdUtils.randomNanoId(),
                             name,
-                            points.points.map { com.zhufucdev.motion_emulator.data.Point(it.latitude, it.longitude) }
+                            p.map { com.zhufucdev.motion_emulator.data.Point(it.latitude, it.longitude) },
+                            offset
                         )
                     )
                     runOnUiThread {
@@ -368,8 +372,8 @@ class TraceDrawingActivity : AppCompatActivity(R.layout.activity_trace_drawing) 
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> callback.markBegin(event.x.toInt(), event.y.toInt())
                 MotionEvent.ACTION_UP -> callback.markEnd(event.x.toInt(), event.y.toInt())
+                else -> callback.addPoint(event.x.toInt(), event.y.toInt())
             }
-            callback.addPoint(event.x.toInt(), event.y.toInt())
             true
         }
 

@@ -354,7 +354,7 @@ object LocationHooker : YukiBaseHooker() {
                     if (Scheduler.satellites <= 0) return@afterHook
 
                     result = fakeSatellites.also {
-                        loggerD(TAG, "${it.count()} Scheduler.satellites are fixed")
+                        loggerD(TAG, "${it.count()} satellites are fixed")
                     }
                 }
             }
@@ -450,7 +450,7 @@ object LocationHooker : YukiBaseHooker() {
                 }
 
                 afterHook {
-                    result = Scheduler.location.latitude
+                    result = Scheduler.location.latitude + Scheduler.offset.latitude
                 }
             }
 
@@ -462,7 +462,7 @@ object LocationHooker : YukiBaseHooker() {
                 }
 
                 afterHook {
-                    result = Scheduler.location.longitude
+                    result = Scheduler.location.longitude + Scheduler.offset.longitude
                 }
             }
         }

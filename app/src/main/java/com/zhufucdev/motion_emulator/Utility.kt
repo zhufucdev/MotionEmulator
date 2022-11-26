@@ -7,10 +7,10 @@ import android.content.res.Resources
 import android.util.TypedValue
 import androidx.annotation.AttrRes
 import com.amap.api.maps.AMap
+import com.amap.api.maps.MapView
 import com.amap.api.maps.MapsInitializer
 import com.amap.api.maps.model.LatLng
 import com.amap.api.maps.model.LatLngBounds
-import com.amap.api.maps.model.LatLngBoundsCreator
 import com.zhufucdev.motion_emulator.data.Point
 import io.ktor.client.*
 import io.ktor.client.call.*
@@ -52,6 +52,11 @@ private val ktorClient = HttpClient(Android) {
     }
 }
 
+/**
+ * Get a human-readable address of PoI
+ *
+ * This is in Mandarin, which sucks
+ */
 suspend fun getAddress(location: LatLng): String? {
     val req = ktorClient.get("https://restapi.amap.com/v3/geocode/regeo") {
         parameter("key", BuildConfig.AMAP_WEB_KEY)
@@ -144,6 +149,7 @@ operator fun FloatArray.times(other: Float): FloatArray {
 }
 
 fun Point.toLatLng(): LatLng = LatLng(latitude, longitude)
+fun LatLng.toPoint(): Point = Point(latitude, longitude)
 
 fun skipAmapFuckingLicense(context: Context) {
     MapsInitializer.updatePrivacyShow(context, true, true)
@@ -173,3 +179,44 @@ fun List<Point>.bounds(): LatLngBounds =
             forEach { include(it.toLatLng()) }
         }
         .build()
+
+/**
+ * Do minus operation, treating
+ * the two [LatLng]s as 2D vectors
+ */
+operator fun LatLng.minus(other: LatLng) = LatLng(latitude - other.latitude, longitude - other.longitude)
+
+/**
+ * Calculate average offset for a specific trace
+ * from current view
+ */
+fun offsetPatch(view: MapView, trace: List<LatLng>): Point {
+    val bounds =
+        LatLngBounds
+            .builder()
+            .apply {
+                trace.forEach { include(it) }
+                if (trace.size < 2) {
+                    include(view.map.projection.fromScreenLocation(ScreenPoint(0, 0)))
+                }
+            }
+            .build()
+    val boundsProjectionNE =
+        view.map.projection.toScreenLocation(bounds.northeast)
+    val boundsProjectionSW =
+        view.map.projection.toScreenLocation(bounds.southwest)
+    val screenCenter =
+        ScreenPoint(
+            (boundsProjectionSW.x - boundsProjectionNE.x) / 2 + boundsProjectionNE.x,
+            (boundsProjectionNE.y - boundsProjectionSW.y) / 2 + boundsProjectionSW.y
+        )
+    val screenCenterProjection = view.map.projection.fromScreenLocation(screenCenter)
+    val mapCenter =
+        LatLng(
+            (bounds.northeast.latitude - bounds.southwest.latitude) / 2 + bounds.southwest.latitude,
+            (bounds.southwest.longitude - bounds.northeast.longitude) / 2 + bounds.northeast.longitude
+        )
+    return (screenCenterProjection - mapCenter).toPoint()
+}
+
+private typealias ScreenPoint = android.graphics.Point

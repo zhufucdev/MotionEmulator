@@ -113,6 +113,8 @@ object Scheduler {
     private val progress get() = (elapsed / duration / 1000).toFloat()
     val location get() = mLocation ?: Point(39.989410, 116.480881)
     val cells get() = mCellMoment ?: CellMoment(0F)
+    var offset: Point = Point.zero
+        private set
 
     private val stepSensors = intArrayOf(Sensor.TYPE_STEP_COUNTER, Sensor.TYPE_STEP_DETECTOR)
     private fun startEmulation(
@@ -130,6 +132,7 @@ object Scheduler {
         val fullTrace = trace.at(0F)
         length = fullTrace.totalLen
         duration = length / velocity // in seconds
+        offset = trace.offset
         this.satellites = satellites
 
         val scope = CoroutineScope(Dispatchers.Default)

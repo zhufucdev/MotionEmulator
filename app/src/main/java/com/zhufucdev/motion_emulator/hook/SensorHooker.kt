@@ -41,7 +41,6 @@ object SensorHooker : YukiBaseHooker() {
             SensorEvent::class.constructors.firstOrNull { it.parameters.size == 4 }
                 ?: error("sensor event constructor not available")
         val elapsed = SystemClock.elapsedRealtimeNanos()
-        loggerD(TAG, "Raising with moment($moment)")
         moment.data.forEach { (t, v) ->
             val sensor = appContext!!.getSystemService(SensorManager::class.java).getDefaultSensor(t)
             val event = eventConstructor.call(sensor, SensorManager.SENSOR_STATUS_ACCURACY_HIGH, elapsed, v)
