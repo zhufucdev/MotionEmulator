@@ -1,9 +1,12 @@
 > This project is under active development
 
 # MotionEmulator
+<img src="art/MotionEmulator.svg" width="200">
+
 English Version | [中文文档](README_zh.md)
 
 Android motion simulator with sensor support.
+
 
 ## Scenarios
 
