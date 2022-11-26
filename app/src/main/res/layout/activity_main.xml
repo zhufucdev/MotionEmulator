@@ -1,212 +1,211 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.appcompat.widget.LinearLayoutCompat
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:context=".MainActivity"
-        android:orientation="vertical">
+        android:layout_height="wrap_content">
 
-    <androidx.cardview.widget.CardView
+        <com.google.android.material.appbar.MaterialToolbar
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:id="@+id/app_bar_toolbar"/>
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
+
+        <androidx.appcompat.widget.LinearLayoutCompat
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/status_card"
-            style="@style/BaseCardLayout"
-            android:foreground="?attr/selectableItemBackgroundBorderless"
-            app:cardBackgroundColor="@color/success"
-            app:cardCornerRadius="@dimen/card_radius">
+            android:orientation="vertical">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+            <androidx.cardview.widget.CardView
+                android:id="@+id/status_card"
+                style="@style/BaseCardLayout"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:padding="@dimen/card_padding_inside">
+                android:layout_height="wrap_content"
+                android:foreground="?attr/selectableItemBackgroundBorderless"
+                app:cardBackgroundColor="@color/success"
+                app:cardCornerRadius="@dimen/card_radius">
 
-            <androidx.appcompat.widget.AppCompatImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/status_icon"
-                    android:tint="?attr/colorOnSurface"
-                    app:srcCompat="@drawable/ic_baseline_done_all_24"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"/>
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:padding="@dimen/card_padding_inside">
 
-            <androidx.appcompat.widget.AppCompatTextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/status_title"
-                    android:text="@string/title_status_activated"
-                    style="@style/TextAppearance.AppCompat.Title"
-                    app:layout_constraintStart_toEndOf="@id/status_icon"
-                    app:layout_constraintTop_toTopOf="parent"
-                    android:layout_marginStart="@dimen/icon_margin"/>
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:id="@+id/status_icon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:tint="?attr/colorOnSurface"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:srcCompat="@drawable/ic_baseline_done_all_24" />
 
-            <androidx.appcompat.widget.AppCompatTextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/status_subtitle"
-                    android:text="@string/text_status_activated"
-                    android:layout_marginTop="@dimen/common_padding"
-                    app:layout_constraintTop_toBottomOf="@id/status_icon"
-                    app:layout_constraintLeft_toLeftOf="parent"/>
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/status_title"
+                        style="@style/TextAppearance.AppCompat.Title"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/icon_margin"
+                        android:text="@string/title_status_activated"
+                        app:layout_constraintStart_toEndOf="@id/status_icon"
+                        app:layout_constraintTop_toTopOf="parent" />
 
-            <androidx.appcompat.widget.AppCompatImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:tint="?attr/colorOnSurface"
-                    app:srcCompat="@drawable/ic_baseline_open_in_new_24"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"/>
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </androidx.cardview.widget.CardView>
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/status_subtitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/common_padding"
+                        android:text="@string/text_status_activated"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/status_icon" />
 
-    <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/record_card"
-            style="@style/BaseCardLayout"
-            android:foreground="?android:attr/selectableItemBackgroundBorderless"
-            app:cardCornerRadius="@dimen/card_radius">
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:tint="?attr/colorOnSurface"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:srcCompat="@drawable/ic_baseline_open_in_new_24" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </androidx.cardview.widget.CardView>
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+            <androidx.cardview.widget.CardView
+                android:id="@+id/record_card"
+                style="@style/BaseCardLayout"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:padding="@dimen/card_padding_inside">
+                android:layout_height="wrap_content"
+                android:foreground="?android:attr/selectableItemBackgroundBorderless"
+                app:cardBackgroundColor="?attr/colorSurfaceVariant"
+                app:cardCornerRadius="@dimen/card_radius">
 
-            <androidx.appcompat.widget.AppCompatImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/record_icon"
-                    android:tint="?attr/colorOnSurface"
-                    app:srcCompat="@drawable/ic_baseline_smartphone_24"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"/>
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:padding="@dimen/card_padding_inside">
 
-            <androidx.appcompat.widget.AppCompatTextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/record_title"
-                    style="@style/TextAppearance.AppCompat.Title"
-                    android:text="@string/title_record"
-                    app:layout_constraintStart_toEndOf="@id/record_icon"
-                    app:layout_constraintTop_toTopOf="parent"
-                    android:layout_marginStart="@dimen/icon_margin"/>
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:id="@+id/record_icon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:tint="?attr/colorOnSurface"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:srcCompat="@drawable/ic_baseline_smartphone_24" />
 
-            <androidx.appcompat.widget.AppCompatTextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/text_record"
-                    android:layout_marginTop="@dimen/common_padding"
-                    app:layout_constraintTop_toBottomOf="@id/record_icon"
-                    app:layout_constraintStart_toStartOf="parent"/>
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/record_title"
+                        style="@style/TextAppearance.AppCompat.Title"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/icon_margin"
+                        android:text="@string/title_record"
+                        app:layout_constraintStart_toEndOf="@id/record_icon"
+                        app:layout_constraintTop_toTopOf="parent" />
 
-            <androidx.appcompat.widget.AppCompatImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:tint="?attr/colorOnSurface"
-                    app:srcCompat="@drawable/ic_baseline_open_in_new_24"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"/>
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </androidx.cardview.widget.CardView>
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/common_padding"
+                        android:text="@string/text_record"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/record_icon" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </androidx.cardview.widget.CardView>
 
-    <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/trace_card"
-            style="@style/BaseCardLayout"
-            android:foreground="?android:attr/selectableItemBackgroundBorderless"
-            app:cardCornerRadius="@dimen/card_radius">
-
-        <androidx.constraintlayout.widget.ConstraintLayout
+            <androidx.cardview.widget.CardView
+                android:id="@+id/trace_card"
+                style="@style/BaseCardLayout"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:padding="@dimen/card_padding_inside">
+                android:layout_height="wrap_content"
+                android:foreground="?android:attr/selectableItemBackgroundBorderless"
+                app:cardBackgroundColor="?attr/colorSurfaceVariant"
+                app:cardCornerRadius="@dimen/card_radius">
 
-            <androidx.appcompat.widget.AppCompatImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/trace_icon"
-                    android:tint="?attr/colorOnSurface"
-                    app:srcCompat="@drawable/ic_baseline_map_24"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"/>
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:padding="@dimen/card_padding_inside">
 
-            <androidx.appcompat.widget.AppCompatTextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/trace_title"
-                    style="@style/TextAppearance.AppCompat.Title"
-                    android:text="@string/title_draw_trace"
-                    app:layout_constraintStart_toEndOf="@id/trace_icon"
-                    app:layout_constraintTop_toTopOf="parent"
-                    android:layout_marginStart="@dimen/icon_margin"/>
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:id="@+id/trace_icon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:tint="?attr/colorOnSurface"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:srcCompat="@drawable/ic_baseline_map_24" />
 
-            <androidx.appcompat.widget.AppCompatTextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/text_draw_trace"
-                    android:layout_marginTop="@dimen/common_padding"
-                    app:layout_constraintTop_toBottomOf="@id/trace_icon"
-                    app:layout_constraintStart_toStartOf="parent"/>
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/trace_title"
+                        style="@style/TextAppearance.AppCompat.Title"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/icon_margin"
+                        android:text="@string/title_draw_trace"
+                        app:layout_constraintStart_toEndOf="@id/trace_icon"
+                        app:layout_constraintTop_toTopOf="parent" />
 
-            <androidx.appcompat.widget.AppCompatImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:tint="?attr/colorOnSurface"
-                    app:srcCompat="@drawable/ic_baseline_open_in_new_24"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"/>
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </androidx.cardview.widget.CardView>
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/common_padding"
+                        android:text="@string/text_draw_trace"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/trace_icon" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </androidx.cardview.widget.CardView>
 
-    <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/emulate_card"
-            style="@style/BaseCardLayout"
-            android:foreground="?android:attr/selectableItemBackgroundBorderless"
-            app:cardCornerRadius="@dimen/card_radius">
-
-        <androidx.constraintlayout.widget.ConstraintLayout
+            <androidx.cardview.widget.CardView
+                android:id="@+id/emulate_card"
+                style="@style/BaseCardLayout"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:padding="@dimen/card_padding_inside">
+                android:layout_height="wrap_content"
+                android:foreground="?android:attr/selectableItemBackgroundBorderless"
+                app:cardBackgroundColor="?attr/colorSurfaceVariant"
+                app:cardCornerRadius="@dimen/card_radius">
 
-            <androidx.appcompat.widget.AppCompatImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/emulate_icon"
-                    android:tint="?attr/colorOnSurface"
-                    app:srcCompat="@drawable/ic_baseline_auto_fix_high_24"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"/>
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:padding="@dimen/card_padding_inside">
 
-            <androidx.appcompat.widget.AppCompatTextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/emulate_title"
-                    style="@style/TextAppearance.AppCompat.Title"
-                    android:text="@string/title_emulate"
-                    app:layout_constraintStart_toEndOf="@id/emulate_icon"
-                    app:layout_constraintTop_toTopOf="parent"
-                    android:layout_marginStart="@dimen/icon_margin"/>
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:id="@+id/emulate_icon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:tint="?attr/colorOnSurface"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:srcCompat="@drawable/ic_baseline_auto_fix_high_24" />
 
-            <androidx.appcompat.widget.AppCompatTextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/text_emulate"
-                    android:layout_marginTop="@dimen/common_padding"
-                    app:layout_constraintTop_toBottomOf="@id/emulate_icon"
-                    app:layout_constraintStart_toStartOf="parent"/>
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/emulate_title"
+                        style="@style/TextAppearance.AppCompat.Title"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/icon_margin"
+                        android:text="@string/title_emulate"
+                        app:layout_constraintStart_toEndOf="@id/emulate_icon"
+                        app:layout_constraintTop_toTopOf="parent" />
 
-            <androidx.appcompat.widget.AppCompatImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:tint="?attr/colorOnSurface"
-                    app:srcCompat="@drawable/ic_baseline_open_in_new_24"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"/>
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </androidx.cardview.widget.CardView>
-</androidx.appcompat.widget.LinearLayoutCompat>
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/common_padding"
+                        android:text="@string/text_emulate"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/emulate_icon" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </androidx.cardview.widget.CardView>
+        </androidx.appcompat.widget.LinearLayoutCompat>
+    </androidx.core.widget.NestedScrollView>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

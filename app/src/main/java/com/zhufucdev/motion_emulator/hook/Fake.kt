@@ -27,6 +27,7 @@ import android.util.Log
 import androidx.core.os.bundleOf
 import com.amap.api.location.AMapLocation
 import com.amap.api.maps.AMapUtils
+import com.highcapable.yukihookapi.hook.log.loggerD
 import com.zhufucdev.motion_emulator.*
 import com.zhufucdev.motion_emulator.data.*
 import kotlinx.coroutines.coroutineScope
@@ -34,7 +35,7 @@ import kotlinx.coroutines.launch
 import kotlin.math.round
 import kotlin.random.Random
 
-fun Point.android(provider: String = LocationManager.GPS_PROVIDER): Location {
+fun Point.android(provider: String = LocationManager.GPS_PROVIDER, fixOffset: Boolean = true): Location {
     val result = Location(provider).apply {
         // fake some data
         time = System.currentTimeMillis()
@@ -51,10 +52,18 @@ fun Point.android(provider: String = LocationManager.GPS_PROVIDER): Location {
     result.latitude = latitude
     result.longitude = longitude
 
+    if (fixOffset) {
+        val offset = Scheduler.offset
+        loggerD("Fake", "Offset is $offset")
+        result.latitude += offset.latitude
+        result.longitude += offset.longitude
+    }
+
     return result
 }
 
-fun Point.amap(): AMapLocation = AMapLocation(android())
+fun Point.amap(provider: String = LocationManager.GPS_PROVIDER, fixOffset: Boolean = true): AMapLocation =
+    AMapLocation(android(provider, fixOffset))
 
 /**
  * Result for [Trace.at]

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          xmlns:tools="http://schemas.android.com/tools"
-          package="com.zhufucdev.motion_emulator">
+          xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
@@ -13,7 +12,7 @@
                      tools:ignore="QueryAllPackagesPermission"/>
 
     <application
-            android:name="com.highcapable.yukihookapi.hook.xposed.application.ModuleApplication"
+            android:name=".MeApplication"
             android:allowBackup="true"
             android:allowNativeHeapPointerTagging="false"
             android:dataExtractionRules="@xml/data_extraction_rules"

@@ -30,6 +30,7 @@ class RecordActivity : AppCompatActivity() {
 
         binding = ActivityRecordBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        setSupportActionBar(binding.appBarToolbar)
 
         navController = findNavController(R.id.nav_host_fragment_activity_record)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {

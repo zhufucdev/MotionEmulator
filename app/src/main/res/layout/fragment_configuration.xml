@@ -1,134 +1,133 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:context=".emulate.ConfigurationFragment">
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".emulate.ConfigurationFragment">
 
-    <ScrollView
+        <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-        <androidx.appcompat.widget.LinearLayoutCompat
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="@dimen/common_padding">
-
-            <com.google.android.material.textfield.TextInputLayout
+                <androidx.appcompat.widget.LinearLayoutCompat
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:id="@+id/wrapper_trace_dropdown"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu"
-                    android:hint="@string/title_trace"
-                    android:layout_marginBottom="@dimen/common_padding"
-                    app:startIconDrawable="@drawable/ic_baseline_map_24">
+                    android:orientation="vertical"
+                    android:padding="@dimen/common_padding">
 
-                <com.google.android.material.textfield.MaterialAutoCompleteTextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/dropdown_trace"
-                        android:inputType="none"/>
-            </com.google.android.material.textfield.TextInputLayout>
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/wrapper_trace_dropdown"
+                            style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="@dimen/common_padding"
+                            android:hint="@string/title_trace"
+                            app:startIconDrawable="@drawable/ic_baseline_map_24">
+
+                                <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                                    android:id="@+id/dropdown_trace"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:inputType="none" />
+                        </com.google.android.material.textfield.TextInputLayout>
 
 
-            <com.google.android.material.textfield.TextInputLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/wrapper_dropdown"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu"
-                    android:hint="@string/title_motion_data"
-                    android:layout_marginBottom="@dimen/common_padding"
-                    app:startIconDrawable="@drawable/ic_baseline_smartphone_24">
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/wrapper_dropdown"
+                            style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="@dimen/common_padding"
+                            android:hint="@string/title_motion_data"
+                            app:startIconDrawable="@drawable/ic_baseline_smartphone_24">
 
-                <com.google.android.material.textfield.MaterialAutoCompleteTextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/dropdown_motion"
-                        android:inputType="none"/>
-            </com.google.android.material.textfield.TextInputLayout>
+                                <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                                    android:id="@+id/dropdown_motion"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:inputType="none" />
+                        </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.textfield.TextInputLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/wrapper_cells_dropdown"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu"
-                    android:hint="@string/title_cells_data"
-                    android:layout_marginBottom="@dimen/common_padding"
-                    app:startIconDrawable="@drawable/ic_baseline_cell_tower_24">
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/wrapper_cells_dropdown"
+                            style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="@dimen/common_padding"
+                            android:hint="@string/title_cells_data"
+                            app:startIconDrawable="@drawable/ic_baseline_cell_tower_24">
 
-                <com.google.android.material.textfield.MaterialAutoCompleteTextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/dropdown_cells"
-                        android:inputType="none"/>
-            </com.google.android.material.textfield.TextInputLayout>
+                                <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                                    android:id="@+id/dropdown_cells"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:inputType="none" />
+                        </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.textfield.TextInputLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/wrapper_repeat_count"
-                    android:hint="@string/title_repeat"
-                    android:layout_marginBottom="@dimen/common_padding"
-                    app:startIconDrawable="@drawable/ic_baseline_repeat_24">
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/wrapper_repeat_count"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="@dimen/common_padding"
+                            android:hint="@string/title_repeat"
+                            app:startIconDrawable="@drawable/ic_baseline_repeat_24">
 
-                <com.google.android.material.textfield.TextInputEditText
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/input_repeat_count"
-                        android:text="1"
-                        android:inputType="numberDecimal"/>
-            </com.google.android.material.textfield.TextInputLayout>
+                                <com.google.android.material.textfield.TextInputEditText
+                                    android:id="@+id/input_repeat_count"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:inputType="numberDecimal"
+                                    android:text="1" />
+                        </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.textfield.TextInputLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/wrapper_velocity"
-                    android:hint="@string/title_velocity"
-                    android:layout_marginBottom="@dimen/common_padding"
-                    app:startIconDrawable="@drawable/ic_baseline_directions_run_24"
-                    app:suffixText="@string/suffix_velocity">
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/wrapper_velocity"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="@dimen/common_padding"
+                            android:hint="@string/title_velocity"
+                            app:startIconDrawable="@drawable/ic_baseline_directions_run_24"
+                            app:suffixText="@string/suffix_velocity">
 
-                <com.google.android.material.textfield.TextInputEditText
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/input_velocity"
-                        android:text="3"
-                        android:inputType="numberDecimal"/>
-            </com.google.android.material.textfield.TextInputLayout>
+                                <com.google.android.material.textfield.TextInputEditText
+                                    android:id="@+id/input_velocity"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:inputType="numberDecimal"
+                                    android:text="3" />
+                        </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.textfield.TextInputLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/wrapper_satellite"
-                    android:hint="@string/title_satellite_count"
-                    android:layout_marginBottom="@dimen/common_padding"
-                    app:startIconDrawable="@drawable/ic_baseline_satellite_alt_24">
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/wrapper_satellite"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="@dimen/common_padding"
+                            android:hint="@string/title_satellite_count"
+                            app:startIconDrawable="@drawable/ic_baseline_satellite_alt_24">
 
-                <com.google.android.material.textfield.TextInputEditText
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/input_satellite"
-                        android:text="10"
-                        android:inputType="number"/>
-            </com.google.android.material.textfield.TextInputLayout>
+                                <com.google.android.material.textfield.TextInputEditText
+                                    android:id="@+id/input_satellite"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:inputType="number"
+                                    android:text="10" />
+                        </com.google.android.material.textfield.TextInputLayout>
 
-            <com.amap.api.maps.MapView
-                    android:layout_width="match_parent"
-                    android:layout_height="400dp"
-                    android:id="@+id/map_trace_preview"
-                    android:focusable="false"/>
-        </androidx.appcompat.widget.LinearLayoutCompat>
-    </ScrollView>
+                        <com.amap.api.maps.MapView
+                            android:id="@+id/map_trace_preview"
+                            android:layout_width="match_parent"
+                            android:layout_height="400dp"
+                            android:focusable="false" />
+                </androidx.appcompat.widget.LinearLayoutCompat>
+        </androidx.core.widget.NestedScrollView>
 
-    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+            android:id="@+id/btn_run_emulation"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/btn_run_emulation"
-            android:layout_marginBottom="@dimen/extended_fab_margin"
             android:layout_gravity="bottom|center_horizontal"
+            android:layout_marginBottom="@dimen/extended_fab_margin"
             android:text="@string/action_start_emulation"
-            app:icon="@drawable/ic_baseline_auto_fix_high_24"/>
+            app:icon="@drawable/ic_baseline_auto_fix_high_24" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -15,6 +15,7 @@ class EmulateActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityEmulateBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        setSupportActionBar(binding.appBarToolbar)
 
         Traces.require(this)
         Motions.require(this)
