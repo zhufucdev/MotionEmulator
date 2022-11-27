@@ -2,6 +2,7 @@ package com.zhufucdev.motion_emulator
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.navigation.findNavController
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.zhufucdev.motion_emulator.data.Cells
 import com.zhufucdev.motion_emulator.data.Motions
@@ -15,7 +16,8 @@ class EmulateActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityEmulateBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        setSupportActionBar(binding.appBarToolbar)
+        val navController = findNavController(R.id.nav_host_fragment_activity_emulate)
+        initializeToolbar(binding.appBarToolbar, navController)
 
         Traces.require(this)
         Motions.require(this)

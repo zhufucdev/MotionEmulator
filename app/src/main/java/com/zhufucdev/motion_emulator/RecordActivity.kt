@@ -20,7 +20,6 @@ import com.zhufucdev.motion_emulator.databinding.ActivityRecordBinding
 class RecordActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityRecordBinding
-    private lateinit var navController: NavController
     override fun onCreate(savedInstanceState: Bundle?) {
         MotionRecorder.init(this)
         TelephonyRecorder.init(this)
@@ -30,9 +29,9 @@ class RecordActivity : AppCompatActivity() {
 
         binding = ActivityRecordBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        setSupportActionBar(binding.appBarToolbar)
+        val navController = findNavController(R.id.nav_host_fragment_activity_record)
+        initializeToolbar(binding.appBarToolbar, navController)
 
-        navController = findNavController(R.id.nav_host_fragment_activity_record)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             requestPermissions(
                 arrayOf(

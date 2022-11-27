@@ -22,7 +22,7 @@ class AppStrategyActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityAppStrategyBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        setSupportActionBar(binding.appBarToolbar)
+        initializeToolbar(binding.appBarToolbar)
 
         AppMetas.require(this)
         initializeList()

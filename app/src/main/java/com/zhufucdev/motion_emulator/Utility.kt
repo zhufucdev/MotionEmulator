@@ -5,7 +5,11 @@ import android.content.pm.ApplicationInfo
 import android.content.res.Configuration
 import android.content.res.Resources
 import android.util.TypedValue
+import android.view.View
 import androidx.annotation.AttrRes
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
+import androidx.navigation.NavController
 import com.amap.api.maps.AMap
 import com.amap.api.maps.MapView
 import com.amap.api.maps.MapsInitializer
@@ -184,7 +188,8 @@ fun List<Point>.bounds(): LatLngBounds =
  * Do minus operation, treating
  * the two [LatLng]s as 2D vectors
  */
-operator fun LatLng.minus(other: LatLng) = LatLng(latitude - other.latitude, longitude - other.longitude)
+operator fun LatLng.minus(other: LatLng) =
+    LatLng(latitude - other.latitude, longitude - other.longitude)
 
 /**
  * Calculate average offset for a specific trace
@@ -220,3 +225,15 @@ fun offsetPatch(view: MapView, trace: List<LatLng>): Point {
 }
 
 private typealias ScreenPoint = android.graphics.Point
+
+fun AppCompatActivity.initializeToolbar(
+    toolbar: Toolbar,
+    navController: NavController? = null
+) {
+    setSupportActionBar(toolbar)
+    toolbar.setNavigationOnClickListener {
+        if (navController?.navigateUp() != true) {
+            finish()
+        }
+    }
+}

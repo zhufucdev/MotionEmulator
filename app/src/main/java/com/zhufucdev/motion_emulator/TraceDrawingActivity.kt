@@ -55,7 +55,7 @@ class TraceDrawingActivity : AppCompatActivity() {
 
         binding = ActivityTraceDrawingBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        setSupportActionBar(binding.appBarToolbar)
+        initializeToolbar(binding.appBarToolbar)
 
         binding.mapCanvas.onCreate(savedInstanceState)
         amap = binding.mapCanvas.map
