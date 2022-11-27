@@ -20,10 +20,11 @@
             android:fullBackupContent="@xml/backup_rules"
             android:icon="@mipmap/ic_launcher"
             android:label="@string/app_name"
+            android:localeConfig="@xml/locales_config"
             android:roundIcon="@mipmap/ic_launcher_round"
             android:supportsRtl="true"
             android:theme="@style/Theme.MotionEmulator"
-            tools:targetApi="32">
+            tools:targetApi="33">
                 <activity
                     android:name=".AppStrategyActivity"
                     android:exported="false"
