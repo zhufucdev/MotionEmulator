@@ -15,8 +15,8 @@ android {
         applicationId "com.zhufucdev.motion_emulator"
         minSdk 23
         targetSdk 33
-        versionCode 3
-        versionName "1.0.4beta"
+        versionCode 4
+        versionName "1.0.5beta"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
