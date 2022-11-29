@@ -30,7 +30,8 @@
             android:layout_height="match_parent"
             android:clickable="true"
             android:focusable="true"
-            android:visibility="gone" />
+            android:visibility="gone"
+            app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior" />
 
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
