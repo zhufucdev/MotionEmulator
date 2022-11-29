@@ -24,12 +24,14 @@ data class Point(val latitude: Double, val longitude: Double) {
  * @param points to describe the trace's shape and direction
  */
 @Serializable
-data class Trace(val id: String, val name: String, val points: List<Point>, val offset: Point = Point.zero)
+data class Trace(val id: String, val name: String, val points: List<Point>)
 
 @OptIn(ExperimentalSerializationApi::class)
 object Traces {
     private val records = arrayListOf<Trace>()
     private lateinit var rootDir: File
+
+    private val jsonParser = Json { ignoreUnknownKeys = true }
 
     /**
      * Make sure it works
@@ -46,7 +48,7 @@ object Traces {
                     return@forEach
                 }
                 file.inputStream().use {
-                    val record = Json.decodeFromStream<Trace>(it)
+                    val record = jsonParser.decodeFromStream<Trace>(it)
                     records.add(record)
                 }
             }

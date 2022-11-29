@@ -34,8 +34,8 @@ class EmulateStatusFragment : Fragment() {
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+    override fun onStart() {
+        super.onStart()
 
         initializeMap()
         initializeMonitors()
@@ -145,12 +145,16 @@ class EmulateStatusFragment : Fragment() {
         }
 
         addIntermediateListener {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                progressBar.setProgress((span * it.progress).roundToInt(), true)
-            } else {
-                progressBar.progress = (span * it.progress).roundToInt()
+            activity?.runOnUiThread {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    progressBar.setProgress((span * it.progress).roundToInt(), true)
+                } else {
+                    progressBar.progress = (span * it.progress).roundToInt()
+                }
+                Scheduler.info?.duration?.let { t -> t - it.elapsed }?.let {
+                    notifyTime(it)
+                }
             }
-            notifyTime(Scheduler.info!!.duration - it.elapsed)
         }
 
         fun stateListener(running: Boolean) {
@@ -191,7 +195,6 @@ class EmulateStatusFragment : Fragment() {
         super.onDestroy()
         binding.mapMotionPreview.onDestroy()
         Scheduler.emulation = null
-        listeners.forEach { it.cancel() }
     }
 
     override fun onResume() {
@@ -202,5 +205,11 @@ class EmulateStatusFragment : Fragment() {
     override fun onPause() {
         super.onPause()
         binding.mapMotionPreview.onPause()
+    }
+
+    override fun onStop() {
+        super.onStop()
+
+        listeners.forEach { it.cancel() }
     }
 }

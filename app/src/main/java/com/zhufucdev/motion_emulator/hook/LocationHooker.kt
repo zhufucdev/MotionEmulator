@@ -450,7 +450,7 @@ object LocationHooker : YukiBaseHooker() {
                 }
 
                 afterHook {
-                    result = Scheduler.location.latitude + Scheduler.offset.latitude
+                    result = Scheduler.location.offsetFixed().latitude
                 }
             }
 
@@ -462,7 +462,7 @@ object LocationHooker : YukiBaseHooker() {
                 }
 
                 afterHook {
-                    result = Scheduler.location.longitude + Scheduler.offset.longitude
+                    result = Scheduler.location.offsetFixed().longitude
                 }
             }
         }

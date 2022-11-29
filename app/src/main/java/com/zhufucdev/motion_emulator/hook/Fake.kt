@@ -35,6 +35,11 @@ import kotlinx.coroutines.launch
 import kotlin.math.round
 import kotlin.random.Random
 
+fun Point.offsetFixed(): Point {
+    val r = MapFixUtil.transform(latitude, longitude)
+    return Point(r[0], r[1])
+}
+
 fun Point.android(provider: String = LocationManager.GPS_PROVIDER, fixOffset: Boolean = true): Location {
     val result = Location(provider).apply {
         // fake some data
@@ -49,14 +54,14 @@ fun Point.android(provider: String = LocationManager.GPS_PROVIDER, fixOffset: Bo
         accuracy = 1F
     }
 
-    result.latitude = latitude
-    result.longitude = longitude
 
     if (fixOffset) {
-        val offset = Scheduler.offset
-        loggerD("Fake", "Offset is $offset")
-        result.latitude += offset.latitude
-        result.longitude += offset.longitude
+        val fixed = offsetFixed()
+        result.latitude = fixed.latitude
+        result.longitude = fixed.longitude
+    } else {
+        result.latitude = latitude
+        result.longitude = longitude
     }
 
     return result

@@ -344,7 +344,6 @@ class TraceDrawingActivity : AppCompatActivity() {
                 lifecycleScope.launch {
                     val p = points.points
                     val address = getAddress(target)
-                    val offset = offsetPatch(binding.mapCanvas, p)
                     val name = address
                         ?.let { getString(R.string.text_near, it) }
                         ?: dateString()
@@ -353,7 +352,6 @@ class TraceDrawingActivity : AppCompatActivity() {
                             NanoIdUtils.randomNanoId(),
                             name,
                             p.map { com.zhufucdev.motion_emulator.data.Point(it.latitude, it.longitude) },
-                            offset
                         )
                     )
                     runOnUiThread {
