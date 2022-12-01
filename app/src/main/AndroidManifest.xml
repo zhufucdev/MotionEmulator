@@ -8,6 +8,7 @@
         <uses-permission android:name="android.permission.READ_PHONE_STATE" />
         <uses-permission android:name="android.permission.INTERNET" />
         <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+        <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
         <uses-permission
             android:name="android.permission.QUERY_ALL_PACKAGES"
             tools:ignore="QueryAllPackagesPermission" />
@@ -25,6 +26,15 @@
             android:supportsRtl="true"
             android:theme="@style/Theme.MotionEmulator"
             tools:targetApi="33">
+                <receiver
+                    android:name=".hook_frontend.EmulationMonitorReceiver"
+                    android:enabled="true"
+                    android:exported="false">
+                        <intent-filter>
+                                <action android:name="com.zhufucdev.motion_emulator.ACTION_DETERMINE" />
+                        </intent-filter>
+                </receiver>
+
                 <activity
                     android:name=".AppStrategyActivity"
                     android:exported="false"
@@ -32,7 +42,8 @@
                 <activity
                     android:name=".EmulateActivity"
                     android:exported="false"
-                    android:label="@string/title_emulate" />
+                    android:label="@string/title_emulate"
+                    android:launchMode="singleTop" />
                 <activity
                     android:name=".TraceDrawingActivity"
                     android:exported="false"
@@ -46,6 +57,7 @@
                     android:exported="true">
                         <intent-filter>
                                 <action android:name="android.intent.action.MAIN" />
+
                                 <category android:name="android.intent.category.LAUNCHER" />
                         </intent-filter>
                 </activity>

@@ -1,5 +1,7 @@
 package com.zhufucdev.motion_emulator.emulate
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -7,6 +9,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
 import com.amap.api.maps.CameraUpdateFactory
 import com.amap.api.maps.model.LatLng
 import com.amap.api.maps.model.NavigateArrow
@@ -20,9 +25,11 @@ class EmulateStatusFragment : Fragment() {
     private lateinit var binding: FragmentEmulateStatusBinding
     private val listeners = mutableSetOf<ListenCallback>()
     private lateinit var emulation: Emulation
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         skipAmapFuckingLicense(requireContext())
+        registerChannel()
     }
 
     override fun onCreateView(
@@ -170,7 +177,7 @@ class EmulateStatusFragment : Fragment() {
             }
         }
 
-        stateListener(true)
+        stateListener(Scheduler.emulation != null)
         addEmulationStateListener { running ->
             activity?.runOnUiThread {
                 stateListener(running)
@@ -191,15 +198,34 @@ class EmulateStatusFragment : Fragment() {
         binding.mapMotionPreview.onSaveInstanceState(outState)
     }
 
+    private fun addMonitorWorker() {
+        val workRequest =
+            OneTimeWorkRequestBuilder<EmulationMonitorWorker>()
+                .build()
+        WorkManager.getInstance(requireContext())
+            .enqueueUniqueWork(
+                WORK_NAME_MONITOR,
+                ExistingWorkPolicy.REPLACE,
+                workRequest
+            )
+    }
+
+    private fun removeMonitorWorker() {
+        WorkManager.getInstance(requireContext())
+            .cancelUniqueWork(WORK_NAME_MONITOR)
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         binding.mapMotionPreview.onDestroy()
         Scheduler.emulation = null
+        removeMonitorWorker()
     }
 
     override fun onResume() {
         super.onResume()
         binding.mapMotionPreview.onResume()
+        removeMonitorWorker()
     }
 
     override fun onPause() {
@@ -211,5 +237,35 @@ class EmulateStatusFragment : Fragment() {
         super.onStop()
 
         listeners.forEach { it.cancel() }
+        addMonitorWorker()
+    }
+
+    private fun registerChannel() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            return
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            requireActivity().requestPermissions(
+                arrayOf(android.Manifest.permission.POST_NOTIFICATIONS),
+                0
+            )
+        }
+        with(requireContext().applicationContext) {
+            val name = getString(R.string.title_channel_emulation)
+            val description = getString(R.string.text_channel_emulation)
+            getSystemService(android.app.NotificationManager::class.java)
+                .createNotificationChannel(
+                    NotificationChannel(
+                        EmulationMonitorWorker.CHANNEL_ID,
+                        name,
+                        NotificationManager.IMPORTANCE_LOW
+                    )
+                        .apply {
+                            setDescription(description)
+                        }
+                )
+        }
     }
 }
+
+const val WORK_NAME_MONITOR = "emulationMonitor"
