@@ -75,4 +75,6 @@
     <string name="action_set_as_default">设为默认</string>
     <string name="text_saved_as_default">已将当前配置存为默认</string>
         <string name="title_app_strategy">应用策略</string>
+        <string name="name_none">不使用</string>
+    <string name="name_block">屏蔽</string>
 </resources>

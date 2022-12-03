@@ -24,7 +24,7 @@ data class Point(val latitude: Double, val longitude: Double) {
  * @param points to describe the trace's shape and direction
  */
 @Serializable
-data class Trace(val id: String, val name: String, val points: List<Point>)
+data class Trace(override val id: String, val name: String, val points: List<Point>) : Referable
 
 @OptIn(ExperimentalSerializationApi::class)
 object Traces {

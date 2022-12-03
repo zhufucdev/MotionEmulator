@@ -15,7 +15,9 @@ import com.amap.api.maps.MapView
 import com.amap.api.maps.MapsInitializer
 import com.amap.api.maps.model.LatLng
 import com.amap.api.maps.model.LatLngBounds
-import com.zhufucdev.motion_emulator.data.Point
+import com.zhufucdev.motion_emulator.data.*
+import com.zhufucdev.motion_emulator.hook_frontend.Emulation
+import com.zhufucdev.motion_emulator.hook_frontend.EmulationRef
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.android.*
@@ -236,8 +238,6 @@ object MapFixUtil {
     }
 }
 
-private typealias ScreenPoint = android.graphics.Point
-
 fun AppCompatActivity.initializeToolbar(
     toolbar: Toolbar,
     navController: NavController? = null
@@ -249,3 +249,13 @@ fun AppCompatActivity.initializeToolbar(
         }
     }
 }
+
+fun Emulation.ref() =
+    EmulationRef(trace.id, motion.ref(), cells.ref(), velocity, repeat, satelliteCount)
+
+fun <T : Referable> Box<T>.ref() =
+    when(this) {
+        is EmptyBox<T> -> EMPTY_REF
+        is BlockBox<T> -> BLOCK_REF
+        else -> value?.id ?: NULL_REF
+    }

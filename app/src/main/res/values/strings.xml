@@ -75,4 +75,6 @@
     <string name="action_set_as_default">Set as default</string>
     <string name="text_saved_as_default">Saved current configuration as default</string>
     <string name="title_app_strategy">App Strategy</string>
+    <string name="name_none">None</string>
+    <string name="name_block">Block</string>
 </resources>

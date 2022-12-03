@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.zhufucdev.motion_emulator.data
 
 import android.content.Context
@@ -6,7 +8,6 @@ import android.os.Parcelable.Creator
 import android.telephony.*
 import android.telephony.cdma.CdmaCellLocation
 import android.telephony.gsm.GsmCellLocation
-import com.zhufucdev.motion_emulator.hook.Moment
 import kotlinx.serialization.*
 import kotlinx.serialization.builtins.ByteArraySerializer
 import kotlinx.serialization.builtins.ListSerializer
@@ -32,7 +33,11 @@ data class CellMoment(
 ) : Moment
 
 @Serializable
-data class CellTimeline(val id: String, val time: Long, val moments: List<CellMoment>)
+data class CellTimeline(
+    override val id: String,
+    val time: Long,
+    val moments: List<CellMoment>
+) : Referable
 
 class CellSerializer : KSerializer<CellMoment> {
     override val descriptor: SerialDescriptor =
@@ -54,7 +59,8 @@ class CellSerializer : KSerializer<CellMoment> {
                 DECODE_DONE -> break@loop
                 0 -> elapsed = decodeFloatElement(descriptor, index)
                 1 -> cells = decodeParcelableListElement(descriptor, CellInfo.CREATOR, index)
-                2 -> neighboring = decodeParcelableListElement(descriptor, NeighboringCellInfo.CREATOR, index)
+                2 -> neighboring =
+                    decodeParcelableListElement(descriptor, NeighboringCellInfo.CREATOR, index)
                 3 -> location = decodeCellLocationElement(descriptor, index)
 
                 else -> throw SerializationException("Unexpected index $index")
@@ -66,19 +72,24 @@ class CellSerializer : KSerializer<CellMoment> {
         CellMoment(elapsed, cells, neighboring, location)
     }
 
-    override fun serialize(encoder: Encoder, value: CellMoment) = encoder.encodeStructure(descriptor) {
-        encodeFloatElement(descriptor, 0, value.elapsed)
-        encodeParcelableListElement(descriptor, 1, value.cell)
-        if (value.neighboring.isNotEmpty())
-            encodeParcelableListElement(descriptor, 2, value.neighboring)
-        if (value.location != null)
-            encodeCellLocationElement(descriptor, 3, value.location)
-    }
+    override fun serialize(encoder: Encoder, value: CellMoment) =
+        encoder.encodeStructure(descriptor) {
+            encodeFloatElement(descriptor, 0, value.elapsed)
+            encodeParcelableListElement(descriptor, 1, value.cell)
+            if (value.neighboring.isNotEmpty())
+                encodeParcelableListElement(descriptor, 2, value.neighboring)
+            if (value.location != null)
+                encodeCellLocationElement(descriptor, 3, value.location)
+        }
 }
 
 fun ByteArrayListSerializer() = ListSerializer(ByteArraySerializer())
 
-fun CompositeEncoder.encodeParcelableListElement(descriptor: SerialDescriptor, index: Int, value: List<Parcelable>) {
+fun CompositeEncoder.encodeParcelableListElement(
+    descriptor: SerialDescriptor,
+    index: Int,
+    value: List<Parcelable>
+) {
     encodeSerializableElement( // cell info
         descriptor, index, ByteArrayListSerializer(),
         value.map { p ->
@@ -90,7 +101,11 @@ fun CompositeEncoder.encodeParcelableListElement(descriptor: SerialDescriptor, i
     )
 }
 
-fun CompositeEncoder.encodeCellLocationElement(descriptor: SerialDescriptor, index: Int, value: CellLocation) {
+fun CompositeEncoder.encodeCellLocationElement(
+    descriptor: SerialDescriptor,
+    index: Int,
+    value: CellLocation
+) {
     encodeSerializableElement(
         descriptor, index, ByteArraySerializer(),
         Parcel.obtain().use {
@@ -130,7 +145,10 @@ fun <T : Parcelable> CompositeDecoder.decodeParcelableListElement(
     return ele
 }
 
-fun CompositeDecoder.decodeCellLocationElement(descriptor: SerialDescriptor, index: Int): CellLocation {
+fun CompositeDecoder.decodeCellLocationElement(
+    descriptor: SerialDescriptor,
+    index: Int
+): CellLocation {
     val byteArray = decodeSerializableElement(descriptor, index, ByteArraySerializer())
     return Parcel.obtain().use {
         it.unmarshall(byteArray, 0, byteArray.size)

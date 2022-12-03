@@ -1,17 +1,14 @@
 package com.zhufucdev.motion_emulator.hook_frontend
 
 import android.util.Log
-import com.zhufucdev.motion_emulator.data.CellTimeline
-import com.zhufucdev.motion_emulator.data.Motion
-import com.zhufucdev.motion_emulator.data.Point
-import com.zhufucdev.motion_emulator.data.Trace
+import com.zhufucdev.motion_emulator.data.*
 import kotlinx.serialization.Serializable
 import java.util.concurrent.FutureTask
 
 data class Emulation(
     val trace: Trace,
-    val motion: Motion,
-    val cells: CellTimeline,
+    val motion: Box<Motion>,
+    val cells: Box<CellTimeline>,
     val velocity: Double,
     val repeat: Int,
     val satelliteCount: Int
@@ -26,9 +23,6 @@ data class EmulationRef(
     val repeat: Int,
     val satelliteCount: Int
 )
-
-fun Emulation.ref() =
-    EmulationRef(trace.id, motion.id, cells.id, velocity, repeat, satelliteCount)
 
 data class Intermediate(val location: Point, val elapsed: Double, val progress: Float)
 

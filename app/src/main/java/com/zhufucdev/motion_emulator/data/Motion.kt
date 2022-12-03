@@ -1,7 +1,6 @@
 package com.zhufucdev.motion_emulator.data
 
 import android.content.Context
-import com.zhufucdev.motion_emulator.hook.Moment
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -16,7 +15,7 @@ import java.io.File
  * @param elapsed Time from start (in sec.)
  */
 @Serializable
-data class MotionMoment(override var elapsed: Float, val data: MutableMap<Int, FloatArray>): Moment
+data class MotionMoment(override var elapsed: Float, val data: MutableMap<Int, FloatArray>) : Moment
 
 /**
  * Motion record, composed with series of [MotionMoment]s.
@@ -26,7 +25,12 @@ data class MotionMoment(override var elapsed: Float, val data: MutableMap<Int, F
  * Notice that not every moment includes all the sensors.
  */
 @Serializable
-data class Motion(val id: String, val time: Long, val moments: List<MotionMoment>, val sensorsInvolved: List<Int>)
+data class Motion(
+    override val id: String,
+    val time: Long,
+    val moments: List<MotionMoment>,
+    val sensorsInvolved: List<Int>
+) : Referable
 
 @OptIn(ExperimentalSerializationApi::class)
 object Motions {

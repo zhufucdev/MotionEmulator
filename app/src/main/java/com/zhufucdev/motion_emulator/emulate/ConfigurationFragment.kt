@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.*
 import androidx.fragment.app.Fragment
 import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
 import androidx.core.os.bundleOf
 import androidx.core.view.MenuProvider
 import androidx.core.widget.doAfterTextChanged
@@ -24,7 +25,6 @@ import com.zhufucdev.motion_emulator.hook.center
 import com.zhufucdev.motion_emulator.hook_frontend.Emulation
 import com.zhufucdev.motion_emulator.hook_frontend.EmulationRef
 import com.zhufucdev.motion_emulator.hook_frontend.Scheduler
-import com.zhufucdev.motion_emulator.hook_frontend.ref
 import kotlinx.serialization.serializer
 import net.edwardday.serialization.preferences.Preferences
 
@@ -32,7 +32,12 @@ class ConfigurationFragment : Fragment(), MenuProvider {
     private lateinit var binding: FragmentConfigurationBinding
     private lateinit var btnRun: ExtendedFloatingActionButton
     private var btnDefault: MenuItem? = null
-    private val settings by lazy { requireContext().getSharedPreferences("settings", Context.MODE_PRIVATE) }
+    private val settings by lazy {
+        requireContext().getSharedPreferences(
+            "settings",
+            Context.MODE_PRIVATE
+        )
+    }
     private val defaultConfig by lazy {
         try {
             val pref = Preferences(settings)
@@ -42,9 +47,9 @@ class ConfigurationFragment : Fragment(), MenuProvider {
         }
     }
 
-    private var motion: Motion? = null
+    private var motion: Box<Motion> = EmptyBox()
     private var trace: Trace? = null
-    private var cells: CellTimeline? = null
+    private var cells: Box<CellTimeline> = EmptyBox()
     private var repeatCount: Int? = 1
     private var velocity: Double? = 3.0
     private var satelliteCount: Int? = 10
@@ -97,8 +102,6 @@ class ConfigurationFragment : Fragment(), MenuProvider {
             || satellites == null
             || satellites < 0
             || trace == null
-            || cells == null
-            || motion == null
         ) {
             return null
         }
@@ -120,26 +123,42 @@ class ConfigurationFragment : Fragment(), MenuProvider {
         btnRun.hide()
     }
 
+    private fun AutoCompleteTextView.select(adapter: ArrayAdapter<*>, name: String) {
+        setText(name)
+        adapter.filter.filter(null)
+    }
+
     private fun initMotionDropdown() {
         val adapter = ArrayAdapter<String>(requireContext(), android.R.layout.simple_list_item_1)
         val motions = Motions.list()
         motions.forEach {
             adapter.add(dateString(it.time))
         }
+        adapter.addDefaults()
         binding.dropdownMotion.apply {
             setOnItemClickListener { _, _, position, _ ->
-                motion = motions[position]
+                motion = if (position < motions.size) {
+                    motions[position].box()
+                } else if (position == motions.size) {
+                    EmptyBox()
+                } else {
+                    BlockBox()
+                }
                 notifyConfig()
             }
             setAdapter(adapter)
 
             defaultConfig?.motion?.let { id ->
+                if (selectDefaults(adapter, id)) {
+                    return
+                }
                 val m = motions.firstOrNull { it.id == id }
                 if (m != null) {
-                    setText(dateString(m.time))
-                    adapter.filter.filter(null)
-                    motion = m
+                    select(adapter, dateString(m.time))
+                    motion = m.box()
                 }
+            } ?: apply {
+                selectDefaults(adapter, EMPTY_REF)
             }
         }
     }
@@ -150,25 +169,36 @@ class ConfigurationFragment : Fragment(), MenuProvider {
         timelines.forEach {
             adapter.add(dateString(it.time))
         }
+        adapter.addDefaults()
         binding.dropdownCells.apply {
             setOnItemClickListener { _, _, position, _ ->
-                cells = timelines[position]
+                cells = if (position < timelines.size) {
+                    timelines[position].box()
+                } else if (position == timelines.size) {
+                    EmptyBox()
+                } else {
+                    BlockBox()
+                }
                 notifyConfig()
             }
             setAdapter(adapter)
 
             defaultConfig?.cells?.let { id ->
+                if (selectDefaults(adapter, id)) {
+                    return
+                }
                 val timeline = timelines.firstOrNull { it.id == id }
                 if (timeline != null) {
-                    setText(dateString(timeline.time))
-                    adapter.filter.filter(null)
-                    cells = timeline
+                    select(adapter, dateString(timeline.time))
+                    cells = timeline.box()
                 }
+            } ?: apply {
+                selectDefaults(adapter, EMPTY_REF)
             }
         }
     }
 
-    private fun select(trace: Trace) {
+    private fun selectTrace(trace: Trace) {
         this.trace = trace
         notifyConfig()
 
@@ -194,28 +224,44 @@ class ConfigurationFragment : Fragment(), MenuProvider {
         }
         binding.dropdownTrace.apply {
             setOnItemClickListener { _, _, position, _ ->
-                select(traces[position])
+                selectTrace(traces[position])
             }
             setAdapter(adapter)
 
             defaultConfig?.trace?.let { id ->
+
                 val trace = traces.firstOrNull { it.id == id }
                 if (trace != null) {
-                    setText(trace.name)
-                    adapter.filter.filter(null)
-                    select(trace)
+                    select(adapter, trace.name)
+                    selectTrace(trace)
                 }
             }
         }
+    }
+
+    /**
+     * - None
+     * - Block
+     */
+    private fun ArrayAdapter<String>.addDefaults() {
+        add(getString(R.string.name_none))
+        add(getString(R.string.name_block))
+    }
+
+    private fun AutoCompleteTextView.selectDefaults(adapter: ArrayAdapter<*>, id: String): Boolean {
+        when (id) {
+            EMPTY_REF -> select(adapter, getString(R.string.name_none))
+            BLOCK_REF -> select(adapter, getString(R.string.name_block))
+            else -> return false
+        }
+        return true
     }
 
     private val notContinue
         get() = !binding.inputVelocity.error.isNullOrEmpty()
                 || !binding.inputRepeatCount.error.isNullOrEmpty()
                 || !binding.inputSatellite.error.isNullOrBlank()
-                || motion == null
                 || trace == null
-                || cells == null
 
     private fun notifyConfig() {
         if (notContinue) {
@@ -319,7 +365,10 @@ class ConfigurationFragment : Fragment(), MenuProvider {
         points.forEachIndexed { i, point ->
             polyline.add(point.toLatLng())
             if (i > 0) {
-                length += AMapUtils.calculateLineDistance(point.toLatLng(), points[i - 1].toLatLng())
+                length += AMapUtils.calculateLineDistance(
+                    point.toLatLng(),
+                    points[i - 1].toLatLng()
+                )
             }
         }
         val center = center(length)

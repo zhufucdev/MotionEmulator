@@ -8,17 +8,7 @@ import android.location.Location
 import android.location.LocationManager
 import android.os.Build
 import android.os.SystemClock
-import android.telephony.CellIdentityCdma
-import android.telephony.CellIdentityGsm
-import android.telephony.CellInfo
-import android.telephony.CellInfoCdma
-import android.telephony.CellInfoGsm
-import android.telephony.CellInfoLte
-import android.telephony.CellInfoWcdma
-import android.telephony.CellLocation
-import android.telephony.NeighboringCellInfo
-import android.telephony.PhoneStateListener
-import android.telephony.TelephonyCallback
+import android.telephony.*
 import android.telephony.cdma.CdmaCellLocation
 import android.telephony.gsm.GsmCellLocation
 import android.util.Log
@@ -352,10 +342,6 @@ fun Trace.center(length: Double = 0.0): Point {
     }
 
     return Point(laSum / sampleCount, lgSum / sampleCount)
-}
-
-interface Moment {
-    val elapsed: Float
 }
 
 /**

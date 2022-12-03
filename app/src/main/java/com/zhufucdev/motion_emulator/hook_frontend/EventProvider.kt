@@ -10,7 +10,7 @@ import android.net.Uri
 import android.util.Log
 import com.zhufucdev.motion_emulator.apps.AppMetas
 import com.zhufucdev.motion_emulator.apps.hooked
-import com.zhufucdev.motion_emulator.data.Point
+import com.zhufucdev.motion_emulator.data.*
 import com.zhufucdev.motion_emulator.hook.EMULATION_START
 import com.zhufucdev.motion_emulator.hook.EMULATION_STOP
 import kotlinx.serialization.encodeToString
@@ -50,8 +50,8 @@ class EventProvider : ContentProvider() {
             val cursor = MatrixCursor(arrayOf("trace", "motion", "cells", "velocity", "repeat", "satellites"))
             cursor.addRow(arrayOf(EMULATION_START, 0, 0, 0, 0, 0))
             val traceData = Json.encodeToString(e.trace)
-            val motionData = Json.encodeToString(e.motion)
-            val cellsData = Json.encodeToString(e.cells)
+            val motionData = e.motion.encodeToString()
+            val cellsData = e.cells.encodeToString()
             cursor.addRow(
                 arrayOf(
                     traceData,

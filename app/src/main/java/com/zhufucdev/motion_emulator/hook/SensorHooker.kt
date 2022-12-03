@@ -22,6 +22,8 @@ object SensorHooker : YukiBaseHooker() {
 
     private val listeners = mutableSetOf<SensorListener>()
 
+    var toggle = Toggle.PRESENT
+
     override fun onHook() {
         classOf<SensorManager>().hook {
             hookRegisterMethod(
@@ -76,8 +78,10 @@ object SensorHooker : YukiBaseHooker() {
                 returnType = BooleanType
             }
             replaceAny {
-                if (!hooking)
+                if (!hooking || toggle == Toggle.NONE)
                     return@replaceAny callOriginal()
+                if (toggle == Toggle.BLOCK)
+                    return@replaceAny false
                 redirectToFakeHandler()
             }
         }
@@ -92,6 +96,13 @@ object SensorHooker : YukiBaseHooker() {
             }
 
             replaceUnit {
+                if (!hooking || toggle == Toggle.NONE) {
+                    callOriginal()
+                    return@replaceUnit
+                }
+                if (toggle == Toggle.BLOCK) {
+                    return@replaceUnit
+                }
                 val listener = args(0).cast<SensorEventListener>()
                 val sensor = args.takeIf { it.size > 1 }?.let { it[1] as? Sensor }
                 if (sensor == null) {

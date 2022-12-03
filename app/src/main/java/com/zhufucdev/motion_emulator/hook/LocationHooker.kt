@@ -63,7 +63,9 @@ object LocationHooker : YukiBaseHooker() {
                     emptyParam()
                     returnType = classOf<List<ScanResult>>()
                 }
-                replaceTo(null)
+                afterHook {
+                    result = emptyList<ScanResult>()
+                }
             }
 
             injectMember {

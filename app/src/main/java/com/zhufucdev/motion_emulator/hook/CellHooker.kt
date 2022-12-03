@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.zhufucdev.motion_emulator.hook
 
 import android.telephony.*
@@ -10,6 +12,9 @@ import java.util.concurrent.Executor
 
 object CellHooker : YukiBaseHooker() {
     private val listeners = mutableSetOf<(CellMoment) -> Unit>()
+
+    var toggle = Toggle.PRESENT
+
     override fun onHook() {
         classOf<TelephonyManager>().hook {
             injectMember {
@@ -19,7 +24,13 @@ object CellHooker : YukiBaseHooker() {
                     returnType(classOf<CellLocation>())
                 }
                 afterHook {
-                    result = Scheduler.cells.cellLocation()
+                    if (!hooking || toggle == Toggle.NONE)
+                        return@afterHook
+                    result = if (toggle == Toggle.BLOCK)
+                        null
+                    else {
+                        Scheduler.cells.cellLocation()
+                    }
                 }
             }
 
@@ -30,7 +41,13 @@ object CellHooker : YukiBaseHooker() {
                     returnType(classOf<List<CellInfo>>())
                 }
                 afterHook {
-                    result = Scheduler.cells.cell.takeIf { it.isNotEmpty() }
+                    if (!hooking || toggle == Toggle.NONE)
+                        return@afterHook
+                    result =
+                        if (toggle == Toggle.BLOCK)
+                            null
+                        else
+                            Scheduler.cells.cell.takeIf { it.isNotEmpty() }
                 }
             }
 
@@ -41,7 +58,13 @@ object CellHooker : YukiBaseHooker() {
                     returnType = classOf<List<NeighboringCellInfo>>()
                 }
                 afterHook {
-                    result = Scheduler.cells.neighboringInfo().takeIf { it.isNotEmpty() }
+                    if (!hooking || toggle == Toggle.NONE)
+                        return@afterHook
+                    result =
+                        if (toggle == Toggle.BLOCK)
+                            null
+                        else
+                            Scheduler.cells.neighboringInfo().takeIf { it.isNotEmpty() }
                 }
             }
 
@@ -52,6 +75,14 @@ object CellHooker : YukiBaseHooker() {
                     returnType = UnitType
                 }
                 replaceUnit {
+                    if (!hooking || toggle == Toggle.NONE) {
+                        callOriginal()
+                        return@replaceUnit
+                    }
+
+                    if (toggle == Toggle.BLOCK)
+                        return@replaceUnit
+
                     val listener = args(0).cast<PhoneStateListener>()
                     val mode = args(1).int()
                     addListener {
@@ -67,6 +98,14 @@ object CellHooker : YukiBaseHooker() {
                     returnType = UnitType
                 }
                 replaceUnit {
+                    if (!hooking || toggle == Toggle.NONE) {
+                        callOriginal()
+                        return@replaceUnit
+                    }
+
+                    if (toggle == Toggle.BLOCK)
+                        return@replaceUnit
+
                     val executor = args(0).cast<Executor>()
                     val callback = args(1).cast<TelephonyCallback>()
                     addListener {
@@ -83,7 +122,15 @@ object CellHooker : YukiBaseHooker() {
                     emptyParam()
                     returnType = IntType
                 }
-                replaceTo(1)
+                replaceAny {
+                    if (!hooking || toggle == Toggle.NONE) {
+                        callOriginal()
+                    } else if (toggle == Toggle.BLOCK) {
+                        0
+                    } else {
+                        1
+                    }
+                }
             }
 
             injectMember {
@@ -92,7 +139,15 @@ object CellHooker : YukiBaseHooker() {
                     emptyParam()
                     returnType = IntType
                 }
-                replaceTo(1)
+                replaceAny {
+                    if (!hooking || toggle == Toggle.NONE) {
+                        callOriginal()
+                    } else if (toggle == Toggle.BLOCK) {
+                        0
+                    } else {
+                        1
+                    }
+                }
             }
         }
     }
