@@ -16,7 +16,7 @@ import java.io.File
  * @param elapsed Time from start (in sec.)
  */
 @Serializable
-data class MotionMoment(override val elapsed: Float, val data: MutableMap<Int, FloatArray>): Moment
+data class MotionMoment(override var elapsed: Float, val data: MutableMap<Int, FloatArray>): Moment
 
 /**
  * Motion record, composed with series of [MotionMoment]s.

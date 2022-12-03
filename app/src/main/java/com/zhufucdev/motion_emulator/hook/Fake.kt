@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.zhufucdev.motion_emulator.hook
 
 import android.annotation.SuppressLint
@@ -5,19 +7,15 @@ import android.hardware.Sensor
 import android.location.Location
 import android.location.LocationManager
 import android.os.Build
-import android.os.Bundle
 import android.os.SystemClock
 import android.telephony.CellIdentityCdma
 import android.telephony.CellIdentityGsm
-import android.telephony.CellIdentityNr
 import android.telephony.CellInfo
 import android.telephony.CellInfoCdma
 import android.telephony.CellInfoGsm
 import android.telephony.CellInfoLte
-import android.telephony.CellInfoNr
 import android.telephony.CellInfoWcdma
 import android.telephony.CellLocation
-import android.telephony.CellSignalStrengthNr
 import android.telephony.NeighboringCellInfo
 import android.telephony.PhoneStateListener
 import android.telephony.TelephonyCallback
@@ -27,12 +25,8 @@ import android.util.Log
 import androidx.core.os.bundleOf
 import com.amap.api.location.AMapLocation
 import com.amap.api.maps.AMapUtils
-import com.highcapable.yukihookapi.hook.log.loggerD
 import com.zhufucdev.motion_emulator.*
 import com.zhufucdev.motion_emulator.data.*
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
-import kotlin.math.round
 import kotlin.random.Random
 
 fun Point.offsetFixed(): Point {
@@ -197,7 +191,7 @@ fun Motion.at(progress: Float, from: Int = 0): MotionInterp {
                     // try to find a moment with specific type
                     // and is earlier than the current one
                     for (j in from - 1 downTo 0) {
-                        if (moments[i].data.containsKey(type)) {
+                        if (moments[i].data.containsKey(type) && moments[i].elapsed < targetElapsed) {
                             last = moments[i]
                             break
                         }
@@ -365,7 +359,7 @@ interface Moment {
 }
 
 /**
- * Get the timespan of a timeline
+ * Get the time span of a timeline
  *
  * @return duration in seconds
  */
@@ -401,6 +395,7 @@ fun CellInfo.cellLocation(): CellLocation? =
         else -> null
     }
 
+@Suppress("DEPRECATION")
 @SuppressLint("NewApi")
 fun CellMoment.cellLocation(): CellLocation? {
     if (location != null) return location

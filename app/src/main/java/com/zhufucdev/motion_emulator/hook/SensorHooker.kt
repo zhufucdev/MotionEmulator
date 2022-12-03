@@ -9,7 +9,6 @@ import android.os.SystemClock
 import com.highcapable.yukihookapi.hook.core.YukiMemberHookCreator
 import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.highcapable.yukihookapi.hook.factory.classOf
-import com.highcapable.yukihookapi.hook.log.loggerD
 import com.highcapable.yukihookapi.hook.param.HookParam
 import com.highcapable.yukihookapi.hook.type.java.BooleanType
 import com.highcapable.yukihookapi.hook.type.java.IntType
@@ -25,14 +24,20 @@ object SensorHooker : YukiBaseHooker() {
 
     override fun onHook() {
         classOf<SensorManager>().hook {
-            hookRegisterMethod(classOf<SensorEventListener>(), classOf<Sensor>(), IntType, classOf<Handler>())
+            hookRegisterMethod(
+                classOf<SensorEventListener>(),
+                classOf<Sensor>(),
+                IntType,
+                classOf<Handler>()
+            )
+            hookRegisterMethod(classOf<SensorEventListener>(), classOf<Sensor>(), IntType)
             hookRegisterMethod(classOf<SensorEventListener>(), classOf<Sensor>(), IntType, IntType)
             hookRegisterMethod(
                 classOf<SensorEventListener>(), classOf<Sensor>(),
                 IntType, IntType, classOf<Handler>()
             )
-            hookUnregisterMethod(classOf<SensorEventListener>())
             hookUnregisterMethod(classOf<SensorEventListener>(), classOf<Sensor>())
+            hookUnregisterMethod(classOf<SensorEventListener>())
         }
     }
 
@@ -42,8 +47,15 @@ object SensorHooker : YukiBaseHooker() {
                 ?: error("sensor event constructor not available")
         val elapsed = SystemClock.elapsedRealtimeNanos()
         moment.data.forEach { (t, v) ->
-            val sensor = appContext!!.getSystemService(SensorManager::class.java).getDefaultSensor(t)
-            val event = eventConstructor.call(sensor, SensorManager.SENSOR_STATUS_ACCURACY_HIGH, elapsed, v)
+            val sensor =
+                appContext!!.getSystemService(SensorManager::class.java).getDefaultSensor(t)
+            val values = Scheduler.motion.data[t] ?: v
+            val event = eventConstructor.call(
+                sensor,
+                SensorManager.SENSOR_STATUS_ACCURACY_HIGH,
+                elapsed,
+                values
+            )
             listeners.forEach { (lt, l, h) ->
                 if (lt == t) {
                     supervisorScope {
@@ -100,4 +112,8 @@ object SensorHooker : YukiBaseHooker() {
     }
 }
 
-data class SensorListener(val type: Int, val listener: SensorEventListener, val handler: Handler? = null)
+data class SensorListener(
+    val type: Int,
+    val listener: SensorEventListener,
+    val handler: Handler? = null
+)

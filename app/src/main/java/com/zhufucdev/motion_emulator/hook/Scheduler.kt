@@ -3,15 +3,11 @@ package com.zhufucdev.motion_emulator.hook
 import android.content.ContentResolver
 import android.content.ContentValues
 import android.content.Context
-import android.content.ContextWrapper
 import android.database.Cursor
 import android.hardware.Sensor
 import android.net.Uri
 import android.os.SystemClock
 import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
-import com.highcapable.yukihookapi.hook.factory.classOf
-import com.highcapable.yukihookapi.hook.log.loggerD
-import com.highcapable.yukihookapi.hook.log.loggerE
 import com.highcapable.yukihookapi.hook.log.loggerI
 import com.zhufucdev.motion_emulator.data.*
 import com.zhufucdev.motion_emulator.hook_frontend.AUTHORITY
@@ -113,6 +109,7 @@ object Scheduler {
     private val progress get() = (elapsed / duration / 1000).toFloat()
     val location get() = mLocation ?: Point(39.989410, 116.480881)
     val cells get() = mCellMoment ?: CellMoment(0F)
+    val motion = MotionMoment(0F, mutableMapOf())
 
     private val stepSensors = intArrayOf(Sensor.TYPE_STEP_COUNTER, Sensor.TYPE_STEP_DETECTOR)
     private fun startEmulation(
@@ -164,7 +161,8 @@ object Scheduler {
             val pause = (1.2 / velocity).seconds
             launch {
                 if (stepsCount == -1) {
-                    stepsCount = (Random.nextFloat() * 5000).toInt() + 2000 // beginning with a random steps count
+                    stepsCount =
+                        (Random.nextFloat() * 5000).toInt() + 2000 // beginning with a random steps count
                 }
                 while (hooking && progress <= 1) {
                     val moment =
@@ -237,7 +235,8 @@ object Scheduler {
                     if (ptr == cells.moments.lastIndex - 1) {
                         break
                     }
-                    val pause = (cells.moments[ptr].elapsed - cells.moments[ptr + 1].elapsed) / timespan * duration
+                    val pause =
+                        (cells.moments[ptr].elapsed - cells.moments[ptr + 1].elapsed) / timespan * duration
                     ptr++
                     delay(pause.seconds)
                 }
