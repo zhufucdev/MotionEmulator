@@ -189,14 +189,15 @@ object Scheduler {
 
     private fun CoroutineScope.startMotionSimulation(motion: Box<Motion>): Job? {
         SensorHooker.toggle = motion.status
+        val partial = motion.value?.validPart()
 
-        return if (motion.value != null && motion.value.sensorsInvolved.any { it !in stepSensors }) {
+        return if (partial != null && partial.sensorsInvolved.any { it !in stepSensors }) {
             launch {
                 // data other than steps
                 while (hooking && progress <= 1) {
                     var lastIndex = 0
-                    while (hooking && lastIndex < motion.value.moments.size && progress <= 1) {
-                        val interp = motion.value.at(progress, lastIndex)
+                    while (hooking && lastIndex < partial.moments.size && progress <= 1) {
+                        val interp = partial.at(progress, lastIndex)
 
                         SensorHooker.raise(interp.moment)
                         lastIndex = interp.index
