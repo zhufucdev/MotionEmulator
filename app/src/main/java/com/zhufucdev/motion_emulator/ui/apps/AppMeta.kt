@@ -1,4 +1,4 @@
-package com.zhufucdev.motion_emulator.apps
+package com.zhufucdev.motion_emulator.ui.apps
 
 import android.content.Context
 import android.content.pm.ApplicationInfo

@@ -4,7 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import androidx.work.WorkManager
-import com.zhufucdev.motion_emulator.emulate.WORK_NAME_MONITOR
+import com.zhufucdev.motion_emulator.ui.emulate.WORK_NAME_MONITOR
 
 class EmulationMonitorReceiver : BroadcastReceiver() {
 

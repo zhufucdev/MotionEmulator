@@ -1,4 +1,4 @@
-package com.zhufucdev.motion_emulator
+package com.zhufucdev.motion_emulator.ui
 
 import android.database.MatrixCursor
 import androidx.appcompat.app.AppCompatActivity
@@ -9,10 +9,12 @@ import android.view.MenuItem
 import android.widget.CursorAdapter
 import android.widget.SearchView
 import android.widget.SimpleCursorAdapter
-import com.zhufucdev.motion_emulator.apps.AppItemAdapter
-import com.zhufucdev.motion_emulator.apps.AppMetas
-import com.zhufucdev.motion_emulator.apps.SnappingLinearSmoothScroller
+import com.zhufucdev.motion_emulator.R
+import com.zhufucdev.motion_emulator.ui.apps.AppItemAdapter
+import com.zhufucdev.motion_emulator.ui.apps.AppMetas
+import com.zhufucdev.motion_emulator.ui.apps.SnappingLinearSmoothScroller
 import com.zhufucdev.motion_emulator.databinding.ActivityAppStrategyBinding
+import com.zhufucdev.motion_emulator.initializeToolbar
 
 class AppStrategyActivity : AppCompatActivity() {
     private lateinit var binding: ActivityAppStrategyBinding

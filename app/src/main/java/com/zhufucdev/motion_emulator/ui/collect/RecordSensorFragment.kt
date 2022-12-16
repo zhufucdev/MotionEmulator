@@ -1,4 +1,4 @@
-package com.zhufucdev.motion_emulator.collect
+package com.zhufucdev.motion_emulator.ui.collect
 
 import android.hardware.Sensor
 import android.hardware.SensorManager

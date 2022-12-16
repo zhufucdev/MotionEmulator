@@ -1,13 +1,14 @@
-package com.zhufucdev.motion_emulator
+package com.zhufucdev.motion_emulator.ui
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
-import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+import com.zhufucdev.motion_emulator.R
 import com.zhufucdev.motion_emulator.data.Cells
 import com.zhufucdev.motion_emulator.data.Motions
 import com.zhufucdev.motion_emulator.data.Traces
 import com.zhufucdev.motion_emulator.databinding.ActivityEmulateBinding
+import com.zhufucdev.motion_emulator.initializeToolbar
 
 class EmulateActivity : AppCompatActivity() {
     private lateinit var binding: ActivityEmulateBinding

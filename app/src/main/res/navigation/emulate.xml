@@ -6,12 +6,12 @@
             app:startDestination="@id/configurationFragment">
     <fragment
             android:id="@+id/emulateStatusFragment"
-            android:name="com.zhufucdev.motion_emulator.emulate.EmulateStatusFragment"
+            android:name="com.zhufucdev.motion_emulator.ui.emulate.EmulateStatusFragment"
             android:label="fragment_emulate_status"
             tools:layout="@layout/fragment_emulate_status"/>
     <fragment
             android:id="@+id/configurationFragment"
-            android:name="com.zhufucdev.motion_emulator.emulate.ConfigurationFragment"
+            android:name="com.zhufucdev.motion_emulator.ui.emulate.ConfigurationFragment"
             android:label="fragment_configuration"
             tools:layout="@layout/fragment_configuration">
         <action

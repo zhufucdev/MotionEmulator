@@ -1,4 +1,4 @@
-package com.zhufucdev.motion_emulator
+package com.zhufucdev.motion_emulator.ui
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -26,7 +26,6 @@ import androidx.lifecycle.lifecycleScope
 import com.amap.api.maps.AMap
 import com.amap.api.maps.AMapUtils
 import com.amap.api.maps.CameraUpdateFactory
-import com.amap.api.maps.MapsInitializer
 import com.amap.api.maps.model.LatLng
 import com.amap.api.maps.model.Polyline
 import com.amap.api.maps.model.PolylineOptions
@@ -36,6 +35,7 @@ import com.amap.api.services.poisearch.PoiResultV2
 import com.amap.api.services.poisearch.PoiSearchV2
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils
 import com.google.android.material.snackbar.Snackbar
+import com.zhufucdev.motion_emulator.*
 import com.zhufucdev.motion_emulator.data.Trace
 import com.zhufucdev.motion_emulator.data.Traces
 import com.zhufucdev.motion_emulator.databinding.ActivityTraceDrawingBinding

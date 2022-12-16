@@ -7,7 +7,7 @@
 
     <fragment
             android:id="@+id/recordSensorFragment"
-            android:name="com.zhufucdev.motion_emulator.collect.RecordSensorFragment"
+            android:name="com.zhufucdev.motion_emulator.ui.collect.RecordSensorFragment"
             android:label="fragment_record_sensor"
             tools:layout="@layout/fragment_record_sensor">
         <action
@@ -19,7 +19,7 @@
     </fragment>
     <fragment
             android:id="@+id/recordDataFragment"
-            android:name="com.zhufucdev.motion_emulator.collect.RecordDataFragment"
+            android:name="com.zhufucdev.motion_emulator.ui.collect.RecordDataFragment"
             android:label="fragment_record_data"
             tools:layout="@layout/fragment_record_data"/>
 </navigation>

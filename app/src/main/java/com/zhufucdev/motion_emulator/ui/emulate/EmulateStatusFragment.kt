@@ -1,4 +1,4 @@
-package com.zhufucdev.motion_emulator.emulate
+package com.zhufucdev.motion_emulator.ui.emulate
 
 import android.app.NotificationChannel
 import android.app.NotificationManager

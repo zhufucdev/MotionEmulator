@@ -1,4 +1,4 @@
-package com.zhufucdev.motion_emulator
+package com.zhufucdev.motion_emulator.ui
 
 import android.Manifest
 import android.content.Intent
@@ -8,14 +8,15 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import androidx.appcompat.app.AppCompatActivity
-import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import com.google.android.material.snackbar.Snackbar
+import com.zhufucdev.motion_emulator.R
 import com.zhufucdev.motion_emulator.data.Cells
 import com.zhufucdev.motion_emulator.data.Motions
 import com.zhufucdev.motion_emulator.data.MotionRecorder
 import com.zhufucdev.motion_emulator.data.TelephonyRecorder
 import com.zhufucdev.motion_emulator.databinding.ActivityRecordBinding
+import com.zhufucdev.motion_emulator.initializeToolbar
 
 class RecordActivity : AppCompatActivity() {
 

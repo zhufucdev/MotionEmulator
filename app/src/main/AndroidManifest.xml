@@ -36,24 +36,28 @@
                 </receiver>
 
                 <activity
-                    android:name=".AppStrategyActivity"
+                    android:name=".ui.AppStrategyActivity"
                     android:exported="false"
                     android:label="@string/title_app_strategy" />
                 <activity
-                    android:name=".EmulateActivity"
+                    android:name=".ui.EmulateActivity"
                     android:exported="false"
                     android:label="@string/title_emulate"
                     android:launchMode="singleTop" />
                 <activity
-                    android:name=".TraceDrawingActivity"
+                    android:name=".ui.TraceDrawingActivity"
                     android:exported="false"
                     android:label="@string/title_draw_trace" />
                 <activity
-                    android:name=".RecordActivity"
+                    android:name=".ui.RecordActivity"
                     android:exported="false"
                     android:label="@string/title_activity_record" />
                 <activity
-                    android:name=".MainActivity"
+                    android:name=".ui.ManagerActivity"
+                    android:exported="false"
+                    android:label="@string/title_manage" />
+                <activity
+                    android:name=".ui.MainActivity"
                     android:exported="true">
                         <intent-filter>
                                 <action android:name="android.intent.action.MAIN" />
