@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import com.zhufucdev.motion_emulator.data.*
 import com.zhufucdev.motion_emulator.ui.manager.ManagerApp
+import com.zhufucdev.motion_emulator.ui.manager.ManagerViewModel
 import com.zhufucdev.motion_emulator.ui.manager.Screen
 import com.zhufucdev.motion_emulator.ui.manager.ScreenParameter
 import com.zhufucdev.motion_emulator.ui.theme.MotionEmulatorTheme
@@ -18,25 +19,8 @@ class ManagerActivity : ComponentActivity() {
 
         setContent {
             MotionEmulatorTheme {
-                ManagerApp(navigateUp = { finish() }, dataProvider())
+                ManagerApp(navigateUp = { finish() }, ManagerViewModel.list.map { it.parameter() })
             }
         }
-    }
-
-    private fun dataProvider(): Map<Screen<*>, ScreenParameter<*>> {
-        val motionHandler: (Motion) -> Unit = {
-
-        }
-        val cellHandler: (CellTimeline) -> Unit = {
-
-        }
-        val traceHandler: (Trace) -> Unit = {
-
-        }
-        return mapOf(
-            Screen.MotionScreen to ScreenParameter(Motions.list(), motionHandler),
-            Screen.CellScreen to ScreenParameter(Cells.list(), cellHandler),
-            Screen.TraceScreen to ScreenParameter(Traces.list(), traceHandler)
-        )
     }
 }
