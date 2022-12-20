@@ -83,4 +83,6 @@
         <string name="action_navigate_up">向上导航</string>
     <string name="title_trace_data">路径数据</string>
         <string name="text_in_duration">时长%s</string>
+    <string name="action_delete">删除</string>
+    <string name="text_deleted">已删除%s</string>
 </resources>

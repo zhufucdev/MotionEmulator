@@ -8,7 +8,7 @@ import androidx.compose.ui.text.style.TextAlign
 import com.zhufucdev.motion_emulator.data.CellTimeline
 
 @Composable
-fun CellScreen(parameter: ScreenParameter<CellTimeline>) {
+fun CellScreen(parameter: ManagerViewModel<CellTimeline>) {
     Text(
         text = "Greetings from cell screen",
         textAlign = TextAlign.Center,

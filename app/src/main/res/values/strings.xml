@@ -83,4 +83,6 @@
         <string name="action_navigate_up">navigate up</string>
         <string name="title_trace_data">Trace Data</string>
         <string name="text_in_duration">%s in duration</string>
+    <string name="action_delete">Delete</string>
+        <string name="text_deleted">Deleted %s</string>
 </resources>

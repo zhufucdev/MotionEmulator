@@ -2,7 +2,6 @@
 
 package com.zhufucdev.motion_emulator.ui.manager
 
-import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
@@ -12,9 +11,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -33,25 +32,32 @@ import com.zhufucdev.motion_emulator.data.*
 import com.zhufucdev.motion_emulator.ui.Swipeable
 import com.zhufucdev.motion_emulator.ui.theme.MotionEmulatorTheme
 import com.zhufucdev.motion_emulator.ui.theme.paddingCommon
-import com.zhufucdev.motion_emulator.data.Trace
 
 @Composable
-fun ManagerApp(navigateUp: () -> Unit, dataProvider: List<ScreenParameter<*>>) {
+fun ManagerApp(navigateUp: () -> Unit, dataProvider: List<ManagerViewModel<*>>) {
     val navController = rememberNavController()
-    val parameters by remember { derivedStateOf { dataProvider } }
+    val snackbarState = remember { SnackbarHostState() }
+
     Scaffold(
+        modifier = Modifier.fillMaxSize(),
         topBar = { AppBar(onBackPressed = { if (!navController.navigateUp()) navigateUp() }) },
         bottomBar = { AppNavigationBar(navController) },
-        modifier = Modifier.fillMaxSize(),
+        snackbarHost = { SnackbarHost(snackbarState) }
     ) {
         Box(Modifier.padding(it)) {
             NavHost(
                 navController = navController,
-                startDestination = parameters.first().screen.name
+                startDestination = dataProvider.first().screen.name
             ) {
-                parameters.forEach { para ->
+                dataProvider.forEach { para ->
                     composable(para.screen.name) {
-                        para.Create()
+                        para.Compose(
+                            ManagerViewModel.RuntimeArguments(
+                                snackbarState,
+                                navController,
+                                LocalContext.current
+                            )
+                        )
                     }
                 }
             }
@@ -103,38 +109,6 @@ private fun AppNavigationBar(navController: NavController) {
     }
 }
 
-sealed class Screen<T>(
-    val name: String,
-    val titleId: Int,
-    val iconId: Int,
-    val screen: @Composable (ScreenParameter<T>) -> Unit
-) {
-    object MotionScreen : Screen<Motion>(
-        "motion",
-        R.string.title_motion_data,
-        R.drawable.ic_baseline_smartphone_24,
-        { MotionScreen(it) }
-    )
-
-    object CellScreen : Screen<CellTimeline>(
-        "cell",
-        R.string.title_cells_data,
-        R.drawable.ic_baseline_cell_tower_24,
-        { CellScreen(it) }
-    )
-
-    object TraceScreen : Screen<Trace>(
-        "trace",
-        R.string.title_trace,
-        R.drawable.ic_baseline_map_24,
-        { TraceScreen(it) }
-    )
-
-    companion object {
-        val list get() = listOf(MotionScreen, CellScreen, TraceScreen)
-    }
-}
-
 @Composable
 @Preview
 fun ActivityPreview() {
@@ -151,23 +125,25 @@ fun ActivityPreview() {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun <T : Referable> DataList(
-    parameter: ScreenParameter<T>,
+    viewModel: ManagerViewModel<T>,
     content: @Composable (T) -> Unit
 ) {
+
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(paddingCommon),
         verticalArrangement = Arrangement.spacedBy(paddingCommon)
     ) {
-        parameter.data.forEach { item ->
+        viewModel.data.forEach { item ->
             item(key = item.id) {
                 var heightAnimator by remember { mutableStateOf(Animatable(0F)) }
                 var removed by remember { mutableStateOf(false) }
 
                 LaunchedEffect(removed) {
                     if (!removed) return@LaunchedEffect
+
                     heightAnimator.animateTo(0F)
-                    parameter.onRemove(item)
+                    viewModel.onRemove(item)
                 }
 
                 Swipeable(
@@ -194,9 +170,10 @@ fun <T : Referable> DataList(
                                     else with(LocalDensity.current) { heightAnimator.value.toDp() }
                                 )
                                 .onGloballyPositioned {
-                                    if (!removed) heightAnimator = Animatable(it.size.height.toFloat())
+                                    if (!removed) heightAnimator =
+                                        Animatable(it.size.height.toFloat())
                                 },
-                            onClick = { parameter.onClick(item) }
+                            onClick = { viewModel.onClick(item) }
                         ) {
                             content()
                         }
@@ -205,17 +182,5 @@ fun <T : Referable> DataList(
                 )
             }
         }
-    }
-}
-
-data class ScreenParameter<T>(
-    val screen: Screen<T>,
-    val data: SnapshotStateList<T>,
-    val onClick: (T) -> Unit,
-    val onRemove: (T) -> Unit
-) {
-    @Composable
-    fun Create() {
-        screen.screen(this)
     }
 }

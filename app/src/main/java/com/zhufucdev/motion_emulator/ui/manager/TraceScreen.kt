@@ -8,7 +8,7 @@ import androidx.compose.ui.text.style.TextAlign
 import com.zhufucdev.motion_emulator.data.Trace
 
 @Composable
-fun TraceScreen(parameter: ScreenParameter<Trace>) {
+fun TraceScreen(parameter: ManagerViewModel<Trace>) {
     Text(
         text = "Greetings from trace screen",
         textAlign = TextAlign.Center,

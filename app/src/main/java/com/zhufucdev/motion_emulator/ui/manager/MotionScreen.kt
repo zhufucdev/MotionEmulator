@@ -8,8 +8,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -25,8 +23,8 @@ import kotlin.random.Random
 import kotlin.time.DurationUnit
 
 @Composable
-fun MotionScreen(parameter: ScreenParameter<Motion>) {
-    DataList(parameter) {
+fun MotionScreen(viewModel: ManagerViewModel<Motion>) {
+    DataList(viewModel) {
         Column(Modifier.padding(paddingCard)) {
             Text(text = dateString(it.time), style = MaterialTheme.typography.titleMedium)
             Spacer(modifier = Modifier.height(paddingSmall))
@@ -51,12 +49,10 @@ fun MotionScreenPreview() {
     }
 }
 
-@Composable
-fun randomizedMotionData(): ScreenParameter<Motion> {
-    val data = remember {
-        val list = mutableStateListOf<Motion>()
+fun randomizedMotionData(): ManagerViewModel<Motion> {
+    val data = buildList {
         repeat(10) {
-            list.add(
+            add(
                 Motion(
                     NanoIdUtils.randomNanoId(),
                     System.currentTimeMillis() - Random.nextLong(
@@ -67,13 +63,7 @@ fun randomizedMotionData(): ScreenParameter<Motion> {
                 )
             )
         }
-        list
     }
 
-    return ScreenParameter(
-        data = data,
-        onClick = {},
-        onRemove = { data.remove(it) },
-        screen = Screen.MotionScreen,
-    )
+    return ManagerViewModel.DummyViewModel(Screen.MotionScreen, data)
 }
