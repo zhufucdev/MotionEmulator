@@ -73,7 +73,8 @@ fun Swipeable(
                         .width(effectiveOffset.takeIf { it.value > 0 } ?: 0.dp)
                         .align(CenterStart),
                     onClick = { startActivated?.invoke() },
-                    shape = MaterialTheme.shapes.extraSmall
+                    shape = MaterialTheme.shapes.extraSmall,
+                    colors = ButtonDefaults.filledTonalButtonColors(containerColor = fillColor)
                 ) {
                     backgroundStart?.invoke(this)
                 }
@@ -84,13 +85,14 @@ fun Swipeable(
                         .width(-(effectiveOffset.takeIf { it.value < 0 } ?: 0.dp))
                         .align(CenterEnd),
                     onClick = { endActivated?.invoke() },
-                    shape = MaterialTheme.shapes.extraSmall
+                    shape = MaterialTheme.shapes.extraSmall,
+                    colors = ButtonDefaults.filledTonalButtonColors(containerColor = fillColor)
                 ) {
                     backgroundEnd?.invoke(this)
                 }
             }
 
-            Surface(
+            Box(
                 modifier = Modifier
                     .offset(x = effectiveOffset)
                     .fillMaxSize()
@@ -135,8 +137,7 @@ fun Swipeable(
                                 }
                             }
                         )
-                    },
-                color = fillColor
+                    }
             ) {
                 foreground()
             }

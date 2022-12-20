@@ -4,6 +4,7 @@ package com.zhufucdev.motion_emulator.ui.manager
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.*
@@ -11,12 +12,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -128,7 +131,16 @@ fun <T : Referable> DataList(
     viewModel: ManagerViewModel<T>,
     content: @Composable (T) -> Unit
 ) {
-
+    if (viewModel.data.isEmpty()) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Image(
+                modifier = Modifier.size(180.dp),
+                painter = painterResource(R.drawable.ic_thinking_face_72),
+                contentDescription = "empty",
+            )
+        }
+        return
+    }
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(paddingCommon),
@@ -150,11 +162,11 @@ fun <T : Referable> DataList(
                     foreground = {
                         content(item)
                     },
-                    fillColor = MaterialTheme.colorScheme.secondaryContainer,
+                    fillColor = MaterialTheme.colorScheme.errorContainer,
                     backgroundEnd = {
                         Icon(
                             painter = painterResource(R.drawable.ic_baseline_delete_24),
-                            contentDescription = "",
+                            contentDescription = "delete",
                         )
                     },
                     endActivated = { removed = true },

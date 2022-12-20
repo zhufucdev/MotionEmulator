@@ -16,7 +16,9 @@ import com.aventrix.jnanoid.jnanoid.NanoIdUtils
 import com.zhufucdev.motion_emulator.R
 import com.zhufucdev.motion_emulator.data.Motion
 import com.zhufucdev.motion_emulator.dateString
+import com.zhufucdev.motion_emulator.hook.estimateSpeed
 import com.zhufucdev.motion_emulator.hook.estimateTimespan
+import com.zhufucdev.motion_emulator.toFixed
 import com.zhufucdev.motion_emulator.ui.theme.paddingCard
 import com.zhufucdev.motion_emulator.ui.theme.paddingSmall
 import kotlin.random.Random
@@ -32,7 +34,12 @@ fun MotionScreen(viewModel: ManagerViewModel<Motion>) {
                 text = stringResource(
                     R.string.text_in_duration,
                     it.estimateTimespan().toString(DurationUnit.SECONDS, decimals = 2)
-                ),
+                ) + (it.estimateSpeed()?.let {
+                    ", " + stringResource(
+                        R.string.text_estimated,
+                        it.toFixed(2) + stringResource(R.string.suffix_velocity)
+                    )
+                } ?: ""),
                 style = MaterialTheme.typography.labelSmall
             )
             Spacer(modifier = Modifier.height(paddingSmall))

@@ -134,6 +134,14 @@ fun Trace.at(progress: Float, from: TraceInterp? = null): TraceInterp {
     return TraceInterp(points.last(), points.lastIndex, totalDeg, totalLen, cache)
 }
 
+fun Trace.length(): Double {
+    var sum = 0.0
+    for (i in 1 until points.size) {
+        sum += AMapUtils.calculateLineDistance(points[i - 1].toLatLng(), points[i].toLatLng())
+    }
+    return sum
+}
+
 /**
  * Result for [Motion.at]
  *
@@ -314,6 +322,7 @@ fun Motion.estimateSpeed(): Double? {
         }
     }
 
+    if (sum < 0) return null
     return sum / count
 }
 
@@ -339,7 +348,6 @@ fun Trace.center(length: Double = 0.0): Point {
         length
     } / 50
     val sampleCount = (if (calcSamples < 10) 10 else calcSamples).toInt()
-    Log.d("center", "length = $length, samples = $sampleCount")
     var lastInterp = at(0F)
     var laSum = 0.0
     var lgSum = 0.0

@@ -85,4 +85,7 @@
         <string name="text_in_duration">%s in duration</string>
     <string name="action_delete">Delete</string>
         <string name="text_deleted">Deleted %s</string>
+    <string name="text_pieces_of_record">%d pieces of record</string>
+        <string name="text_in_length">%s in length</string>
+    <string name="text_estimated">%s estimated</string>
 </resources>

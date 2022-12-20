@@ -85,4 +85,7 @@
         <string name="text_in_duration">时长%s</string>
     <string name="action_delete">删除</string>
     <string name="text_deleted">已删除%s</string>
+    <string name="text_pieces_of_record">%d条记录</string>
+    <string name="text_in_length">长度为%s</string>
+    <string name="text_estimated">约%s</string>
 </resources>

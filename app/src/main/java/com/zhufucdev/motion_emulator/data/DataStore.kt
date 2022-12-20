@@ -15,7 +15,7 @@ import java.io.File
 @Suppress("UNCHECKED_CAST")
 @OptIn(ExperimentalSerializationApi::class)
 abstract class DataStore<T : Referable> {
-    private val data = mutableMapOf<String, T>()
+    private val data = sortedMapOf<String, T>()
     private lateinit var rootDir: File
 
     protected abstract val typeName: String

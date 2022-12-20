@@ -26,7 +26,9 @@ class ManagerActivity : ComponentActivity() {
     private val viewModels: List<ManagerViewModel<*>> by lazy {
         val provider = ViewModelProvider(this)
         listOf(
-            provider[ManagerViewModel.MotionViewModel::class.java]
+            provider[ManagerViewModel.MotionViewModel::class.java],
+            provider[ManagerViewModel.CellsViewModel::class.java],
+            provider[ManagerViewModel.TraceViewModel::class.java]
         )
     }
 }

@@ -63,7 +63,7 @@ sealed class ManagerViewModel<T : Referable> : ViewModel() {
 
     class MotionViewModel : DummyViewModel<Motion>(Screen.MotionScreen, Motions.list()) {
         override fun onClick(item: Motion) {
-            Motions
+
         }
 
         override fun onRemove(item: Motion) {
@@ -74,6 +74,38 @@ sealed class ManagerViewModel<T : Referable> : ViewModel() {
         override fun undo(item: Motion, index: Int) {
             super.undo(item, index)
             Motions.store(item)
+        }
+    }
+
+    class CellsViewModel : DummyViewModel<CellTimeline>(Screen.CellScreen, Cells.list()) {
+        override fun onClick(item: CellTimeline) {
+
+        }
+
+        override fun onRemove(item: CellTimeline) {
+            super.onRemove(item)
+            Cells.delete(item, runtime.context)
+        }
+
+        override fun undo(item: CellTimeline, index: Int) {
+            super.undo(item, index)
+            Cells.store(item)
+        }
+    }
+
+    class TraceViewModel : DummyViewModel<Trace>(Screen.TraceScreen, Traces.list()) {
+        override fun onClick(item: Trace) {
+
+        }
+
+        override fun onRemove(item: Trace) {
+            super.onRemove(item)
+            Traces.delete(item, runtime.context)
+        }
+
+        override fun undo(item: Trace, index: Int) {
+            super.undo(item, index)
+            Traces.store(item)
         }
     }
 
