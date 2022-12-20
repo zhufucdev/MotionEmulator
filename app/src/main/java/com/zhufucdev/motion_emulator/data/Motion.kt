@@ -2,10 +2,12 @@ package com.zhufucdev.motion_emulator.data
 
 import android.content.Context
 import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import kotlinx.serialization.json.encodeToStream
+import kotlinx.serialization.serializer
 import java.io.File
 
 /**
@@ -32,42 +34,7 @@ data class Motion(
     val sensorsInvolved: List<Int>
 ) : Referable
 
-@OptIn(ExperimentalSerializationApi::class)
-object Motions {
-    private val records = arrayListOf<Motion>()
-    private lateinit var rootDir: File
-
-    /**
-     * Make sure it works
-     *
-     * Should be called before any read operation
-     */
-    fun require(context: Context) {
-        rootDir = context.getDir("motion", Context.MODE_PRIVATE)
-        val list = rootDir.listFiles() ?: emptyArray<File>()
-        if (list.map { it.nameWithoutExtension }.toSet() != records.map { it.id }.toSet()) {
-            records.clear()
-            list.forEach { file ->
-                if (file.extension != "json") {
-                    return@forEach
-                }
-                file.inputStream().use {
-                    val record = Json.decodeFromStream<Motion>(it)
-                    records.add(record)
-                }
-            }
-        }
-    }
-
-    fun store(record: Motion) {
-        if (records.contains(record)) return
-        val name = record.id + ".json"
-        File(rootDir, name).outputStream().use {
-            Json.encodeToStream(record, it)
-        }
-        records.add(record)
-    }
-
-    fun list() = records.toList()
-    operator fun get(id: String) = records.firstOrNull { it.id == id }
+object Motions : DataStore<Motion>() {
+    override val typeName: String get() = "motion"
+    override val dataSerializer: KSerializer<Motion> get() = serializer()
 }

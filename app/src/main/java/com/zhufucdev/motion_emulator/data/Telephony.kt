@@ -2,7 +2,6 @@
 
 package com.zhufucdev.motion_emulator.data
 
-import android.content.Context
 import android.os.*
 import android.os.Parcelable.Creator
 import android.telephony.*
@@ -16,10 +15,6 @@ import kotlinx.serialization.descriptors.buildClassSerialDescriptor
 import kotlinx.serialization.descriptors.serialDescriptor
 import kotlinx.serialization.encoding.*
 import kotlinx.serialization.encoding.CompositeDecoder.Companion.DECODE_DONE
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.decodeFromStream
-import kotlinx.serialization.json.encodeToStream
-import java.io.File
 
 /**
  * A snapshot taken from [TelephonyManager]
@@ -83,6 +78,7 @@ class CellSerializer : KSerializer<CellMoment> {
         }
 }
 
+@Suppress("FunctionName")
 fun ByteArrayListSerializer() = ListSerializer(ByteArraySerializer())
 
 fun CompositeEncoder.encodeParcelableListElement(
@@ -167,46 +163,10 @@ fun CompositeDecoder.decodeCellLocationElement(
 
 class CellLocationDecodeException(override val message: String) : Exception()
 
-@OptIn(ExperimentalSerializationApi::class)
-object Cells {
-    private val timelines = arrayListOf<CellTimeline>()
-    private lateinit var rootDir: File
-
-    /**
-     * Make sure it works
-     *
-     * Should be called before any read operation
-     */
-    fun require(context: Context) {
-        rootDir = context.getDir("cells", Context.MODE_PRIVATE)
-        val list = rootDir.listFiles() ?: emptyArray<File>()
-        if (list.map { it.nameWithoutExtension }.toSet() != timelines.map { it.id }.toSet()) {
-            timelines.clear()
-            list.forEach { file ->
-                if (file.extension != "json") {
-                    return@forEach
-                }
-                file.inputStream().use {
-                    val record = Json.decodeFromStream<CellTimeline>(it)
-                    timelines.add(record)
-                }
-            }
-        }
-    }
-
-    fun store(record: CellTimeline) {
-        if (timelines.contains(record)) return
-        val name = record.id + ".json"
-        File(rootDir, name).outputStream().use {
-            Json.encodeToStream(record, it)
-        }
-        timelines.add(record)
-    }
-
-    fun list() = timelines.toList()
-    operator fun get(id: String) = timelines.firstOrNull { it.id == id }
+object Cells : DataStore<CellTimeline>() {
+    override val typeName: String get() = "cells"
+    override val dataSerializer: KSerializer<CellTimeline> get() = serializer()
 }
-
 
 fun <T> Parcel.use(block: (Parcel) -> T): T {
     val result = block(this)

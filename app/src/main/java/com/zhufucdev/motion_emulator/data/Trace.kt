@@ -1,12 +1,8 @@
 package com.zhufucdev.motion_emulator.data
 
-import android.content.Context
-import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.decodeFromStream
-import kotlinx.serialization.json.encodeToStream
-import java.io.File
+import kotlinx.serialization.serializer
 
 /**
  * A location on earth.
@@ -26,43 +22,7 @@ data class Point(val latitude: Double, val longitude: Double) {
 @Serializable
 data class Trace(override val id: String, val name: String, val points: List<Point>) : Referable
 
-@OptIn(ExperimentalSerializationApi::class)
-object Traces {
-    private val records = arrayListOf<Trace>()
-    private lateinit var rootDir: File
-
-    private val jsonParser = Json { ignoreUnknownKeys = true }
-
-    /**
-     * Make sure it works
-     *
-     * Should be called before any read operation
-     */
-    fun require(context: Context) {
-        rootDir = context.getDir("record", Context.MODE_PRIVATE)
-        val list = rootDir.listFiles() ?: emptyArray<File>()
-        if (list.map { it.nameWithoutExtension }.toSet() != records.map { it.id }.toSet()) {
-            records.clear()
-            list.forEach { file ->
-                if (file.extension != "json") {
-                    return@forEach
-                }
-                file.inputStream().use {
-                    val record = jsonParser.decodeFromStream<Trace>(it)
-                    records.add(record)
-                }
-            }
-        }
-    }
-
-    fun store(record: Trace) {
-        if (records.contains(record)) return
-        File(rootDir, "${record.id}.json").outputStream().use {
-            Json.encodeToStream(record, it)
-        }
-        records.add(record)
-    }
-
-    fun list() = records.toList()
-    operator fun get(id: String) = list().firstOrNull { it.id == id }
+object Traces : DataStore<Trace>() {
+    override val typeName: String get() = "record"
+    override val dataSerializer: KSerializer<Trace> get() = serializer()
 }

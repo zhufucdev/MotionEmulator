@@ -63,7 +63,17 @@ sealed class ManagerViewModel<T : Referable> : ViewModel() {
 
     class MotionViewModel : DummyViewModel<Motion>(Screen.MotionScreen, Motions.list()) {
         override fun onClick(item: Motion) {
+            Motions
+        }
 
+        override fun onRemove(item: Motion) {
+            super.onRemove(item)
+            Motions.delete(item, runtime.context)
+        }
+
+        override fun undo(item: Motion, index: Int) {
+            super.undo(item, index)
+            Motions.store(item)
         }
     }
 
