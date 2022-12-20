@@ -30,7 +30,7 @@
     <string name="name_map_satellite">卫星地图</string>
     <string name="name_map_night">暗色模式地图</string>
     <string name="text_near">%s附近</string>
-    <string name="action_undo">橡皮</string>
+    <string name="action_undo">撤销</string>
     <string name="text_trace_name">标记为\"%s\"</string>
     <string name="text_trace_saved">成功保存了%d条路径</string>
     <string name="title_motion_data">运动数据</string>
