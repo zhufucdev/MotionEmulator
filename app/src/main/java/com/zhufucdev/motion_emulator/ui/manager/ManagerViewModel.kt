@@ -10,8 +10,10 @@ import androidx.lifecycle.ViewModel
 import androidx.navigation.NavController
 import com.zhufucdev.motion_emulator.R
 import com.zhufucdev.motion_emulator.data.*
-import kotlinx.coroutines.*
-import kotlin.coroutines.coroutineContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 
 sealed class Screen<T : Referable>(
     val name: String,
@@ -79,8 +81,9 @@ sealed class ManagerViewModel<T : Referable> : ViewModel() {
 
             coroutine.launch {
                 val action = runtime.snackbarHost.showSnackbar(
-                    runtime.context.getString(R.string.text_deleted, item.id),
-                    runtime.context.getString(R.string.action_undo)
+                    message = runtime.context.getString(R.string.text_deleted, item.id),
+                    actionLabel = runtime.context.getString(R.string.action_undo),
+                    withDismissAction = true
                 )
                 if (action == SnackbarResult.ActionPerformed) {
                     undo(item, index)
@@ -88,7 +91,7 @@ sealed class ManagerViewModel<T : Referable> : ViewModel() {
             }
         }
 
-        private fun undo(item: T, index: Int) {
+        open fun undo(item: T, index: Int) {
             data.add(index, item)
         }
 
