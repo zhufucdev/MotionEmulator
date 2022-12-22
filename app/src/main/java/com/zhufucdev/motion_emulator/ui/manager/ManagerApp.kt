@@ -2,11 +2,13 @@
 
 package com.zhufucdev.motion_emulator.ui.manager
 
+import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -40,6 +42,7 @@ import com.zhufucdev.motion_emulator.ui.theme.paddingCommon
 fun ManagerApp(navigateUp: () -> Unit, dataProvider: List<ManagerViewModel<*>>) {
     val navController = rememberNavController()
     val snackbarState = remember { SnackbarHostState() }
+    val context = LocalContext.current
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -53,12 +56,12 @@ fun ManagerApp(navigateUp: () -> Unit, dataProvider: List<ManagerViewModel<*>>) 
                 startDestination = dataProvider.first().screen.name
             ) {
                 dataProvider.forEach { para ->
-                    composable(para.screen.name) {
-                        para.Compose(
+                    with(para) {
+                        compose(
                             ManagerViewModel.RuntimeArguments(
                                 snackbarState,
                                 navController,
-                                LocalContext.current
+                                context
                             )
                         )
                     }
@@ -86,7 +89,7 @@ private fun AppBar(onBackPressed: () -> Unit) {
 @Composable
 private fun AppNavigationBar(navController: NavController) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val screens by remember { derivedStateOf { Screen.list } }
+    val screens by remember { mutableStateOf(Screen.list) }
     NavigationBar {
         screens.forEach { route: Screen<*> ->
             NavigationBarItem(
@@ -141,10 +144,14 @@ fun <T : Referable> DataList(
         }
         return
     }
+
+    val state = rememberLazyListState()
+
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(paddingCommon),
-        verticalArrangement = Arrangement.spacedBy(paddingCommon)
+        verticalArrangement = Arrangement.spacedBy(paddingCommon),
+        state = state
     ) {
         viewModel.data.forEach { item ->
             item(key = item.id) {
@@ -185,7 +192,9 @@ fun <T : Referable> DataList(
                                     if (!removed) heightAnimator =
                                         Animatable(it.size.height.toFloat())
                                 },
-                            onClick = { viewModel.onClick(item) }
+                            onClick = {
+                                viewModel.onClick(item)
+                            }
                         ) {
                             content()
                         }
