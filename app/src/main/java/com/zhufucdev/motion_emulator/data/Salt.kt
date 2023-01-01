@@ -4,6 +4,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils
+import com.highcapable.yukihookapi.hook.log.loggerD
 import com.highcapable.yukihookapi.hook.log.loggerI
 import com.zhufucdev.motion_emulator.data.BypassProjector.toIdeal
 import com.zhufucdev.motion_emulator.hook.center
@@ -42,9 +43,9 @@ open class Vector2D(val x: Double, val y: Double) {
 @Serializable
 data class Matrix2x2(val values: DoubleArray = DoubleArray(4)) {
     operator fun get(row: Int, column: Int): Double {
-        if (row < 1 && column < 1) {
+        if (row <= 1 && column <= 1) {
             return values[row * 2 + column]
-        } else if (row >= 1) {
+        } else if (row > 1) {
             dimensionError(row)
         } else {
             dimensionError(column)
@@ -150,9 +151,7 @@ data class Factor(
         val c = -3 * x[0] + 3 * x[1]
         val d = x[0] - targetX
         val d1 = b * c / a / a / 6 - b * b * b / 27 / a / a / a - d / 2 / a
-        val d2 = c / 3 / a - b * b / 9 / a / a
-        val d3 = sqrt(d1 * d1 + d2 * d2 * d2)
-        val t = -b / 3 / a + cbrt(d1 + d3) + cbrt(d1 - d3)
+        val t = -b / 3 / a + cbrt(d1) + cbrt(d1)
 
         // then use the solved t to manipulate the point (x, y)
         val tRounded = 1 - t
@@ -337,10 +336,6 @@ class Salt2dRuntime(val data: Salt2dData) {
         val transformers =
             this.transformers ?: resolve(projector, parent).also { this.transformers = it }
 
-        loggerI(
-            "Salt",
-            "resolved ${transformers.size} transformers (${transformers.joinToString { it.transforms.joinToString { it::class.simpleName!! } }})"
-        )
         if (transformers.isEmpty()) return point
         var last = transformers.first().apply(with(projector) { point.toIdeal() })
         for (i in 1 until transformers.size) {
@@ -355,7 +350,7 @@ class Salt2dRuntime(val data: Salt2dData) {
      * what [Transformation]s should be taken
      * and what order they are in
      */
-    private fun resolve(projector: Projector, parent: ClosedShape): List<Transformation> =
+    internal fun resolve(projector: Projector, parent: ClosedShape): List<Transformation> =
         buildList {
             var lastAnchor: Vector2D? = null
             val center by lazy { parent.center(projector) }
@@ -372,19 +367,19 @@ class Salt2dRuntime(val data: Salt2dData) {
             environment.addLazyVariable("centerY") { center.y }
 
             fun commit() {
-                add(Transformation(lastAnchor, chains))
+                add(Transformation(lastAnchor, chains.toList()))
                 chains.clear()
             }
 
             fun commitTranslations() {
                 if (translate.isEmpty()) return
-                chains.add(TranslationChain(translate))
+                chains.add(TranslationChain(translate.toList()))
                 translate.clear()
             }
 
             fun commitMatrix() {
                 if (matrix.isEmpty()) return
-                chains.add(TransformationChain(matrix))
+                chains.add(TransformationChain(matrix.toList()))
                 matrix.clear()
             }
 
@@ -392,6 +387,8 @@ class Salt2dRuntime(val data: Salt2dData) {
                 when (ele.type) {
                     SaltType.Anchor -> {
                         if (lastAnchor != null) {
+                            commitMatrix()
+                            commitTranslations()
                             commit()
                         }
                         lastAnchor =
