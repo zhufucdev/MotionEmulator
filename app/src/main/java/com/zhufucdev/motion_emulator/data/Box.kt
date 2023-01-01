@@ -43,3 +43,8 @@ inline fun <reified T> Box<T>.encodeToString(): String =
         is BlockBox -> BLOCK_REF
         else -> value?.let { Json.encodeToString(serializer<T>(), it) } ?: "null"
     }
+
+
+class MutableBox<T>(var value: T)
+
+fun <T> T.mutbox() = MutableBox(this)

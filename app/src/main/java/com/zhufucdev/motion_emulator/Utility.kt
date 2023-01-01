@@ -5,13 +5,13 @@ import android.content.pm.ApplicationInfo
 import android.content.res.Configuration
 import android.content.res.Resources
 import android.util.TypedValue
-import android.view.View
 import androidx.annotation.AttrRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.compose.ui.geometry.Offset
 import androidx.navigation.NavController
 import com.amap.api.maps.AMap
-import com.amap.api.maps.MapView
+import com.amap.api.maps.AMapUtils
 import com.amap.api.maps.MapsInitializer
 import com.amap.api.maps.model.LatLng
 import com.amap.api.maps.model.LatLngBounds
@@ -20,6 +20,7 @@ import com.zhufucdev.motion_emulator.hook_frontend.Emulation
 import com.zhufucdev.motion_emulator.hook_frontend.EmulationRef
 import io.ktor.client.*
 import io.ktor.client.call.*
+import io.ktor.client.call.body
 import io.ktor.client.engine.android.*
 import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
@@ -79,7 +80,18 @@ suspend fun getAddress(location: LatLng): String? {
 fun Double.toFixed(n: Int): String {
     val df = DecimalFormat(buildString {
         append("#.")
-        for (i in 0..n) {
+        repeat(n) {
+            append("#")
+        }
+    })
+    df.roundingMode = RoundingMode.HALF_UP
+    return df.format(this)
+}
+
+fun Float.toFixed(n: Int): String {
+    val df = DecimalFormat(buildString {
+        append("#.")
+        repeat(n) {
             append("#")
         }
     })
@@ -155,6 +167,7 @@ operator fun FloatArray.times(other: Float): FloatArray {
 }
 
 fun Point.toLatLng(): LatLng = LatLng(latitude, longitude)
+fun Vector2D.toLatLng(): LatLng = LatLng(x, y)
 fun LatLng.toPoint(): Point = Point(latitude, longitude)
 
 fun skipAmapFuckingLicense(context: Context) {
@@ -162,12 +175,10 @@ fun skipAmapFuckingLicense(context: Context) {
     MapsInitializer.updatePrivacyAgree(context, true)
 }
 
-/**
- * Treat [Point] as a 2d vector and calculate
- * the length
- */
-fun Point.lenTo(other: Point): Double =
-    sqrt((latitude - other.latitude).pow(2) + (longitude - other.longitude).pow(2))
+fun Vector2D.lenTo(other: Vector2D): Double =
+    sqrt((x - other.x).pow(2) + (y - other.y).pow(2))
+
+fun Vector2D.toPoint() = Point(x, y)
 
 fun AMap.unifyTheme(resources: Resources) {
     mapType = if (isDarkModeEnabled(resources)) AMap.MAP_TYPE_NIGHT else AMap.MAP_TYPE_NORMAL
@@ -193,51 +204,6 @@ fun List<Point>.bounds(): LatLngBounds =
 operator fun LatLng.minus(other: LatLng) =
     LatLng(latitude - other.latitude, longitude - other.longitude)
 
-object MapFixUtil {
-    private const val pi = 3.14159265358979324
-    private const val a = 6378245.0
-    private const val ee = 0.00669342162296594323
-    fun transform(wgLat: Double, wgLon: Double): DoubleArray {
-        val latlng = DoubleArray(2)
-        if (outOfChina(wgLat, wgLon)) {
-            latlng[0] = wgLat
-            latlng[1] = wgLon
-            return latlng
-        }
-        var dLat = transformLat(wgLon - 105.0, wgLat - 35.0)
-        var dLon = transformLon(wgLon - 105.0, wgLat - 35.0)
-        val radLat = wgLat / 180.0 * pi
-        var magic = sin(radLat)
-        magic = 1 - ee * magic * magic
-        val sqrtMagic = sqrt(magic)
-        dLat = dLat * 180.0 / (a * (1 - ee) / (magic * sqrtMagic) * pi)
-        dLon = dLon * 180.0 / (a / sqrtMagic * cos(radLat) * pi)
-        latlng[0] = wgLat - dLat
-        latlng[1] = wgLon - dLon
-        return latlng
-    }
-
-    private fun outOfChina(lat: Double, lon: Double): Boolean {
-        return if (lon < 72.004 || lon > 137.8347) true else lat < 0.8293 || lat > 55.8271
-    }
-
-    private fun transformLat(x: Double, y: Double): Double {
-        var ret = -100.0 + 2.0 * x + 3.0 * y + 0.2 * y * y + 0.1 * x * y + 0.2 * sqrt(abs(x))
-        ret += (20.0 * sin(6.0 * x * pi) + 20.0 * sin(2.0 * x * pi)) * 2.0 / 3.0
-        ret += (20.0 * sin(y * pi) + 40.0 * sin(y / 3.0 * pi)) * 2.0 / 3.0
-        ret += (160.0 * sin(y / 12.0 * pi) + 320 * sin(y * pi / 30.0)) * 2.0 / 3.0
-        return ret
-    }
-
-    private fun transformLon(x: Double, y: Double): Double {
-        var ret = 300.0 + x + 2.0 * y + 0.1 * x * x + 0.1 * x * y + 0.1 * sqrt(abs(x))
-        ret += (20.0 * sin(6.0 * x * pi) + 20.0 * sin(2.0 * x * pi)) * 2.0 / 3.0
-        ret += (20.0 * sin(x * pi) + 40.0 * sin(x / 3.0 * pi)) * 2.0 / 3.0
-        ret += (150.0 * sin(x / 12.0 * pi) + 300.0 * sin(x / 30.0 * pi)) * 2.0 / 3.0
-        return ret
-    }
-}
-
 fun AppCompatActivity.initializeToolbar(
     toolbar: Toolbar,
     navController: NavController? = null
@@ -254,8 +220,11 @@ fun Emulation.ref() =
     EmulationRef(trace.id, motion.ref(), cells.ref(), velocity, repeat, satelliteCount)
 
 fun <T : Referable> Box<T>.ref() =
-    when(this) {
+    when (this) {
         is EmptyBox<T> -> EMPTY_REF
         is BlockBox<T> -> BLOCK_REF
         else -> value?.id ?: NULL_REF
     }
+
+fun Vector2D.toOffset() = Offset(x.toFloat(), y.toFloat())
+fun Offset.toVector2d() = Vector2D(x * 1.0, y * 1.0)

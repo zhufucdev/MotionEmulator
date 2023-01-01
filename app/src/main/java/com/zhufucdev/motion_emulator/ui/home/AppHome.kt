@@ -136,7 +136,7 @@ fun HomeAppbar() {
 @Composable
 fun HomePreview() {
     MotionEmulatorTheme {
-        val state = remember { derivedStateOf { false } }
+        val state = remember { mutableStateOf(false) }
         AppHome(state) {}
     }
 }

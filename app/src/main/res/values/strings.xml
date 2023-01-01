@@ -68,7 +68,7 @@
         <string name="title_emulation_stopped">Emulation Stopped</string>
         <string name="title_emulation_pending">Emulation Pending</string>
         <string name="text_emulation_pending">waiting for an app to pick up</string>
-        <string name="action_restart">restart</string>
+        <string name="action_restart">Restart</string>
         <string name="title_unknown">Unknown</string>
         <string name="action_show_system_apps">Show system apps</string>
         <string name="action_bypass_mode">Bypass mode</string>
@@ -88,4 +88,49 @@
     <string name="text_pieces_of_record">%d pieces of record</string>
         <string name="text_in_length">%s in length</string>
     <string name="text_estimated">%s estimated</string>
+    <string name="title_name">Name</string>
+        <string name="title_id">Identity</string>
+    <string name="caption_salt">Random factors</string>
+    <string name="action_add">Add</string>
+    <string name="name_translation">Translation</string>
+        <string name="name_rotation">Rotation</string>
+        <string name="name_scale">Scale</string>
+        <string name="name_custom_matrix">Custom Matrix</string>
+    <string name="caption_adding_salt">Adding salt</string>
+    <string name="name_anchor">Anchor</string>
+    <string name="text_point" translatable="false">(%s, %s)</string>
+    <string name="name_latitude">latitude</string>
+        <string name="name_longitude">longitude</string>
+    <string name="caption_insert_formula">Insert formula</string>
+    <string name="name_x" translatable="false">x</string>
+        <string name="name_y" translatable="false">y</string>
+    <string name="name_ratio_x">ratio x</string>
+    <string name="name_ratio_y">ration y</string>
+    <string name="name_radian">radian</string>
+    <string name="suffix_deg" translatable="false">%s°</string>
+    <string name="action_use_input">Use input</string>
+    <string name="suffix_increasing" translatable="false">%s↑</string>
+    <string name="suffix_decreasing" translatable="false">%s↓</string>
+    <string name="name_sin">sine</string>
+    <string name="name_cos">cosine</string>
+    <string name="name_tan">tangent</string>
+    <string name="name_arcsin">arcsine</string>
+    <string name="name_arccos">arccosine</string>
+    <string name="name_atan">arctangent</string>
+    <string name="name_sinh">hyperbolic sine</string>
+    <string name="name_cosh">hyperbolic cosine</string>
+    <string name="name_tanh">hyperbolic tangent</string>
+    <string name="name_abs">absoluate</string>
+    <string name="name_round">half up or down</string>
+    <string name="name_floor">round down</string>
+    <string name="name_ceil">round up</string>
+    <string name="name_log">natural logarithm</string>
+    <string name="name_sqrt">square root</string>
+    <string name="name_cbrt">cube root</string>
+    <string name="name_pi">pi</string>
+    <string name="name_e">Euler\'s number</string>
+    <string name="name_rand">random</string>
+    <string name="name_random_factor">Random factor</string>
+    <string name="title_random_factor">Random Factor</string>
+    <string name="title_custom_matrix">Custom Matrix</string>
 </resources>

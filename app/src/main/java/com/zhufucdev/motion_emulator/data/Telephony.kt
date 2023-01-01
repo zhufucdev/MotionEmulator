@@ -2,6 +2,7 @@
 
 package com.zhufucdev.motion_emulator.data
 
+import android.annotation.SuppressLint
 import android.os.*
 import android.os.Parcelable.Creator
 import android.telephony.*
@@ -141,6 +142,7 @@ fun <T : Parcelable> CompositeDecoder.decodeParcelableListElement(
     return ele
 }
 
+@SuppressLint("ParcelClassLoader")
 fun CompositeDecoder.decodeCellLocationElement(
     descriptor: SerialDescriptor,
     index: Int

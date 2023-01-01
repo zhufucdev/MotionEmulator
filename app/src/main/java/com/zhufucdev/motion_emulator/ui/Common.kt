@@ -1,6 +1,7 @@
 package com.zhufucdev.motion_emulator.ui
 
 import androidx.compose.animation.core.Animatable
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -13,9 +14,12 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import com.zhufucdev.motion_emulator.R
+import com.zhufucdev.motion_emulator.ui.theme.paddingCommon
 import kotlin.math.abs
 import kotlin.math.sign
 
@@ -44,6 +48,8 @@ fun Swipeable(
         }
 
     var maxWidthPx by remember { mutableStateOf(0) }
+    val localEndActivated by rememberUpdatedState(endActivated)
+    val localStartActivated by rememberUpdatedState(startActivated)
 
     LaunchedEffect(key1 = animator) {
         if (animator.value.isNaN()) return@LaunchedEffect
@@ -72,7 +78,7 @@ fun Swipeable(
                         .fillMaxHeight()
                         .width(effectiveOffset.takeIf { it.value > 0 } ?: 0.dp)
                         .align(CenterStart),
-                    onClick = { startActivated?.invoke() },
+                    onClick = { localStartActivated?.invoke() },
                     shape = MaterialTheme.shapes.extraSmall,
                     colors = ButtonDefaults.filledTonalButtonColors(containerColor = fillColor)
                 ) {
@@ -84,7 +90,7 @@ fun Swipeable(
                         .fillMaxHeight()
                         .width(-(effectiveOffset.takeIf { it.value < 0 } ?: 0.dp))
                         .align(CenterEnd),
-                    onClick = { endActivated?.invoke() },
+                    onClick = { localEndActivated?.invoke() },
                     shape = MaterialTheme.shapes.extraSmall,
                     colors = ButtonDefaults.filledTonalButtonColors(containerColor = fillColor)
                 ) {
@@ -107,12 +113,12 @@ fun Swipeable(
                                             SwipeableState.Hidden
                                     } else if (abs(offsetX) > targetOffsetPx + fractionWidth.toPx()) {
                                         if (offsetX > 0) {
-                                            startActivated?.let {
+                                            localStartActivated?.let {
                                                 it.invoke()
                                                 SwipeableState.Filled
                                             }
                                         } else {
-                                            endActivated?.let {
+                                            localEndActivated?.let {
                                                 it.invoke()
                                                 SwipeableState.Filled
                                             }
@@ -143,6 +149,26 @@ fun Swipeable(
             }
         }
     }
+}
+
+@Composable
+fun VerticalSpacer(space: Dp = paddingCommon) {
+    Spacer(Modifier.height(space))
+}
+
+@Composable
+fun HorizontalSpacer(space: Dp = paddingCommon) {
+    Spacer(Modifier.width(space))
+}
+
+@Composable
+fun CaptionText(modifier: Modifier = Modifier, text: String) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.secondary,
+        modifier = modifier
+    )
 }
 
 private enum class SwipeableState {

@@ -181,7 +181,8 @@ object LocationHooker : YukiBaseHooker() {
             }
 
             injectMember {
-                members(*classOfLM.methods.filter { it.name == "requestLocationUpdates" || it.name == "requestSingleUpdate" }.toTypedArray())
+                members(*classOfLM.methods.filter { it.name == "requestLocationUpdates" || it.name == "requestSingleUpdate" }
+                    .toTypedArray())
                 replaceAny {
                     if (Scheduler.satellites <= 0) return@replaceAny callOriginal()
 
@@ -204,7 +205,7 @@ object LocationHooker : YukiBaseHooker() {
                 }
                 afterHook {
                     if (Scheduler.satellites <= 0) return@afterHook
-                    
+
                     val info = args(0).cast<GpsStatus>() ?: result as GpsStatus
                     val method7 =
                         GpsStatus::class.members.firstOrNull { it.name == "setStatus" && it.parameters.size == 8 }
@@ -499,9 +500,9 @@ object LocationHooker : YukiBaseHooker() {
             val clz = classOf<GpsSatellite>()
             for (i in 1..Scheduler.satellites) {
                 val instance =
-                        clz.constructor {
-                            param(IntType)
-                        }
+                    clz.constructor {
+                        param(IntType)
+                    }
                         .get()
                         .newInstance<GpsSatellite>(i) ?: return@buildList
                 listOf("mValid", "mHasEphemeris", "mHasAlmanac", "mUsedInFix").forEach {

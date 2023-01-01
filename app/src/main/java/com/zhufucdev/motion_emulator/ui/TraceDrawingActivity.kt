@@ -35,6 +35,7 @@ import com.amap.api.services.poisearch.PoiResultV2
 import com.amap.api.services.poisearch.PoiSearchV2
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils
 import com.google.android.material.snackbar.Snackbar
+import com.highcapable.yukihookapi.hook.log.loggerW
 import com.zhufucdev.motion_emulator.*
 import com.zhufucdev.motion_emulator.data.Trace
 import com.zhufucdev.motion_emulator.data.Traces
@@ -126,7 +127,11 @@ class TraceDrawingActivity : AppCompatActivity() {
                                     arrayOf<Any>(
                                         index,
                                         item.title,
-                                        getString(R.string.name_location, item.provinceName, item.cityName)
+                                        getString(
+                                            R.string.name_location,
+                                            item.provinceName,
+                                            item.cityName
+                                        )
                                     )
                                 )
                             }
@@ -180,7 +185,7 @@ class TraceDrawingActivity : AppCompatActivity() {
                 if (it != null) {
                     moveCamera(it)
                 } else {
-                    Log.w("Trace", "failed to obtain location")
+                    loggerW("Trace", "failed to obtain location")
                 }
             }
         } else {
@@ -260,7 +265,7 @@ class TraceDrawingActivity : AppCompatActivity() {
 
                 R.id.slot_save -> {
                     currentTool.complete()
-                    if (traces.isNotEmpty())  {
+                    if (traces.isNotEmpty()) {
                         traces.forEach { t ->
                             Traces.store(t)
                         }
@@ -308,7 +313,8 @@ class TraceDrawingActivity : AppCompatActivity() {
         points.color(getColor(if (isDarkModeEnabled(resources)) R.color.purple_200 else R.color.purple_500))
 
         val callback = object : DrawToolCallback {
-            private fun project(x: Int, y: Int): LatLng = amap.projection.fromScreenLocation(Point(x, y))
+            private fun project(x: Int, y: Int): LatLng =
+                amap.projection.fromScreenLocation(Point(x, y))
 
             override fun addPoint(x: Int, y: Int) {
                 val al = project(x, y)
@@ -351,11 +357,15 @@ class TraceDrawingActivity : AppCompatActivity() {
                         Trace(
                             NanoIdUtils.randomNanoId(),
                             name,
-                            p.map { com.zhufucdev.motion_emulator.data.Point(it.latitude, it.longitude) },
+                            p.map { it.toPoint() }
                         )
                     )
                     runOnUiThread {
-                        Snackbar.make(binding.root, getString(R.string.text_trace_name, name), Snackbar.LENGTH_LONG)
+                        Snackbar.make(
+                            binding.root,
+                            getString(R.string.text_trace_name, name),
+                            Snackbar.LENGTH_LONG
+                        )
                             .setAnchorView(binding.toolSlots)
                             .show()
                     }
@@ -378,7 +388,11 @@ class TraceDrawingActivity : AppCompatActivity() {
         return callback
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == 0 && grantResults.first() == PackageManager.PERMISSION_GRANTED) {
             involveLocation()

@@ -11,6 +11,7 @@ import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.highcapable.yukihookapi.hook.log.loggerI
 import com.zhufucdev.motion_emulator.data.*
 import com.zhufucdev.motion_emulator.hook_frontend.AUTHORITY
+import com.zhufucdev.motion_emulator.toPoint
 import io.ktor.http.*
 import kotlinx.coroutines.*
 import kotlinx.serialization.json.Json
@@ -124,8 +125,7 @@ object Scheduler {
         val motion = Box.decodeFromString<Motion>(motionData)
         val cells = Box.decodeFromString<CellTimeline>(cellsData)
 
-        val fullTrace = trace.at(0F)
-        length = fullTrace.totalLen
+        length = trace.circumference(MapProjector)
         duration = length / velocity // in seconds
         this.satellites = satellites
 
@@ -138,7 +138,7 @@ object Scheduler {
                 val jobs = mutableSetOf<Job>()
                 startStepsEmulation(motion, velocity)?.let { jobs.add(it) }
                 startMotionSimulation(motion)?.let { jobs.add(it) }
-                startTraceEmulation(trace, fullTrace).let { jobs.add(it) }
+                startTraceEmulation(trace).let { jobs.add(it) }
                 startCellEmulation(cells)?.let { jobs.add(it) }
 
                 jobs.addAll(jobs)
@@ -212,14 +212,14 @@ object Scheduler {
         }
     }
 
-    private fun CoroutineScope.startTraceEmulation(trace: Trace, opti: TraceInterp): Job =
+    private fun CoroutineScope.startTraceEmulation(trace: Trace): Job =
         launch {
-            var traceInterp = opti
+            var traceInterp = trace.saltedPoints.at(0F)
             while (hooking && progress <= 1) {
-                val interp = trace.at(progress, traceInterp)
+                val interp = trace.saltedPoints.at(progress, MapProjector, traceInterp)
                 traceInterp = interp
-                mLocation = interp.point
-                LocationHooker.raise(interp.point)
+                mLocation = interp.point.toPoint()
+                LocationHooker.raise(interp.point.toPoint())
 
                 notifyProgress()
                 delay(1000)

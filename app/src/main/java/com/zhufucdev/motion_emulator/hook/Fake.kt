@@ -11,7 +11,6 @@ import android.os.SystemClock
 import android.telephony.*
 import android.telephony.cdma.CdmaCellLocation
 import android.telephony.gsm.GsmCellLocation
-import android.util.Log
 import androidx.core.os.bundleOf
 import com.amap.api.location.AMapLocation
 import com.amap.api.maps.AMapUtils
@@ -22,12 +21,12 @@ import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
 import kotlin.time.seconds
 
-fun Point.offsetFixed(): Point {
-    val r = MapFixUtil.transform(latitude, longitude)
-    return Point(r[0], r[1])
-}
+fun Point.offsetFixed(): Point = with(MapProjector) { toIdeal() }.toPoint()
 
-fun Point.android(provider: String = LocationManager.GPS_PROVIDER, fixOffset: Boolean = true): Location {
+fun Point.android(
+    provider: String = LocationManager.GPS_PROVIDER,
+    fixOffset: Boolean = true
+): Location {
     val result = Location(provider).apply {
         // fake some data
         time = System.currentTimeMillis()
@@ -54,84 +53,86 @@ fun Point.android(provider: String = LocationManager.GPS_PROVIDER, fixOffset: Bo
     return result
 }
 
-fun Point.amap(provider: String = LocationManager.GPS_PROVIDER, fixOffset: Boolean = true): AMapLocation =
+fun Point.amap(
+    provider: String = LocationManager.GPS_PROVIDER,
+    fixOffset: Boolean = true
+): AMapLocation =
     AMapLocation(android(provider, fixOffset))
 
 /**
- * Result for [Trace.at]
+ * Result for [ClosedShape.at]
  *
  * @param point the interpolated point
  * @param index the bigger index between which the point was interpolated
- * @param totalDeg length of the [Trace] used to interpolate, in degrees
- * @param totalLen length of the [Trace], in meters
+ * @param totalLen length of the [ClosedShape] used to interpolate, in target panel's measure
  * @param cache some distance cache humans don't really care
  */
-data class TraceInterp(
-    val point: Point,
+data class ClosedShapeInterp(
+    val point: Vector2D,
     val index: Int,
-    val totalDeg: Double,
     val totalLen: Double,
     val cache: List<Double>
 )
 
 /**
- * Interpolate a point, give [progress] valued
+ * Interpolate a point, given [progress] valued
  * between 0 and 1
  *
  * The point may have never been drawn
  *
  * @param from if this algorithm is called many times in an increasing [progress] manner,
  * its last result can be used to help calculate faster
- * @see [TraceInterp]
+ * @param projector The interpolation will happen on the **ideal** plane. Basically, it's projected to
+ * the ideal plane, and back to the target plane
+ * @see [ClosedShapeInterp]
  */
-fun Trace.at(progress: Float, from: TraceInterp? = null): TraceInterp {
-    if (progress >= 1) {
-        return TraceInterp(points.last(), points.lastIndex, 0.0, 0.0, emptyList())
+fun List<Vector2D>.at(progress: Float, projector: Projector = BypassProjector, from: ClosedShapeInterp? = null): ClosedShapeInterp {
+    if (progress > 1) {
+        return ClosedShapeInterp(last(), size - 1, 0.0, emptyList())
     } else if (progress < 0) {
-        return TraceInterp(points.first(), 0, 0.0, 0.0, emptyList())
+        return ClosedShapeInterp(first(), 0, 0.0, emptyList())
     }
 
-    var totalDeg = 0.0
     var totalLen = 0.0
     val cache = if (from == null || from.cache.isEmpty()) {
         buildList {
             add(0.0)
-            for (i in 1 until points.size) {
-                totalDeg += points[i].lenTo(points[i - 1])
-                totalLen += AMapUtils.calculateLineDistance(points[i].toLatLng(), points[i - 1].toLatLng())
-                add(totalDeg)
+            for (i in 1 until this@at.size) {
+                totalLen += with(projector) { this@at[i].distance(this@at[i - 1]) }
+                add(totalLen)
             }
         }
     } else {
-        totalDeg = from.totalDeg
         totalLen = from.totalLen
         from.cache
     }
-    val required = totalDeg * progress
+    val required = totalLen * progress
     val range = if (from == null) {
-        1 until points.size
+        1 until this.size
     } else {
-        from.index + 1 until points.size
+        from.index + 1 until this.size
     }
     for (i in range) {
         val current = cache[i]
         if (required == current) {
-            return TraceInterp(points[i], i, totalDeg, totalLen, cache)
+            return ClosedShapeInterp(this[i], i, totalLen, cache)
         } else if (current > required) {
-            val a = points[i - 1]
-            val b = points[i]
+            val a = with(projector) { this@at[i - 1].toIdeal() }
+            val b = with(projector) { this@at[i].toIdeal() }
             val f = (required - cache[i - 1]) / (cache[i] - cache[i - 1])
-            return TraceInterp(
-                point = Point(
-                    latitude = (b.latitude - a.latitude) * f + a.latitude,
-                    longitude = (b.longitude - a.longitude) * f + a.longitude
-                ),
+            return ClosedShapeInterp(
+                point = with(projector) {
+                    Vector2D(
+                        x = (b.x - a.x) * f + a.x,
+                        y = (b.y - a.y) * f + a.y
+                    ).toTarget()
+                },
                 index = i,
-                totalDeg, totalLen, cache
+                totalLen, cache
             )
         }
     }
-    return TraceInterp(points.last(), points.lastIndex, totalDeg, totalLen, cache)
+    return ClosedShapeInterp(this.last(), this.lastIndex, totalLen, cache)
 }
 
 fun Trace.length(): Double {
@@ -255,9 +256,11 @@ fun Motion.validPart(): Motion {
 
             val others =
                 counter && moment.data.containsKey(Sensor.TYPE_STEP_COUNTER)
-                        || linear && moment.data[Sensor.TYPE_LINEAR_ACCELERATION]?.length()?.let { it < 1F } == true
+                        || linear && moment.data[Sensor.TYPE_LINEAR_ACCELERATION]?.length()
+                    ?.let { it < 1F } == true
                         || acc
-                        && moment.data[Sensor.TYPE_ACCELEROMETER]?.filterHighPass()?.length()?.let { it < 1F } == true
+                        && moment.data[Sensor.TYPE_ACCELEROMETER]?.filterHighPass()?.length()
+                    ?.let { it < 1F } == true
 
             val flag =
                 detector && detectorFlag && others || !detector && others
@@ -322,7 +325,7 @@ fun Motion.estimateSpeed(): Double? {
         }
     }
 
-    if (sum < 0) return null
+    if (sum < 0 || sum.isNaN()) return null
     return sum / count
 }
 
@@ -333,32 +336,40 @@ fun Motion.estimateTimespan(): Duration {
 }
 
 /**
- * Get the geometric center of a trace.
- * @param length length of the trace if known. Will
- * help the algorithm run faster
+ * Get the geometric center of a [ClosedShape].
+ *
+ * @param projector The calculation will happen on the **ideal**
+ * plane. Basically, a point is projected to the ideal plane, then
+ * back to target plane.
  */
-fun Trace.center(length: Double = 0.0): Point {
-    val calcSamples = if (length <= 0) {
-        var sum = 0.0
-        for (i in 1 until points.size) {
-            sum += AMapUtils.calculateLineDistance(points[i].toLatLng(), points[i - 1].toLatLng())
-        }
-        sum
-    } else {
-        length
-    } / 50
-    val sampleCount = (if (calcSamples < 10) 10 else calcSamples).toInt()
-    var lastInterp = at(0F)
-    var laSum = 0.0
-    var lgSum = 0.0
+fun ClosedShape.center(projector: Projector = BypassProjector): Vector2D {
+    val sampleCount = 10
+    var lastInterp = points.at(0F)
+    var sum = Vector2D.zero
     for (i in 1..sampleCount) {
-        val sample = at(i * 1F / sampleCount, lastInterp)
-        laSum += sample.point.latitude
-        lgSum += sample.point.longitude
+        val sample = points.at(i * 1F / sampleCount, projector, lastInterp)
+        sum += sample.point
         lastInterp = sample
     }
 
-    return Point(laSum / sampleCount, lgSum / sampleCount)
+    return Point(sum.x / sampleCount, sum.y / sampleCount)
+}
+
+/**
+ * Get circumference of a [ClosedShape].
+ *
+ * @param projector The calculation will happen on the **ideal**
+ * plane. Basically, a point is projected to the ideal plane, then
+ * back to target plane.
+ */
+fun ClosedShape.circumference(projector: Projector = BypassProjector): Double {
+    var c = 0.0
+    if (points.isEmpty()) return c
+    for (i in 0 until points.lastIndex - 1) {
+        c += with(projector) { points[i].distance(points[i + 1]) }
+    }
+    if (points.size > 2) c += with(projector) { points[0].distance(points.last()) }
+    return c
 }
 
 /**
@@ -415,10 +426,22 @@ fun CellMoment.neighboringInfo(): List<NeighboringCellInfo> {
     if (cell.isNotEmpty()) {
         return cell.mapNotNull {
             when (it) {
-                is CellInfoCdma -> NeighboringCellInfo(it.cellSignalStrength.dbm, it.cellIdentity.basestationId)
-                is CellInfoGsm -> NeighboringCellInfo(it.cellSignalStrength.rssi, it.cellIdentity.cid)
-                is CellInfoLte -> NeighboringCellInfo(it.cellSignalStrength.rssi, it.cellIdentity.ci)
-                is CellInfoWcdma -> NeighboringCellInfo(it.cellSignalStrength.dbm, it.cellIdentity.cid)
+                is CellInfoCdma -> NeighboringCellInfo(
+                    it.cellSignalStrength.dbm,
+                    it.cellIdentity.basestationId
+                )
+                is CellInfoGsm -> NeighboringCellInfo(
+                    it.cellSignalStrength.rssi,
+                    it.cellIdentity.cid
+                )
+                is CellInfoLte -> NeighboringCellInfo(
+                    it.cellSignalStrength.rssi,
+                    it.cellIdentity.ci
+                )
+                is CellInfoWcdma -> NeighboringCellInfo(
+                    it.cellSignalStrength.dbm,
+                    it.cellIdentity.cid
+                )
                 else -> null
             }
         }

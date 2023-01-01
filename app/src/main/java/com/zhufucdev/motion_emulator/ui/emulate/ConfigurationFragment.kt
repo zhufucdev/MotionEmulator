@@ -371,7 +371,7 @@ class ConfigurationFragment : Fragment(), MenuProvider {
                 )
             }
         }
-        val center = center(length)
+        val center = center(MapProjector)
         val marker = amap.addMarker(
             MarkerOptions()
                 .position(center.toLatLng())

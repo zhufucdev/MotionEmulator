@@ -51,16 +51,15 @@ abstract class DataStore<T : Referable> {
                     data[record.id] = record
                 }
             }
-            data.keys.forEach {
-                if (it !in existingIds) {
-                    data.remove(it)
-                }
+            val removed = data.keys.filter { it !in existingIds }
+            removed.forEach {
+                data.remove(it)
             }
         }
     }
 
-    fun store(record: T) {
-        if (data.containsKey(record.id)) return
+    fun store(record: T, overwrite: Boolean = false) {
+        if (data.containsKey(record.id) && !overwrite) return
 
         File(rootDir, record.storeName).outputStream().use {
             Json.encodeToStream(dataSerializer, record, it)
