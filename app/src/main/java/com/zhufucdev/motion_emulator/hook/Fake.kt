@@ -110,7 +110,7 @@ fun List<Vector2D>.at(progress: Float, projector: Projector = BypassProjector, f
     val range = if (from == null) {
         1 until this.size
     } else {
-        from.index + 1 until this.size
+        from.index until this.size
     }
     for (i in range) {
         val current = cache[i]

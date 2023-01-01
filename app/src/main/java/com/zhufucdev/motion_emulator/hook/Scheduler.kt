@@ -214,7 +214,7 @@ object Scheduler {
 
     private fun CoroutineScope.startTraceEmulation(trace: Trace): Job =
         launch {
-            var traceInterp = trace.saltedPoints.at(0F)
+            var traceInterp = trace.saltedPoints.at(0F, MapProjector)
             while (hooking && progress <= 1) {
                 val interp = trace.saltedPoints.at(progress, MapProjector, traceInterp)
                 traceInterp = interp
