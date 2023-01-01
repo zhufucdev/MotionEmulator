@@ -72,7 +72,14 @@ fun TraceEditor(target: Trace, viewModel: ManagerViewModel<Trace>) {
         viewModel.onModify(
             target.copy(
                 name = rename,
-                salt = salt.copy(factors = factors.map { it.immutable() }, elements = formulas.map { it.immutable() })
+                salt =
+                if (factors.isEmpty() && formulas.isEmpty())
+                    null
+                else
+                    salt.copy(
+                        factors = factors.map { it.immutable() },
+                        elements = formulas.map { it.immutable() }
+                    )
             )
         )
     }
