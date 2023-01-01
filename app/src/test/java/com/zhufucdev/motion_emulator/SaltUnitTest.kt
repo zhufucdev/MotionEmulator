@@ -13,7 +13,16 @@ import kotlin.math.sqrt
 class SaltUnitTest {
     private val salts = mutableListOf<Salt2dRuntime>()
     private val trace =
-        Trace(NanoIdUtils.randomNanoId(), "testificate trace", listOf(Point.zero))
+        Trace(
+            id = NanoIdUtils.randomNanoId(),
+            name ="testificate trace",
+            listOf(
+                Point(-1.0, -1.0),
+                Point(-1.0, 1.0),
+                Point(1.0, 1.0),
+                Point(1.0, -1.0)
+            )
+        )
 
     @Before
     fun init() {
