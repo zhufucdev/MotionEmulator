@@ -106,9 +106,9 @@ object MapProjector : Projector {
                 }
             )
 
-    override fun Vector2D.toTarget(): Vector2D = this + cache[this]
+    override fun Vector2D.toTarget(): Vector2D = this - cache[this]
 
-    override fun Vector2D.toIdeal(): Vector2D = this - cache[this]
+    override fun Vector2D.toIdeal(): Vector2D = this + cache[this]
 }
 
 
