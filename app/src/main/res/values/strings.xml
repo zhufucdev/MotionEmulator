@@ -105,7 +105,7 @@
     <string name="name_x" translatable="false">x</string>
         <string name="name_y" translatable="false">y</string>
     <string name="name_ratio_x">ratio x</string>
-    <string name="name_ratio_y">ration y</string>
+    <string name="name_ratio_y">ratio y</string>
     <string name="name_radian">radian</string>
     <string name="suffix_deg" translatable="false">%s°</string>
     <string name="action_use_input">Use input</string>
