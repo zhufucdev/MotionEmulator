@@ -127,4 +127,6 @@
     <string name="name_random_factor">随机因子</string>
     <string name="title_random_factor">随机因子</string>
     <string name="title_custom_matrix">自定义矩阵</string>
+    <string name="text_salt_common">加盐的意思是修改数据，使其每次看起来都不一样</string>
+    <string name="text_salt_trace">当向路径加盐的时候，考虑数量级，一般在E-4左右，甚至更小</string>
 </resources>

@@ -133,4 +133,6 @@
     <string name="name_random_factor">Random factor</string>
     <string name="title_random_factor">Random Factor</string>
     <string name="title_custom_matrix">Custom Matrix</string>
+    <string name="text_salt_common">Adding salt means modifying the data to make it different for each run</string>
+    <string name="text_salt_trace">When adding salt to a trace, consider the order of magnitude to be around E-4 or smaller</string>
 </resources>

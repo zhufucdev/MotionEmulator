@@ -178,6 +178,30 @@ fun TraceEditor(target: Trace, viewModel: ManagerViewModel<Trace>) {
                 }
             )
         }
+
+        item {
+            VerticalSpacer()
+            Column(Modifier.fillParentMaxWidth().padding(paddingLarge)) {
+                val color = MaterialTheme.colorScheme.onSurfaceVariant
+                Icon(
+                    painter = painterResource(R.drawable.outline_info_24),
+                    contentDescription = stringResource(R.string.caption_adding_salt),
+                    tint = color
+                )
+                VerticalSpacer(paddingCommon)
+                Text(
+                    text = stringResource(R.string.text_salt_common),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = color
+                )
+                VerticalSpacer()
+                Text(
+                    text = stringResource(R.string.text_salt_trace),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = color
+                )
+            }
+        }
     }
 }
 
