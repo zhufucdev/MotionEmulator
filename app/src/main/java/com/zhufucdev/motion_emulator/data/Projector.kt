@@ -53,7 +53,9 @@ object BypassProjector : Projector {
 }
 
 /**
- * A [Projector] targeting WGS84 coordinating system
+ * A [Projector] targeting GCJ-02 coordinating system
+ *
+ * The ideal plane is WGS-84 coordination
  */
 object MapProjector : Projector {
     private const val pi = 3.14159265358979324
