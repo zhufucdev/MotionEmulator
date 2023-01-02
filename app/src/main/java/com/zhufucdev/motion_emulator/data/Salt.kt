@@ -360,7 +360,7 @@ class Salt2dRuntime(val data: Salt2dData) {
     internal fun resolve(projector: Projector, parent: ClosedShape): List<Transformation> =
         buildList {
             var lastAnchor: Vector2D? = null
-            val center by lazy { parent.center(projector) }
+            val center by lazy { with(projector) { parent.center(projector).toIdeal() } }
             var lastType: SaltType = data.elements.first().type
             val translate = mutableListOf<Vector2D>()
             var anchorOffset = Vector2D.zero
