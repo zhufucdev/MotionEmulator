@@ -112,16 +112,22 @@ class SaltUnitTest {
         val resolution = salts[0].resolve(MapProjector, trace)
         assertEquals("size not match", 2, resolution.size)
         assertEquals("size of transforms not match", 1, resolution[0].transforms.size)
-        assertEquals("type of transform not match", TransformationChain::class, resolution[0].transforms[0]::class)
+        assertEquals("type of transforms not match", TransformationChain::class, resolution[0].transforms[0]::class)
         // TODO: complete this shit
+    }
+
+    @Test
+    fun center_correct() {
+        val resolution = salts[0].resolve(MapProjector, trace)
+        assertEquals("anchor not match", Vector2D.zero, resolution[1].anchor)
     }
 
     @Test
     fun transform1_correct() {
         val testPoint = Vector2D.one
         val transformed = salts[0].apply(point = testPoint, parent = trace)
-        assertEquals("x not match", 11.0, transformed.x, 0.0)
-        assertEquals("y not match", 1.0, transformed.y, 0.0)
+        assertEquals("x not match", 11.0, transformed.x, 1e-6)
+        assertEquals("y not match", 1.0, transformed.y, 1e-6)
     }
 
     @Test
