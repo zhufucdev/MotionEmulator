@@ -264,18 +264,23 @@ class TraceDrawingActivity : AppCompatActivity() {
                 }
 
                 R.id.slot_save -> {
-                    currentTool.complete()
-                    if (traces.isNotEmpty()) {
-                        traces.forEach { t ->
-                            Traces.store(t)
+                    lifecycleScope.launch {
+                        currentTool.complete()
+
+                        if (traces.isNotEmpty()) {
+                            traces.forEach { t ->
+                                Traces.store(t)
+                            }
+                            runOnUiThread {
+                                Snackbar.make(
+                                    binding.root,
+                                    getString(R.string.text_trace_saved, traces.size),
+                                    Snackbar.LENGTH_LONG
+                                )
+                                    .setAnchorView(binding.toolSlots)
+                                    .show()
+                            }
                         }
-                        Snackbar.make(
-                            binding.root,
-                            getString(R.string.text_trace_saved, traces.size),
-                            Snackbar.LENGTH_LONG
-                        )
-                            .setAnchorView(binding.toolSlots)
-                            .show()
                     }
                     false
                 }
@@ -284,7 +289,9 @@ class TraceDrawingActivity : AppCompatActivity() {
             }
 
             if (working) {
-                lastTool.complete()
+                lifecycleScope.launch {
+                    lastTool.complete()
+                }
             }
 
             working
@@ -341,34 +348,32 @@ class TraceDrawingActivity : AppCompatActivity() {
                 lastPos = points.points.lastOrNull() ?: LatLng(0.0, 0.0)
             }
 
-            override fun complete() {
+            override suspend fun complete() {
                 if (points.points.isEmpty()) {
                     return
                 }
 
                 val target = amap.cameraPosition.target
-                lifecycleScope.launch {
-                    val p = points.points
-                    val address = getAddress(target)
-                    val name = address
-                        ?.let { getString(R.string.text_near, it) }
-                        ?: dateString()
-                    traces.add(
-                        Trace(
-                            NanoIdUtils.randomNanoId(),
-                            name,
-                            p.map { it.toPoint() }
-                        )
+                val p = points.points
+                val address = getAddress(target)
+                val name = address
+                    ?.let { getString(R.string.text_near, it) }
+                    ?: dateString()
+                traces.add(
+                    Trace(
+                        NanoIdUtils.randomNanoId(),
+                        name,
+                        p.map { it.toPoint() }
                     )
-                    runOnUiThread {
-                        Snackbar.make(
-                            binding.root,
-                            getString(R.string.text_trace_name, name),
-                            Snackbar.LENGTH_LONG
-                        )
-                            .setAnchorView(binding.toolSlots)
-                            .show()
-                    }
+                )
+                runOnUiThread {
+                    Snackbar.make(
+                        binding.root,
+                        getString(R.string.text_trace_name, name),
+                        Snackbar.LENGTH_LONG
+                    )
+                        .setAnchorView(binding.toolSlots)
+                        .show()
                 }
             }
         }
@@ -431,7 +436,7 @@ const val drawPrecision = 0.5F // in meters
 
 interface ToolCallback {
     fun undo()
-    fun complete()
+    suspend fun complete()
 }
 
 interface DrawToolCallback : ToolCallback {
@@ -443,5 +448,5 @@ interface DrawToolCallback : ToolCallback {
 object MoveToolCallback : ToolCallback {
     override fun undo() {}
 
-    override fun complete() {}
+    override suspend fun complete() {}
 }
