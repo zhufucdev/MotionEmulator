@@ -72,7 +72,7 @@ data class Matrix2x2(val values: DoubleArray = DoubleArray(4)) {
     operator fun times(vector: Vector2D) =
         Vector2D(
             this[0, 0] * vector.x + this[1, 0] * vector.y,
-            this[0, 1] * vector.x + this[1, 1] * vector.x
+            this[0, 1] * vector.x + this[1, 1] * vector.y
         )
 
     override fun equals(other: Any?): Boolean {
