@@ -97,7 +97,7 @@ object MapProjector : Projector {
                         if (outOfChina(x, y)) return Vector2D.zero
                         var dLat = transformLat(y - 105.0, x - 35.0)
                         var dLon = transformLon(y - 105.0, x - 35.0)
-                        val radLat = x / 180.0 * pi
+                        val radLat = x / 180 * pi
                         var magic = sin(radLat)
                         magic = 1 - ee * magic * magic
                         val sqrtMagic = sqrt(magic)

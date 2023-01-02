@@ -34,6 +34,13 @@ open class Vector2D(val x: Double, val y: Double) {
 
     operator fun times(factor: Double) = Vector2D(x * factor, y * factor)
 
+    override fun toString(): String = "(x=$x, y=$y)"
+
+    override fun equals(other: Any?): Boolean {
+        if (other !is Vector2D) return false
+        return other.x == x && other.y == y
+    }
+
     companion object {
         val zero get() = Vector2D(0.0, 0.0)
         val one get() = Vector2D(1.0, 1.0)

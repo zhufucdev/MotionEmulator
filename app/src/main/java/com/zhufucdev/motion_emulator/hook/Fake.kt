@@ -343,16 +343,12 @@ fun Motion.estimateTimespan(): Duration {
  * back to target plane.
  */
 fun ClosedShape.center(projector: Projector = BypassProjector): Vector2D {
-    val sampleCount = 10
-    var lastInterp = points.at(0F)
-    var sum = Vector2D.zero
-    for (i in 1..sampleCount) {
-        val sample = points.at(i * 1F / sampleCount, projector, lastInterp)
-        sum += sample.point
-        lastInterp = sample
-    }
+    if (points.isEmpty()) throw IllegalArgumentException("points is empty")
 
-    return Point(sum.x / sampleCount, sum.y / sampleCount)
+    var sum = points.first()
+    for (i in 1 until points.size) sum += with(projector) { points[i].toIdeal() }
+
+    return with(projector) { Vector2D(sum.x / points.size, sum.y / points.size).toTarget() }
 }
 
 /**
