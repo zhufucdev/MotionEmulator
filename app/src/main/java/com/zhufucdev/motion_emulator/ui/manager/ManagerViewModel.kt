@@ -16,6 +16,7 @@ import androidx.navigation.navArgument
 import com.zhufucdev.motion_emulator.R
 import com.zhufucdev.motion_emulator.data.*
 import com.zhufucdev.motion_emulator.data.Trace
+import com.zhufucdev.motion_emulator.insert
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -113,7 +114,7 @@ sealed class ManagerViewModel<T : Referable> : ViewModel() {
         }
 
         open fun undo(item: T, index: Int) {
-            data.add(index, item)
+            data.insert(index, item)
         }
 
         override fun onModify(item: T) {
