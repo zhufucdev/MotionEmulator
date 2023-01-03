@@ -1,14 +1,20 @@
 package com.zhufucdev.motion_emulator.ui
 
+import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment.Companion.CenterEnd
 import androidx.compose.ui.Alignment.Companion.CenterStart
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -16,11 +22,13 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.zhufucdev.motion_emulator.R
 import com.zhufucdev.motion_emulator.ui.theme.paddingCommon
 import kotlin.math.abs
+import kotlin.math.roundToInt
 import kotlin.math.sign
 
 @Composable
@@ -173,4 +181,64 @@ fun CaptionText(modifier: Modifier = Modifier, text: String) {
 
 private enum class SwipeableState {
     Hidden, Revealed, Filled
+}
+
+fun <T> Modifier.dragDroppable(
+    element: T,
+    list: MutableList<T>,
+    state: LazyListState,
+    itemsIgnored: Int = 0
+): Modifier = composed {
+    var offset by remember { mutableStateOf(0F) }
+    var index by remember { mutableStateOf(-1) }
+    var movedUp by remember { mutableStateOf(false) }
+    then(
+        Modifier.offset {
+            IntOffset(x = 0, y = offset.roundToInt())
+        }
+            .pointerInput(Unit) {
+                detectDragGesturesAfterLongPress(
+                    onDragStart = {
+                        index = list.indexOf(element)
+                        offset = 0F
+                    },
+                    onDragEnd = {
+                        offset = 0F
+                    },
+                    onDrag = { change, dragAmount ->
+                        if (dragAmount.y == 0F) return@detectDragGesturesAfterLongPress
+                        offset += dragAmount.y
+
+                        val info = state.layoutInfo.visibleItemsInfo
+                        var target = index
+                        var find = 0
+                        if (offset < 0) {
+                            if (index <= 0) return@detectDragGesturesAfterLongPress
+                            if (movedUp) {
+                                find = info[target + itemsIgnored].size
+                            }
+                            while (find < -offset && target > 0) {
+                                target--
+                                find += info[target + itemsIgnored].size
+                            }
+                        } else {
+                            if (index >= list.lastIndex) return@detectDragGesturesAfterLongPress
+                            find = info[target + itemsIgnored].size
+                            while (find < offset && target < list.size) {
+                                target++
+                                find += info[target + itemsIgnored].size
+                            }
+                        }
+                        if (target != index) {
+                            movedUp = target < index
+
+                            list.removeAt(index)
+                            list.add(target, element)
+                            index = target
+                            offset = 0F
+                        }
+                    }
+                )
+            }
+    )
 }

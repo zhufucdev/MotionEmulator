@@ -2,16 +2,15 @@
 
 package com.zhufucdev.motion_emulator.ui.manager
 
-import android.util.Log
 import androidx.compose.animation.*
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.animate
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -38,7 +37,6 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils
 import com.zhufucdev.motion_emulator.R
 import com.zhufucdev.motion_emulator.data.*
-import com.zhufucdev.motion_emulator.data.MapProjector.toIdeal
 import com.zhufucdev.motion_emulator.data.Trace
 import com.zhufucdev.motion_emulator.insert
 import com.zhufucdev.motion_emulator.toOffset
@@ -46,6 +44,7 @@ import com.zhufucdev.motion_emulator.toVector2d
 import com.zhufucdev.motion_emulator.ui.CaptionText
 import com.zhufucdev.motion_emulator.ui.Swipeable
 import com.zhufucdev.motion_emulator.ui.VerticalSpacer
+import com.zhufucdev.motion_emulator.ui.dragDroppable
 import com.zhufucdev.motion_emulator.ui.theme.*
 import kotlinx.coroutines.*
 import kotlin.math.*
@@ -63,6 +62,7 @@ fun TraceEditor(target: Trace, viewModel: ManagerViewModel<Trace>) {
     val factors = remember {
         (target.salt ?: Salt2dData()).factors.map { it.mutable() }.toMutableStateList()
     }
+    val listState = rememberLazyListState()
 
     LaunchedEffect(rename) {
         val captured = rename
@@ -108,6 +108,7 @@ fun TraceEditor(target: Trace, viewModel: ManagerViewModel<Trace>) {
     LazyColumn(
         modifier = Modifier.fillMaxWidth(),
         contentPadding = PaddingValues(paddingCommon),
+        state = listState
     ) {
         item {
             TextField(
@@ -148,7 +149,15 @@ fun TraceEditor(target: Trace, viewModel: ManagerViewModel<Trace>) {
 
         factors.forEach {
             item(key = it.id, contentType = "factor") {
-                Box(Modifier.animateItemPlacement()) {
+                Box(
+                    Modifier.animateItemPlacement()
+                        .dragDroppable(
+                            element = it,
+                            list = factors,
+                            state = listState,
+                            itemsIgnored = 3
+                        )
+                ) {
                     FactorSaltItem(
                         factor = it,
                         onRemove = {
@@ -175,7 +184,15 @@ fun TraceEditor(target: Trace, viewModel: ManagerViewModel<Trace>) {
 
         formulas.forEach {
             item(key = it.id, contentType = it.type) {
-                Box(Modifier.animateItemPlacement()) {
+                Box(
+                    Modifier.animateItemPlacement()
+                        .dragDroppable(
+                            element = it,
+                            list = formulas,
+                            state = listState,
+                            itemsIgnored = 3 + factors.size
+                        )
+                ) {
                     SaltItemSelector(
                         formula = it,
                         onRemove = {
