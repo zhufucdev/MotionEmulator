@@ -41,6 +41,12 @@ open class Vector2D(val x: Double, val y: Double) {
         return other.x == x && other.y == y
     }
 
+    override fun hashCode(): Int {
+        var result = x.hashCode()
+        result = 31 * result + y.hashCode()
+        return result
+    }
+
     companion object {
         val zero get() = Vector2D(0.0, 0.0)
         val one get() = Vector2D(1.0, 1.0)

@@ -2,8 +2,10 @@
 
 package com.zhufucdev.motion_emulator.ui.manager
 
+import android.util.Log
 import androidx.compose.animation.*
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.animate
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -24,6 +26,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.pointerInteropFilter
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -37,13 +40,14 @@ import com.zhufucdev.motion_emulator.R
 import com.zhufucdev.motion_emulator.data.*
 import com.zhufucdev.motion_emulator.data.MapProjector.toIdeal
 import com.zhufucdev.motion_emulator.data.Trace
+import com.zhufucdev.motion_emulator.insert
 import com.zhufucdev.motion_emulator.toOffset
 import com.zhufucdev.motion_emulator.toVector2d
 import com.zhufucdev.motion_emulator.ui.CaptionText
 import com.zhufucdev.motion_emulator.ui.Swipeable
 import com.zhufucdev.motion_emulator.ui.VerticalSpacer
 import com.zhufucdev.motion_emulator.ui.theme.*
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.*
 import kotlin.math.*
 import kotlin.time.Duration.Companion.seconds
 
@@ -52,6 +56,7 @@ import kotlin.time.Duration.Companion.seconds
 fun TraceEditor(target: Trace, viewModel: ManagerViewModel<Trace>) {
     var rename by remember { mutableStateOf(target.name) }
     var formulaToken by remember { mutableStateOf(0L) }
+    val lifecycleCoroutine = remember { CoroutineScope(Dispatchers.Main) }
     val formulas = remember {
         (target.salt ?: Salt2dData()).elements.map { it.mutable() }.toMutableStateList()
     }
@@ -96,6 +101,7 @@ fun TraceEditor(target: Trace, viewModel: ManagerViewModel<Trace>) {
     DisposableEffect(Unit) {
         onDispose {
             commit()
+            lifecycleCoroutine.cancel()
         }
     }
 
@@ -145,7 +151,23 @@ fun TraceEditor(target: Trace, viewModel: ManagerViewModel<Trace>) {
                 Box(Modifier.animateItemPlacement()) {
                     FactorSaltItem(
                         factor = it,
-                        onRemove = { factors.remove(it) }
+                        onRemove = {
+                            val index = factors.indexOf(it)
+                            factors.remove(it)
+
+                            lifecycleCoroutine.launch {
+                                val result =
+                                    viewModel.runtime.snackbarHost.showSnackbar(
+                                        message = viewModel.runtime.context.getString(R.string.text_deleted, it.name),
+                                        actionLabel = viewModel.runtime.context.getString(R.string.action_undo),
+                                        withDismissAction = true
+                                    )
+
+                                if (result == SnackbarResult.ActionPerformed) {
+                                    factors.insert(index, it)
+                                }
+                            }
+                        }
                     )
                 }
             }
@@ -156,7 +178,26 @@ fun TraceEditor(target: Trace, viewModel: ManagerViewModel<Trace>) {
                 Box(Modifier.animateItemPlacement()) {
                     SaltItemSelector(
                         formula = it,
-                        onRemove = { formulas.remove(it) }
+                        onRemove = {
+                            val index = formulas.indexOf(it)
+                            formulas.remove(it)
+
+                            lifecycleCoroutine.launch {
+                                val result =
+                                    viewModel.runtime.snackbarHost.showSnackbar(
+                                        message = viewModel.runtime.context.getString(
+                                            R.string.text_deleted,
+                                            viewModel.runtime.context.getString(saltTypeNames[it.type]!!)
+                                        ),
+                                        actionLabel = viewModel.runtime.context.getString(R.string.action_undo),
+                                        withDismissAction = true
+                                    )
+
+                                if (result == SnackbarResult.ActionPerformed) {
+                                    formulas.insert(index, it)
+                                }
+                            }
+                        }
                     )
                 }
             }
@@ -466,13 +507,7 @@ fun NewSaltItem(modifier: Modifier = Modifier, onClick: (Boolean, SaltType) -> U
                 }
             )
 
-            mapOf(
-                SaltType.Anchor to R.string.name_anchor,
-                SaltType.Translation to R.string.name_translation,
-                SaltType.Rotation to R.string.name_rotation,
-                SaltType.Scale to R.string.name_scale,
-                SaltType.CustomMatrix to R.string.title_custom_matrix
-            ).forEach { (t, u) ->
+            saltTypeNames.forEach { (t, u) ->
                 DropdownMenuItem(
                     text = { Text(stringResource(u)) },
                     onClick = {
@@ -832,7 +867,10 @@ fun SaltItemScaffold(
 ) {
     var expanded by remember { mutableStateOf(false) }
     var indicatorAnimation by remember { mutableStateOf(Animatable(0F)) }
-    val localRemove by rememberUpdatedState(onRemove)
+    var removed by remember { mutableStateOf(false) }
+    var targetHeight by remember { mutableStateOf(Int.MAX_VALUE) }
+    var animator by remember { mutableStateOf(Animatable(Float.POSITIVE_INFINITY)) }
+    val density = LocalDensity.current
 
     LaunchedEffect(expanded) {
         val targetValue = if (expanded) 180F else 0F
@@ -842,7 +880,21 @@ fun SaltItemScaffold(
         indicatorAnimation.animateTo(targetValue)
     }
 
-    Column(Modifier.fillMaxWidth()) {
+    LaunchedEffect(removed) {
+        if (!removed) return@LaunchedEffect
+
+        animator = Animatable(targetHeight / density.density)
+        animator.animateTo(0F)
+        onRemove()
+    }
+
+    Column(
+        Modifier.fillMaxWidth()
+            .heightIn(max = animator.value.dp)
+            .onGloballyPositioned {
+                targetHeight = it.size.height
+            }
+    ) {
         Swipeable(
             foreground = {
                 Column(
@@ -940,7 +992,7 @@ fun SaltItemScaffold(
                     )
                 )
             },
-            endActivated = localRemove,
+            endActivated = { removed = true },
             container = { content ->
                 Column(Modifier.fillMaxWidth()) {
                     content()
@@ -1012,3 +1064,10 @@ fun TraceEditorPreview() {
 }
 
 private fun randomTraceData() = Trace(NanoIdUtils.randomNanoId(), "Near the moon", emptyList())
+private val saltTypeNames = mapOf(
+    SaltType.Anchor to R.string.name_anchor,
+    SaltType.Translation to R.string.name_translation,
+    SaltType.Rotation to R.string.name_rotation,
+    SaltType.Scale to R.string.name_scale,
+    SaltType.CustomMatrix to R.string.title_custom_matrix
+)

@@ -228,3 +228,14 @@ fun <T : Referable> Box<T>.ref() =
 
 fun Vector2D.toOffset() = Offset(x.toFloat(), y.toFloat())
 fun Offset.toVector2d() = Vector2D(x * 1.0, y * 1.0)
+
+/**
+ * To involve [MutableList.add], but avoid [IndexOutOfBoundsException]
+ */
+fun <T> MutableList<T>.insert(index: Int, element: T) {
+    if (index >= size) {
+        add(element)
+    } else {
+        add(index, element)
+    }
+}
