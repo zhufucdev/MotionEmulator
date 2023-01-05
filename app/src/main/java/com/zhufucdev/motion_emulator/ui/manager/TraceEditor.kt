@@ -89,7 +89,7 @@ fun TraceEditor(target: Trace, viewModel: ManagerViewModel<Trace>) {
         )
     }
 
-    LaunchedEffect(formulas) {
+    LaunchedEffect(formulas, factors) {
         formulaToken = System.currentTimeMillis()
         val captured = formulaToken
         delay(1.seconds)
