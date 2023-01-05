@@ -22,10 +22,23 @@ bit easier.
 
 * Pick up your phone and turn on the motion recorder
 * Take a one-hundred-meter speed run and press `STOP`
-* Draw the path you desire to be running on, like the one
-revolves around the mainland, probably using polyline
-* Set time limit and repeat count
+* Draw the path you desire to be running on
+* Set velocity and repeat count
 * Make more time
+
+### Adding salt
+Now for each emulation, the path to run on
+is exactly the same
+
+To reverse the behavior to make it not so sus
+
+* Turn to the `Manage` page and navigate to the trace
+* `Add` some `Random Factor`, saying `x`
+* Add some salt, like `Rotation`
+* Expand the salt you've just added, and put in some
+mathematics expression involving `x` as you like
+
+Note: knowledge of linear algebra may be needed
 
 ## Build Instructions
 
