@@ -93,7 +93,7 @@ private fun AppNavigationBar(navController: NavController) {
     NavigationBar {
         screens.forEach { route: Screen<*> ->
             NavigationBarItem(
-                selected = navBackStackEntry?.destination?.hierarchy?.any { it.route == route.name } == true,
+                selected = navBackStackEntry?.destination?.hierarchy?.any { it.route?.startsWith(route.name) == true } == true,
                 onClick = {
                     navController.navigate(route.name) {
                         popUpTo(navController.graph.findStartDestination().id) {
