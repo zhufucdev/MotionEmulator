@@ -325,7 +325,7 @@ fun Motion.estimateSpeed(): Double? {
         }
     }
 
-    if (sum < 0 || sum.isNaN()) return null
+    if (sum < 0 || sum.isNaN() || count <= 0) return null
     return sum / count
 }
 
