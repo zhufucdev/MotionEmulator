@@ -1,5 +1,3 @@
-> 此项目处于积极开发阶段
-
 # MotionEmulator
 
 <img src="art/MotionEmulator.svg" width="200">

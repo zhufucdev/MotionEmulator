@@ -1,5 +1,3 @@
-> This project is under active development
-
 # MotionEmulator
 <img src="art/MotionEmulator.svg" width="200">
 
