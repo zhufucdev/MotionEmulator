@@ -1,5 +1,6 @@
 package com.zhufucdev.motion_emulator.data
 
+import com.zhufucdev.motion_emulator.dateString
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.serializer
@@ -23,10 +24,13 @@ data class MotionMoment(override var elapsed: Float, val data: MutableMap<Int, F
 @Serializable
 data class Motion(
     override val id: String,
+    val name: String? = null,
     val time: Long,
     val moments: List<MotionMoment>,
     val sensorsInvolved: List<Int>
 ) : Referable
+
+val Motion.userDisplay get() = name.takeIf { !it.isNullOrEmpty() } ?: dateString(time)
 
 object Motions : DataStore<Motion>() {
     override val typeName: String get() = "motion"

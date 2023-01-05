@@ -15,6 +15,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils
 import com.zhufucdev.motion_emulator.R
 import com.zhufucdev.motion_emulator.data.Motion
+import com.zhufucdev.motion_emulator.data.userDisplay
 import com.zhufucdev.motion_emulator.dateString
 import com.zhufucdev.motion_emulator.hook.estimateSpeed
 import com.zhufucdev.motion_emulator.hook.estimateTimespan
@@ -28,7 +29,7 @@ import kotlin.time.DurationUnit
 fun MotionScreen(viewModel: ManagerViewModel<Motion>) {
     DataList(viewModel) {
         Column(Modifier.padding(paddingCard)) {
-            Text(text = dateString(it.time), style = MaterialTheme.typography.titleMedium)
+            Text(text = it.userDisplay, style = MaterialTheme.typography.titleMedium)
             Spacer(modifier = Modifier.height(paddingSmall))
             Text(
                 text = stringResource(
@@ -62,6 +63,7 @@ fun randomizedMotionData(): ManagerViewModel<Motion> {
             add(
                 Motion(
                     NanoIdUtils.randomNanoId(),
+                    null,
                     System.currentTimeMillis() - Random.nextLong(
                         10000
                     ),

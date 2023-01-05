@@ -46,44 +46,25 @@ sealed class ManagerViewModel<T : Referable> : ViewModel() {
         }
     }
 
-    class MotionViewModel : DummyViewModel<Motion>(Screen.MotionScreen, Motions.list()) {
-        override fun onRemove(item: Motion) {
+    class MotionViewModel : StandardViewModel<Motion>(Screen.MotionScreen, Motions)
+    class CellsViewModel : StandardViewModel<CellTimeline>(Screen.CellScreen, Cells)
+    class TraceViewModel : StandardViewModel<Trace>(Screen.TraceScreen, Traces)
+
+    abstract class StandardViewModel<T : Referable>(screen: Screen<T>, private val store: DataStore<T>) :
+        DummyViewModel<T>(screen, store.list()) {
+        override fun onRemove(item: T) {
             super.onRemove(item)
-            Motions.delete(item, runtime.context)
+            store.delete(item, runtime.context)
         }
 
-        override fun undo(item: Motion, index: Int) {
+        override fun undo(item: T, index: Int) {
             super.undo(item, index)
-            Motions.store(item)
-        }
-    }
-
-    class CellsViewModel : DummyViewModel<CellTimeline>(Screen.CellScreen, Cells.list()) {
-        override fun onRemove(item: CellTimeline) {
-            super.onRemove(item)
-            Cells.delete(item, runtime.context)
+            store.store(item)
         }
 
-        override fun undo(item: CellTimeline, index: Int) {
-            super.undo(item, index)
-            Cells.store(item)
-        }
-    }
-
-    class TraceViewModel : DummyViewModel<Trace>(Screen.TraceScreen, Traces.list()) {
-        override fun onRemove(item: Trace) {
-            super.onRemove(item)
-            Traces.delete(item, runtime.context)
-        }
-
-        override fun undo(item: Trace, index: Int) {
-            super.undo(item, index)
-            Traces.store(item)
-        }
-
-        override fun onModify(item: Trace) {
+        override fun onModify(item: T) {
             super.onModify(item)
-            Traces.store(item, true)
+            store.store(item, true)
         }
     }
 

@@ -8,6 +8,7 @@ import android.os.Parcelable.Creator
 import android.telephony.*
 import android.telephony.cdma.CdmaCellLocation
 import android.telephony.gsm.GsmCellLocation
+import com.zhufucdev.motion_emulator.dateString
 import kotlinx.serialization.*
 import kotlinx.serialization.builtins.ByteArraySerializer
 import kotlinx.serialization.builtins.ListSerializer
@@ -31,9 +32,12 @@ data class CellMoment(
 @Serializable
 data class CellTimeline(
     override val id: String,
+    val name: String? = null,
     val time: Long,
     val moments: List<CellMoment>
 ) : Referable
+
+val CellTimeline.userDisplay get() = name.takeIf { !it.isNullOrEmpty() } ?: dateString(time)
 
 class CellSerializer : KSerializer<CellMoment> {
     override val descriptor: SerialDescriptor =

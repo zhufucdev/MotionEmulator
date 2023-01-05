@@ -110,38 +110,15 @@ fun TraceEditor(target: Trace, viewModel: ManagerViewModel<Trace>) {
         contentPadding = PaddingValues(paddingCommon),
         state = listState
     ) {
-        item {
-            TextField(
-                label = { Text(stringResource(id = R.string.title_id)) },
-                value = target.id,
-                onValueChange = {},
-                leadingIcon = {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_baseline_map_24),
-                        contentDescription = null, // only for decoration
-                    )
-                },
-                readOnly = true,
-                modifier = Modifier.fillMaxWidth()
-            )
-            VerticalSpacer()
-        }
-
-        item {
-            TextField(
-                label = { Text(stringResource(id = R.string.title_name)) },
-                value = rename,
-                onValueChange = { rename = it },
-                leadingIcon = {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_baseline_edit_24),
-                        contentDescription = null
-                    )
-                },
-                modifier = Modifier.fillMaxWidth()
-            )
-            VerticalSpacer(paddingCommon * 2)
-        }
+        basicEditItems(
+            id = target.id,
+            name = rename,
+            onNameChanged = {
+                rename = it
+                viewModel.onModify(target.copy(name = rename))
+            },
+            icon = { Icon(painterResource(R.drawable.ic_baseline_map_24), contentDescription = null) }
+        )
 
         item {
             CaptionText(text = stringResource(R.string.caption_salt))
