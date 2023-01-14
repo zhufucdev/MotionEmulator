@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -56,6 +57,7 @@ fun TraceEditor(target: Trace, viewModel: EditorViewModel<Trace>) {
     var rename by remember { mutableStateOf(target.name) }
     var formulaToken by remember { mutableStateOf(0L) }
     val lifecycleCoroutine = remember { CoroutineScope(Dispatchers.Main) }
+    val context = LocalContext.current
     val formulas = remember {
         (target.salt ?: Salt2dData()).elements.map { it.mutable() }.toMutableStateList()
     }
@@ -144,8 +146,8 @@ fun TraceEditor(target: Trace, viewModel: EditorViewModel<Trace>) {
                             lifecycleCoroutine.launch {
                                 val result =
                                     viewModel.runtime.snackbarHost.showSnackbar(
-                                        message = viewModel.runtime.context.getString(R.string.text_deleted, it.name),
-                                        actionLabel = viewModel.runtime.context.getString(R.string.action_undo),
+                                        message = context.getString(R.string.text_deleted, it.name),
+                                        actionLabel = context.getString(R.string.action_undo),
                                         withDismissAction = true
                                     )
 
@@ -179,11 +181,11 @@ fun TraceEditor(target: Trace, viewModel: EditorViewModel<Trace>) {
                             lifecycleCoroutine.launch {
                                 val result =
                                     viewModel.runtime.snackbarHost.showSnackbar(
-                                        message = viewModel.runtime.context.getString(
+                                        message = context.getString(
                                             R.string.text_deleted,
-                                            viewModel.runtime.context.getString(saltTypeNames[it.type]!!)
+                                            context.getString(saltTypeNames[it.type]!!)
                                         ),
-                                        actionLabel = viewModel.runtime.context.getString(R.string.action_undo),
+                                        actionLabel = context.getString(R.string.action_undo),
                                         withDismissAction = true
                                     )
 
