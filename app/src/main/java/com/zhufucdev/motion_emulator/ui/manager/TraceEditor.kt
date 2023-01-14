@@ -52,7 +52,7 @@ import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun TraceEditor(target: Trace, viewModel: ManagerViewModel<Trace>) {
+fun TraceEditor(target: Trace, viewModel: EditorViewModel<Trace>) {
     var rename by remember { mutableStateOf(target.name) }
     var formulaToken by remember { mutableStateOf(0L) }
     val lifecycleCoroutine = remember { CoroutineScope(Dispatchers.Main) }
@@ -926,6 +926,7 @@ fun SaltItemScaffold(
                                         top.linkTo(parent.top)
                                         bottom.linkTo(parent.bottom)
                                     }
+                                    .padding(start = paddingCommon)
                             ) {
                                 header()
                             }
@@ -1052,7 +1053,7 @@ fun TraceEditorPreview() {
         }
         TraceEditor(
             target = data,
-            viewModel = ManagerViewModel.DummyViewModel(Screen.TraceScreen, listOf(data))
+            viewModel = EditorViewModel.DummyViewModel(EditableScreen.TraceScreen, listOf(data))
         )
     }
 }
