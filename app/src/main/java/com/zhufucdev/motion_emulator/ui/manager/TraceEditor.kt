@@ -426,6 +426,13 @@ fun FactorCanvas(factor: MutableFactor) {
             )
         }
 
+        drawRect(
+            color = outlineColor,
+            topLeft = Offset(boundLeft, 0F),
+            size = Size(size.width - boundLeft, size.height - boundBottom),
+            style = Stroke(width = density)
+        ) // borders
+
         drawLine(
             color = referenceColor,
             start = controlStart,
@@ -441,12 +448,6 @@ fun FactorCanvas(factor: MutableFactor) {
         )
         drawControlPoint(controlEnd)
 
-        drawRect(
-            color = outlineColor,
-            topLeft = Offset(boundLeft, 0F),
-            size = Size(size.width - boundLeft, size.height - boundBottom),
-            style = Stroke(width = density)
-        )
     }
 }
 
