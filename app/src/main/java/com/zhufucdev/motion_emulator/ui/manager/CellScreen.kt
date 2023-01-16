@@ -11,18 +11,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.zhufucdev.motion_emulator.R
 import com.zhufucdev.motion_emulator.data.CellTimeline
-import com.zhufucdev.motion_emulator.data.userDisplay
-import com.zhufucdev.motion_emulator.dateString
-import com.zhufucdev.motion_emulator.hook.estimateTimespan
 import com.zhufucdev.motion_emulator.ui.theme.paddingCard
 import com.zhufucdev.motion_emulator.ui.theme.paddingSmall
-import kotlin.time.DurationUnit
 
 @Composable
-fun CellScreen(viewModel: ManagerViewModel<CellTimeline>) {
+fun CellScreen(viewModel: EditorViewModel<CellTimeline>) {
     DataList(viewModel) {
         Column(Modifier.padding(paddingCard)) {
-            Text(text = it.userDisplay, style = MaterialTheme.typography.titleMedium)
+            Text(text = it.displayName, style = MaterialTheme.typography.titleMedium)
             Spacer(modifier = Modifier.height(paddingSmall))
             Text(
                 text = stringResource(R.string.text_pieces_of_record, it.moments.size),

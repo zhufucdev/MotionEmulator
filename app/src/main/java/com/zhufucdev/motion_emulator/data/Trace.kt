@@ -1,6 +1,6 @@
 package com.zhufucdev.motion_emulator.data
 
-import com.zhufucdev.motion_emulator.data.BypassProjector.toIdeal
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.SerialDescriptor
@@ -11,7 +11,10 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.encoding.decodeStructure
 import kotlinx.serialization.encoding.encodeStructure
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.encodeToStream
 import kotlinx.serialization.serializer
+import java.io.OutputStream
 
 /**
  * A location on the Earth. Get it?
@@ -37,7 +40,7 @@ data class Trace(
     val name: String,
     override val points: List<Point>,
     val salt: Salt2dData? = null
-) : Referable, ClosedShape {
+) : Data, ClosedShape {
     val saltedPoints by lazy {
         if (salt != null) {
             val runtime = salt.runtime()
@@ -51,6 +54,13 @@ data class Trace(
         } else {
             points
         }
+    }
+
+    override val displayName: String get() = name
+
+    @OptIn(ExperimentalSerializationApi::class)
+    override fun writeTo(stream: OutputStream) {
+        Json.encodeToStream(kotlinx.serialization.serializer(), this, stream)
     }
 }
 

@@ -132,7 +132,7 @@ class ConfigurationFragment : Fragment(), MenuProvider {
         val adapter = ArrayAdapter<String>(requireContext(), android.R.layout.simple_list_item_1)
         val motions = Motions.list()
         motions.forEach {
-            adapter.add(it.userDisplay)
+            adapter.add(it.displayName)
         }
         adapter.addDefaults()
         binding.dropdownMotion.apply {
@@ -154,7 +154,7 @@ class ConfigurationFragment : Fragment(), MenuProvider {
                 }
                 val m = motions.firstOrNull { it.id == id }
                 if (m != null) {
-                    select(adapter, m.userDisplay)
+                    select(adapter, m.displayName)
                     motion = m.box()
                 }
             } ?: apply {
@@ -167,7 +167,7 @@ class ConfigurationFragment : Fragment(), MenuProvider {
         val adapter = ArrayAdapter<String>(requireContext(), android.R.layout.simple_list_item_1)
         val timelines = Cells.list()
         timelines.forEach {
-            adapter.add(it.userDisplay)
+            adapter.add(it.displayName)
         }
         adapter.addDefaults()
         binding.dropdownCells.apply {
@@ -189,7 +189,7 @@ class ConfigurationFragment : Fragment(), MenuProvider {
                 }
                 val timeline = timelines.firstOrNull { it.id == id }
                 if (timeline != null) {
-                    select(adapter, timeline.userDisplay)
+                    select(adapter, timeline.displayName)
                     cells = timeline.box()
                 }
             } ?: apply {

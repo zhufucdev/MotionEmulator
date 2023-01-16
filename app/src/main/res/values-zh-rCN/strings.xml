@@ -33,7 +33,7 @@
     <string name="action_undo">撤销</string>
     <string name="text_trace_name">标记为\"%s\"</string>
     <string name="text_trace_saved">成功保存了%d条路径</string>
-    <string name="title_motion_data">运动数据</string>
+    <string name="title_motion">传感器</string>
     <string name="action_start_emulation">开始模拟</string>
     <string name="text_trace_selected">选择轨迹\"%s\"</string>
     <string name="title_repeat">重复次数</string>
@@ -56,7 +56,7 @@
     <string name="text_telephony_recording_neighboring">找到了%d条基站信息</string>
     <string name="text_telephony_recording_location">记录将包括基站定位</string>
     <string name="name_cell_signal">信号强度</string>
-    <string name="title_cells_data">基站数据</string>
+    <string name="title_cells">基站</string>
     <string name="title_satellite_count">卫星数量</string>
     <string name="title_trace">路径</string>
     <string name="status_velocity">速度为%s</string>
@@ -129,4 +129,14 @@
     <string name="title_custom_matrix">自定义矩阵</string>
     <string name="text_salt_common">加盐的意思是修改数据，使其每次看起来都不一样</string>
     <string name="text_salt_trace">当向路径加盐的时候，请考虑数量级，一般在E-4，甚至更小</string>
+    <string name="title_overview">总览</string>
+    <string name="title_exported">导出于%s</string>
+    <string name="title_export">导出</string>
+    <string name="title_import">导入</string>
+    <string name="title_share">分享</string>
+    <string name="text_selected_items">已选择%d项</string>
+    <string name="title_select_to_export">导出选中项</string>
+    <string name="text_empty_list">空列表</string>
+    <string name="title_send_to">分享到...</string>
+    <string name="text_imported">导入了%d条记录</string>
 </resources>

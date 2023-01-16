@@ -32,7 +32,7 @@
         <string name="action_undo">Undo</string>
         <string name="text_trace_name">Marked as \"%s\"</string>
         <string name="text_trace_saved">Successfully saved %d traces</string>
-        <string name="title_motion_data">Motion Data</string>
+        <string name="title_motion">Motion</string>
         <string name="text_trace_selected">Trace \"%s\" selected</string>
         <string name="action_start_emulation">Start Emulation</string>
         <string name="title_repeat">Repeat Count</string>
@@ -56,7 +56,7 @@
         <string name="text_telephony_recording_neighboring">Capturing %d neighboring infos</string>
         <string name="text_telephony_recording_location">Cell location is present</string>
         <string name="name_cell_signal">Signal Strength</string>
-        <string name="title_cells_data">Base Station Data</string>
+        <string name="title_cells">Base Station</string>
         <string name="title_satellite_count">Satellites Count</string>
         <string name="title_trace">Trace</string>
         <string name="status_velocity">running at %s</string>
@@ -90,7 +90,7 @@
     <string name="text_estimated">%s estimated</string>
     <string name="title_name">Name</string>
         <string name="title_id">Identity</string>
-    <string name="caption_salt">Random factors</string>
+    <string name="caption_salt">RANDOM FACTORS</string>
     <string name="action_add">Add</string>
     <string name="name_translation">Translation</string>
         <string name="name_rotation">Rotation</string>
@@ -135,4 +135,14 @@
     <string name="title_custom_matrix">Custom Matrix</string>
     <string name="text_salt_common">Adding salt means modifying the data to make it different for each run</string>
     <string name="text_salt_trace">When adding salt to a trace, consider the order of magnitude to be E-4 or smaller</string>
+    <string name="title_overview">Overview</string>
+    <string name="title_exported">Export at %s</string>
+    <string name="title_export">Export</string>
+    <string name="title_import">Import</string>
+    <string name="title_share">Share</string>
+    <string name="text_selected_items">%d item(s) selected</string>
+    <string name="title_select_to_export">Select to Export</string>
+    <string name="text_empty_list">empty list</string>
+    <string name="title_send_to">Send to ...</string>
+    <string name="text_imported">%d records were imported</string>
 </resources>

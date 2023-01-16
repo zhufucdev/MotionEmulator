@@ -17,6 +17,9 @@ import kotlinx.serialization.descriptors.buildClassSerialDescriptor
 import kotlinx.serialization.descriptors.serialDescriptor
 import kotlinx.serialization.encoding.*
 import kotlinx.serialization.encoding.CompositeDecoder.Companion.DECODE_DONE
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.encodeToStream
+import java.io.OutputStream
 
 /**
  * A snapshot taken from [TelephonyManager]
@@ -35,9 +38,15 @@ data class CellTimeline(
     val name: String? = null,
     val time: Long,
     val moments: List<CellMoment>
-) : Referable
+) : Data {
+    override val displayName: String
+        get() = name.takeIf { !it.isNullOrEmpty() } ?: dateString(time)
 
-val CellTimeline.userDisplay get() = name.takeIf { !it.isNullOrEmpty() } ?: dateString(time)
+    @OptIn(ExperimentalSerializationApi::class)
+    override fun writeTo(stream: OutputStream) {
+        Json.encodeToStream(kotlinx.serialization.serializer(), this, stream)
+    }
+}
 
 class CellSerializer : KSerializer<CellMoment> {
     override val descriptor: SerialDescriptor =

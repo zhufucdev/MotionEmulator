@@ -2,7 +2,6 @@
 
 package com.zhufucdev.motion_emulator.ui.manager
 
-import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -21,7 +20,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -29,41 +27,47 @@ import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.zhufucdev.motion_emulator.R
+import com.zhufucdev.motion_emulator.component.BottomSheetModal
+import com.zhufucdev.motion_emulator.component.BottomSheetModalState
+import com.zhufucdev.motion_emulator.component.Swipeable
 import com.zhufucdev.motion_emulator.data.*
-import com.zhufucdev.motion_emulator.ui.Swipeable
 import com.zhufucdev.motion_emulator.ui.theme.MotionEmulatorTheme
 import com.zhufucdev.motion_emulator.ui.theme.paddingCommon
 
 @Composable
-fun ManagerApp(navigateUp: () -> Unit, dataProvider: List<ManagerViewModel<*>>) {
+fun ManagerApp(navigateUp: () -> Unit) {
     val navController = rememberNavController()
     val snackbarState = remember { SnackbarHostState() }
+    val bottomSheetState = remember { BottomSheetModalState() }
     val context = LocalContext.current
+    val screenProviders = LocalScreenProviders.current
 
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        topBar = { AppBar(onBackPressed = { if (!navController.navigateUp()) navigateUp() }) },
-        bottomBar = { AppNavigationBar(navController) },
-        snackbarHost = { SnackbarHost(snackbarState) }
-    ) {
-        Box(Modifier.padding(it)) {
-            NavHost(
-                navController = navController,
-                startDestination = dataProvider.first().screen.name
-            ) {
-                dataProvider.forEach { para ->
-                    with(para) {
-                        compose(
-                            ManagerViewModel.RuntimeArguments(
-                                snackbarState,
-                                navController,
-                                context
+    BottomSheetModal(state = bottomSheetState) {
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            topBar = { AppBar(onBackPressed = { if (!navController.navigateUp()) navigateUp() }) },
+            bottomBar = { AppNavigationBar(navController, screenProviders) },
+            snackbarHost = { SnackbarHost(snackbarState) }
+        ) {
+            Box(Modifier.padding(it)) {
+                NavHost(
+                    navController = navController,
+                    startDestination = screenProviders.value.first().screen.name
+                ) {
+                    screenProviders.value.forEach { para ->
+                        with(para) {
+                            compose(
+                                ManagerViewModel.RuntimeArguments(
+                                    snackbarState,
+                                    navController,
+                                    context,
+                                    bottomSheetState
+                                )
                             )
-                        )
+                        }
                     }
                 }
             }
@@ -87,11 +91,11 @@ private fun AppBar(onBackPressed: () -> Unit) {
 }
 
 @Composable
-private fun AppNavigationBar(navController: NavController) {
+private fun AppNavigationBar(navController: NavController, provider: ScreenProviders) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val screens by remember { mutableStateOf(Screen.list) }
     NavigationBar {
-        screens.forEach { route: Screen<*> ->
+        provider.value.forEach { provider ->
+            val route = provider.screen
             NavigationBarItem(
                 selected = navBackStackEntry?.destination?.hierarchy?.any { it.route?.startsWith(route.name) == true } == true,
                 onClick = {
@@ -119,19 +123,16 @@ private fun AppNavigationBar(navController: NavController) {
 @Preview
 fun ActivityPreview() {
     MotionEmulatorTheme {
-        ManagerApp(
-            navigateUp = {},
-            dataProvider = listOf(
-                randomizedMotionData()
-            )
-        )
+        CompositionLocalProvider(LocalScreenProviders provides ScreenProviders(listOf(randomizedMotionData()))) {
+            ManagerApp(navigateUp = {})
+        }
     }
 }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun <T : Referable> DataList(
-    viewModel: ManagerViewModel<T>,
+fun <T : Data> DataList(
+    viewModel: EditorViewModel<T>,
     content: @Composable (T) -> Unit
 ) {
     if (viewModel.data.isEmpty()) {

@@ -15,8 +15,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils
 import com.zhufucdev.motion_emulator.R
 import com.zhufucdev.motion_emulator.data.Motion
-import com.zhufucdev.motion_emulator.data.userDisplay
-import com.zhufucdev.motion_emulator.dateString
 import com.zhufucdev.motion_emulator.hook.estimateSpeed
 import com.zhufucdev.motion_emulator.hook.estimateTimespan
 import com.zhufucdev.motion_emulator.toFixed
@@ -26,10 +24,10 @@ import kotlin.random.Random
 import kotlin.time.DurationUnit
 
 @Composable
-fun MotionScreen(viewModel: ManagerViewModel<Motion>) {
+fun MotionScreen(viewModel: EditorViewModel<Motion>) {
     DataList(viewModel) {
         Column(Modifier.padding(paddingCard)) {
-            Text(text = it.userDisplay, style = MaterialTheme.typography.titleMedium)
+            Text(text = it.displayName, style = MaterialTheme.typography.titleMedium)
             Spacer(modifier = Modifier.height(paddingSmall))
             Text(
                 text = stringResource(
@@ -57,7 +55,7 @@ fun MotionScreenPreview() {
     }
 }
 
-fun randomizedMotionData(): ManagerViewModel<Motion> {
+fun randomizedMotionData(): EditorViewModel<Motion> {
     val data = buildList {
         repeat(10) {
             add(
@@ -74,5 +72,5 @@ fun randomizedMotionData(): ManagerViewModel<Motion> {
         }
     }
 
-    return ManagerViewModel.DummyViewModel(Screen.MotionScreen, data)
+    return EditorViewModel.DummyViewModel(EditableScreen.MotionScreen, data)
 }

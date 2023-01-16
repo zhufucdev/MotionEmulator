@@ -1,12 +1,10 @@
 package com.zhufucdev.motion_emulator.ui.manager
 
 import android.content.Context
-import android.util.Log
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
-import androidx.compose.ui.text.font.createFontFamilyResolver
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
@@ -14,6 +12,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.zhufucdev.motion_emulator.R
+import com.zhufucdev.motion_emulator.component.BottomSheetModalState
 import com.zhufucdev.motion_emulator.data.*
 import com.zhufucdev.motion_emulator.data.Trace
 import com.zhufucdev.motion_emulator.insert
@@ -22,35 +21,57 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
-sealed class ManagerViewModel<T : Referable> : ViewModel() {
-    abstract val screen: Screen<T>
+sealed class ManagerViewModel : ViewModel() {
+    lateinit var runtime: RuntimeArguments
+    abstract val screen: Screen
+    abstract fun NavGraphBuilder.compose(runtimeArguments: RuntimeArguments)
+
+    class OverviewViewModel : ManagerViewModel() {
+        override val screen get() = Screen.OverviewScreen
+
+        override fun NavGraphBuilder.compose(runtimeArguments: RuntimeArguments) {
+            composable(screen.name) {
+                runtime = runtimeArguments
+                screen.List(this@OverviewViewModel)
+            }
+        }
+    }
+
+    data class RuntimeArguments(
+        val snackbarHost: SnackbarHostState,
+        val navigationController: NavController,
+        val context: Context,
+        val bottomModalState: BottomSheetModalState
+    )
+}
+
+sealed class EditorViewModel<T : Data> : ManagerViewModel() {
+    override val screen: Screen get() = editorScreen
+    abstract val editorScreen: EditableScreen<T>
     abstract val data: SnapshotStateList<T>
     abstract fun onClick(item: T)
     abstract fun onRemove(item: T)
     abstract fun onModify(item: T)
 
-    lateinit var runtime: RuntimeArguments
-
-    fun NavGraphBuilder.compose(runtimeArguments: RuntimeArguments) {
+    override fun NavGraphBuilder.compose(runtimeArguments: RuntimeArguments) {
         composable(screen.name) {
             runtime = runtimeArguments
-            screen.screen(this@ManagerViewModel)
+            screen.List(this@EditorViewModel)
         }
-
         composable(
             route = "${screen.name}/{id}",
             arguments = listOf(navArgument("id") { type = NavType.StringType })
         ) { entry ->
             val target by remember { mutableStateOf(data.first { it.id == entry.arguments?.getString("id") }) }
-            screen.editor(target, this@ManagerViewModel)
+            editorScreen.Editor(this@EditorViewModel, target)
         }
     }
 
-    class MotionViewModel : StandardViewModel<Motion>(Screen.MotionScreen, Motions)
-    class CellsViewModel : StandardViewModel<CellTimeline>(Screen.CellScreen, Cells)
-    class TraceViewModel : StandardViewModel<Trace>(Screen.TraceScreen, Traces)
+    class MotionViewModel : StandardViewModel<Motion>(EditableScreen.MotionScreen, Motions)
+    class CellsViewModel : StandardViewModel<CellTimeline>(EditableScreen.CellScreen, Cells)
+    class TraceViewModel : StandardViewModel<Trace>(EditableScreen.TraceScreen, Traces)
 
-    abstract class StandardViewModel<T : Referable>(screen: Screen<T>, private val store: DataStore<T>) :
+    abstract class StandardViewModel<T : Data>(screen: EditableScreen<T>, val store: DataStore<T>) :
         DummyViewModel<T>(screen, store.list()) {
         override fun onRemove(item: T) {
             super.onRemove(item)
@@ -68,8 +89,8 @@ sealed class ManagerViewModel<T : Referable> : ViewModel() {
         }
     }
 
-    open class DummyViewModel<T : Referable>(override val screen: Screen<T>, data: List<T>) :
-        ManagerViewModel<T>() {
+    open class DummyViewModel<T : Data>(override val editorScreen: EditableScreen<T>, data: List<T>) :
+        EditorViewModel<T>() {
         private val coroutine by lazy { CoroutineScope(Dispatchers.Main) }
 
         override val data: SnapshotStateList<T> = data.toMutableStateList()
@@ -108,47 +129,91 @@ sealed class ManagerViewModel<T : Referable> : ViewModel() {
             coroutine.cancel("cleared")
         }
     }
-
-    data class RuntimeArguments(
-        val snackbarHost: SnackbarHostState,
-        val navigationController: NavController,
-        val context: Context
-    )
 }
 
-sealed class Screen<T : Referable>(
-    val name: String,
-    val titleId: Int,
-    val iconId: Int,
-    val screen: @Composable (ManagerViewModel<T>) -> Unit,
-    val editor: @Composable (T, ManagerViewModel<T>) -> Unit
-) {
-    object MotionScreen : Screen<Motion>(
+sealed class EditableScreen<T : Data>(
+    name: String,
+    titleId: Int,
+    iconId: Int,
+) : Screen(name, titleId, iconId) {
+    @Composable
+    override fun <M : ManagerViewModel> List(viewModel: M) {
+        @Suppress("UNCHECKED_CAST")
+        ListScreen(viewModel as EditorViewModel<T>)
+    }
+
+    @Composable
+    abstract fun ListScreen(viewModel: EditorViewModel<T>)
+
+    @Composable
+    abstract fun Editor(viewModel: EditorViewModel<T>, target: T)
+
+    object MotionScreen : EditableScreen<Motion>(
         "motion",
-        R.string.title_motion_data,
-        R.drawable.ic_baseline_smartphone_24,
-        { MotionScreen(it) },
-        { m, m2 -> MotionEditor(m, m2) }
-    )
+        R.string.title_motion,
+        R.drawable.ic_baseline_smartphone_24
+    ) {
+        @Composable
+        override fun ListScreen(viewModel: EditorViewModel<Motion>) {
+            MotionScreen(viewModel)
+        }
 
-    object CellScreen : Screen<CellTimeline>(
+        @Composable
+        override fun Editor(viewModel: EditorViewModel<Motion>, target: Motion) {
+            MotionEditor(target, viewModel)
+        }
+    }
+
+    object CellScreen : EditableScreen<CellTimeline>(
         "cell",
-        R.string.title_cells_data,
+        R.string.title_cells,
         R.drawable.ic_baseline_cell_tower_24,
-        { CellScreen(it) },
-        { c, m -> CellEditor(c, m) }
-    )
+    ) {
+        @Composable
+        override fun ListScreen(viewModel: EditorViewModel<CellTimeline>) {
+            CellScreen(viewModel)
+        }
 
-    object TraceScreen : Screen<Trace>(
+        @Composable
+        override fun Editor(viewModel: EditorViewModel<CellTimeline>, target: CellTimeline) {
+            CellEditor(target, viewModel)
+        }
+    }
+
+    object TraceScreen : EditableScreen<Trace>(
         "trace",
         R.string.title_trace,
         R.drawable.ic_baseline_map_24,
-        { TraceScreen(it) },
-        { t, m -> TraceEditor(t, m) }
-    )
+    ) {
+        @Composable
+        override fun ListScreen(viewModel: EditorViewModel<Trace>) {
+            TraceScreen(viewModel)
+        }
 
-    companion object {
-        val list get() = listOf(MotionScreen, CellScreen, TraceScreen)
+        @Composable
+        override fun Editor(viewModel: EditorViewModel<Trace>, target: Trace) {
+            TraceEditor(target, viewModel)
+        }
     }
 }
 
+sealed class Screen(
+    val name: String,
+    val titleId: Int,
+    val iconId: Int,
+) {
+    @Composable
+    abstract fun <M : ManagerViewModel> List(viewModel: M)
+
+    object OverviewScreen :
+        Screen(
+            name = "overview",
+            titleId = R.string.title_overview,
+            iconId = R.drawable.ic_baseline_app_registration_24,
+        ) {
+        @Composable
+        override fun <M : ManagerViewModel> List(viewModel: M) {
+            OverviewScreen(viewModel)
+        }
+    }
+}

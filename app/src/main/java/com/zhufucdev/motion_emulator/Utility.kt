@@ -11,7 +11,6 @@ import androidx.appcompat.widget.Toolbar
 import androidx.compose.ui.geometry.Offset
 import androidx.navigation.NavController
 import com.amap.api.maps.AMap
-import com.amap.api.maps.AMapUtils
 import com.amap.api.maps.MapsInitializer
 import com.amap.api.maps.model.LatLng
 import com.amap.api.maps.model.LatLngBounds
@@ -19,8 +18,6 @@ import com.zhufucdev.motion_emulator.data.*
 import com.zhufucdev.motion_emulator.hook_frontend.Emulation
 import com.zhufucdev.motion_emulator.hook_frontend.EmulationRef
 import io.ktor.client.*
-import io.ktor.client.call.*
-import io.ktor.client.call.body
 import io.ktor.client.call.body
 import io.ktor.client.engine.android.*
 import io.ktor.client.plugins.*
@@ -220,7 +217,7 @@ fun AppCompatActivity.initializeToolbar(
 fun Emulation.ref() =
     EmulationRef(trace.id, motion.ref(), cells.ref(), velocity, repeat, satelliteCount)
 
-fun <T : Referable> Box<T>.ref() =
+fun <T : Data> Box<T>.ref() =
     when (this) {
         is EmptyBox<T> -> EMPTY_REF
         is BlockBox<T> -> BLOCK_REF

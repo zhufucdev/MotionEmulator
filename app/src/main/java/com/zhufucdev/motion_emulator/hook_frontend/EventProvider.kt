@@ -8,8 +8,8 @@ import android.database.MatrixCursor
 import android.hardware.SensorManager
 import android.net.Uri
 import android.util.Log
-import com.zhufucdev.motion_emulator.ui.apps.AppMetas
-import com.zhufucdev.motion_emulator.ui.apps.hooked
+import com.zhufucdev.motion_emulator.data.apps.AppMetas
+import com.zhufucdev.motion_emulator.data.apps.hooked
 import com.zhufucdev.motion_emulator.data.*
 import com.zhufucdev.motion_emulator.hook.EMULATION_START
 import com.zhufucdev.motion_emulator.hook.EMULATION_STOP

@@ -1,13 +1,11 @@
 package com.zhufucdev.motion_emulator.ui.manager
 
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -89,5 +87,34 @@ fun BasicEdit(
             },
             icon = icon
         )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ListItem(
+    modifier: Modifier = Modifier,
+    title: @Composable () -> Unit,
+    leadingIcon: @Composable () -> Unit,
+    onClick: () -> Unit,
+    divider: Boolean = true
+) {
+    Column {
+        Surface(onClick = onClick) {
+            Row(
+                Modifier.padding(horizontal = paddingCommon * 2, vertical = paddingCommon)
+                    .then(modifier),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                leadingIcon()
+                Spacer(Modifier.width(paddingCommon * 2))
+                CompositionLocalProvider(LocalTextStyle provides MaterialTheme.typography.bodyLarge) {
+                    title()
+                }
+            }
+        }
+        if (divider) {
+            Divider(Modifier.padding(horizontal = paddingCommon))
+        }
     }
 }

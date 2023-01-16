@@ -1,9 +1,13 @@
 package com.zhufucdev.motion_emulator.data
 
 import com.zhufucdev.motion_emulator.dateString
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.encodeToStream
 import kotlinx.serialization.serializer
+import java.io.OutputStream
 
 /**
  * Basic motion record unit
@@ -28,9 +32,15 @@ data class Motion(
     val time: Long,
     val moments: List<MotionMoment>,
     val sensorsInvolved: List<Int>
-) : Referable
+) : Data {
+    override val displayName: String
+        get() = name.takeIf { !it.isNullOrEmpty() } ?: dateString(time)
 
-val Motion.userDisplay get() = name.takeIf { !it.isNullOrEmpty() } ?: dateString(time)
+    @OptIn(ExperimentalSerializationApi::class)
+    override fun writeTo(stream: OutputStream) {
+        Json.encodeToStream(kotlinx.serialization.serializer(), this, stream)
+    }
+}
 
 object Motions : DataStore<Motion>() {
     override val typeName: String get() = "motion"

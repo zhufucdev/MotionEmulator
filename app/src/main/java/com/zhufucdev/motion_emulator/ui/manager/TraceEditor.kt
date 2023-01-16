@@ -16,7 +16,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Path
@@ -37,15 +36,16 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils
 import com.zhufucdev.motion_emulator.R
+import com.zhufucdev.motion_emulator.component.Expandable
+import com.zhufucdev.motion_emulator.component.Swipeable
+import com.zhufucdev.motion_emulator.component.dragDroppable
 import com.zhufucdev.motion_emulator.data.*
 import com.zhufucdev.motion_emulator.data.Trace
 import com.zhufucdev.motion_emulator.insert
 import com.zhufucdev.motion_emulator.toOffset
 import com.zhufucdev.motion_emulator.toVector2d
 import com.zhufucdev.motion_emulator.ui.CaptionText
-import com.zhufucdev.motion_emulator.ui.Swipeable
 import com.zhufucdev.motion_emulator.ui.VerticalSpacer
-import com.zhufucdev.motion_emulator.ui.dragDroppable
 import com.zhufucdev.motion_emulator.ui.theme.*
 import kotlinx.coroutines.*
 import kotlin.math.*
@@ -272,12 +272,7 @@ fun FactorSaltItem(factor: MutableFactor, onRemove: () -> Unit) {
                 modifier = Modifier.size(18.dp)
             )
         },
-        header = {
-            Text(
-                text = stringResource(R.string.name_random_factor),
-                style = MaterialTheme.typography.titleMedium
-            )
-        },
+        header = { Text(stringResource(R.string.name_random_factor)) },
         body = {
             Column {
                 OutlinedTextField(
@@ -294,12 +289,7 @@ fun FactorSaltItem(factor: MutableFactor, onRemove: () -> Unit) {
                 FactorCanvas(factor)
             }
         },
-        overview = {
-            Text(
-                text = factor.name,
-                style = MaterialTheme.typography.labelMedium
-            )
-        },
+        overview = { Text(factor.name) },
         onRemove = onRemove
     )
 }
@@ -565,12 +555,7 @@ fun RotationItem(formula: MutableSaltElement, onRemove: () -> Unit) {
                 modifier = Modifier.size(18.dp)
             )
         },
-        header = {
-            Text(
-                text = stringResource(R.string.name_rotation),
-                style = MaterialTheme.typography.titleMedium
-            )
-        },
+        header = { Text(stringResource(R.string.name_rotation)) },
         body = {
             AnimatedContent(simpleMode) { s ->
                 if (s) {
@@ -703,7 +688,6 @@ fun RotationItem(formula: MutableSaltElement, onRemove: () -> Unit) {
                     stringResource(R.string.suffix_deg, formula.values.first())
                 else
                     formula.values.first(),
-                style = MaterialTheme.typography.labelMedium
             )
         },
         onRemove = onRemove
@@ -735,10 +719,7 @@ fun CustomMatrixItem(formula: MutableSaltElement, onRemove: () -> Unit) {
             )
         },
         header = {
-            Text(
-                text = stringResource(R.string.name_custom_matrix),
-                style = MaterialTheme.typography.titleMedium
-            )
+            Text(stringResource(R.string.name_custom_matrix))
         },
         body = {
             Column(Modifier.fillMaxWidth()) {
@@ -786,7 +767,7 @@ fun CustomMatrixItem(formula: MutableSaltElement, onRemove: () -> Unit) {
 
 @Composable
 fun SaltTextField(
-    modifier: Modifier = Modifier.fillMaxWidth(),
+    modifier: Modifier = Modifier,
     label: String,
     value: String,
     onValueChange: (String) -> Unit
@@ -815,7 +796,7 @@ fun SaltTextField(
                 }
             }
         },
-        modifier = modifier
+        modifier = Modifier.fillMaxWidth().then(modifier)
     )
 }
 
@@ -852,29 +833,19 @@ enum class FormulaExpress(val isConstant: Boolean, val value: String, val label:
     E(true, "e", R.string.name_e)
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
 fun SaltItemScaffold(
     icon: @Composable () -> Unit,
-    header: @Composable () -> Unit,
-    body: @Composable () -> Unit,
+    header: @Composable BoxScope.() -> Unit,
+    body: @Composable BoxScope.() -> Unit,
     overview: @Composable () -> Unit,
     onRemove: () -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
-    var indicatorAnimation by remember { mutableStateOf(Animatable(0F)) }
     var removed by remember { mutableStateOf(false) }
     var targetHeight by remember { mutableStateOf(Int.MAX_VALUE) }
     var animator by remember { mutableStateOf(Animatable(Float.POSITIVE_INFINITY)) }
     val density = LocalDensity.current
-
-    LaunchedEffect(expanded) {
-        val targetValue = if (expanded) 180F else 0F
-        if (indicatorAnimation.value == targetValue) return@LaunchedEffect
-
-        indicatorAnimation = Animatable(180F - targetValue)
-        indicatorAnimation.animateTo(targetValue)
-    }
 
     LaunchedEffect(removed) {
         if (!removed) return@LaunchedEffect
@@ -893,93 +864,14 @@ fun SaltItemScaffold(
     ) {
         Swipeable(
             foreground = {
-                Column(
-                    Modifier.fillMaxWidth()
-                ) {
-                    Surface(
-                        onClick = { expanded = !expanded },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        ConstraintLayout(
-                            Modifier.padding(
-                                start = paddingCommon * 2,
-                                end = paddingCommon * 2,
-                                top = paddingCommon,
-                                bottom = paddingCommon
-                            )
-                        ) {
-                            val (s, h, o, i) = createRefs()
-                            Box(
-                                Modifier
-                                    .padding(end = paddingSmall)
-                                    .constrainAs(s) {
-                                        start.linkTo(parent.start)
-                                        top.linkTo(parent.top)
-                                        bottom.linkTo(parent.bottom)
-                                    }
-                            ) {
-                                icon()
-                            }
-
-                            Box(
-                                Modifier
-                                    .constrainAs(h) {
-                                        start.linkTo(s.end)
-                                        top.linkTo(parent.top)
-                                        bottom.linkTo(parent.bottom)
-                                    }
-                                    .padding(start = paddingCommon)
-                            ) {
-                                header()
-                            }
-
-                            AnimatedContent(
-                                targetState = expanded,
-                                modifier = Modifier
-                                    .constrainAs(o) {
-                                        start.linkTo(h.end)
-                                        top.linkTo(parent.top)
-                                        bottom.linkTo(parent.bottom)
-                                    }
-                                    .padding(start = paddingSmall)
-                            ) { e ->
-                                if (!e) overview()
-                            }
-
-                            Box(
-                                Modifier
-                                    .constrainAs(i) {
-                                        top.linkTo(parent.top)
-                                        bottom.linkTo(parent.bottom)
-                                        end.linkTo(parent.end)
-                                    }
-                            ) {
-                                Icon(
-                                    painter = painterResource(R.drawable.ic_baseline_expand_more_24),
-                                    contentDescription = null,
-                                    modifier = Modifier
-                                        .rotate(indicatorAnimation.value)
-                                )
-                            }
-                        }
-                    }
-
-                    AnimatedVisibility(
-                        visible = expanded,
-                        enter = remember { expandVertically() },
-                        exit = remember { shrinkVertically() },
-                    ) {
-                        Box(
-                            Modifier.padding(
-                                start = paddingCommon * 2,
-                                end = paddingCommon * 2,
-                                bottom = paddingCommon
-                            )
-                        ) {
-                            body()
-                        }
-                    }
-                }
+                Expandable(
+                    icon = icon,
+                    header = header,
+                    body = body,
+                    overview = overview,
+                    expanded = expanded,
+                    onToggle = { expanded = !expanded }
+                )
             },
             backgroundEnd = {
                 Icon(
@@ -1016,10 +908,7 @@ fun DualFieldSnippet(
             Icon(painter = icon, contentDescription = header, modifier = Modifier.size(18.dp))
         },
         header = {
-            Text(
-                text = header,
-                style = MaterialTheme.typography.titleMedium
-            )
+            Text(header)
         },
         body = {
             Column {
@@ -1036,12 +925,7 @@ fun DualFieldSnippet(
                 )
             }
         },
-        overview = {
-            Text(
-                text = stringResource(R.string.text_point, formula[0], formula[1]),
-                style = MaterialTheme.typography.labelMedium
-            )
-        },
+        overview = { Text(stringResource(R.string.text_point, formula[0], formula[1])) },
         onRemove = onRemove
     )
 }

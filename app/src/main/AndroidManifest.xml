@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+          xmlns:tools="http://schemas.android.com/tools">
 
-        <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-        <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-        <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
-        <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-        <uses-permission android:name="android.permission.INTERNET" />
-        <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-        <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-        <uses-permission
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION"/>
+    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission
             android:name="android.permission.QUERY_ALL_PACKAGES"
-            tools:ignore="QueryAllPackagesPermission" />
+            tools:ignore="QueryAllPackagesPermission"/>
 
-        <application
+    <application
             android:name=".MeApplication"
             android:allowBackup="true"
             android:allowNativeHeapPointerTagging="false"
@@ -26,66 +26,76 @@
             android:supportsRtl="true"
             android:theme="@style/Theme.MotionEmulator"
             tools:targetApi="33">
-                <receiver
-                    android:name=".hook_frontend.EmulationMonitorReceiver"
-                    android:enabled="true"
-                    android:exported="false">
-                        <intent-filter>
-                                <action android:name="com.zhufucdev.motion_emulator.ACTION_DETERMINE" />
-                        </intent-filter>
-                </receiver>
+        <receiver
+                android:name=".hook_frontend.EmulationMonitorReceiver"
+                android:enabled="true"
+                android:exported="false">
+            <intent-filter>
+                <action android:name="com.zhufucdev.motion_emulator.ACTION_DETERMINE"/>
+            </intent-filter>
+        </receiver>
 
-                <activity
-                    android:name=".ui.AppStrategyActivity"
-                    android:exported="false"
-                    android:label="@string/title_app_strategy" />
-                <activity
-                    android:name=".ui.EmulateActivity"
-                    android:exported="false"
-                    android:label="@string/title_emulate"
-                    android:launchMode="singleTop" />
-                <activity
-                    android:name=".ui.TraceDrawingActivity"
-                    android:exported="false"
-                    android:label="@string/title_draw_trace" />
-                <activity
-                    android:name=".ui.RecordActivity"
-                    android:exported="false"
-                    android:label="@string/title_activity_record" />
-                <activity
-                    android:name=".ui.ManagerActivity"
-                    android:exported="false"
-                    android:label="@string/title_manage" />
-                <activity
-                    android:name=".ui.MainActivity"
-                    android:exported="true">
-                        <intent-filter>
-                                <action android:name="android.intent.action.MAIN" />
+        <activity
+                android:name=".ui.AppStrategyActivity"
+                android:exported="false"
+                android:label="@string/title_app_strategy"/>
+        <activity
+                android:name=".ui.EmulateActivity"
+                android:exported="false"
+                android:label="@string/title_emulate"
+                android:launchMode="singleTop"/>
+        <activity
+                android:name=".ui.TraceDrawingActivity"
+                android:exported="false"
+                android:label="@string/title_draw_trace"/>
+        <activity
+                android:name=".ui.RecordActivity"
+                android:exported="false"
+                android:label="@string/title_activity_record"/>
+        <activity
+                android:name=".ui.ManagerActivity"
+                android:exported="false"
+                android:label="@string/title_manage"/>
+        <activity
+                android:name=".ui.MainActivity"
+                android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
 
-                                <category android:name="android.intent.category.LAUNCHER" />
-                        </intent-filter>
-                </activity>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
 
-                <provider
-                    android:name=".hook_frontend.EventProvider"
-                    android:authorities="com.zhufucdev.motion_emulator.event_provider"
-                    android:exported="true" />
+        <provider
+                android:name=".hook_frontend.EventProvider"
+                android:authorities="com.zhufucdev.motion_emulator.event_provider"
+                android:exported="true"/>
 
-                <meta-data
-                    android:name="xposedmodule"
-                    android:value="true" />
-                <meta-data
-                    android:name="xposeddescription"
-                    android:value="Motion simulator with sensor support." />
-                <meta-data
-                    android:name="xposedminversion"
-                    android:value="93" />
-                <meta-data
-                    android:name="xposedsharedprefs"
-                    android:value="true" />
-                <meta-data
-                    android:name="com.amap.api.v2.apikey"
-                    android:value="@string/amap_api_key" />
-        </application>
+        <provider
+                android:authorities="com.zhufucdev.motion_emulator.file_provider"
+                android:name="androidx.core.content.FileProvider"
+                android:grantUriPermissions="true"
+                android:exported="false">
+            <meta-data
+                    android:name="android.support.FILE_PROVIDER_PATHS"
+                    android:resource="@xml/shared_paths"/>
+        </provider>
+
+        <meta-data
+                android:name="xposedmodule"
+                android:value="true"/>
+        <meta-data
+                android:name="xposeddescription"
+                android:value="Motion simulator with sensor support."/>
+        <meta-data
+                android:name="xposedminversion"
+                android:value="93"/>
+        <meta-data
+                android:name="xposedsharedprefs"
+                android:value="true"/>
+        <meta-data
+                android:name="com.amap.api.v2.apikey"
+                android:value="@string/amap_api_key"/>
+    </application>
 
 </manifest>

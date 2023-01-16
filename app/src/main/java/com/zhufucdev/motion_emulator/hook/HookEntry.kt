@@ -9,7 +9,7 @@ import com.highcapable.yukihookapi.hook.log.loggerI
 import com.highcapable.yukihookapi.hook.param.PackageParam
 import com.highcapable.yukihookapi.hook.xposed.proxy.IYukiHookXposedInit
 import com.zhufucdev.motion_emulator.BuildConfig
-import com.zhufucdev.motion_emulator.ui.apps.isHooked
+import com.zhufucdev.motion_emulator.data.apps.isHooked
 import com.zhufucdev.motion_emulator.hook_frontend.AUTHORITY
 
 @InjectYukiHookWithXposed
