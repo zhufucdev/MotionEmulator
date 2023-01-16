@@ -335,13 +335,15 @@ private suspend fun getUri(context: Context, items: Map<Data, String>): Uri {
     if (!sharedDir.exists()) sharedDir.mkdir()
     val file = File(sharedDir, "${context.getString(R.string.title_exported, dateString())}.tar.gz")
 
-    file.outputStream().use {
-        writeInto(it, context, items)
+    val fileOut = file.outputStream()
+    writeInto(fileOut, context, items)
+    withContext(Dispatchers.IO) {
+        fileOut.close()
     }
     return FileProvider.getUriForFile(context, "com.zhufucdev.motion_emulator.file_provider", file)
 }
 
-private fun exportedDir(context: Context) = File(context.cacheDir, "exported")
+private fun exportedDir(context: Context) = File(context.filesDir, "exported")
 
 @Suppress("UNCHECKED_CAST")
 private suspend fun import(context: Context, providers: ScreenProviders, uri: Uri): Int {
