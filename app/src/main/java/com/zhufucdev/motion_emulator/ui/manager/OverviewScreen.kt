@@ -365,7 +365,16 @@ private suspend fun import(context: Context, providers: ScreenProviders, uri: Ur
                 ?: continue
         val text = tarIn.readBytes().decodeToString()
         val record = provider.store.parseAndStore(text, true)
-        (provider.data as SnapshotStateList<Data>).add(record)
+        (provider.data as SnapshotStateList<Data>).apply {
+            val oldIndex = indexOfFirst { it.id == record.id }
+            if (oldIndex < 0) {
+                // insert
+                add(record)
+            } else {
+                // update
+                set(oldIndex, record)
+            }
+        }
 
         entry = tarIn.nextTarEntry
     }
