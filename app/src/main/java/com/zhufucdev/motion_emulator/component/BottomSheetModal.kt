@@ -22,6 +22,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.zhufucdev.motion_emulator.ui.theme.paddingCommon
 import com.zhufucdev.motion_emulator.ui.theme.paddingSmall
+import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.seconds
 
 @Composable
 fun BottomSheetModal(
@@ -33,10 +35,13 @@ fun BottomSheetModal(
     val density = LocalDensity.current
     fun targetValue() = if (state.open) 0F else height
     val animator = remember { Animatable(targetValue()) }
+    var ready by remember { mutableStateOf(false) }
 
     LaunchedEffect(height) {
         if (height <= 0 && state.open) return@LaunchedEffect
         animator.snapTo(targetValue())
+        delay(1.seconds) // idk why, just to solve shutter problems
+        ready = true
     }
 
     LaunchedEffect(state.open) {
@@ -63,7 +68,7 @@ fun BottomSheetModal(
                     modifier = Modifier
                         .align(Alignment.BottomStart)
                         .fillMaxWidth()
-                        .alpha(if (height <= 0) 0F else 1F) // do not show when not measured
+                        .alpha(if (ready) 1F else 0F) // do not show when not measured
                         .offset(y = animator.value.dp)
                         .then(modifier),
                     shape = RoundedCornerShape(topStart = 16F, topEnd = 16F),
