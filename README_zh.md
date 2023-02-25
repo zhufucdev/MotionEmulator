@@ -8,7 +8,7 @@
 
 ## 为啥要用
 
-如果你是不幸的中国大学生，想必对 _校园跑_ 比较熟悉
+如果你是不幸的中国大学生，或许体验过 _校园跑_ 
 
 尽管教职工总希望我们在夕阳下跑阳光长跑，我想做些有创造性的事情来让生活更轻松一点
 
@@ -37,17 +37,25 @@
 如果你是开发者，请使用Android Studio或Jetbrains IDEA构建和维护这个项目
 
 
-项目使用了高德地图API，你得申请一个自己的，网址在[这儿](https://console.amap.com/dev/key/app)
+项目使用了高德地图和Google Maps的API，你得申请些自己的，网址在[这儿](https://console.amap.com/dev/key/app)和
+[这儿](https://developers.google.com/maps/documentation/android-sdk/start)
 
 申请完别忘了做些事情
 ```shell
-cd app/src/main/res/values
-touch amap.xml
 ## Android SDK ##
-echo "<?xml version=\"1.0\" encoding=\"utf-8\"?>" >> amap.xml
-echo "<resources><string name=\"amap_api_key\" translatable=\"false\">$android_sdk_key</dimen></resources>" >> amap.xml
+cd app/src/main/res/values
+touch api_keys.xml
+cat > api_keys.xml
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="amap_api_key" translatable="false">$amap_sdk_key</dimen>
+  <string name="gcp_maps_api_key" translatable="false">$gcp_maps_api_key</string>
+</resources>
+
+^D
 ## REST API ##
-echo $rest_api >> local.properties
+echo amap.web.key=$amap_rest_api >> local.properties
+echo MAPS_API_KEY=$gcp_maps_api_key >> local.properties
 ```
 
 ## 营业执照

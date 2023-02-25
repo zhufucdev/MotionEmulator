@@ -96,6 +96,9 @@
         <meta-data
                 android:name="com.amap.api.v2.apikey"
                 android:value="@string/amap_api_key"/>
+        <meta-data
+                android:name="com.google.android.geo.API_KEY"
+                android:value="@string/gcp_maps_api_key"/>
     </application>
 
 </manifest>

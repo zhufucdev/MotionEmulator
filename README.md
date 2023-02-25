@@ -43,18 +43,26 @@ Note: knowledge of linear algebra may be needed
 Build and maintain this project with Android Studio
 or Intellij IDEA.
 
-This app contains sdk from Amap, thus **api keys** are
+This app contains sdk from Amap and Google Maps, thus **api keys** are
 required.
 Obtain them from [here](https://console.amap.com/dev/key/app)
+[and here](https://developers.google.com/maps/documentation/android-sdk/start),
 and create a xml file under `app/src/main/res/values`
 ```shell
-cd app/src/main/res/values
-touch amap.xml
 ## Android SDK ##
-echo "<?xml version=\"1.0\" encoding=\"utf-8\"?>" >> amap.xml
-echo "<resources><string name=\"amap_api_key\" translatable=\"false\">$android_sdk_key</dimen></resources>" >> amap.xml
+cd app/src/main/res/values
+touch api_keys.xml
+cat > api_keys.xml
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="amap_api_key" translatable="false">$amap_sdk_key</dimen>
+  <string name="gcp_maps_api_key" translatable="false">$gcp_maps_api_key</string>
+</resources>
+
+^D
 ## REST API ##
-echo $rest_api >> local.properties
+echo amap.web.key=$amap_rest_api >> local.properties
+echo MAPS_API_KEY=$gcp_maps_api_key >> local.properties
 ```
 
 ## License

@@ -15,7 +15,7 @@
 local.properties
 
 # API Key
-/app/src/main/res/values/amap.xml
+/app/src/main/res/values/api_keys.xml
 
 # Build
 /app/release/
