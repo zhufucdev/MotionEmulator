@@ -95,10 +95,13 @@
                 android:value="true"/>
         <meta-data
                 android:name="com.amap.api.v2.apikey"
-                android:value="@string/amap_api_key"/>
+                android:value="${AMAP_SDK_KEY}"/>
         <meta-data
                 android:name="com.google.android.geo.API_KEY"
-                android:value="@string/gcp_maps_api_key"/>
+                android:value="${GCP_MAPS_KEY}"/>
+        <meta-data
+                android:name="com.google.android.gms.version"
+                android:value="@integer/google_play_services_version" />
     </application>
 
 </manifest>

@@ -42,20 +42,9 @@
 
 申请完别忘了做些事情
 ```shell
-## Android SDK ##
-cd app/src/main/res/values
-touch api_keys.xml
-cat > api_keys.xml
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-  <string name="amap_api_key" translatable="false">$amap_sdk_key</dimen>
-  <string name="gcp_maps_api_key" translatable="false">$gcp_maps_api_key</string>
-</resources>
-
-^D
-## REST API ##
-echo amap.web.key=$amap_rest_api >> local.properties
-echo MAPS_API_KEY=$gcp_maps_api_key >> local.properties
+echo amap.web.key="<Your Key>" >> local.properties
+echo AMAP_SDK_KEY="<Your Key>" >> local.properties
+echo GCP_MAPS_KEY="<Your Key>" >> local.properties
 ```
 
 ## 营业执照

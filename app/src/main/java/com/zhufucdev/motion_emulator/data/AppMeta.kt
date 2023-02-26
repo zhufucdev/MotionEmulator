@@ -1,25 +1,16 @@
-package com.zhufucdev.motion_emulator.data.apps
+package com.zhufucdev.motion_emulator.data
 
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.graphics.drawable.Drawable
-import com.highcapable.yukihookapi.YukiHookAPI
 import com.highcapable.yukihookapi.hook.factory.modulePrefs
 import com.highcapable.yukihookapi.hook.param.PackageParam
-import com.highcapable.yukihookapi.hook.xposed.bridge.YukiHookBridge
 import com.highcapable.yukihookapi.hook.xposed.prefs.YukiHookModulePrefs
 import com.zhufucdev.motion_emulator.BuildConfig
 import com.zhufucdev.motion_emulator.isSystemApp
-import io.ktor.utils.io.core.*
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.*
-import kotlinx.serialization.serializer
-import java.io.File
-import kotlin.io.use
 
 /**
  * Represents strategy applied to an app.

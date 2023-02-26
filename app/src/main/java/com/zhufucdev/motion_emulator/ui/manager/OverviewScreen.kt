@@ -22,7 +22,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.core.content.FileProvider
 import com.zhufucdev.motion_emulator.R
-import com.zhufucdev.motion_emulator.component.Expandable
+import com.zhufucdev.motion_emulator.ui.component.Expandable
 import com.zhufucdev.motion_emulator.data.Data
 import com.zhufucdev.motion_emulator.dateString
 import com.zhufucdev.motion_emulator.ui.theme.paddingCommon

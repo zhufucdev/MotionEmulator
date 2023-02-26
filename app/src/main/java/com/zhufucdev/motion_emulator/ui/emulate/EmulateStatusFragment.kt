@@ -12,13 +12,13 @@ import androidx.fragment.app.Fragment
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
-import com.amap.api.maps.CameraUpdateFactory
-import com.amap.api.maps.model.LatLng
-import com.amap.api.maps.model.NavigateArrow
-import com.amap.api.maps.model.NavigateArrowOptions
+import com.highcapable.yukihookapi.hook.log.loggerD
 import com.zhufucdev.motion_emulator.*
+import com.zhufucdev.motion_emulator.data.Traces
 import com.zhufucdev.motion_emulator.databinding.FragmentEmulateStatusBinding
 import com.zhufucdev.motion_emulator.hook_frontend.*
+import com.zhufucdev.motion_emulator.ui.map.MapController
+import com.zhufucdev.motion_emulator.ui.map.TraceBounds
 import kotlin.math.roundToInt
 
 class EmulateStatusFragment : Fragment() {
@@ -37,46 +37,30 @@ class EmulateStatusFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentEmulateStatusBinding.inflate(layoutInflater, container, false)
-        binding.mapMotionPreview.onCreate(savedInstanceState)
+        binding.mapMotionPreview.setReadyListener {
+            initializeMap(it)
+        }
         return binding.root
     }
 
     override fun onStart() {
         super.onStart()
-
-        initializeMap()
         initializeMonitors()
     }
 
-    private fun initializeMap() {
-        val map = binding.mapMotionPreview.map
-        map.uiSettings.isZoomControlsEnabled = false
-        map.unifyTheme(resources)
-
-        val naviArrow = NavigateArrowOptions()
-        var lastNav: NavigateArrow? = null
+    private fun initializeMap(controller: MapController) {
         addIntermediateListener {
-            lastNav?.remove()
-            naviArrow.add(it.location.toLatLng())
-            requireActivity().runOnUiThread {
-                lastNav = map.addNavigateArrow(naviArrow)
+            activity?.runOnUiThread {
+                controller.updateLocationIndicator(it.location)
+                loggerD(tag = "intermediate", msg = it.location.toString())
             }
-        }
-
-        addEmulationStateListener {
-            lastNav?.remove()
         }
 
         arguments?.let {
-            val lat = it.getDouble("cam_center_lat")
-            val lng = it.getDouble("cam_center_lng")
-            val zoom = it.getFloat("cam_zoom")
-            if (zoom > 0) {
-                map.animateCamera(
-                    CameraUpdateFactory
-                        .newLatLngZoom(LatLng(lat, lng), zoom)
-                )
-            }
+            val traceId = it.getString("trace") ?: return@let
+            val trace = Traces[traceId] ?: return@let
+            controller.drawTrace(trace)
+            controller.boundCamera(TraceBounds(trace))
         }
     }
 
@@ -193,11 +177,6 @@ class EmulateStatusFragment : Fragment() {
         listeners.add(Scheduler.onEmulationStateChanged(l))
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        binding.mapMotionPreview.onSaveInstanceState(outState)
-    }
-
     private fun addMonitorWorker() {
         val workRequest =
             OneTimeWorkRequestBuilder<EmulationMonitorWorker>()
@@ -217,20 +196,13 @@ class EmulateStatusFragment : Fragment() {
 
     override fun onDestroy() {
         super.onDestroy()
-        binding.mapMotionPreview.onDestroy()
         Scheduler.emulation = null
         removeMonitorWorker()
     }
 
     override fun onResume() {
         super.onResume()
-        binding.mapMotionPreview.onResume()
         removeMonitorWorker()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        binding.mapMotionPreview.onPause()
     }
 
     override fun onStop() {

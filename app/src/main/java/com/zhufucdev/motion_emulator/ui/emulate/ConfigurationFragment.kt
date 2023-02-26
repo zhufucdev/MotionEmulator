@@ -25,6 +25,8 @@ import com.zhufucdev.motion_emulator.hook.center
 import com.zhufucdev.motion_emulator.hook_frontend.Emulation
 import com.zhufucdev.motion_emulator.hook_frontend.EmulationRef
 import com.zhufucdev.motion_emulator.hook_frontend.Scheduler
+import com.zhufucdev.motion_emulator.ui.map.MapTraceCallback
+import com.zhufucdev.motion_emulator.ui.map.TraceBounds
 import kotlinx.serialization.serializer
 import net.edwardday.serialization.preferences.Preferences
 
@@ -54,7 +56,7 @@ class ConfigurationFragment : Fragment(), MenuProvider {
     private var velocity: Double? = 3.0
     private var satelliteCount: Int? = 10
 
-    private var drawnTrace: Pair<Polyline, Marker>? = null
+    private var drawnTrace: MapTraceCallback? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -72,7 +74,6 @@ class ConfigurationFragment : Fragment(), MenuProvider {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.mapTracePreview.onCreate(savedInstanceState)
         requireActivity().addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.RESUMED)
         btnRun = binding.btnRunEmulation
     }
@@ -82,8 +83,9 @@ class ConfigurationFragment : Fragment(), MenuProvider {
 
         initMotionDropdown()
         initCellsDropdown()
-        initializeMap()
-        initTracesDropdown()
+        binding.mapTracePreview.setReadyListener {
+            initTracesDropdown()
+        }
         initializeOthers()
         notifyConfig()
     }
@@ -110,15 +112,11 @@ class ConfigurationFragment : Fragment(), MenuProvider {
 
     private fun startEmulation() {
         Scheduler.emulation = emulation() ?: return
-        val camera = binding.mapTracePreview.map.cameraPosition
+        val traceId = trace!!.id
         findNavController()
             .navigate(
                 R.id.action_configurationFragment_to_emulateStatusFragment,
-                bundleOf(
-                    "cam_center_lat" to camera.target.latitude,
-                    "cam_center_lng" to camera.target.longitude,
-                    "cam_zoom" to camera.zoom
-                )
+                bundleOf("trace" to traceId)
             )
         btnRun.hide()
     }
@@ -202,18 +200,11 @@ class ConfigurationFragment : Fragment(), MenuProvider {
         this.trace = trace
         notifyConfig()
 
-        drawnTrace?.apply {
-            first.remove()
-            second.remove()
-        }
-        val map = binding.mapTracePreview.map
-        val drawn = trace.drawOnMap(map)
-        drawn.second.position
-        drawnTrace = drawn
-        map.animateCamera(
-            CameraUpdateFactory
-                .newLatLngBounds(trace.points.bounds(), 400)
-        )
+        val controller = binding.mapTracePreview.requireController()
+
+        drawnTrace?.remove()
+        drawnTrace = controller.drawTrace(trace)
+        controller.boundCamera(TraceBounds(trace), true)
     }
 
     private fun initTracesDropdown() {
@@ -330,19 +321,6 @@ class ConfigurationFragment : Fragment(), MenuProvider {
         }
     }
 
-    private fun initializeMap() {
-        val amap = binding.mapTracePreview.map
-
-        amap.uiSettings.apply {
-            isZoomControlsEnabled = false
-            isZoomGesturesEnabled = false
-            isScrollGesturesEnabled = false
-            isRotateGesturesEnabled = false
-        }
-        amap.unifyTheme(resources)
-        amap.isMyLocationEnabled = false
-    }
-
     private val inputWrappers
         get() = listOf(
             binding.wrapperDropdown,
@@ -363,18 +341,18 @@ class ConfigurationFragment : Fragment(), MenuProvider {
 
         var length = 0.0
         points.forEachIndexed { i, point ->
-            polyline.add(point.toLatLng())
+            polyline.add(point.toAmapLatLng())
             if (i > 0) {
                 length += AMapUtils.calculateLineDistance(
-                    point.toLatLng(),
-                    points[i - 1].toLatLng()
+                    point.toAmapLatLng(),
+                    points[i - 1].toAmapLatLng()
                 )
             }
         }
         val center = center(MapProjector)
         val marker = amap.addMarker(
             MarkerOptions()
-                .position(center.toLatLng())
+                .position(center.toAmapLatLng())
                 .draggable(false)
         )
         val polylineInstance = amap.addPolyline(polyline)
@@ -400,24 +378,9 @@ class ConfigurationFragment : Fragment(), MenuProvider {
         return false
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        binding.mapTracePreview.onSaveInstanceState(outState)
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        binding.mapTracePreview.onDestroy()
-    }
 
     override fun onResume() {
         super.onResume()
-        binding.mapTracePreview.onResume()
         notifyConfig()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        binding.mapTracePreview.onPause()
     }
 }

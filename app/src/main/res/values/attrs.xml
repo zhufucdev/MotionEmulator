@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="UnifiedMapFragment">
+        <attr name="provider" format="enum">
+            <enum name="amap" value="0"/>
+            <enum name="gcp_maps" value="1"/>
+        </attr>
+    </declare-styleable>
+</resources>

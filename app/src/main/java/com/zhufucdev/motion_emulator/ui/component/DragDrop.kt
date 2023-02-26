@@ -1,4 +1,4 @@
-package com.zhufucdev.motion_emulator.component
+package com.zhufucdev.motion_emulator.ui.component
 
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.layout.offset

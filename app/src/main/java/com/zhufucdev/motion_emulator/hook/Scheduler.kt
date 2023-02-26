@@ -108,7 +108,7 @@ object Scheduler {
     var satellites: Int = 0
         private set
     private val progress get() = (elapsed / duration / 1000).toFloat()
-    val location get() = mLocation ?: Point(39.989410, 116.480881)
+    val location get() = mLocation ?: Point.zero
     val cells get() = mCellMoment ?: CellMoment(0F)
     val motion = MotionMoment(0F, mutableMapOf())
 
@@ -218,7 +218,7 @@ object Scheduler {
             while (hooking && progress <= 1) {
                 val interp = trace.saltedPoints.at(progress, MapProjector, traceInterp)
                 traceInterp = interp
-                mLocation = interp.point.toPoint()
+                mLocation = interp.point.toPoint(trace.coordinateSystem)
                 LocationHooker.raise(interp.point.toPoint())
 
                 notifyProgress()
@@ -263,6 +263,7 @@ object Scheduler {
         values.put("progress", progress)
         values.put("pos_la", mLocation!!.latitude)
         values.put("pos_lg", mLocation!!.longitude)
+        values.put("coord_sys", mLocation!!.coordinateSystem.ordinal)
         values.put("elapsed", elapsed / 1000.0)
         eventResolver.update(stateUri, values, "progress", null)
     }

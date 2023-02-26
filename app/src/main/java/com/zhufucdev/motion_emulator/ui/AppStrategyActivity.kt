@@ -10,9 +10,9 @@ import android.widget.CursorAdapter
 import android.widget.SearchView
 import android.widget.SimpleCursorAdapter
 import com.zhufucdev.motion_emulator.R
-import com.zhufucdev.motion_emulator.data.apps.AppItemAdapter
-import com.zhufucdev.motion_emulator.data.apps.AppMetas
-import com.zhufucdev.motion_emulator.data.apps.SnappingLinearSmoothScroller
+import com.zhufucdev.motion_emulator.ui.apps.AppItemAdapter
+import com.zhufucdev.motion_emulator.data.AppMetas
+import com.zhufucdev.motion_emulator.ui.apps.SnappingLinearSmoothScroller
 import com.zhufucdev.motion_emulator.databinding.ActivityAppStrategyBinding
 import com.zhufucdev.motion_emulator.initializeToolbar
 

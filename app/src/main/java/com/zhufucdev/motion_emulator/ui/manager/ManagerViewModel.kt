@@ -12,7 +12,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.zhufucdev.motion_emulator.R
-import com.zhufucdev.motion_emulator.component.BottomSheetModalState
+import com.zhufucdev.motion_emulator.ui.component.BottomSheetModalState
 import com.zhufucdev.motion_emulator.data.*
 import com.zhufucdev.motion_emulator.data.Trace
 import com.zhufucdev.motion_emulator.insert

@@ -7,10 +7,11 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         tools:context=".ui.emulate.EmulateStatusFragment">
 
-    <com.amap.api.maps.MapView
+    <com.zhufucdev.motion_emulator.ui.map.UnifiedMapFragment
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:id="@+id/map_motion_preview"
+            app:provider="gcp_maps"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toTopOf="@id/layout_bottom_sheet"/>
 

@@ -30,9 +30,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.zhufucdev.motion_emulator.R
-import com.zhufucdev.motion_emulator.component.BottomSheetModal
-import com.zhufucdev.motion_emulator.component.BottomSheetModalState
-import com.zhufucdev.motion_emulator.component.Swipeable
+import com.zhufucdev.motion_emulator.ui.component.BottomSheetModal
+import com.zhufucdev.motion_emulator.ui.component.BottomSheetModalState
+import com.zhufucdev.motion_emulator.ui.component.Swipeable
 import com.zhufucdev.motion_emulator.data.*
 import com.zhufucdev.motion_emulator.ui.theme.MotionEmulatorTheme
 import com.zhufucdev.motion_emulator.ui.theme.paddingCommon

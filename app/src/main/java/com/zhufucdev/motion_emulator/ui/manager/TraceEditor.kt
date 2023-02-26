@@ -36,9 +36,9 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils
 import com.zhufucdev.motion_emulator.R
-import com.zhufucdev.motion_emulator.component.Expandable
-import com.zhufucdev.motion_emulator.component.Swipeable
-import com.zhufucdev.motion_emulator.component.dragDroppable
+import com.zhufucdev.motion_emulator.ui.component.Expandable
+import com.zhufucdev.motion_emulator.ui.component.Swipeable
+import com.zhufucdev.motion_emulator.ui.component.dragDroppable
 import com.zhufucdev.motion_emulator.data.*
 import com.zhufucdev.motion_emulator.data.Trace
 import com.zhufucdev.motion_emulator.insert

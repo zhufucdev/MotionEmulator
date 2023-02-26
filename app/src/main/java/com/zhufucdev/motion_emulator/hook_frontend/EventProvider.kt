@@ -7,9 +7,6 @@ import android.database.Cursor
 import android.database.MatrixCursor
 import android.hardware.SensorManager
 import android.net.Uri
-import android.util.Log
-import com.zhufucdev.motion_emulator.data.apps.AppMetas
-import com.zhufucdev.motion_emulator.data.apps.hooked
 import com.zhufucdev.motion_emulator.data.*
 import com.zhufucdev.motion_emulator.hook.EMULATION_START
 import com.zhufucdev.motion_emulator.hook.EMULATION_STOP
@@ -104,7 +101,8 @@ class EventProvider : ContentProvider() {
 
                 "progress" -> {
                     val progress = values.getAsFloat("progress")
-                    val position = Point(values.getAsDouble("pos_la"), values.getAsDouble("pos_lg"))
+                    val coordSys = CoordinateSystem.values()[values.getAsInteger("coord_sys")]
+                    val position = Point(values.getAsDouble("pos_la"), values.getAsDouble("pos_lg"), coordSys)
                     val elapsed = values.getAsDouble("elapsed")
                     Scheduler.intermediate = Intermediate(position, elapsed, progress)
                     return 0

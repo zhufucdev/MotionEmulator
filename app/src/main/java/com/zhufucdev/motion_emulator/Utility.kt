@@ -4,32 +4,25 @@ import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.res.Configuration
 import android.content.res.Resources
+import android.location.Location
 import android.util.TypedValue
 import androidx.annotation.AttrRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.compose.ui.geometry.Offset
 import androidx.navigation.NavController
-import com.amap.api.maps.AMap
-import com.amap.api.maps.MapsInitializer
-import com.amap.api.maps.model.LatLng
 import com.amap.api.maps.model.LatLngBounds
 import com.zhufucdev.motion_emulator.data.*
 import com.zhufucdev.motion_emulator.hook_frontend.Emulation
 import com.zhufucdev.motion_emulator.hook_frontend.EmulationRef
+import com.zhufucdev.motion_emulator.ui.map.TraceBounds
 import io.ktor.client.*
-import io.ktor.client.call.body
-import io.ktor.client.call.body
 import io.ktor.client.engine.android.*
 import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.int
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
 import java.math.RoundingMode
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
@@ -42,7 +35,7 @@ fun getAttrColor(@AttrRes id: Int, context: Context): Int {
     return typedValue.data
 }
 
-private val ktorClient = HttpClient(Android) {
+val defaultKtorClient = HttpClient(Android) {
     install(ContentNegotiation) {
         json()
     }
@@ -58,23 +51,6 @@ private val ktorClient = HttpClient(Android) {
     }
 }
 
-/**
- * Get a human-readable address of PoI
- *
- * This is in Mandarin, which sucks
- */
-suspend fun getAddress(location: LatLng): String? {
-    val req = ktorClient.get("https://restapi.amap.com/v3/geocode/regeo") {
-        parameter("key", BuildConfig.AMAP_WEB_KEY)
-        parameter("location", "${location.longitude.toFixed(6)},${location.latitude.toFixed(6)}")
-    }
-    if (!req.status.isSuccess()) return null
-    val res = req.body<JsonObject>()
-    if (res["status"]?.jsonPrimitive?.int != 1
-        || res["info"]?.jsonPrimitive?.content != "OK"
-    ) return null
-    return res["regeocode"]!!.jsonObject["formatted_address"]!!.jsonPrimitive.content
-}
 
 fun Double.toFixed(n: Int): String {
     val df = DecimalFormat(buildString {
@@ -165,43 +141,14 @@ operator fun FloatArray.times(other: Float): FloatArray {
     }.toFloatArray()
 }
 
-fun Point.toLatLng(): LatLng = LatLng(latitude, longitude)
-fun Vector2D.toLatLng(): LatLng = LatLng(x, y)
-fun LatLng.toPoint(): Point = Point(latitude, longitude)
-
-fun skipAmapFuckingLicense(context: Context) {
-    MapsInitializer.updatePrivacyShow(context, true, true)
-    MapsInitializer.updatePrivacyAgree(context, true)
-}
+fun Location.toPoint(): Point = Point(latitude, longitude)
 
 fun Vector2D.lenTo(other: Vector2D): Double =
     sqrt((x - other.x).pow(2) + (y - other.y).pow(2))
 
-fun Vector2D.toPoint() = Point(x, y)
-
-fun AMap.unifyTheme(resources: Resources) {
-    mapType = if (isDarkModeEnabled(resources)) AMap.MAP_TYPE_NIGHT else AMap.MAP_TYPE_NORMAL
-}
+fun Vector2D.toPoint(coordinateSystem: CoordinateSystem = CoordinateSystem.GCJ02) = Point(x, y, coordinateSystem)
 
 val ApplicationInfo.isSystemApp get() = flags and ApplicationInfo.FLAG_SYSTEM != 0
-
-/**
- * Get the [LatLngBounds] from a trace
- */
-fun List<Point>.bounds(): LatLngBounds =
-    LatLngBounds
-        .builder()
-        .apply {
-            forEach { include(it.toLatLng()) }
-        }
-        .build()
-
-/**
- * Do minus operation, treating
- * the two [LatLng]s as 2D vectors
- */
-operator fun LatLng.minus(other: LatLng) =
-    LatLng(latitude - other.latitude, longitude - other.longitude)
 
 fun AppCompatActivity.initializeToolbar(
     toolbar: Toolbar,

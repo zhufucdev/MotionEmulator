@@ -4,7 +4,6 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.database.MatrixCursor
-import android.graphics.Point
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
@@ -12,7 +11,6 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.provider.BaseColumns
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.MotionEvent
@@ -23,13 +21,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
-import com.amap.api.maps.AMap
-import com.amap.api.maps.AMapUtils
-import com.amap.api.maps.CameraUpdateFactory
-import com.amap.api.maps.model.LatLng
-import com.amap.api.maps.model.Polyline
-import com.amap.api.maps.model.PolylineOptions
-import com.amap.api.services.core.LatLonPoint
 import com.amap.api.services.core.PoiItemV2
 import com.amap.api.services.poisearch.PoiResultV2
 import com.amap.api.services.poisearch.PoiSearchV2
@@ -37,14 +28,16 @@ import com.aventrix.jnanoid.jnanoid.NanoIdUtils
 import com.google.android.material.snackbar.Snackbar
 import com.highcapable.yukihookapi.hook.log.loggerW
 import com.zhufucdev.motion_emulator.*
+import com.zhufucdev.motion_emulator.data.CoordinateSystem
+import com.zhufucdev.motion_emulator.data.Point
 import com.zhufucdev.motion_emulator.data.Trace
 import com.zhufucdev.motion_emulator.data.Traces
 import com.zhufucdev.motion_emulator.databinding.ActivityTraceDrawingBinding
+import com.zhufucdev.motion_emulator.ui.map.MapStyle
 import kotlinx.coroutines.launch
 
 class TraceDrawingActivity : AppCompatActivity() {
     private lateinit var binding: ActivityTraceDrawingBinding
-    private lateinit var amap: AMap
     private lateinit var locationManager: LocationManager
 
     private val traces = arrayListOf<Trace>()
@@ -57,10 +50,6 @@ class TraceDrawingActivity : AppCompatActivity() {
         binding = ActivityTraceDrawingBinding.inflate(layoutInflater)
         setContentView(binding.root)
         initializeToolbar(binding.appBarToolbar)
-
-        binding.mapCanvas.onCreate(savedInstanceState)
-        amap = binding.mapCanvas.map
-        amap.stylize()
 
         locationManager = getSystemService(LocationManager::class.java)
         Traces.require(this)
@@ -156,7 +145,7 @@ class TraceDrawingActivity : AppCompatActivity() {
 
                 searchView.isIconified = true
                 searchView.onActionViewCollapsed()
-                moveCamera(location)
+                binding.mapUnified.requireController().moveCamera(location.toPoint(), focus = true, animate = true)
                 return true
             }
         })
@@ -177,13 +166,13 @@ class TraceDrawingActivity : AppCompatActivity() {
         val provider = LocationManager.NETWORK_PROVIDER
         locationManager.getLastKnownLocation(provider)
             ?.let {
-                moveCamera(it)
+                notifyLocated(it.toPoint())
                 return
             }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             locationManager.getCurrentLocation(provider, null, application.mainExecutor) {
                 if (it != null) {
-                    moveCamera(it)
+                    notifyLocated(it.toPoint())
                 } else {
                     loggerW("Trace", "failed to obtain location")
                 }
@@ -192,7 +181,7 @@ class TraceDrawingActivity : AppCompatActivity() {
             // register a one-time listener
             val listener = object : LocationListener {
                 override fun onLocationChanged(location: Location) {
-                    moveCamera(location)
+                    notifyLocated(location.toPoint())
                     locationManager.removeUpdates(this)
                 }
             }
@@ -200,45 +189,25 @@ class TraceDrawingActivity : AppCompatActivity() {
         }
     }
 
-    private fun moveCamera(location: Location) {
-        val camera = CameraUpdateFactory
-            .newLatLngZoom(
-                LatLng(location.latitude, location.longitude),
-                10F
-            )
-        amap.animateCamera(camera)
-    }
-
-    private fun moveCamera(location: LatLonPoint) {
-        val camera = CameraUpdateFactory
-            .newLatLngZoom(
-                LatLng(location.latitude, location.longitude),
-                50F
-            )
-        amap.animateCamera(camera)
-    }
-
-    private fun AMap.stylize() {
-        isMyLocationEnabled = false
-        uiSettings.isZoomControlsEnabled = false
-
-        if (isDarkModeEnabled(resources)) {
-            amap.mapType = AMap.MAP_TYPE_NIGHT
+    fun notifyLocated(point: Point) {
+        binding.mapUnified.requireController().apply {
+            updateLocationIndicator(point)
+            moveCamera(point, focus = true, animate = false)
         }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        amap.mapType = when (item.itemId) {
-            R.id.app_bar_type_common -> AMap.MAP_TYPE_NORMAL
-            R.id.app_bar_type_satellite -> AMap.MAP_TYPE_SATELLITE
-            R.id.app_bar_type_night -> AMap.MAP_TYPE_NIGHT
+        binding.mapUnified.requireController().displayStyle = when (item.itemId) {
+            R.id.app_bar_type_common -> MapStyle.NORMAL
+            R.id.app_bar_type_satellite -> MapStyle.SATELLITE
+            R.id.app_bar_type_night -> MapStyle.NIGHT
             else -> return super.onOptionsItemSelected(item)
         }
         return super.onOptionsItemSelected(item)
     }
 
     private var currentToolType: Tool = Tool.MOVE
-    private var currentTool: ToolCallback = MoveToolCallback
+    private var currentTool: ToolCallback<*> = MoveToolCallback
     private fun initializeToolSlots() {
         val undoItem = binding.toolSlots.menu.findItem(R.id.slot_undo)
         binding.toolSlots.setOnItemSelectedListener {
@@ -298,8 +267,8 @@ class TraceDrawingActivity : AppCompatActivity() {
         }
     }
 
-    private fun useMove(): ToolCallback {
-        binding.mapCanvas.isFocusable = true
+    private fun useMove(): MoveToolCallback {
+        binding.mapUnified.isFocusable = true
         binding.touchReceiver.apply {
             isVisible = false
             setOnTouchListener(null)
@@ -308,76 +277,11 @@ class TraceDrawingActivity : AppCompatActivity() {
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    private fun useDraw(): ToolCallback {
-        binding.mapCanvas.isFocusable = false
+    private fun useDraw(): DrawToolCallback {
+        binding.mapUnified.isFocusable = false
         binding.touchReceiver.isVisible = true
 
-
-        var lastPos = LatLng(0.0, 0.0)
-        val points = PolylineOptions()
-        val lastPoints = arrayListOf<ArrayList<LatLng>>() // for undoing
-        var lastPolyline: Polyline? = null
-        points.color(getColor(if (isDarkModeEnabled(resources)) R.color.purple_200 else R.color.purple_500))
-
-        val callback = object : DrawToolCallback {
-            private fun project(x: Int, y: Int): LatLng =
-                amap.projection.fromScreenLocation(Point(x, y))
-
-            override fun addPoint(x: Int, y: Int) {
-                val al = project(x, y)
-                if (distance(lastPos, al) >= drawPrecision) {
-                    points.add(al)
-                    lastPoints.lastOrNull()?.add(al)
-                    lastPolyline?.remove()
-                    lastPolyline = amap.addPolyline(points)
-                }
-                lastPos = al
-            }
-
-            override fun markBegin(x: Int, y: Int) {
-                lastPoints.add(arrayListOf())
-                addPoint(x, y)
-            }
-
-            override fun markEnd(x: Int, y: Int) {}
-
-            override fun undo() {
-                lastPoints.removeLastOrNull()?.let { points.points.removeAll(it) } ?: return
-                lastPolyline?.remove()
-                lastPolyline = amap.addPolyline(points)
-                lastPos = points.points.lastOrNull() ?: LatLng(0.0, 0.0)
-            }
-
-            override suspend fun complete() {
-                if (points.points.isEmpty()) {
-                    return
-                }
-
-                val target = amap.cameraPosition.target
-                val p = points.points
-                val address = getAddress(target)
-                val name = address
-                    ?.let { getString(R.string.text_near, it) }
-                    ?: dateString()
-                traces.add(
-                    Trace(
-                        NanoIdUtils.randomNanoId(),
-                        name,
-                        p.map { it.toPoint() }
-                    )
-                )
-                runOnUiThread {
-                    Snackbar.make(
-                        binding.root,
-                        getString(R.string.text_trace_name, name),
-                        Snackbar.LENGTH_LONG
-                    )
-                        .setAnchorView(binding.toolSlots)
-                        .show()
-                }
-            }
-        }
-
+        val callback = binding.mapUnified.requireController().useDraw()
         binding.touchReceiver.setOnTouchListener { _, event ->
             if (event.pointerCount > 1) {
                 return@setOnTouchListener false
@@ -388,6 +292,24 @@ class TraceDrawingActivity : AppCompatActivity() {
                 else -> callback.addPoint(event.x.toInt(), event.y.toInt())
             }
             true
+        }
+        callback.onCompleted {
+            traces.add(
+                Trace(
+                    NanoIdUtils.randomNanoId(),
+                    it.poiName,
+                    it.trace
+                )
+            )
+            runOnUiThread {
+                Snackbar.make(
+                    binding.root,
+                    getString(R.string.text_trace_name, it.poiName),
+                    Snackbar.LENGTH_LONG
+                )
+                    .setAnchorView(binding.toolSlots)
+                    .show()
+            }
         }
 
         return callback
@@ -403,50 +325,38 @@ class TraceDrawingActivity : AppCompatActivity() {
             involveLocation()
         }
     }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        binding.mapCanvas.onDestroy()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        binding.mapCanvas.onResume()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        binding.mapCanvas.onPause()
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        binding.mapCanvas.onSaveInstanceState(outState)
-    }
 }
 
 enum class Tool {
     MOVE, DRAW
 }
 
-private fun distance(p1: LatLng, p2: LatLng): Float =
-    AMapUtils.calculateLineDistance(p1, p2)
-
-const val drawPrecision = 0.5F // in meters
-
-interface ToolCallback {
+interface ToolCallback<T : ToolCallbackResult> {
     fun undo()
-    suspend fun complete()
+    suspend fun complete(): T
+    fun onCompleted(l: (T) -> Unit)
 }
 
-interface DrawToolCallback : ToolCallback {
+interface ToolCallbackResult
+
+interface DrawToolCallback : ToolCallback<DrawResult> {
     fun addPoint(x: Int, y: Int)
     fun markBegin(x: Int, y: Int)
     fun markEnd(x: Int, y: Int)
 }
 
-object MoveToolCallback : ToolCallback {
+data class DrawResult(
+    val poiName: String = "",
+    val trace: List<com.zhufucdev.motion_emulator.data.Point> = emptyList(),
+    val coordinateSystem: CoordinateSystem = CoordinateSystem.WGS84
+) : ToolCallbackResult
+
+object MoveToolCallback : ToolCallback<MoveResult> {
     override fun undo() {}
 
-    override suspend fun complete() {}
+    override suspend fun complete(): MoveResult = MoveResult
+
+    override fun onCompleted(l: (MoveResult) -> Unit) {}
 }
+
+object MoveResult : ToolCallbackResult

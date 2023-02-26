@@ -5,8 +5,10 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import com.amap.api.maps.AMapUtils
 import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
-import com.zhufucdev.motion_emulator.toLatLng
+import com.google.maps.android.SphericalUtil
+import com.zhufucdev.motion_emulator.toAmapLatLng
 import com.zhufucdev.motion_emulator.lenTo
+import com.zhufucdev.motion_emulator.toGoogleLatLng
 import com.zhufucdev.motion_emulator.ui.manager.FactorCanvas
 import kotlin.math.*
 
@@ -83,7 +85,7 @@ object MapProjector : Projector {
     }
 
     override fun Vector2D.distance(other: Vector2D): Double =
-        AMapUtils.calculateLineDistance(this.toLatLng(), other.toLatLng()).toDouble()
+        AMapUtils.calculateLineDistance(this.toAmapLatLng(), other.toAmapLatLng()).toDouble()
 
     private val cache =
         CacheBuilder.newBuilder()

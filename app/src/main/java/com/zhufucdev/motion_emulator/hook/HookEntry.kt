@@ -1,16 +1,12 @@
 package com.zhufucdev.motion_emulator.hook
 
-import android.net.Uri
 import com.highcapable.yukihookapi.YukiHookAPI
 import com.highcapable.yukihookapi.annotation.xposed.InjectYukiHookWithXposed
 import com.highcapable.yukihookapi.hook.factory.configs
-import com.highcapable.yukihookapi.hook.log.loggerD
 import com.highcapable.yukihookapi.hook.log.loggerI
-import com.highcapable.yukihookapi.hook.param.PackageParam
 import com.highcapable.yukihookapi.hook.xposed.proxy.IYukiHookXposedInit
 import com.zhufucdev.motion_emulator.BuildConfig
-import com.zhufucdev.motion_emulator.data.apps.isHooked
-import com.zhufucdev.motion_emulator.hook_frontend.AUTHORITY
+import com.zhufucdev.motion_emulator.data.isHooked
 
 @InjectYukiHookWithXposed
 class HookEntry : IYukiHookXposedInit {

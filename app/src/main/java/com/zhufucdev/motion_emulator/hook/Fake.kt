@@ -21,11 +21,11 @@ import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
 import kotlin.time.seconds
 
-fun Point.offsetFixed(): Point = with(MapProjector) { toIdeal() }.toPoint()
+fun Point.offsetFixed(): Point =
+    with(if (coordinateSystem == CoordinateSystem.GCJ02) MapProjector else BypassProjector) { toIdeal() }.toPoint()
 
 fun Point.android(
     provider: String = LocationManager.GPS_PROVIDER,
-    fixOffset: Boolean = true
 ): Location {
     val result = Location(provider).apply {
         // fake some data
@@ -41,23 +41,17 @@ fun Point.android(
     }
 
 
-    if (fixOffset) {
-        val fixed = offsetFixed()
-        result.latitude = fixed.latitude
-        result.longitude = fixed.longitude
-    } else {
-        result.latitude = latitude
-        result.longitude = longitude
-    }
+    val fixed = offsetFixed()
+    result.latitude = fixed.latitude
+    result.longitude = fixed.longitude
 
     return result
 }
 
 fun Point.amap(
     provider: String = LocationManager.GPS_PROVIDER,
-    fixOffset: Boolean = true
 ): AMapLocation =
-    AMapLocation(android(provider, fixOffset))
+    AMapLocation(android(provider))
 
 /**
  * Result for [ClosedShape.at]
@@ -86,7 +80,11 @@ data class ClosedShapeInterp(
  * the ideal plane, and back to the target plane
  * @see [ClosedShapeInterp]
  */
-fun List<Vector2D>.at(progress: Float, projector: Projector = BypassProjector, from: ClosedShapeInterp? = null): ClosedShapeInterp {
+fun List<Vector2D>.at(
+    progress: Float,
+    projector: Projector = BypassProjector,
+    from: ClosedShapeInterp? = null
+): ClosedShapeInterp {
     if (progress > 1) {
         return ClosedShapeInterp(last(), size - 1, 0.0, emptyList())
     } else if (progress < 0) {
@@ -138,7 +136,7 @@ fun List<Vector2D>.at(progress: Float, projector: Projector = BypassProjector, f
 fun Trace.length(): Double {
     var sum = 0.0
     for (i in 1 until points.size) {
-        sum += AMapUtils.calculateLineDistance(points[i - 1].toLatLng(), points[i].toLatLng())
+        sum += AMapUtils.calculateLineDistance(points[i - 1].toAmapLatLng(), points[i].toAmapLatLng())
     }
     return sum
 }
@@ -426,18 +424,22 @@ fun CellMoment.neighboringInfo(): List<NeighboringCellInfo> {
                     it.cellSignalStrength.dbm,
                     it.cellIdentity.basestationId
                 )
+
                 is CellInfoGsm -> NeighboringCellInfo(
                     it.cellSignalStrength.rssi,
                     it.cellIdentity.cid
                 )
+
                 is CellInfoLte -> NeighboringCellInfo(
                     it.cellSignalStrength.rssi,
                     it.cellIdentity.ci
                 )
+
                 is CellInfoWcdma -> NeighboringCellInfo(
                     it.cellSignalStrength.dbm,
                     it.cellIdentity.cid
                 )
+
                 else -> null
             }
         }

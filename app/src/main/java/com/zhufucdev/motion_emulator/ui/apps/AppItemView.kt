@@ -1,4 +1,4 @@
-package com.zhufucdev.motion_emulator.data.apps
+package com.zhufucdev.motion_emulator.ui.apps
 
 import android.content.Context
 import android.view.LayoutInflater
@@ -11,6 +11,8 @@ import androidx.appcompat.widget.AppCompatTextView
 import androidx.recyclerview.widget.LinearSmoothScroller
 import androidx.recyclerview.widget.RecyclerView
 import com.zhufucdev.motion_emulator.R
+import com.zhufucdev.motion_emulator.data.AppMeta
+import com.zhufucdev.motion_emulator.data.AppMetas
 
 class AppItemAdapter : RecyclerView.Adapter<AppItemViewHolder>() {
     var appsSnapshot = emptyList<AppMeta>()
