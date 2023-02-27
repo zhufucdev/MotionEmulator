@@ -4,10 +4,9 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import com.highcapable.yukihookapi.YukiHookAPI
+import com.zhufucdev.motion_emulator.setUpStatusBar
 import com.zhufucdev.motion_emulator.ui.home.AppHome
 import com.zhufucdev.motion_emulator.ui.theme.MotionEmulatorTheme
 
@@ -16,6 +15,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         updateStatus()
+        setUpStatusBar()
         setContent {
             MotionEmulatorTheme {
                 AppHome(activatedState = activated) {

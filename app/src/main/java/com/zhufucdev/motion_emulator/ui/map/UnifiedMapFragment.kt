@@ -1,6 +1,7 @@
 package com.zhufucdev.motion_emulator.ui.map
 
 import android.content.Context
+import android.content.res.TypedArray
 import android.os.Bundle
 import android.util.AttributeSet
 import android.view.LayoutInflater
@@ -23,7 +24,7 @@ class UnifiedMapFragment : FrameLayout {
         context.theme.obtainStyledAttributes(
             attributes, R.styleable.UnifiedMapFragment, 0, 0
         ).apply {
-            type = Type.values()[getInteger(R.styleable.UnifiedMapFragment_provider, 0)]
+            init(this)
         }
     }
 
@@ -33,8 +34,12 @@ class UnifiedMapFragment : FrameLayout {
             attributes, R.styleable.UnifiedMapFragment,
             defStyleAttr, 0
         ).apply {
-            type = Type.values()[getInteger(R.styleable.UnifiedMapFragment_provider, 0)]
+            init(this)
         }
+    }
+
+    private fun init(args: TypedArray) {
+        provider = Provider.values()[args.getInteger(R.styleable.UnifiedMapFragment_provider, 0)]
     }
 
     private val container = FrameLayout(context)
@@ -43,11 +48,11 @@ class UnifiedMapFragment : FrameLayout {
         addView(container)
     }
 
-    enum class Type {
+    enum class Provider {
         AMAP, GCP_MAPS
     }
 
-    var type: Type = Type.AMAP
+    var provider: Provider = Provider.AMAP
         set(value) {
             if (field == value && controller != null) return
             removeAllViews()
@@ -67,9 +72,9 @@ class UnifiedMapFragment : FrameLayout {
         onReady = l
     }
 
-    private fun initializeAs(type: Type) {
-        val maps = when (type) {
-            Type.AMAP ->
+    private fun initializeAs(provider: Provider) {
+        val maps = when (provider) {
+            Provider.AMAP ->
                 AMapFragment().apply {
                     getMapAsync {
                         val ctrl = AMapController(it, requireContext())
@@ -78,7 +83,7 @@ class UnifiedMapFragment : FrameLayout {
                     }
                 }
 
-            Type.GCP_MAPS ->
+            Provider.GCP_MAPS ->
                 SupportMapFragment.newInstance().apply {
                     getMapAsync {
                         val ctrl = GoogleMapsController(requireContext(), it)

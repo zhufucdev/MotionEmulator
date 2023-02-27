@@ -4,24 +4,33 @@ package com.zhufucdev.motion_emulator.ui.home
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.zhufucdev.motion_emulator.R
 import com.zhufucdev.motion_emulator.ui.*
 import com.zhufucdev.motion_emulator.ui.theme.*
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppHome(activatedState: State<Boolean>, onClick: (AppHomeDestination) -> Unit) {
+    val behavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
     Scaffold(
-        topBar = { HomeAppbar() }
+        topBar = {
+            HomeAppbar(
+                onClick = onClick,
+                scrollBehavior = behavior
+            )
+        },
+        modifier = Modifier.nestedScroll(behavior.nestedScrollConnection)
     ) {
         LazyColumn(modifier = Modifier.padding(it)) {
             item {
@@ -66,8 +75,8 @@ fun AppHome(activatedState: State<Boolean>, onClick: (AppHomeDestination) -> Uni
                     icon = painterResource(id = R.drawable.ic_baseline_map_24)
                 )
             }
-            
-            item { 
+
+            item {
                 HomeCard(
                     onClick = { onClick(AppHomeDestination.Management) },
                     title = stringResource(id = R.string.title_manage),
@@ -84,7 +93,6 @@ fun AppHome(activatedState: State<Boolean>, onClick: (AppHomeDestination) -> Uni
                     icon = painterResource(id = R.drawable.ic_baseline_auto_fix_high_24)
                 )
             }
-            
         }
     }
 }
@@ -127,9 +135,31 @@ fun HomeCard(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeAppbar() {
-    TopAppBar(title = { Text(text = stringResource(R.string.app_name)) })
+fun HomeAppbar(onClick: (AppHomeDestination) -> Unit, scrollBehavior: TopAppBarScrollBehavior) {
+    LargeTopAppBar(
+        title = { Text(text = stringResource(R.string.app_name)) },
+        actions = {
+            PlainTooltipBox(
+                tooltip = { Text(stringResource(R.string.title_activity_settings)) },
+                content = {
+                    IconButton(
+                        onClick = { onClick(AppHomeDestination.Settings) },
+                        modifier = Modifier.tooltipAnchor(),
+                        content = {
+                            Icon(
+                                Icons.Default.Settings,
+                                stringResource(R.string.title_activity_settings),
+                                tint = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    )
+                }
+            )
+        },
+        scrollBehavior = scrollBehavior
+    )
 }
 
 @Preview
@@ -146,5 +176,6 @@ enum class AppHomeDestination(val activity: Class<*>) {
     Record(RecordActivity::class.java),
     Trace(TraceDrawingActivity::class.java),
     Emulation(EmulateActivity::class.java),
-    Management(ManagerActivity::class.java)
+    Management(ManagerActivity::class.java),
+    Settings(SettingsActivity::class.java)
 }

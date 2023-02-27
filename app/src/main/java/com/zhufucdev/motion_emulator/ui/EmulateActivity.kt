@@ -9,6 +9,7 @@ import com.zhufucdev.motion_emulator.data.Motions
 import com.zhufucdev.motion_emulator.data.Traces
 import com.zhufucdev.motion_emulator.databinding.ActivityEmulateBinding
 import com.zhufucdev.motion_emulator.initializeToolbar
+import com.zhufucdev.motion_emulator.setUpStatusBar
 
 class EmulateActivity : AppCompatActivity() {
     private lateinit var binding: ActivityEmulateBinding
@@ -19,6 +20,7 @@ class EmulateActivity : AppCompatActivity() {
         setContentView(binding.root)
         val navController = findNavController(R.id.nav_host_fragment_activity_emulate)
         initializeToolbar(binding.appBarToolbar, navController)
+        setUpStatusBar()
 
         Traces.require(this)
         Motions.require(this)

@@ -1,0 +1,22 @@
+<PreferenceScreen
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <ListPreference
+            app:key="map_provider"
+            app:title="@string/title_settings_map_provider"
+            app:icon="@drawable/ic_baseline_map_24"
+            app:entries="@array/map_entries"
+            app:entryValues="@array/map_values"
+            app:defaultValue="gcp_maps"
+            app:useSimpleSummaryProvider="true"/>
+
+    <ListPreference
+            app:key="poi_provider"
+            app:title="@string/settings_title_poi_provider"
+            app:icon="@drawable/ic_baseline_search_24"
+            app:entries="@array/map_entries"
+            app:entryValues="@array/map_values"
+            app:defaultValue="gcp_maps"
+            app:useSimpleSummaryProvider="true"/>
+</PreferenceScreen>

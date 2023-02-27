@@ -6,6 +6,7 @@ import com.amap.api.maps.AMap
 import com.amap.api.maps.MapsInitializer
 import com.amap.api.maps.model.LatLng
 import com.amap.api.services.core.LatLonPoint
+import com.zhufucdev.motion_emulator.data.CoordinateSystem
 import com.zhufucdev.motion_emulator.data.Point
 import com.zhufucdev.motion_emulator.data.Vector2D
 import io.ktor.client.call.*
@@ -18,13 +19,9 @@ import kotlinx.serialization.json.jsonPrimitive
 
 fun Vector2D.toAmapLatLng(): LatLng = LatLng(x, y)
 
-fun LatLng.toPoint(): Point = Point(latitude, longitude)
+fun LatLng.toPoint(): Point = Point(latitude, longitude, CoordinateSystem.GCJ02)
 
-fun LatLonPoint.toPoint(): Point = Point(latitude, longitude)
-
-fun AMap.unifyTheme(resources: Resources) {
-    mapType = if (isDarkModeEnabled(resources)) AMap.MAP_TYPE_NIGHT else AMap.MAP_TYPE_NORMAL
-}
+fun LatLonPoint.toPoint(): Point = Point(latitude, longitude, CoordinateSystem.GCJ02)
 
 fun skipAmapFuckingLicense(context: Context) {
     MapsInitializer.updatePrivacyShow(context, true, true)

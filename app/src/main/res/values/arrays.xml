@@ -1,0 +1,12 @@
+<resources>
+    <!-- Reply Preference -->
+    <string-array name="map_entries">
+        <item>@string/name_google_maps</item>
+        <item>@string/name_amap</item>
+    </string-array>
+
+    <string-array name="map_values">
+        <item>gcp_maps</item>
+        <item>amap</item>
+    </string-array>
+</resources>

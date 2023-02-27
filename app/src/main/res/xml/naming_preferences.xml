@@ -1,0 +1,12 @@
+<PreferenceScreen
+        xmlns:app="http://schemas.android.com/apk/res-auto">
+
+
+<!--    <SwitchPreferenceCompat-->
+<!--            app:key="attachment"-->
+<!--            app:title="@string/attachment_title"-->
+<!--            app:summaryOn="@string/attachment_summary_on"-->
+<!--            app:summaryOff="@string/attachment_summary_off"-->
+<!--            app:dependency="sync"/>-->
+
+</PreferenceScreen>

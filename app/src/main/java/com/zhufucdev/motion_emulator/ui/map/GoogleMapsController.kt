@@ -37,7 +37,7 @@ class GoogleMapsController(private val context: Context, private val map: Google
 
     override fun moveCamera(location: Point, focus: Boolean, animate: Boolean) {
         val update = CameraUpdateFactory.newLatLngZoom(
-            location.toGoogleLatLng(), if (focus) 50F else 10F
+            location.ensureGoogleCoordinate().toGoogleLatLng(), if (focus) 40F else 10F
         )
         if (animate) map.animateCamera(update)
         else map.moveCamera(update)

@@ -8,8 +8,6 @@ import com.amap.api.maps.LocationSource
 import com.amap.api.maps.model.LatLng
 import com.amap.api.maps.model.Polyline
 import com.amap.api.maps.model.PolylineOptions
-import com.google.android.material.color.MaterialColors
-import com.google.android.material.elevation.SurfaceColors
 import com.zhufucdev.motion_emulator.*
 import com.zhufucdev.motion_emulator.data.CoordinateSystem
 import com.zhufucdev.motion_emulator.data.Point
@@ -17,7 +15,6 @@ import com.zhufucdev.motion_emulator.data.Trace
 import com.zhufucdev.motion_emulator.hook.android
 import com.zhufucdev.motion_emulator.ui.DrawResult
 import com.zhufucdev.motion_emulator.ui.DrawToolCallback
-import io.ktor.util.reflect.*
 
 class AMapController(private val map: AMap, val context: Context) : MapController {
     init {
@@ -39,8 +36,8 @@ class AMapController(private val map: AMap, val context: Context) : MapControlle
 
     override fun moveCamera(location: Point, focus: Boolean, animate: Boolean) {
         val camera = CameraUpdateFactory.newLatLngZoom(
-            LatLng(location.latitude, location.longitude),
-            if (focus) 50F else 10F
+            location.ensureAmapCoordinate().toAmapLatLng(),
+            if (focus) 40F else 10F
         )
         if (animate) map.animateCamera(camera)
         else map.moveCamera(camera)
@@ -51,6 +48,7 @@ class AMapController(private val map: AMap, val context: Context) : MapControlle
         if (animate) map.animateCamera(update)
         else map.moveCamera(update)
     }
+
 
     override fun useDraw(): DrawToolCallback {
         var lastPos = LatLng(0.0, 0.0)
@@ -144,6 +142,7 @@ class AMapController(private val map: AMap, val context: Context) : MapControlle
             callback?.onLocationChanged(it.android())
         }
     }
+
     override fun updateLocationIndicator(point: Point) {
         locationListener.invoke(point)
     }
@@ -172,6 +171,7 @@ class AMapController(private val map: AMap, val context: Context) : MapControlle
                         isRotateGesturesEnabled = false
                     }
                 }
+
                 MapDisplayType.INTERACTIVE -> {
                     map.uiSettings.apply {
                         isZoomGesturesEnabled = true

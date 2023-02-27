@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.ui.text.toUpperCase
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.work.ExistingWorkPolicy
@@ -19,12 +20,14 @@ import com.zhufucdev.motion_emulator.databinding.FragmentEmulateStatusBinding
 import com.zhufucdev.motion_emulator.hook_frontend.*
 import com.zhufucdev.motion_emulator.ui.map.MapController
 import com.zhufucdev.motion_emulator.ui.map.TraceBounds
+import com.zhufucdev.motion_emulator.ui.map.UnifiedMapFragment
 import kotlin.math.roundToInt
 
 class EmulateStatusFragment : Fragment() {
     private lateinit var binding: FragmentEmulateStatusBinding
     private val listeners = mutableSetOf<ListenCallback>()
     private lateinit var emulation: Emulation
+    private val preferences by requireContext().lazySharedPreferences()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,6 +40,8 @@ class EmulateStatusFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentEmulateStatusBinding.inflate(layoutInflater, container, false)
+        binding.mapMotionPreview.provider =
+            UnifiedMapFragment.Provider.valueOf(preferences.getString("map_provider", "gcp_maps")!!.uppercase())
         binding.mapMotionPreview.setReadyListener {
             initializeMap(it)
         }

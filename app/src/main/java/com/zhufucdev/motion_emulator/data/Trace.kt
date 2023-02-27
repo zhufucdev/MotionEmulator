@@ -23,10 +23,16 @@ import java.io.OutputStream
 class Point : Vector2D {
     val coordinateSystem: CoordinateSystem
 
+    /**
+     * Constructs a [Point], in WGS84 coordinate system
+     */
     constructor(latitude: Double, longitude: Double) : super(latitude, longitude) {
         coordinateSystem = CoordinateSystem.WGS84
     }
 
+    /**
+     * Constructs a [Point], in a given coordinate system
+     */
     constructor(latitude: Double, longitude: Double, coordinateSystem: CoordinateSystem) : super(latitude, longitude) {
         this.coordinateSystem = coordinateSystem
     }

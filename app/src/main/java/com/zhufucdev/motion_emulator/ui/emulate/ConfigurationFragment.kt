@@ -25,8 +25,10 @@ import com.zhufucdev.motion_emulator.hook.center
 import com.zhufucdev.motion_emulator.hook_frontend.Emulation
 import com.zhufucdev.motion_emulator.hook_frontend.EmulationRef
 import com.zhufucdev.motion_emulator.hook_frontend.Scheduler
+import com.zhufucdev.motion_emulator.ui.map.MapDisplayType
 import com.zhufucdev.motion_emulator.ui.map.MapTraceCallback
 import com.zhufucdev.motion_emulator.ui.map.TraceBounds
+import com.zhufucdev.motion_emulator.ui.map.UnifiedMapFragment
 import kotlinx.serialization.serializer
 import net.edwardday.serialization.preferences.Preferences
 
@@ -48,6 +50,7 @@ class ConfigurationFragment : Fragment(), MenuProvider {
             null
         }
     }
+    private val defaultPreferences by requireContext().lazySharedPreferences()
 
     private var motion: Box<Motion> = EmptyBox()
     private var trace: Trace? = null
@@ -75,6 +78,8 @@ class ConfigurationFragment : Fragment(), MenuProvider {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         requireActivity().addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.RESUMED)
+        binding.mapTracePreview.provider =
+            UnifiedMapFragment.Provider.valueOf(defaultPreferences.getString("map_provider", "gcp_maps")!!.uppercase())
         btnRun = binding.btnRunEmulation
     }
 
@@ -85,6 +90,7 @@ class ConfigurationFragment : Fragment(), MenuProvider {
         initCellsDropdown()
         binding.mapTracePreview.setReadyListener {
             initTracesDropdown()
+            it.displayType = MapDisplayType.STILL
         }
         initializeOthers()
         notifyConfig()

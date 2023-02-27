@@ -12,4 +12,8 @@
         <item name="android:navigationBarColor">?attr/colorSurface</item>
         <item name="android:windowLightStatusBar">true</item>
     </style>
+
+    <style name="Theme.MotionEmulator.Preference" parent="Theme.MotionEmulator">
+        <item name="android:tint">?attr/colorOnSurface</item>
+    </style>
 </resources>

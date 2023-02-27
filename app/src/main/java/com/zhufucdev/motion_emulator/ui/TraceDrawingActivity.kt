@@ -33,12 +33,14 @@ import com.zhufucdev.motion_emulator.data.Point
 import com.zhufucdev.motion_emulator.data.Trace
 import com.zhufucdev.motion_emulator.data.Traces
 import com.zhufucdev.motion_emulator.databinding.ActivityTraceDrawingBinding
-import com.zhufucdev.motion_emulator.ui.map.MapStyle
+import com.zhufucdev.motion_emulator.ui.map.*
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 
 class TraceDrawingActivity : AppCompatActivity() {
     private lateinit var binding: ActivityTraceDrawingBinding
     private lateinit var locationManager: LocationManager
+    private val preferences by lazySharedPreferences()
 
     private val traces = arrayListOf<Trace>()
 
@@ -53,6 +55,8 @@ class TraceDrawingActivity : AppCompatActivity() {
 
         locationManager = getSystemService(LocationManager::class.java)
         Traces.require(this)
+        binding.mapUnified.provider = getProvider("map")
+
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             requestPermissions(arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION), 0)
@@ -74,6 +78,17 @@ class TraceDrawingActivity : AppCompatActivity() {
         return true
     }
 
+    private fun getProvider(key: String): UnifiedMapFragment.Provider {
+        return UnifiedMapFragment.Provider.valueOf(preferences.getString(key, "gcp_maps")!!.uppercase())
+    }
+
+    private val poiEngine: PoiSearchEngine by lazy {
+        when (getProvider("poi_provider")) {
+            UnifiedMapFragment.Provider.AMAP -> AMapPoiEngine(this)
+            UnifiedMapFragment.Provider.GCP_MAPS -> GooglePoiEngine(this)
+        }
+    }
+
     private fun initializeSearch(searchView: SearchView) {
         val adapter = SimpleCursorAdapter(
             this,
@@ -87,7 +102,7 @@ class TraceDrawingActivity : AppCompatActivity() {
 
         val handler = Handler(mainLooper)
         var lastQuery: String?
-        var lastResults: PoiResultV2? = null
+        var lastResults: List<Poi>? = null
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String): Boolean {
                 return false
@@ -96,52 +111,47 @@ class TraceDrawingActivity : AppCompatActivity() {
             override fun onQueryTextChange(newText: String): Boolean {
                 lastQuery = newText
                 handler.postDelayed({
-                    if (lastQuery != newText) {
+                    if (lastQuery != newText || newText.isEmpty()) {
                         return@postDelayed
                     }
-                    // carry out search only if the user holds on for 0.5s
-                    val query = PoiSearchV2.Query(newText, null)
-                    query.pageSize = 20
-                    val search = PoiSearchV2(this@TraceDrawingActivity, query)
-                    search.setOnPoiSearchListener(object : PoiSearchV2.OnPoiSearchListener {
-                        override fun onPoiSearched(p0: PoiResultV2?, p1: Int) {
-                            if (p0 == null) {
-                                return
-                            }
-                            lastResults = p0
-                            val cursor = MatrixCursor(arrayOf(BaseColumns._ID, "name", "city"))
-                            p0.pois.forEachIndexed { index, item ->
-                                // Something like XX Park \n Luan, Anhui
-                                cursor.addRow(
-                                    arrayOf<Any>(
-                                        index,
-                                        item.title,
+                    // carry out search only if the user holds on for 1s
+                    lifecycleScope.launch {
+                        val results = poiEngine.search(newText, 20)
+                        lastResults = results
+
+                        val cursor = MatrixCursor(arrayOf(BaseColumns._ID, "name", "city"))
+                        results.forEachIndexed { index, item ->
+                            // Something like XX Park \n Luan, Anhui
+                            cursor.addRow(
+                                arrayOf<Any>(
+                                    index,
+                                    item.name,
+                                    if (item.province.isNotEmpty())
                                         getString(
                                             R.string.name_location,
-                                            item.provinceName,
-                                            item.cityName
+                                            item.province,
+                                            item.city
                                         )
-                                    )
+                                    else if (item.city.isNotEmpty())
+                                        item.city
+                                    else ""
                                 )
-                            }
-                            adapter.changeCursor(cursor)
+                            )
                         }
-
-                        override fun onPoiItemSearched(p0: PoiItemV2?, p1: Int) {}
-                    })
-
-                    search.searchPOIAsyn()
-                }, 500)
+                        adapter.changeCursor(cursor)
+                    }
+                }, 1000)
                 return false
             }
         })
+
         searchView.setOnSuggestionListener(object : SearchView.OnSuggestionListener {
             override fun onSuggestionSelect(position: Int): Boolean {
                 return false
             }
 
             override fun onSuggestionClick(position: Int): Boolean {
-                val location = lastResults?.pois?.get(position)?.latLonPoint ?: return false
+                val location = lastResults?.get(position)?.location ?: return false
 
                 searchView.isIconified = true
                 searchView.onActionViewCollapsed()
@@ -298,7 +308,8 @@ class TraceDrawingActivity : AppCompatActivity() {
                 Trace(
                     NanoIdUtils.randomNanoId(),
                     it.poiName,
-                    it.trace
+                    it.trace,
+                    coordinateSystem = it.coordinateSystem
                 )
             )
             runOnUiThread {
@@ -347,7 +358,7 @@ interface DrawToolCallback : ToolCallback<DrawResult> {
 
 data class DrawResult(
     val poiName: String = "",
-    val trace: List<com.zhufucdev.motion_emulator.data.Point> = emptyList(),
+    val trace: List<Point> = emptyList(),
     val coordinateSystem: CoordinateSystem = CoordinateSystem.WGS84
 ) : ToolCallbackResult
 

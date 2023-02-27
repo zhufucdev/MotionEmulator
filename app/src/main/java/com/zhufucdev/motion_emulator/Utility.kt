@@ -1,21 +1,23 @@
 package com.zhufucdev.motion_emulator
 
+import android.app.Activity
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.res.Configuration
 import android.content.res.Resources
+import android.graphics.Color
 import android.location.Location
 import android.util.TypedValue
 import androidx.annotation.AttrRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.compose.ui.geometry.Offset
+import androidx.core.view.WindowCompat
 import androidx.navigation.NavController
-import com.amap.api.maps.model.LatLngBounds
+import androidx.preference.PreferenceManager
 import com.zhufucdev.motion_emulator.data.*
 import com.zhufucdev.motion_emulator.hook_frontend.Emulation
 import com.zhufucdev.motion_emulator.hook_frontend.EmulationRef
-import com.zhufucdev.motion_emulator.ui.map.TraceBounds
 import io.ktor.client.*
 import io.ktor.client.engine.android.*
 import io.ktor.client.plugins.*
@@ -185,3 +187,11 @@ fun <T> MutableList<T>.insert(index: Int, element: T) {
         add(index, element)
     }
 }
+
+fun Activity.setUpStatusBar() {
+    WindowCompat.setDecorFitsSystemWindows(window, false)
+    window.statusBarColor = Color.TRANSPARENT
+    window.navigationBarColor = Color.TRANSPARENT
+}
+
+fun Context.lazySharedPreferences() = lazy { PreferenceManager.getDefaultSharedPreferences(this) }
