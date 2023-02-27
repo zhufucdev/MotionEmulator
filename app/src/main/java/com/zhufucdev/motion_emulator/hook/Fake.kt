@@ -18,8 +18,7 @@ import com.zhufucdev.motion_emulator.*
 import com.zhufucdev.motion_emulator.data.*
 import kotlin.random.Random
 import kotlin.time.Duration
-import kotlin.time.ExperimentalTime
-import kotlin.time.seconds
+import kotlin.time.Duration.Companion.seconds
 
 fun Point.offsetFixed(): Point =
     with(if (coordinateSystem == CoordinateSystem.GCJ02) MapProjector else BypassProjector) { toIdeal() }.toPoint()
@@ -327,7 +326,6 @@ fun Motion.estimateSpeed(): Double? {
     return sum / count
 }
 
-@OptIn(ExperimentalTime::class)
 fun Motion.estimateTimespan(): Duration {
     if (moments.size < 2) return 0.seconds
     return (moments.last().elapsed - moments.first().elapsed * 1.0).seconds
