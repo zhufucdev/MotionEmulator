@@ -8,23 +8,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import androidx.annotation.RequiresApi
 import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.core.view.setMargins
 import androidx.core.view.updateLayoutParams
-import androidx.core.widget.TextViewCompat
 import androidx.fragment.app.Fragment
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.charts.BarLineChartBase
-import com.github.mikephil.charting.charts.Chart
 import com.github.mikephil.charting.charts.LineChart
-import com.github.mikephil.charting.components.Description
-import com.github.mikephil.charting.data.BarData
-import com.github.mikephil.charting.data.BarDataSet
-import com.github.mikephil.charting.data.BarEntry
-import com.github.mikephil.charting.data.Entry
-import com.github.mikephil.charting.data.LineData
-import com.github.mikephil.charting.data.LineDataSet
+import com.github.mikephil.charting.data.*
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.zhufucdev.motion_emulator.R
 import com.zhufucdev.motion_emulator.data.*
@@ -151,6 +142,7 @@ class RecordDataFragment : Fragment() {
                             title.text = getString(R.string.title_telephony_recording, it.elapsed.toString())
                         }
                         stylize()
+                        legend.isEnabled = false
                         description.text = getString(R.string.name_cell_signal)
                         setFitBars(true)
                         layout()
