@@ -21,9 +21,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
-import com.amap.api.services.core.PoiItemV2
-import com.amap.api.services.poisearch.PoiResultV2
-import com.amap.api.services.poisearch.PoiSearchV2
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils
 import com.google.android.material.snackbar.Snackbar
 import com.highcapable.yukihookapi.hook.log.loggerW
@@ -34,7 +31,6 @@ import com.zhufucdev.motion_emulator.data.Trace
 import com.zhufucdev.motion_emulator.data.Traces
 import com.zhufucdev.motion_emulator.databinding.ActivityTraceDrawingBinding
 import com.zhufucdev.motion_emulator.ui.map.*
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 
 class TraceDrawingActivity : AppCompatActivity() {
@@ -55,7 +51,7 @@ class TraceDrawingActivity : AppCompatActivity() {
 
         locationManager = getSystemService(LocationManager::class.java)
         Traces.require(this)
-        binding.mapUnified.provider = getProvider("map")
+        binding.mapUnified.provider = getProvider("map_provider")
 
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
