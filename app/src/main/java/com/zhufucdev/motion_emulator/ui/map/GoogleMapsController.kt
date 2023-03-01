@@ -155,6 +155,7 @@ class GoogleMapsController(private val context: Context, private val map: Google
             field = value
             when (value) {
                 MapStyle.NORMAL -> {
+                    map.setMapStyle(null)
                     map.mapType = GoogleMap.MAP_TYPE_NORMAL
                 }
                 MapStyle.NIGHT -> {
@@ -162,6 +163,7 @@ class GoogleMapsController(private val context: Context, private val map: Google
                     map.mapType = GoogleMap.MAP_TYPE_NORMAL
                 }
                 MapStyle.SATELLITE -> {
+                    map.setMapStyle(null)
                     map.mapType = GoogleMap.MAP_TYPE_SATELLITE
                 }
             }
