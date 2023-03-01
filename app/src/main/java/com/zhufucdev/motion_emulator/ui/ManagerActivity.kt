@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.lifecycle.ViewModelProvider
 import com.zhufucdev.motion_emulator.data.*
+import com.zhufucdev.motion_emulator.setUpStatusBar
 import com.zhufucdev.motion_emulator.ui.manager.*
 import com.zhufucdev.motion_emulator.ui.theme.MotionEmulatorTheme
 
@@ -15,6 +16,7 @@ class ManagerActivity : ComponentActivity() {
         Motions.require(this)
         Cells.require(this)
         Traces.require(this)
+        setUpStatusBar()
 
         setContent {
             MotionEmulatorTheme {

@@ -15,6 +15,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -39,6 +40,7 @@ import com.zhufucdev.motion_emulator.ui.theme.paddingCommon
 
 @Composable
 fun ManagerApp(navigateUp: () -> Unit) {
+    val appbarBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val navController = rememberNavController()
     val snackbarState = remember { SnackbarHostState() }
     val bottomSheetState = remember { BottomSheetModalState() }
@@ -47,8 +49,13 @@ fun ManagerApp(navigateUp: () -> Unit) {
 
     BottomSheetModal(state = bottomSheetState) {
         Scaffold(
-            modifier = Modifier.fillMaxSize(),
-            topBar = { AppBar(onBackPressed = { if (!navController.navigateUp()) navigateUp() }) },
+            modifier = Modifier.fillMaxSize().nestedScroll(appbarBehavior.nestedScrollConnection),
+            topBar = {
+                AppBar(
+                    onBackPressed = { if (!navController.navigateUp()) navigateUp() },
+                    scrollBehavior = appbarBehavior
+                )
+            },
             bottomBar = { AppNavigationBar(navController, screenProviders) },
             snackbarHost = { SnackbarHost(snackbarState) }
         ) {
@@ -76,7 +83,7 @@ fun ManagerApp(navigateUp: () -> Unit) {
 }
 
 @Composable
-private fun AppBar(onBackPressed: () -> Unit) {
+private fun AppBar(onBackPressed: () -> Unit, scrollBehavior: TopAppBarScrollBehavior) {
     TopAppBar(
         title = { Text(text = stringResource(R.string.title_manager)) },
         navigationIcon = {
@@ -86,7 +93,8 @@ private fun AppBar(onBackPressed: () -> Unit) {
                     contentDescription = stringResource(R.string.action_navigate_up)
                 )
             }
-        }
+        },
+        scrollBehavior = scrollBehavior
     )
 }
 
