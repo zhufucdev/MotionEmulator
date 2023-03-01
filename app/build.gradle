@@ -29,6 +29,13 @@ android {
         enabled = true
     }
 
+    splits {
+        abi {
+            enable = true
+            universalApk = true
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false
