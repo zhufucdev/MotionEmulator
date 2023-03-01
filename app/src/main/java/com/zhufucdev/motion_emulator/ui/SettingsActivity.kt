@@ -20,6 +20,7 @@ class SettingsActivity : AppCompatActivity(),
         super.onCreate(savedInstanceState)
         binding = ActivitySettingsBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        setSupportActionBar(binding.appBarToolbar)
         if (savedInstanceState == null) {
             supportFragmentManager
                 .beginTransaction()
@@ -30,11 +31,10 @@ class SettingsActivity : AppCompatActivity(),
         }
         supportFragmentManager.addOnBackStackChangedListener {
             if (supportFragmentManager.backStackEntryCount == 0) {
-                setTitle(R.string.title_activity_settings)
+                supportActionBar!!.setTitle(R.string.title_activity_settings)
             }
         }
 
-        setSupportActionBar(binding.appBarToolbar)
         binding.appBarToolbar.setNavigationOnClickListener {
             if (supportFragmentManager.backStackEntryCount > 0)
                 supportFragmentManager.popBackStack()
@@ -78,6 +78,16 @@ class SettingsActivity : AppCompatActivity(),
             .commit()
         title = pref.title
         return true
+    }
+
+    override fun setTitle(title: CharSequence?) {
+        supportActionBar?.title = title
+        super.setTitle(title)
+    }
+
+    override fun setTitle(titleId: Int) {
+        supportActionBar?.setTitle(titleId)
+        super.setTitle(titleId)
     }
 
     class HeaderFragment : PreferenceFragmentCompat() {

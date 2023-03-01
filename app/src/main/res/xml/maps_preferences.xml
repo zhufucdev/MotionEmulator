@@ -13,7 +13,7 @@
 
     <ListPreference
             app:key="poi_provider"
-            app:title="@string/settings_title_poi_provider"
+            app:title="@string/title_settings_poi_provider"
             app:icon="@drawable/ic_baseline_search_24"
             app:entries="@array/map_entries"
             app:entryValues="@array/map_values"
