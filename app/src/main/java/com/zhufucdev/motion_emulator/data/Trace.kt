@@ -63,10 +63,12 @@ data class Trace(
     val saltedPoints by lazy {
         if (salt != null) {
             val runtime = salt.runtime()
+            val projector =
+                if (coordinateSystem == CoordinateSystem.GCJ02) MapProjector else BypassProjector
             points.map {
                 runtime.apply(
                     point = it,
-                    projector = MapProjector,
+                    projector = projector,
                     parent = this
                 )
             }
