@@ -27,7 +27,7 @@ class EmulateStatusFragment : Fragment() {
     private lateinit var binding: FragmentEmulateStatusBinding
     private val listeners = mutableSetOf<ListenCallback>()
     private lateinit var emulation: Emulation
-    private val preferences by requireContext().lazySharedPreferences()
+    private val preferences by lazySharedPreferences()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.compose.ui.geometry.Offset
 import androidx.core.view.WindowCompat
+import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.preference.PreferenceManager
 import com.zhufucdev.motion_emulator.data.*
@@ -213,3 +214,5 @@ fun Activity.setUpStatusBar() {
 }
 
 fun Context.lazySharedPreferences() = lazy { PreferenceManager.getDefaultSharedPreferences(this) }
+
+fun Fragment.lazySharedPreferences() = lazy { PreferenceManager.getDefaultSharedPreferences(requireContext()) }

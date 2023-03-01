@@ -52,7 +52,7 @@ class ConfigurationFragment : Fragment(), MenuProvider {
             null
         }
     }
-    private val defaultPreferences by requireContext().lazySharedPreferences()
+    private val defaultPreferences by lazySharedPreferences()
     private val dateFormat by lazy { defaultPreferences.effectiveTimeFormat() }
 
     private var motion: Box<Motion> = EmptyBox()
