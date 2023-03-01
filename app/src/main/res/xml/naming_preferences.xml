@@ -1,12 +1,20 @@
 <PreferenceScreen
         xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <PreferenceCategory
+        app:title="@string/settings_caption_time_format">
+        <SwitchPreferenceCompat
+            app:icon="@drawable/baseline_more_time_24"
+            app:title="@string/settings_title_use_custom_time_format"
+            app:key="customize_time_format"
+            app:defaultValue="false"/>
 
-<!--    <SwitchPreferenceCompat-->
-<!--            app:key="attachment"-->
-<!--            app:title="@string/attachment_title"-->
-<!--            app:summaryOn="@string/attachment_summary_on"-->
-<!--            app:summaryOff="@string/attachment_summary_off"-->
-<!--            app:dependency="sync"/>-->
+        <EditTextPreference
+                app:title="@string/settings_title_time_format"
+                app:key="time_format"
+                app:enabled="false"
+                app:defaultValue="dd-MM-yyyy hh:mm:ss"
+                app:useSimpleSummaryProvider="true"/>
+    </PreferenceCategory>
 
 </PreferenceScreen>

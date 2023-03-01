@@ -1,6 +1,7 @@
 package com.zhufucdev.motion_emulator.data
 
 import java.io.OutputStream
+import java.text.DateFormat
 
 /**
  * Represents something that can be referred
@@ -8,6 +9,6 @@ import java.io.OutputStream
  */
 interface Data {
     val id: String
-    val displayName: String
+    fun getDisplayName(format: DateFormat): String
     fun writeTo(stream: OutputStream)
 }

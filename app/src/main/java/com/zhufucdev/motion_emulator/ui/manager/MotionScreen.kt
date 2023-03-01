@@ -8,13 +8,16 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils
 import com.zhufucdev.motion_emulator.R
 import com.zhufucdev.motion_emulator.data.Motion
+import com.zhufucdev.motion_emulator.effectiveTimeFormat
 import com.zhufucdev.motion_emulator.hook.estimateSpeed
 import com.zhufucdev.motion_emulator.hook.estimateTimespan
 import com.zhufucdev.motion_emulator.toFixed
@@ -25,9 +28,12 @@ import kotlin.time.DurationUnit
 
 @Composable
 fun MotionScreen(viewModel: EditorViewModel<Motion>) {
+    val context = LocalContext.current
+    val formatter = remember { context.effectiveTimeFormat() }
+
     DataList(viewModel) {
         Column(Modifier.padding(paddingCard)) {
-            Text(text = it.displayName, style = MaterialTheme.typography.titleMedium)
+            Text(text = it.getDisplayName(formatter), style = MaterialTheme.typography.titleMedium)
             Spacer(modifier = Modifier.height(paddingSmall))
             Text(
                 text = stringResource(

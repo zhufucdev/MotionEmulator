@@ -3,18 +3,20 @@ package com.zhufucdev.motion_emulator.ui.emulate
 import android.content.Context
 import android.os.Bundle
 import android.view.*
-import androidx.fragment.app.Fragment
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import androidx.core.os.bundleOf
 import androidx.core.view.MenuProvider
 import androidx.core.widget.doAfterTextChanged
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.findNavController
 import com.amap.api.maps.AMap
 import com.amap.api.maps.AMapUtils
-import com.amap.api.maps.CameraUpdateFactory
-import com.amap.api.maps.model.*
+import com.amap.api.maps.model.Marker
+import com.amap.api.maps.model.MarkerOptions
+import com.amap.api.maps.model.Polyline
+import com.amap.api.maps.model.PolylineOptions
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputEditText
@@ -51,6 +53,7 @@ class ConfigurationFragment : Fragment(), MenuProvider {
         }
     }
     private val defaultPreferences by requireContext().lazySharedPreferences()
+    private val dateFormat by lazy { defaultPreferences.effectiveTimeFormat() }
 
     private var motion: Box<Motion> = EmptyBox()
     private var trace: Trace? = null
@@ -136,7 +139,7 @@ class ConfigurationFragment : Fragment(), MenuProvider {
         val adapter = ArrayAdapter<String>(requireContext(), android.R.layout.simple_list_item_1)
         val motions = Motions.list()
         motions.forEach {
-            adapter.add(it.displayName)
+            adapter.add(it.getDisplayName(dateFormat))
         }
         adapter.addDefaults()
         binding.dropdownMotion.apply {
@@ -158,7 +161,7 @@ class ConfigurationFragment : Fragment(), MenuProvider {
                 }
                 val m = motions.firstOrNull { it.id == id }
                 if (m != null) {
-                    select(adapter, m.displayName)
+                    select(adapter, m.getDisplayName(dateFormat))
                     motion = m.box()
                 }
             } ?: apply {
@@ -171,7 +174,7 @@ class ConfigurationFragment : Fragment(), MenuProvider {
         val adapter = ArrayAdapter<String>(requireContext(), android.R.layout.simple_list_item_1)
         val timelines = Cells.list()
         timelines.forEach {
-            adapter.add(it.displayName)
+            adapter.add(it.getDisplayName(dateFormat))
         }
         adapter.addDefaults()
         binding.dropdownCells.apply {
@@ -193,7 +196,7 @@ class ConfigurationFragment : Fragment(), MenuProvider {
                 }
                 val timeline = timelines.firstOrNull { it.id == id }
                 if (timeline != null) {
-                    select(adapter, timeline.displayName)
+                    select(adapter, timeline.getDisplayName(dateFormat))
                     cells = timeline.box()
                 }
             } ?: apply {

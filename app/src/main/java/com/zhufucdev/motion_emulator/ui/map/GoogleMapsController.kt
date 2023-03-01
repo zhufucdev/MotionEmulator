@@ -2,7 +2,6 @@ package com.zhufucdev.motion_emulator.ui.map
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.view.animation.Animation
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.LocationSource
@@ -11,7 +10,6 @@ import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.android.gms.maps.model.Polyline
 import com.google.android.gms.maps.model.PolylineOptions
 import com.google.maps.android.SphericalUtil
-import com.google.maps.android.ktx.addCircle
 import com.google.maps.android.ktx.addPolyline
 import com.zhufucdev.motion_emulator.*
 import com.zhufucdev.motion_emulator.data.CoordinateSystem
@@ -99,7 +97,7 @@ class GoogleMapsController(private val context: Context, private val map: Google
                 val address = getAddressWithGoogle(target, context)
                 val name = address
                     ?.let { context.getString(R.string.text_near, it) }
-                    ?: dateString()
+                    ?: context.effectiveTimeFormat().dateString()
                 val result = DrawResult(name, p.map { it.toPoint() }, CoordinateSystem.WGS84)
                 completeListener?.invoke(result)
                 return result

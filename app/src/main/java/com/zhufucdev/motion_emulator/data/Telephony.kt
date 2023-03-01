@@ -20,6 +20,7 @@ import kotlinx.serialization.encoding.CompositeDecoder.Companion.DECODE_DONE
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.encodeToStream
 import java.io.OutputStream
+import java.text.DateFormat
 
 /**
  * A snapshot taken from [TelephonyManager]
@@ -39,8 +40,8 @@ data class CellTimeline(
     val time: Long,
     val moments: List<CellMoment>
 ) : Data {
-    override val displayName: String
-        get() = name.takeIf { !it.isNullOrEmpty() } ?: dateString(time)
+    override fun getDisplayName(format: DateFormat): String =
+        name.takeIf { !it.isNullOrEmpty() } ?: format.dateString(time)
 
     @OptIn(ExperimentalSerializationApi::class)
     override fun writeTo(stream: OutputStream) {

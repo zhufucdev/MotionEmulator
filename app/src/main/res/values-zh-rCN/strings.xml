@@ -146,4 +146,7 @@
     <string name="name_google_maps">谷歌地图</string>
     <string name="name_amap">高德地图</string>
     <string name="settings_title_poi_provider">兴趣点提供者</string>
+    <string name="settings_caption_time_format">时间格式</string>
+    <string name="settings_title_use_custom_time_format">使用自定义时间格式</string>
+    <string name="settings_title_time_format">时间格式</string>
 </resources>

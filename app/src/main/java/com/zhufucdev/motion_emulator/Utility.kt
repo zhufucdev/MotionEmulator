@@ -2,6 +2,7 @@ package com.zhufucdev.motion_emulator
 
 import android.app.Activity
 import android.content.Context
+import android.content.SharedPreferences
 import android.content.pm.ApplicationInfo
 import android.content.res.Configuration
 import android.content.res.Resources
@@ -26,10 +27,12 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import java.math.RoundingMode
+import java.text.DateFormat
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.math.*
+import kotlin.math.pow
+import kotlin.math.sqrt
 
 fun getAttrColor(@AttrRes id: Int, context: Context): Int {
     val typedValue = TypedValue()
@@ -76,8 +79,23 @@ fun Float.toFixed(n: Int): String {
     return df.format(this)
 }
 
-fun dateString(time: Long = System.currentTimeMillis()): String =
-    SimpleDateFormat.getDateTimeInstance().format(Date(time))
+fun DateFormat.dateString(time: Long = System.currentTimeMillis()): String =
+    format(Date(time))
+
+fun SharedPreferences.effectiveTimeFormat(): DateFormat {
+    val useCustom = getBoolean("customize_time_format", false)
+    return if (useCustom) {
+        val format = getString("time_format", "dd-MM-yyyy hh:mm:ss")
+        SimpleDateFormat(format, Locale.getDefault())
+    } else {
+        SimpleDateFormat.getDateTimeInstance()
+    }
+}
+
+fun Context.effectiveTimeFormat(): DateFormat {
+    val preferences by lazySharedPreferences()
+    return preferences.effectiveTimeFormat()
+}
 
 fun isDarkModeEnabled(resources: Resources) =
     resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES

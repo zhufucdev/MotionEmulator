@@ -96,7 +96,7 @@ class AMapController(private val map: AMap, val context: Context) : MapControlle
                 val address = getAddressWithAmap(target)
                 val name = address
                     ?.let { context.getString(R.string.text_near, it) }
-                    ?: dateString()
+                    ?: context.effectiveTimeFormat().dateString()
                 val result = DrawResult(name, p.map { it.toPoint() }, CoordinateSystem.GCJ02)
                 completeListener?.invoke(result)
                 return result

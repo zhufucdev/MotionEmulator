@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
-
 package com.zhufucdev.motion_emulator.ui.home
 
 import androidx.compose.foundation.layout.*
@@ -97,6 +95,7 @@ fun AppHome(activatedState: State<Boolean>, onClick: (AppHomeDestination) -> Uni
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeCard(
     onClick: () -> Unit,

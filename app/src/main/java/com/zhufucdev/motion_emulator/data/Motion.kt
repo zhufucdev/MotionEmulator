@@ -8,6 +8,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.encodeToStream
 import kotlinx.serialization.serializer
 import java.io.OutputStream
+import java.text.DateFormat
 
 /**
  * Basic motion record unit
@@ -33,8 +34,8 @@ data class Motion(
     val moments: List<MotionMoment>,
     val sensorsInvolved: List<Int>
 ) : Data {
-    override val displayName: String
-        get() = name.takeIf { !it.isNullOrEmpty() } ?: dateString(time)
+    override fun getDisplayName(format: DateFormat): String =
+        name.takeIf { !it.isNullOrEmpty() } ?: format.dateString(time)
 
     @OptIn(ExperimentalSerializationApi::class)
     override fun writeTo(stream: OutputStream) {

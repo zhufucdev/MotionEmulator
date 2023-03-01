@@ -25,6 +25,7 @@ import com.zhufucdev.motion_emulator.R
 import com.zhufucdev.motion_emulator.ui.component.Expandable
 import com.zhufucdev.motion_emulator.data.Data
 import com.zhufucdev.motion_emulator.dateString
+import com.zhufucdev.motion_emulator.effectiveTimeFormat
 import com.zhufucdev.motion_emulator.ui.theme.paddingCommon
 import com.zhufucdev.motion_emulator.ui.theme.paddingSmall
 import kotlinx.coroutines.Dispatchers
@@ -46,6 +47,7 @@ fun OverviewScreen(viewModel: ManagerViewModel) {
     val context = LocalContext.current
     var operation by remember { mutableStateOf(ExportType.File) }
     var lastArgs by remember { mutableStateOf(mapOf<Data, String>()) }
+    val formatter = remember { context.effectiveTimeFormat() }
 
     val fileCreateHintLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
@@ -85,7 +87,7 @@ fun OverviewScreen(viewModel: ManagerViewModel) {
                             type = "application/gzip"
                             putExtra(
                                 Intent.EXTRA_TITLE,
-                                "${context.getString(R.string.title_exported, dateString())}.tar.gz"
+                                "${context.getString(R.string.title_exported, formatter.dateString())}.tar.gz"
                             )
                         }
                     )
@@ -169,6 +171,8 @@ private enum class ExportType {
 @Composable
 private fun SheetContent(onClick: (Map<Data, String>) -> Unit) {
     val providers = LocalScreenProviders.current.value
+    val context = LocalContext.current
+    val formatter = remember { context.effectiveTimeFormat() }
     val items = remember {
         mutableMapOf<Data, String>().apply {
             providers.forEach {
@@ -209,7 +213,7 @@ private fun SheetContent(onClick: (Map<Data, String>) -> Unit) {
                                 vm.data.forEachIndexed { index, data ->
                                     var selected by remember { mutableStateOf(true) }
                                     SelectableItem(
-                                        title = data.displayName,
+                                        title = data.getDisplayName(formatter),
                                         subtitle = data.id,
                                         selected = selected,
                                         onSelectedChanged = { s ->
@@ -333,7 +337,7 @@ private suspend fun writeInto(stream: OutputStream, context: Context, items: Map
 private suspend fun getUri(context: Context, items: Map<Data, String>): Uri {
     val sharedDir = exportedDir(context)
     if (!sharedDir.exists()) sharedDir.mkdir()
-    val file = File(sharedDir, "${context.getString(R.string.title_exported, dateString())}.tar.gz")
+    val file = File(sharedDir, "${context.getString(R.string.title_exported, context.effectiveTimeFormat())}.tar.gz")
 
     val fileOut = file.outputStream()
     writeInto(fileOut, context, items)

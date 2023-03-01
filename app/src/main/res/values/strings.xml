@@ -149,8 +149,11 @@
     <string name="title_activity_settings">Settings</string>
     <string name="title_settings_map">Maps</string>
     <string name="title_settings_naming">Naming</string>
-    <string name="title_settings_map_provider">Map Provider</string>
+    <string name="title_settings_map_provider">Map provider</string>
     <string name="name_google_maps">Google Maps</string>
     <string name="name_amap">AMap</string>
     <string name="settings_title_poi_provider">POI Provider</string>
+    <string name="settings_caption_time_format">TIME FORMAT</string>
+    <string name="settings_title_use_custom_time_format">Use custom time format</string>
+    <string name="settings_title_time_format">Time format</string>
 </resources>

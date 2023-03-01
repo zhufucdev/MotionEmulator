@@ -15,5 +15,10 @@
 
     <style name="Theme.MotionEmulator.Preference" parent="Theme.MotionEmulator">
         <item name="android:tint">?attr/colorOnSurface</item>
+        <item name="switchPreferenceCompatStyle">@style/Preference.MotionEmulator.SwitchPreferenceCompat</item>
+    </style>
+
+    <style name="Preference.MotionEmulator.SwitchPreferenceCompat" parent="Preference.SwitchPreferenceCompat.Material">
+        <item name="android:widgetLayout">@layout/item_m3_switch</item>
     </style>
 </resources>

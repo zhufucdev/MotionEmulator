@@ -15,6 +15,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.encodeToStream
 import kotlinx.serialization.serializer
 import java.io.OutputStream
+import java.text.DateFormat
 
 /**
  * A location on the Earth. Get it?
@@ -74,7 +75,7 @@ data class Trace(
         }
     }
 
-    override val displayName: String get() = name
+    override fun getDisplayName(format: DateFormat): String = name
 
     @OptIn(ExperimentalSerializationApi::class)
     override fun writeTo(stream: OutputStream) {

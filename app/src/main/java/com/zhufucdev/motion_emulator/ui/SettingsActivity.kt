@@ -3,14 +3,12 @@ package com.zhufucdev.motion_emulator.ui
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentTransaction.TRANSIT_FRAGMENT_FADE
-import androidx.navigation.NavController
-import androidx.navigation.findNavController
+import androidx.preference.EditTextPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
-import com.google.android.material.appbar.MaterialToolbar
+import androidx.preference.SwitchPreferenceCompat
 import com.zhufucdev.motion_emulator.R
 import com.zhufucdev.motion_emulator.databinding.ActivitySettingsBinding
-import com.zhufucdev.motion_emulator.initializeToolbar
 
 private const val TITLE_TAG = "settingsActivityTitle"
 
@@ -97,6 +95,17 @@ class SettingsActivity : AppCompatActivity(),
     class NamingFragment : PreferenceFragmentCompat() {
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.naming_preferences, rootKey)
+            init()
+        }
+
+        private fun init() {
+            val customTimeFormatSwitch = findPreference<SwitchPreferenceCompat>("customize_time_format")!!
+            val timeFormat = findPreference<EditTextPreference>("time_format")!!
+            timeFormat.isEnabled = customTimeFormatSwitch.isChecked
+            customTimeFormatSwitch.setOnPreferenceChangeListener { _, use ->
+                timeFormat.isEnabled = use as Boolean
+                true
+            }
         }
     }
 }
