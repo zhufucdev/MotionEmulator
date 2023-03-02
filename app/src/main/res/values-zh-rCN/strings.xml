@@ -149,4 +149,5 @@
     <string name="caption_settings_time_format">时间格式</string>
     <string name="title_settings_use_custom_time_format">使用自定义时间格式</string>
     <string name="settings_title_time_format">时间格式</string>
+    <string name="name_coord_sys">坐标系统</string>
 </resources>

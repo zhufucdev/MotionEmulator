@@ -33,6 +33,7 @@ import androidx.compose.ui.text.*
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.toSize
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils
 import com.zhufucdev.motion_emulator.R
@@ -55,6 +56,7 @@ import kotlin.time.Duration.Companion.seconds
 @Composable
 fun TraceEditor(target: Trace, viewModel: EditorViewModel<Trace>) {
     var rename by remember { mutableStateOf(target.name) }
+    var coordSys by remember { mutableStateOf(target.coordinateSystem) }
     var formulaToken by remember { mutableStateOf(0L) }
     val lifecycleCoroutine = remember { CoroutineScope(Dispatchers.Main) }
     val context = LocalContext.current
@@ -86,7 +88,8 @@ fun TraceEditor(target: Trace, viewModel: EditorViewModel<Trace>) {
                     salt.copy(
                         factors = factors.map { it.immutable() },
                         elements = formulas.map { it.immutable() }
-                    )
+                    ),
+                coordinateSystem = coordSys
             )
         )
     }
@@ -119,8 +122,55 @@ fun TraceEditor(target: Trace, viewModel: EditorViewModel<Trace>) {
                 rename = it
                 viewModel.onModify(target.copy(name = rename))
             },
-            icon = { Icon(painterResource(R.drawable.ic_baseline_map_24), contentDescription = null) }
+            icon = { Icon(painterResource(R.drawable.ic_baseline_map_24), contentDescription = null) },
+            bottomMargin = paddingCommon
         )
+
+        item {
+            var expanded by remember { mutableStateOf(false) }
+            var textfieldWidth by remember { mutableStateOf(0) }
+            ExposedDropdownMenuBox(
+                expanded = expanded,
+                onExpandedChange = { expanded = !expanded },
+            ) {
+                TextField(
+                    value = coordSys.name,
+                    label = { Text(stringResource(R.string.name_coord_sys)) },
+                    readOnly = true,
+                    onValueChange = {},
+                    leadingIcon = { Icon(painterResource(R.drawable.ic_baseline_satellite_alt_24), null) },
+                    trailingIcon = {
+                        ExposedDropdownMenuDefaults.TrailingIcon(expanded)
+                    },
+                    colors = ExposedDropdownMenuDefaults.textFieldColors(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .menuAnchor()
+                        .onGloballyPositioned {
+                            textfieldWidth = it.size.width
+                        }
+                )
+                ExposedDropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false },
+                    modifier = Modifier.width(
+                        with(LocalDensity.current) { textfieldWidth.toDp() }
+                    )
+                ) {
+                    CoordinateSystem.values().forEach {
+                        DropdownMenuItem(
+                            text = { Text(it.name) },
+                            onClick = {
+                                expanded = false
+                                coordSys = it
+                            }
+                        )
+                    }
+                }
+            }
+
+            VerticalSpacer(paddingCommon * 2)
+        }
 
         item {
             CaptionText(text = stringResource(R.string.caption_salt))

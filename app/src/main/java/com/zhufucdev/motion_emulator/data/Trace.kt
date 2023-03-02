@@ -119,7 +119,7 @@ class TraceSerializer : KSerializer<Trace> {
     override fun deserialize(decoder: Decoder): Trace = decoder.decodeStructure(descriptor) {
         var name = ""
         var id = ""
-        var coordinateSystem = CoordinateSystem.WGS84
+        var coordinateSystem = CoordinateSystem.GCJ02
         var points: List<Point> = emptyList()
         var salt: Salt2dData? = null
         loop@ while (true) {
