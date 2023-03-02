@@ -38,6 +38,14 @@ mathematics expression involving `x` as you like
 
 Note: knowledge of linear algebra may be needed
 
+### For users whose targeting location is in China mainland
+
+Due to mapping restrictions, ensure that **coordinate system**
+of the pending trace in Manage -> Trace page is set to **GCJ02**
+
+If you are curious, go ahead to
+[Restrictions on geographic data in China](https://en.wikipedia.org/wiki/Restrictions_on_geographic_data_in_China)
+
 ## Build Instructions
 
 Build and maintain this project with Android Studio

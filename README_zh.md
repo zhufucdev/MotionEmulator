@@ -32,6 +32,14 @@
 
 便条：可能需要一点线性代数的知识
 
+### 对于目标位置在中国大陆的用户
+
+由于地图测绘的限制，请在使用一个路径前，先去
+管理 -> 路径 页面将该路径的**坐标系统**改为**GCJ02**
+
+好奇的话，参阅
+[Restrictions on geographic data in China](https://en.wikipedia.org/wiki/Restrictions_on_geographic_data_in_China)
+
 ## 构建指南
 
 如果你是开发者，请使用Android Studio或Jetbrains IDEA构建和维护这个项目
