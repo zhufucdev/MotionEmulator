@@ -70,6 +70,9 @@ class UnifiedMapFragment : FrameLayout {
     private var onReady: ((MapController) -> Unit)? = null
     fun setReadyListener(l: (MapController) -> Unit) {
         onReady = l
+        if (controller != null) {
+            l(controller!!)
+        }
     }
 
     private fun initializeAs(provider: Provider) {
@@ -109,8 +112,8 @@ class AMapFragment : Fragment() {
     private lateinit var map: MapView
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         map = MapView(container?.context)
-        getter?.invoke(map.map)
         map.onCreate(savedInstanceState)
+        getter?.invoke(map.map)
         return map
     }
 

@@ -11,19 +11,12 @@ import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.findNavController
-import com.amap.api.maps.AMap
-import com.amap.api.maps.AMapUtils
-import com.amap.api.maps.model.Marker
-import com.amap.api.maps.model.MarkerOptions
-import com.amap.api.maps.model.Polyline
-import com.amap.api.maps.model.PolylineOptions
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputEditText
 import com.zhufucdev.motion_emulator.*
 import com.zhufucdev.motion_emulator.data.*
 import com.zhufucdev.motion_emulator.databinding.FragmentConfigurationBinding
-import com.zhufucdev.motion_emulator.hook.center
 import com.zhufucdev.motion_emulator.hook_frontend.Emulation
 import com.zhufucdev.motion_emulator.hook_frontend.EmulationRef
 import com.zhufucdev.motion_emulator.hook_frontend.Scheduler
@@ -229,7 +222,6 @@ class ConfigurationFragment : Fragment(), MenuProvider {
             setAdapter(adapter)
 
             defaultConfig?.trace?.let { id ->
-
                 val trace = traces.firstOrNull { it.id == id }
                 if (trace != null) {
                     select(adapter, trace.name)
@@ -342,30 +334,6 @@ class ConfigurationFragment : Fragment(), MenuProvider {
     private fun disable() {
         btnRun.hide()
         inputWrappers.forEach { it.isEnabled = false }
-    }
-
-    private fun Trace.drawOnMap(amap: AMap): Pair<Polyline, Marker> {
-        val polyline = PolylineOptions()
-        polyline.color(requireContext().getColor(R.color.purple_500))
-
-        var length = 0.0
-        points.forEachIndexed { i, point ->
-            polyline.add(point.toAmapLatLng())
-            if (i > 0) {
-                length += AMapUtils.calculateLineDistance(
-                    point.toAmapLatLng(),
-                    points[i - 1].toAmapLatLng()
-                )
-            }
-        }
-        val center = center(MapProjector)
-        val marker = amap.addMarker(
-            MarkerOptions()
-                .position(center.toAmapLatLng())
-                .draggable(false)
-        )
-        val polylineInstance = amap.addPolyline(polyline)
-        return polylineInstance to marker
     }
 
     override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
