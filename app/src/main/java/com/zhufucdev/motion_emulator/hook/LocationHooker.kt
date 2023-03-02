@@ -311,6 +311,10 @@ object LocationHooker : YukiBaseHooker() {
                         returnType = BooleanType
                     }
                     replaceAny {
+                        if (Scheduler.satellites <= 0) {
+                            return@replaceAny callOriginal()
+                        }
+
                         val callback = args(1).cast<GnssStatus.Callback>()
                         callback?.onStarted()
                         callback?.onFirstFix(1000 + Random.nextInt(-500, 500))
