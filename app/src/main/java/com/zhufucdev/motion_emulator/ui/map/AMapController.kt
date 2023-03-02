@@ -113,7 +113,7 @@ class AMapController(private val map: AMap, val context: Context) : MapControlle
 
     override fun drawTrace(trace: Trace): MapTraceCallback {
         val options = PolylineOptions()
-        options.addAll(trace.points.map { it.toAmapLatLng() })
+        options.addAll(trace.points.map { it.toAmapLatLng() }.plus(trace.points[0].toAmapLatLng())) // closed shape
         options.color(lineColor)
         val line = map.addPolyline(options)
 

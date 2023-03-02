@@ -7,17 +7,18 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.ui.text.toUpperCase
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
-import com.highcapable.yukihookapi.hook.log.loggerD
-import com.zhufucdev.motion_emulator.*
+import com.zhufucdev.motion_emulator.R
 import com.zhufucdev.motion_emulator.data.Traces
 import com.zhufucdev.motion_emulator.databinding.FragmentEmulateStatusBinding
 import com.zhufucdev.motion_emulator.hook_frontend.*
+import com.zhufucdev.motion_emulator.lazySharedPreferences
+import com.zhufucdev.motion_emulator.skipAmapFuckingLicense
+import com.zhufucdev.motion_emulator.toFixed
 import com.zhufucdev.motion_emulator.ui.map.MapController
 import com.zhufucdev.motion_emulator.ui.map.TraceBounds
 import com.zhufucdev.motion_emulator.ui.map.UnifiedMapFragment
@@ -42,22 +43,21 @@ class EmulateStatusFragment : Fragment() {
         binding = FragmentEmulateStatusBinding.inflate(layoutInflater, container, false)
         binding.mapMotionPreview.provider =
             UnifiedMapFragment.Provider.valueOf(preferences.getString("map_provider", "gcp_maps")!!.uppercase())
-        binding.mapMotionPreview.setReadyListener {
-            initializeMap(it)
-        }
         return binding.root
     }
 
     override fun onStart() {
         super.onStart()
         initializeMonitors()
+        binding.mapMotionPreview.setReadyListener {
+            initializeMap(it)
+        }
     }
 
     private fun initializeMap(controller: MapController) {
         addIntermediateListener {
             activity?.runOnUiThread {
                 controller.updateLocationIndicator(it.location)
-                loggerD(tag = "intermediate", msg = it.location.toString())
             }
         }
 
