@@ -13,7 +13,6 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.zhufucdev.motion_emulator.R
 import com.zhufucdev.motion_emulator.ui.*
 import com.zhufucdev.motion_emulator.ui.theme.*
@@ -171,11 +170,11 @@ fun HomePreview() {
     }
 }
 
-enum class AppHomeDestination(val activity: Class<*>) {
+enum class AppHomeDestination(val activity: Class<*>, val mapping: Boolean = false) {
     AppStrategy(AppStrategyActivity::class.java),
     Record(RecordActivity::class.java),
-    Trace(TraceDrawingActivity::class.java),
-    Emulation(EmulateActivity::class.java),
+    Trace(TraceDrawingActivity::class.java, true),
+    Emulation(EmulateActivity::class.java, true),
     Management(ManagerActivity::class.java),
     Settings(SettingsActivity::class.java)
 }

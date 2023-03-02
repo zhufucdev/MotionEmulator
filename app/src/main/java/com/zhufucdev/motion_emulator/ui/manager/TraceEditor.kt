@@ -33,20 +33,19 @@ import androidx.compose.ui.text.*
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.toSize
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils
 import com.zhufucdev.motion_emulator.R
-import com.zhufucdev.motion_emulator.ui.component.Expandable
-import com.zhufucdev.motion_emulator.ui.component.Swipeable
-import com.zhufucdev.motion_emulator.ui.component.dragDroppable
 import com.zhufucdev.motion_emulator.data.*
-import com.zhufucdev.motion_emulator.data.Trace
 import com.zhufucdev.motion_emulator.insert
 import com.zhufucdev.motion_emulator.toOffset
 import com.zhufucdev.motion_emulator.toVector2d
 import com.zhufucdev.motion_emulator.ui.CaptionText
 import com.zhufucdev.motion_emulator.ui.VerticalSpacer
+import com.zhufucdev.motion_emulator.ui.component.Appendix
+import com.zhufucdev.motion_emulator.ui.component.Expandable
+import com.zhufucdev.motion_emulator.ui.component.Swipeable
+import com.zhufucdev.motion_emulator.ui.component.dragDroppable
 import com.zhufucdev.motion_emulator.ui.theme.*
 import kotlinx.coroutines.*
 import kotlin.math.*
@@ -268,26 +267,12 @@ fun TraceEditor(target: Trace, viewModel: EditorViewModel<Trace>) {
 
         item {
             VerticalSpacer()
-            Column(Modifier.fillParentMaxWidth().padding(paddingLarge)) {
-                val color = MaterialTheme.colorScheme.onSurfaceVariant
-                Icon(
-                    painter = painterResource(R.drawable.outline_info_24),
-                    contentDescription = stringResource(R.string.caption_adding_salt),
-                    tint = color
-                )
-                VerticalSpacer(paddingCommon)
-                Text(
-                    text = stringResource(R.string.text_salt_common),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = color
-                )
-                VerticalSpacer()
-                Text(
-                    text = stringResource(R.string.text_salt_trace),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = color
-                )
-            }
+            Appendix(
+                { Text(stringResource(R.string.text_salt_common)) },
+                { Text(stringResource(R.string.text_salt_trace)) },
+                iconDescription = stringResource(R.string.caption_adding_salt),
+                modifier = Modifier.fillParentMaxWidth().padding(paddingLarge)
+            )
         }
     }
 }

@@ -150,4 +150,11 @@
     <string name="title_settings_use_custom_time_format">使用自定义时间格式</string>
     <string name="settings_title_time_format">时间格式</string>
     <string name="name_coord_sys">坐标系统</string>
+    <string name="title_activity_map_pending">等待地图</string>
+    <string name="title_is_gcs_accessible">该设备能访问谷歌地图服务吗？</string>
+    <string name="text_gcs_inaccessible">使用高德地图，范围局限于中国大陆</string>
+    <string name="title_gcs_accessible">可以访问</string>
+    <string name="title_gcs_inaccessible">不能访问</string>
+    <string name="text_gcs_accessible">将使用谷歌提供的地图</string>
+    <string name="text_pending_map_provider">你可以稍后修改这些选项</string>
 </resources>

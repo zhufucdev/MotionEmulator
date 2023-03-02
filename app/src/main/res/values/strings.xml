@@ -157,4 +157,11 @@
     <string name="title_settings_use_custom_time_format">Use custom time format</string>
     <string name="settings_title_time_format">Time format</string>
     <string name="name_coord_sys">Coordinate System</string>
+    <string name="title_activity_map_pending">Pending Map</string>
+    <string name="title_is_gcs_accessible">Does this device have access to Google services?</string>
+    <string name="title_gcs_accessible">Yes it does</string>
+    <string name="title_gcs_inaccessible">No it doesn\'t</string>
+    <string name="text_gcs_accessible">Will use Google Maps as the map provider</string>
+    <string name="text_gcs_inaccessible">Use AMap as the provider, whose scope is limited to China mainland</string>
+    <string name="text_pending_map_provider">You can change these settings later</string>
 </resources>

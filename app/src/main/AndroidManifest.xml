@@ -26,6 +26,7 @@
             android:supportsRtl="true"
             android:theme="@style/Theme.MotionEmulator"
             tools:targetApi="33">
+
         <receiver
                 android:name=".hook_frontend.EmulationMonitorReceiver"
                 android:enabled="true"
@@ -36,10 +37,15 @@
         </receiver>
 
         <activity
+                android:name=".ui.MapPendingActivity"
+                android:exported="false"
+                android:label="@string/title_activity_map_pending"
+                android:theme="@style/Theme.MotionEmulator"/>
+        <activity
                 android:name=".ui.SettingsActivity"
                 android:exported="false"
-                android:theme="@style/Theme.MotionEmulator.Preference"
-                android:label="@string/title_activity_settings"/>
+                android:label="@string/title_activity_settings"
+                android:theme="@style/Theme.MotionEmulator.Preference"/>
         <activity
                 android:name=".ui.AppStrategyActivity"
                 android:exported="false"
