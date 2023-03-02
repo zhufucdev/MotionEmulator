@@ -121,7 +121,7 @@ class SettingsActivity : AppCompatActivity(),
     }
 }
 
-class PreferenceM3DialogFragment : ListPreferenceDialogFragmentCompat() {
+class ListPreferenceM3DialogFragment : ListPreferenceDialogFragmentCompat() {
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val builder = MaterialAlertDialogBuilder(requireContext())
             .setTitle(preference.dialogTitle)
@@ -139,7 +139,37 @@ class PreferenceM3DialogFragment : ListPreferenceDialogFragmentCompat() {
 
     companion object {
         fun show(instance: ListPreference, parent: Fragment) {
-            val dialog = PreferenceM3DialogFragment()
+            val dialog = ListPreferenceM3DialogFragment()
+            dialog.apply {
+                arguments = bundleOf("key" to instance.key)
+                setTargetFragment(parent, 0)
+            }
+
+            dialog.show(parent.parentFragmentManager, "androidx.preference.PreferenceFragment.DIALOG")
+        }
+    }
+}
+
+class EditTextPreferenceM3DialogFragment : EditTextPreferenceDialogFragmentCompat() {
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        val builder = MaterialAlertDialogBuilder(requireContext())
+            .setTitle(preference.dialogTitle)
+            .setPositiveButton(preference.positiveButtonText, this)
+            .setNegativeButton(preference.negativeButtonText, this)
+        val content = context?.let { onCreateDialogView(it) }
+        if (content == null) {
+            builder.setMessage(preference.dialogMessage)
+        } else {
+            onBindDialogView(content)
+            builder.setView(content)
+        }
+        onPrepareDialogBuilder(builder)
+        return builder.create()
+    }
+
+    companion object {
+        fun show(instance: EditTextPreference, parent: Fragment) {
+            val dialog = EditTextPreferenceM3DialogFragment()
             dialog.apply {
                 arguments = bundleOf("key" to instance.key)
                 setTargetFragment(parent, 0)
@@ -152,10 +182,18 @@ class PreferenceM3DialogFragment : ListPreferenceDialogFragmentCompat() {
 
 abstract class M3PreferenceFragment : PreferenceFragmentCompat() {
     override fun onDisplayPreferenceDialog(preference: Preference) {
-        if (preference is ListPreference) {
-            PreferenceM3DialogFragment.show(preference, this)
-        } else {
-            super.onDisplayPreferenceDialog(preference)
+        when (preference) {
+            is ListPreference -> {
+                ListPreferenceM3DialogFragment.show(preference, this)
+            }
+
+            is EditTextPreference -> {
+                EditTextPreferenceM3DialogFragment.show(preference, this)
+            }
+
+            else -> {
+                super.onDisplayPreferenceDialog(preference)
+            }
         }
     }
 }
