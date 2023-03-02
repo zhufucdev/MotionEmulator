@@ -37,6 +37,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils
 import com.zhufucdev.motion_emulator.R
 import com.zhufucdev.motion_emulator.data.*
+import com.zhufucdev.motion_emulator.data.Trace
 import com.zhufucdev.motion_emulator.insert
 import com.zhufucdev.motion_emulator.toOffset
 import com.zhufucdev.motion_emulator.toVector2d

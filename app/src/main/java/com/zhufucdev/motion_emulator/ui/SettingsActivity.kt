@@ -1,12 +1,13 @@
 package com.zhufucdev.motion_emulator.ui
 
+import android.app.Dialog
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.os.bundleOf
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction.TRANSIT_FRAGMENT_FADE
-import androidx.preference.EditTextPreference
-import androidx.preference.Preference
-import androidx.preference.PreferenceFragmentCompat
-import androidx.preference.SwitchPreferenceCompat
+import androidx.preference.*
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.zhufucdev.motion_emulator.R
 import com.zhufucdev.motion_emulator.databinding.ActivitySettingsBinding
 
@@ -90,19 +91,19 @@ class SettingsActivity : AppCompatActivity(),
         super.setTitle(titleId)
     }
 
-    class HeaderFragment : PreferenceFragmentCompat() {
+    class HeaderFragment : M3PreferenceFragment() {
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.header_preferences, rootKey)
         }
     }
 
-    class MapsFragment : PreferenceFragmentCompat() {
+    class MapsFragment : M3PreferenceFragment() {
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.maps_preferences, rootKey)
         }
     }
 
-    class NamingFragment : PreferenceFragmentCompat() {
+    class NamingFragment : M3PreferenceFragment() {
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.naming_preferences, rootKey)
             init()
@@ -116,6 +117,45 @@ class SettingsActivity : AppCompatActivity(),
                 timeFormat.isEnabled = use as Boolean
                 true
             }
+        }
+    }
+}
+
+class PreferenceM3DialogFragment : ListPreferenceDialogFragmentCompat() {
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        val builder = MaterialAlertDialogBuilder(requireContext())
+            .setTitle(preference.dialogTitle)
+            .setNegativeButton(preference.negativeButtonText, this)
+        val content = context?.let { onCreateDialogView(it) }
+        if (content == null) {
+            builder.setMessage(preference.dialogMessage)
+        } else {
+            onBindDialogView(content)
+            builder.setView(content)
+        }
+        onPrepareDialogBuilder(builder)
+        return builder.create()
+    }
+
+    companion object {
+        fun show(instance: ListPreference, parent: Fragment) {
+            val dialog = PreferenceM3DialogFragment()
+            dialog.apply {
+                arguments = bundleOf("key" to instance.key)
+                setTargetFragment(parent, 0)
+            }
+
+            dialog.show(parent.parentFragmentManager, "androidx.preference.PreferenceFragment.DIALOG")
+        }
+    }
+}
+
+abstract class M3PreferenceFragment : PreferenceFragmentCompat() {
+    override fun onDisplayPreferenceDialog(preference: Preference) {
+        if (preference is ListPreference) {
+            PreferenceM3DialogFragment.show(preference, this)
+        } else {
+            super.onDisplayPreferenceDialog(preference)
         }
     }
 }
