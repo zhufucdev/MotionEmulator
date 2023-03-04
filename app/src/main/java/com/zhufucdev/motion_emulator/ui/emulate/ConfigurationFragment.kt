@@ -10,6 +10,7 @@ import androidx.core.view.MenuProvider
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.snackbar.Snackbar
@@ -24,6 +25,7 @@ import com.zhufucdev.motion_emulator.ui.map.MapDisplayType
 import com.zhufucdev.motion_emulator.ui.map.MapTraceCallback
 import com.zhufucdev.motion_emulator.ui.map.TraceBounds
 import com.zhufucdev.motion_emulator.ui.map.UnifiedMapFragment
+import kotlinx.coroutines.launch
 import kotlinx.serialization.serializer
 import net.edwardday.serialization.preferences.Preferences
 
@@ -77,19 +79,16 @@ class ConfigurationFragment : Fragment(), MenuProvider {
         binding.mapTracePreview.provider =
             UnifiedMapFragment.Provider.valueOf(defaultPreferences.getString("map_provider", "gcp_maps")!!.uppercase())
         btnRun = binding.btnRunEmulation
-    }
 
-    override fun onStart() {
-        super.onStart()
+        lifecycleScope.launch {
+            initTracesDropdown()
+            binding.mapTracePreview.requireController().displayType = MapDisplayType.STILL
+        }
 
         initMotionDropdown()
         initCellsDropdown()
-        binding.mapTracePreview.setReadyListener {
-            initTracesDropdown()
-            it.displayType = MapDisplayType.STILL
-        }
         initializeOthers()
-        notifyConfig()
+        notifyContinue()
     }
 
     private fun emulation(): Emulation? {
@@ -144,7 +143,7 @@ class ConfigurationFragment : Fragment(), MenuProvider {
                 } else {
                     BlockBox()
                 }
-                notifyConfig()
+                notifyContinue()
             }
             setAdapter(adapter)
 
@@ -179,7 +178,7 @@ class ConfigurationFragment : Fragment(), MenuProvider {
                 } else {
                     BlockBox()
                 }
-                notifyConfig()
+                notifyContinue()
             }
             setAdapter(adapter)
 
@@ -198,9 +197,9 @@ class ConfigurationFragment : Fragment(), MenuProvider {
         }
     }
 
-    private fun selectTrace(trace: Trace) {
+    private suspend fun selectTrace(trace: Trace) {
         this.trace = trace
-        notifyConfig()
+        notifyContinue()
 
         val controller = binding.mapTracePreview.requireController()
 
@@ -209,7 +208,7 @@ class ConfigurationFragment : Fragment(), MenuProvider {
         controller.boundCamera(TraceBounds(trace), true)
     }
 
-    private fun initTracesDropdown() {
+    private suspend fun initTracesDropdown() {
         val adapter = ArrayAdapter<String>(requireContext(), android.R.layout.simple_list_item_1)
         val traces = Traces.list()
         traces.forEach {
@@ -217,7 +216,9 @@ class ConfigurationFragment : Fragment(), MenuProvider {
         }
         binding.dropdownTrace.apply {
             setOnItemClickListener { _, _, position, _ ->
-                selectTrace(traces[position])
+                lifecycleScope.launch {
+                    selectTrace(traces[position])
+                }
             }
             setAdapter(adapter)
 
@@ -255,7 +256,7 @@ class ConfigurationFragment : Fragment(), MenuProvider {
                 || !binding.inputSatellite.error.isNullOrBlank()
                 || trace == null
 
-    private fun notifyConfig() {
+    private fun notifyContinue() {
         if (notContinue) {
             btnRun.hide()
             btnDefault?.isEnabled = false
@@ -274,7 +275,7 @@ class ConfigurationFragment : Fragment(), MenuProvider {
             binding.inputSatellite.setText(satelliteCount.toString())
             this@ConfigurationFragment.satelliteCount = satelliteCount
 
-            notifyConfig()
+            notifyContinue()
         }
 
         binding.inputVelocity.doAfterTextChanged {
@@ -287,7 +288,7 @@ class ConfigurationFragment : Fragment(), MenuProvider {
                 if (velocity == null) getString(R.string.text_field_must_not_empty)
                 else if (velocity!! <= 0) getString(R.string.text_field_must_not_neg_or_zero)
                 else null
-            notifyConfig()
+            notifyContinue()
         }
 
         fun setError(input: TextInputEditText, value: Int?, filterNegative: Boolean) {
@@ -295,7 +296,7 @@ class ConfigurationFragment : Fragment(), MenuProvider {
                 if (value == null) getString(R.string.text_field_must_not_empty)
                 else if (filterNegative && value <= 0) getString(R.string.text_field_must_not_neg_or_zero)
                 else null
-            notifyConfig()
+            notifyContinue()
         }
         binding.inputRepeatCount.doAfterTextChanged {
             repeatCount = if (it.isNullOrEmpty()) {
@@ -304,7 +305,7 @@ class ConfigurationFragment : Fragment(), MenuProvider {
                 it.toString().toIntOrNull()
             }
             setError(binding.inputRepeatCount, repeatCount, true)
-            notifyConfig()
+            notifyContinue()
         }
         binding.inputSatellite.doAfterTextChanged {
             satelliteCount = if (it.isNullOrEmpty()) {
@@ -313,7 +314,7 @@ class ConfigurationFragment : Fragment(), MenuProvider {
                 it.toString().toIntOrNull()
             }
             setError(binding.inputSatellite, satelliteCount, false)
-            notifyConfig()
+            notifyContinue()
         }
 
         btnRun.setOnClickListener {
@@ -358,6 +359,6 @@ class ConfigurationFragment : Fragment(), MenuProvider {
 
     override fun onResume() {
         super.onResume()
-        notifyConfig()
+        notifyContinue()
     }
 }

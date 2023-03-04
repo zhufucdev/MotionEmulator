@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
@@ -19,9 +20,9 @@ import com.zhufucdev.motion_emulator.hook_frontend.*
 import com.zhufucdev.motion_emulator.lazySharedPreferences
 import com.zhufucdev.motion_emulator.skipAmapFuckingLicense
 import com.zhufucdev.motion_emulator.toFixed
-import com.zhufucdev.motion_emulator.ui.map.MapController
 import com.zhufucdev.motion_emulator.ui.map.TraceBounds
 import com.zhufucdev.motion_emulator.ui.map.UnifiedMapFragment
+import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 class EmulateStatusFragment : Fragment() {
@@ -46,15 +47,17 @@ class EmulateStatusFragment : Fragment() {
         return binding.root
     }
 
-    override fun onStart() {
-        super.onStart()
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
         initializeMonitors()
-        binding.mapMotionPreview.setReadyListener {
-            initializeMap(it)
+        lifecycleScope.launch {
+            initializeMap()
         }
     }
 
-    private fun initializeMap(controller: MapController) {
+    private suspend fun initializeMap() {
+        val controller = binding.mapMotionPreview.requireController()
         addIntermediateListener {
             activity?.runOnUiThread {
                 controller.updateLocationIndicator(it.location)
@@ -68,7 +71,6 @@ class EmulateStatusFragment : Fragment() {
             controller.boundCamera(TraceBounds(trace))
         }
     }
-
 
     private fun initializeMonitors() {
         val expander = binding.layoutBottomSheet.stackMonitors

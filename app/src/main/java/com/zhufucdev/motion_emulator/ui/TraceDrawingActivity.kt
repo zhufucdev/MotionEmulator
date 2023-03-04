@@ -4,6 +4,7 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.database.MatrixCursor
+import android.location.Criteria
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
@@ -151,7 +152,9 @@ class TraceDrawingActivity : AppCompatActivity() {
 
                 searchView.isIconified = true
                 searchView.onActionViewCollapsed()
-                binding.mapUnified.requireController().moveCamera(location.toPoint(), focus = true, animate = true)
+                lifecycleScope.launch {
+                    binding.mapUnified.requireController().moveCamera(location.toPoint(), focus = true, animate = true)
+                }
                 return true
             }
         })
@@ -169,16 +172,23 @@ class TraceDrawingActivity : AppCompatActivity() {
             return
         }
 
-        val provider = LocationManager.NETWORK_PROVIDER
+        val provider = locationManager.getBestProvider(Criteria().apply {
+            accuracy = Criteria.ACCURACY_COARSE
+            isSpeedRequired = false
+        }, true) ?: return
         locationManager.getLastKnownLocation(provider)
             ?.let {
-                notifyLocated(it.toPoint())
+                lifecycleScope.launch {
+                    notifyLocated(it.toPoint())
+                }
                 return
             }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             locationManager.getCurrentLocation(provider, null, application.mainExecutor) {
                 if (it != null) {
-                    notifyLocated(it.toPoint())
+                    lifecycleScope.launch {
+                        notifyLocated(it.toPoint())
+                    }
                 } else {
                     loggerW("Trace", "failed to obtain location")
                 }
@@ -187,7 +197,9 @@ class TraceDrawingActivity : AppCompatActivity() {
             // register a one-time listener
             val listener = object : LocationListener {
                 override fun onLocationChanged(location: Location) {
-                    notifyLocated(location.toPoint())
+                    lifecycleScope.launch {
+                        notifyLocated(location.toPoint())
+                    }
                     locationManager.removeUpdates(this)
                 }
             }
@@ -195,7 +207,7 @@ class TraceDrawingActivity : AppCompatActivity() {
         }
     }
 
-    fun notifyLocated(point: Point) {
+    suspend fun notifyLocated(point: Point) {
         binding.mapUnified.requireController().apply {
             updateLocationIndicator(point)
             moveCamera(point, focus = true, animate = false)
@@ -203,13 +215,13 @@ class TraceDrawingActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        binding.mapUnified.requireController().displayStyle = when (item.itemId) {
+        binding.mapUnified.controller?.displayStyle = when (item.itemId) {
             R.id.app_bar_type_common -> MapStyle.NORMAL
             R.id.app_bar_type_satellite -> MapStyle.SATELLITE
             R.id.app_bar_type_night -> MapStyle.NIGHT
-            else -> return super.onOptionsItemSelected(item)
+            else -> return false
         }
-        return super.onOptionsItemSelected(item)
+        return binding.mapUnified.controller != null
     }
 
     private var currentToolType: Tool = Tool.MOVE
@@ -227,9 +239,11 @@ class TraceDrawingActivity : AppCompatActivity() {
                 }
 
                 R.id.slot_draw -> {
-                    currentToolType = Tool.DRAW
-                    currentTool = useDraw()
-                    undoItem.isEnabled = true
+                    lifecycleScope.launch {
+                        currentToolType = Tool.DRAW
+                        currentTool = useDraw()
+                        undoItem.isEnabled = true
+                    }
                     true
                 }
 
@@ -283,7 +297,7 @@ class TraceDrawingActivity : AppCompatActivity() {
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    private fun useDraw(): DrawToolCallback {
+    private suspend fun useDraw(): DrawToolCallback {
         binding.mapUnified.isFocusable = false
         binding.touchReceiver.isVisible = true
 

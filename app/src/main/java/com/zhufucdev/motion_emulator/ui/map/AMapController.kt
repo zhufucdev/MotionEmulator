@@ -144,7 +144,7 @@ class AMapController(private val map: AMap, val context: Context) : MapControlle
     }
 
     override fun updateLocationIndicator(point: Point) {
-        locationListener.invoke(point)
+        locationListener.invoke(point.ensureAmapCoordinate())
     }
 
     private fun distance(p1: LatLng, p2: LatLng): Float =

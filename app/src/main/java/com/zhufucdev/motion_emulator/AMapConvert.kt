@@ -1,12 +1,11 @@
 package com.zhufucdev.motion_emulator
 
 import android.content.Context
-import android.content.res.Resources
-import com.amap.api.maps.AMap
 import com.amap.api.maps.MapsInitializer
 import com.amap.api.maps.model.LatLng
 import com.amap.api.services.core.LatLonPoint
 import com.zhufucdev.motion_emulator.data.CoordinateSystem
+import com.zhufucdev.motion_emulator.data.MapProjector
 import com.zhufucdev.motion_emulator.data.Point
 import com.zhufucdev.motion_emulator.data.Vector2D
 import io.ktor.client.call.*
@@ -52,3 +51,7 @@ suspend fun getAddressWithAmap(location: LatLng): String? {
     ) return null
     return res["regeocode"]!!.jsonObject["formatted_address"]!!.jsonPrimitive.content
 }
+
+fun Point.ensureAmapCoordinate(): Point =
+    if (coordinateSystem == CoordinateSystem.WGS84) with(MapProjector) { toTarget() }.toPoint(CoordinateSystem.GCJ02)
+    else this

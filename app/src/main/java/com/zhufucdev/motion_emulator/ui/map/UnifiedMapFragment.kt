@@ -17,6 +17,7 @@ import com.zhufucdev.motion_emulator.R
 import com.zhufucdev.motion_emulator.data.Point
 import com.zhufucdev.motion_emulator.data.Trace
 import com.zhufucdev.motion_emulator.ui.DrawToolCallback
+import kotlin.coroutines.suspendCoroutine
 
 class UnifiedMapFragment : FrameLayout {
     constructor(context: Context) : super(context)
@@ -63,17 +64,13 @@ class UnifiedMapFragment : FrameLayout {
     var controller: MapController? = null
         private set
 
-    fun requireController(): MapController {
-        return controller ?: throw NullPointerException()
+    suspend fun requireController(): MapController = suspendCoroutine { res ->
+        val current = controller
+        if (current != null) res.resumeWith(Result.success(current))
+        onReady.add { res.resumeWith(Result.success(it)) }
     }
 
-    private var onReady: ((MapController) -> Unit)? = null
-    fun setReadyListener(l: (MapController) -> Unit) {
-        onReady = l
-        if (controller != null) {
-            l(controller!!)
-        }
-    }
+    private val onReady = mutableSetOf<(MapController) -> Unit>()
 
     private fun initializeAs(provider: Provider) {
         val maps = when (provider) {
@@ -82,7 +79,7 @@ class UnifiedMapFragment : FrameLayout {
                     getMapAsync {
                         val ctrl = AMapController(it, requireContext())
                         controller = ctrl
-                        onReady?.invoke(ctrl)
+                        notifyReady(ctrl)
                     }
                 }
 
@@ -91,7 +88,7 @@ class UnifiedMapFragment : FrameLayout {
                     getMapAsync {
                         val ctrl = GoogleMapsController(requireContext(), it)
                         controller = ctrl
-                        onReady?.invoke(ctrl)
+                        notifyReady(ctrl)
                     }
                 }
         }
@@ -105,6 +102,10 @@ class UnifiedMapFragment : FrameLayout {
         } else {
             throw IllegalStateException("Can't initialize unless in a Fragment Activity context.")
         }
+    }
+
+    private fun notifyReady(controller: MapController) {
+        onReady.forEach { it.invoke(controller) }
     }
 }
 

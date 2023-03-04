@@ -145,7 +145,7 @@ class GoogleMapsController(private val context: Context, private val map: Google
     }
 
     override fun updateLocationIndicator(point: Point) {
-        locationIndicator.invoke(point)
+        locationIndicator.invoke(point.ensureGoogleCoordinate())
     }
 
     fun distance(a: LatLng, b: LatLng) = SphericalUtil.computeDistanceBetween(a, b)

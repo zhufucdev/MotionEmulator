@@ -162,7 +162,7 @@ operator fun FloatArray.times(other: Float): FloatArray {
     }.toFloatArray()
 }
 
-fun Location.toPoint(): Point = Point(latitude, longitude)
+fun Location.toPoint(): Point = Point(latitude, longitude, CoordinateSystem.WGS84)
 
 fun Vector2D.lenTo(other: Vector2D): Double =
     sqrt((x - other.x).pow(2) + (y - other.y).pow(2))
