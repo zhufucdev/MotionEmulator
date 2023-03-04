@@ -3,18 +3,13 @@
 
 English Version | [中文文档](README_zh.md)
 
-Android motion simulator with sensor support.
+Motion Emulator is an Xposed module that allows 
+you to mock location and sensor data, but in a continuous manner.
 
 
 ## Scenarios
 
-If you study in universities in China, there'll be
-no necessity to explain it.
-
-Despite how hard the faculty tries to make us take an
-after-dinner sunny long run every three days,
-we always want to create something innovative to make the life a little
-bit easier.
+Trick your fitness app or your favourite game. Make you king of the world
 
 ## Usage
 
