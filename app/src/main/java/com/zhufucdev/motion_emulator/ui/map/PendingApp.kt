@@ -72,7 +72,9 @@ fun PendingApp(proceeding: Class<*>, onFinish: () -> Unit) {
                 content = { Text(stringResource(R.string.action_continue)) },
                 onClick = {
                     preference.edit {
-                        putString("map_provider", targetProvider.name.lowercase())
+                        val provider = targetProvider.name.lowercase()
+                        putString("map_provider", provider)
+                        putString("poi_provider", provider)
                     }
                     context.startActivity(Intent(context, proceeding))
                     onFinish()
