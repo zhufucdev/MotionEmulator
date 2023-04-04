@@ -14,7 +14,6 @@ import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -23,10 +22,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.core.content.FileProvider
 import com.zhufucdev.motion_emulator.R
-import com.zhufucdev.motion_emulator.ui.component.Expandable
 import com.zhufucdev.motion_emulator.data.Data
 import com.zhufucdev.motion_emulator.dateString
 import com.zhufucdev.motion_emulator.effectiveTimeFormat
+import com.zhufucdev.motion_emulator.ui.component.Expandable
 import com.zhufucdev.motion_emulator.ui.theme.paddingCommon
 import com.zhufucdev.motion_emulator.ui.theme.paddingSmall
 import kotlinx.coroutines.Dispatchers

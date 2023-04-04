@@ -27,7 +27,6 @@ import com.zhufucdev.motion_emulator.data.Trace
 import com.zhufucdev.motion_emulator.ui.DrawResult
 import com.zhufucdev.motion_emulator.ui.DrawToolCallback
 import com.zhufucdev.motion_emulator.ui.GpsToolCallback
-import kotlinx.coroutines.coroutineScope
 import kotlin.coroutines.suspendCoroutine
 
 class UnifiedMapFragment : FrameLayout {
