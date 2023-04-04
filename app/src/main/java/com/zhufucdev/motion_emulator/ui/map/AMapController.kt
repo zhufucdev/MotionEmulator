@@ -38,7 +38,7 @@ class AMapController(private val map: AMap, context: Context) : MapController(co
 
     override fun moveCamera(location: Point, focus: Boolean, animate: Boolean) {
         val camera = CameraUpdateFactory.newLatLngZoom(
-            location.ensureAmapCoordinate().toAmapLatLng(),
+            location.ensureAmapCoordinate(context).toAmapLatLng(),
             if (focus) 40F else 10F
         )
         if (animate) map.animateCamera(camera)
@@ -46,7 +46,7 @@ class AMapController(private val map: AMap, context: Context) : MapController(co
     }
 
     override fun boundCamera(bounds: TraceBounds, animate: Boolean) {
-        val update = CameraUpdateFactory.newLatLngBounds(bounds.amap(), 400)
+        val update = CameraUpdateFactory.newLatLngBounds(bounds.amap(context), 400)
         if (animate) map.animateCamera(update)
         else map.moveCamera(update)
     }
@@ -64,7 +64,7 @@ class AMapController(private val map: AMap, context: Context) : MapController(co
         override val points: List<Point> by lazy(lastPos) { polyline.points.map { it.toPoint() } }
 
         override fun addPoint(point: Point) {
-            val al = point.ensureAmapCoordinate().toAmapLatLng()
+            val al = point.ensureAmapCoordinate(context).toAmapLatLng()
             if (distance(lastPos, al) >= mapCaptureAccuracy) {
                 polyline.add(al)
                 backStack.lastOrNull()?.add(al)
@@ -109,7 +109,7 @@ class AMapController(private val map: AMap, context: Context) : MapController(co
         map.projection.fromScreenLocation(android.graphics.Point(x, y)).toPoint()
 
     override suspend fun getAddress(point: Point): String? {
-        return getAddressWithAmap(point.ensureAmapCoordinate().toAmapLatLng())
+        return getAddressWithAmap(point.ensureAmapCoordinate(context).toAmapLatLng())
     }
 
     override fun cameraCenter(): Point = map.cameraPosition.target.toPoint()
@@ -130,7 +130,7 @@ class AMapController(private val map: AMap, context: Context) : MapController(co
     private var locationIndicator: Circle? = null
     private var accuracyIndicator: Circle? = null
     override fun updateLocationIndicator(location: Location) {
-        val point = location.toPoint().ensureAmapCoordinate().toAmapLatLng()
+        val point = location.toPoint().ensureAmapCoordinate(context).toAmapLatLng()
         locationIndicator?.remove()
         locationIndicator = map.addCircle(
             CircleOptions().apply {

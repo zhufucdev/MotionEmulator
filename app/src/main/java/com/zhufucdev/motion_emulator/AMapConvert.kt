@@ -4,10 +4,7 @@ import android.content.Context
 import com.amap.api.maps.MapsInitializer
 import com.amap.api.maps.model.LatLng
 import com.amap.api.services.core.LatLonPoint
-import com.zhufucdev.motion_emulator.data.CoordinateSystem
-import com.zhufucdev.motion_emulator.data.MapProjector
-import com.zhufucdev.motion_emulator.data.Point
-import com.zhufucdev.motion_emulator.data.Vector2D
+import com.zhufucdev.motion_emulator.data.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
@@ -52,6 +49,6 @@ suspend fun getAddressWithAmap(location: LatLng): String? {
     return res["regeocode"]!!.jsonObject["formatted_address"]!!.jsonPrimitive.content
 }
 
-fun Point.ensureAmapCoordinate(): Point =
-    if (coordinateSystem == CoordinateSystem.WGS84) with(MapProjector) { toTarget() }.toPoint(CoordinateSystem.GCJ02)
+fun Point.ensureAmapCoordinate(context: Context): Point =
+    if (coordinateSystem == CoordinateSystem.WGS84) with(AMapProjector(context)) { toTarget() }.toPoint(CoordinateSystem.GCJ02)
     else this

@@ -1,8 +1,10 @@
 package com.zhufucdev.motion_emulator.data
 
+import android.content.Context
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import com.amap.api.maps.AMapUtils
+import com.amap.api.maps.CoordinateConverter
 import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
 import com.google.maps.android.SphericalUtil
@@ -135,3 +137,25 @@ class CanvasProjector(scope: DrawScope, val boundLeft: Float, val boundBottom: F
 
 fun DrawScope.CanvasProjector(boundLeft: Float, boundBottom: Float) =
     CanvasProjector(this, boundLeft, boundBottom)
+
+/**
+ * A [Projector] targeting AMap
+ *
+ * The ideal plane is WGS-84
+ *
+ * This projector **doesn't** support unversed projection
+ */
+class AMapProjector(context: Context) : Projector {
+    private val cvt = CoordinateConverter(context).from(CoordinateConverter.CoordType.GPS)
+
+    override fun Vector2D.distance(other: Vector2D): Double =
+        AMapUtils.calculateLineDistance(this.toAmapLatLng(), other.toAmapLatLng()).toDouble()
+
+
+    override fun Vector2D.toTarget(): Vector2D =
+        cvt.coord(this.toAmapLatLng()).convert().let { Vector2D(it.latitude, it.longitude) }
+
+
+    override fun Vector2D.toIdeal(): Vector2D =
+        throw UnsupportedOperationException("Projection from AMap is not supported")
+}

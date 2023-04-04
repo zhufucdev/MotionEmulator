@@ -1,5 +1,6 @@
 package com.zhufucdev.motion_emulator.ui.map
 
+import android.content.Context
 import com.zhufucdev.motion_emulator.*
 import com.zhufucdev.motion_emulator.data.CoordinateSystem
 import com.zhufucdev.motion_emulator.data.Point
@@ -25,7 +26,7 @@ fun TraceBounds(trace: Trace): TraceBounds {
     }
 }
 
-fun TraceBounds.amap() =
-    com.amap.api.maps.model.LatLngBounds(southwest.ensureAmapCoordinate().toAmapLatLng(), northeast.ensureAmapCoordinate().toAmapLatLng())
+fun TraceBounds.amap(context: Context) =
+    com.amap.api.maps.model.LatLngBounds(southwest.ensureAmapCoordinate(context).toAmapLatLng(), northeast.ensureAmapCoordinate(context).toAmapLatLng())
 fun TraceBounds.google() =
     com.google.android.gms.maps.model.LatLngBounds(southwest.ensureGoogleCoordinate().toGoogleLatLng(), northeast.ensureGoogleCoordinate().toGoogleLatLng())
