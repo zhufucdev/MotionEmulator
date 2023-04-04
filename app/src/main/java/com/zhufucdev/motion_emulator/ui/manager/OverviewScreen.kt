@@ -20,6 +20,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.core.content.FileProvider
 import com.zhufucdev.motion_emulator.R
 import com.zhufucdev.motion_emulator.ui.component.Expandable
@@ -273,14 +274,20 @@ private fun LazyItemScope.SelectableItem(
     divider: Boolean = true,
     onSelectedChanged: (Boolean) -> Unit
 ) {
-    Column {
-        Row(
+    Column(Modifier.fillParentMaxWidth()) {
+        ConstraintLayout(
             modifier = Modifier.clickable { onSelectedChanged(!selected) }
-                .padding(horizontal = paddingCommon * 2, vertical = paddingCommon)
-                .fillParentMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+                .padding(start = paddingCommon * 2, top = paddingCommon, bottom = paddingCommon)
+                .fillMaxWidth(),
         ) {
-            Column(Modifier.fillMaxWidth()) {
+            val (content, box) = createRefs()
+            Column(
+                Modifier.constrainAs(content) {
+                    top.linkTo(parent.top)
+                    start.linkTo(parent.start)
+                    bottom.linkTo(parent.bottom)
+                }
+            ) {
                 Text(
                     text = title,
                     style = MaterialTheme.typography.titleMedium,
@@ -296,7 +303,12 @@ private fun LazyItemScope.SelectableItem(
             Checkbox(
                 checked = selected,
                 onCheckedChange = onSelectedChanged,
-                modifier = Modifier.align(Alignment.CenterVertically)
+                modifier = Modifier.constrainAs(box) {
+                    top.linkTo(parent.top)
+                    end.linkTo(parent.end)
+                    bottom.linkTo(parent.bottom)
+                }
+                    .padding(end = paddingCommon)
             )
         }
 
@@ -365,7 +377,7 @@ private suspend fun import(context: Context, providers: ScreenProviders, uri: Ur
         val type = name.substring(0, separator)
         val provider =
             providers.value.firstOrNull { it is EditorViewModel.StandardViewModel<*> && it.store.typeName == type }
-                as EditorViewModel.StandardViewModel<*>?
+                    as EditorViewModel.StandardViewModel<*>?
                 ?: continue
         val text = tarIn.readBytes().decodeToString()
         val record = provider.store.parseAndStore(text, true)
