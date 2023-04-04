@@ -275,7 +275,7 @@ abstract class MapController(protected val context: Context) {
                 val result =
                     if (points.isEmpty()) DrawResult()
                     else {
-                        val address = getAddressWithGoogle(points.first().toGoogleLatLng(), context)
+                        val address = getAddress(points.first())
                         val name = address
                             ?.let { context.getString(R.string.text_near, it) }
                             ?: context.effectiveTimeFormat().dateString()
