@@ -16,8 +16,4 @@
             android:id="@+id/tool_undo"
             android:title="@string/action_undo"
             android:icon="@drawable/ic_baseline_undo_24"/>
-    <item
-            android:id="@+id/tool_clear"
-            android:title="@string/action_clear"
-            android:icon="@drawable/ic_baseline_delete_sweep_24"/>
 </menu>
