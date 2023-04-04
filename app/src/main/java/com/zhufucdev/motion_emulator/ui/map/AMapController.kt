@@ -6,9 +6,7 @@ import com.amap.api.maps.AMap
 import com.amap.api.maps.AMapUtils
 import com.amap.api.maps.CameraUpdateFactory
 import com.amap.api.maps.LocationSource
-import com.amap.api.maps.model.LatLng
-import com.amap.api.maps.model.Polyline
-import com.amap.api.maps.model.PolylineOptions
+import com.amap.api.maps.model.*
 import com.zhufucdev.motion_emulator.*
 import com.zhufucdev.motion_emulator.data.Point
 import com.zhufucdev.motion_emulator.data.Trace
@@ -30,6 +28,13 @@ class AMapController(private val map: AMap, context: Context) : MapController(co
     }
 
     private val lineColor get() = getAttrColor(com.google.android.material.R.attr.colorTertiary, context)
+    private val indicatorColor get() = getAttrColor(com.google.android.material.R.attr.colorPrimary, context)
+    private val indicatorStroke
+        get() =
+            if (map.mapType == AMap.MAP_TYPE_NORMAL)
+                android.graphics.Color.rgb(55, 71, 79)
+            else
+                android.graphics.Color.rgb(250, 250, 250)
 
     override fun moveCamera(location: Point, focus: Boolean, animate: Boolean) {
         val camera = CameraUpdateFactory.newLatLngZoom(
@@ -59,7 +64,7 @@ class AMapController(private val map: AMap, context: Context) : MapController(co
         override val points: List<Point> by lazy(lastPos) { polyline.points.map { it.toPoint() } }
 
         override fun addPoint(point: Point) {
-            val al = point.toAmapLatLng()
+            val al = point.ensureAmapCoordinate().toAmapLatLng()
             if (distance(lastPos, al) >= mapCaptureAccuracy) {
                 polyline.add(al)
                 backStack.lastOrNull()?.add(al)
@@ -122,27 +127,29 @@ class AMapController(private val map: AMap, context: Context) : MapController(co
         }
     }
 
-    private val locationListener: (Location) -> Unit by lazy {
-        var callback: LocationSource.OnLocationChangedListener? = null
-        map.setLocationSource(object : LocationSource {
-            override fun activate(p0: LocationSource.OnLocationChangedListener?) {
-                callback = p0
-            }
-
-            override fun deactivate() {
-                callback = null
-            }
-        })
-        map.isMyLocationEnabled = true
-        map.uiSettings.isMyLocationButtonEnabled = false
-
-        return@lazy {
-            callback?.onLocationChanged(it)
-        }
-    }
-
+    private var locationIndicator: Circle? = null
+    private var accuracyIndicator: Circle? = null
     override fun updateLocationIndicator(location: Location) {
-        locationListener.invoke(location)
+        val point = location.toPoint().ensureAmapCoordinate().toAmapLatLng()
+        locationIndicator?.remove()
+        locationIndicator = map.addCircle(
+            CircleOptions().apply {
+                center(point)
+                fillColor(indicatorColor)
+                strokeColor(indicatorStroke)
+                strokeWidth(0.5F)
+                radius(30.0 / map.cameraPosition.zoom)
+            }
+        )
+        accuracyIndicator?.remove()
+        accuracyIndicator = map.addCircle(
+            CircleOptions().apply {
+                center(point)
+                strokeColor(0)
+                fillColor(android.graphics.Color.argb(100, 30, 136, 229))
+                radius(location.accuracy * 1.0)
+            }
+        )
     }
 
     private fun distance(p1: LatLng, p2: LatLng): Float =

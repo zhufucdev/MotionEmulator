@@ -68,7 +68,7 @@ class GoogleMapsController(context: Context, private val map: GoogleMap) : MapCo
         }
 
         override fun addPoint(point: Point) {
-            val al = point.toGoogleLatLng()
+            val al = point.ensureGoogleCoordinate().toGoogleLatLng()
             if (distance(lastPos, al) >= mapCaptureAccuracy) {
                 polyline.add(al)
                 backStack.lastOrNull()?.add(al)
