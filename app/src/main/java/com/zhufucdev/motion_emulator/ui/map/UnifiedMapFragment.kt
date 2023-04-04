@@ -268,6 +268,7 @@ abstract class MapController(protected val context: Context) {
 
             override fun undo() {
                 pen.undo()
+                started = false
             }
 
             override suspend fun complete(): DrawResult {
