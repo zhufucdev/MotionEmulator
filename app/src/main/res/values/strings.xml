@@ -164,4 +164,12 @@
     <string name="text_gcs_accessible">Will use Google Maps as the map provider</string>
     <string name="text_gcs_inaccessible">Use AMap as the provider, whose scope is limited to China mainland</string>
     <string name="text_pending_map_provider">You can change these settings later</string>
+    <string name="action_add_trace">Add Trace</string>
+    <string name="action_sample">GPS Sample</string>
+    <string name="action_opt">Opt</string>
+    <string name="action_done">Done</string>
+    <string name="action_clear">Clear</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_pause">Pause</string>
+    <string name="action_unpause">Unpause</string>
 </resources>

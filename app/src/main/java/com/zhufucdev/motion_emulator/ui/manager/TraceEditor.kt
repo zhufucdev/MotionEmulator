@@ -303,7 +303,7 @@ fun FactorSaltItem(factor: MutableFactor, onRemove: () -> Unit) {
     SaltItemScaffold(
         icon = {
             Icon(
-                painter = painterResource(R.drawable.baseline_extension_24),
+                painter = painterResource(R.drawable.ic_baseline_extension_24),
                 contentDescription = null,
                 modifier = Modifier.size(18.dp)
             )

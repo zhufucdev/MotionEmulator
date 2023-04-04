@@ -40,6 +40,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
             android:layout_margin="@dimen/extended_fab_margin"
+            android:animateLayoutChanges="true"
             app:cardCornerRadius="@dimen/slot_radius">
 
         <com.google.android.material.bottomnavigation.BottomNavigationView

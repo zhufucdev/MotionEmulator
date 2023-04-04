@@ -10,7 +10,7 @@
     <Preference
             app:key="sync_header"
             app:title="@string/title_settings_naming"
-            app:icon="@drawable/baseline_assignment_24"
+            app:icon="@drawable/ic_baseline_assignment_24"
             app:fragment="com.zhufucdev.motion_emulator.ui.SettingsActivity$NamingFragment"/>
 
 </PreferenceScreen>

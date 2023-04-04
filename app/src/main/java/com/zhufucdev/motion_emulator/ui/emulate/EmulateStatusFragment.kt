@@ -16,6 +16,7 @@ import androidx.work.WorkManager
 import com.zhufucdev.motion_emulator.R
 import com.zhufucdev.motion_emulator.data.Traces
 import com.zhufucdev.motion_emulator.databinding.FragmentEmulateStatusBinding
+import com.zhufucdev.motion_emulator.hook.android
 import com.zhufucdev.motion_emulator.hook_frontend.*
 import com.zhufucdev.motion_emulator.lazySharedPreferences
 import com.zhufucdev.motion_emulator.skipAmapFuckingLicense
@@ -60,7 +61,7 @@ class EmulateStatusFragment : Fragment() {
         val controller = binding.mapMotionPreview.requireController()
         addIntermediateListener {
             activity?.runOnUiThread {
-                controller.updateLocationIndicator(it.location)
+                controller.updateLocationIndicator(it.location.android())
             }
         }
 

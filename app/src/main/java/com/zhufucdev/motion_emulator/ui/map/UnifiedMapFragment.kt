@@ -1,22 +1,31 @@
 package com.zhufucdev.motion_emulator.ui.map
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.TypedArray
+import android.location.Location
+import android.location.LocationListener
+import android.location.LocationManager
 import android.os.Bundle
 import android.util.AttributeSet
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import com.amap.api.maps.AMap
 import com.amap.api.maps.MapView
 import com.google.android.gms.maps.SupportMapFragment
-import com.zhufucdev.motion_emulator.R
+import com.zhufucdev.motion_emulator.*
+import com.zhufucdev.motion_emulator.data.CoordinateSystem
 import com.zhufucdev.motion_emulator.data.Point
 import com.zhufucdev.motion_emulator.data.Trace
+import com.zhufucdev.motion_emulator.ui.DrawResult
 import com.zhufucdev.motion_emulator.ui.DrawToolCallback
+import com.zhufucdev.motion_emulator.ui.GpsToolCallback
 import kotlin.coroutines.suspendCoroutine
 
 class UnifiedMapFragment : FrameLayout {
@@ -106,6 +115,7 @@ class UnifiedMapFragment : FrameLayout {
 
     private fun notifyReady(controller: MapController) {
         onReady.forEach { it.invoke(controller) }
+        onReady.clear()
     }
 }
 
@@ -144,21 +154,151 @@ class AMapFragment : Fragment() {
     }
 }
 
-interface MapController {
-    fun moveCamera(location: Point, focus: Boolean = false, animate: Boolean = false)
-    fun boundCamera(bounds: TraceBounds, animate: Boolean = false)
-    fun useDraw(): DrawToolCallback
-    fun drawTrace(trace: Trace): MapTraceCallback
-    fun updateLocationIndicator(point: Point)
-    var displayStyle: MapStyle
-    var displayType: MapDisplayType
+abstract class MapController(protected val context: Context) {
+    abstract fun moveCamera(location: Point, focus: Boolean = false, animate: Boolean = false)
+    abstract fun boundCamera(bounds: TraceBounds, animate: Boolean = false)
+    abstract fun project(x: Int, y: Int): Point
+    abstract suspend fun getAddress(point: Point): String?
+    abstract fun cameraCenter(): Point
+
+    abstract fun usePen(): MapScrawl
+    @SuppressLint("ClickableViewAccessibility")
+    fun useDraw(screen: View): DrawToolCallback {
+        val pen = usePen()
+
+        val callback = object : DrawToolCallback {
+            override fun clear() {
+                pen.clear()
+            }
+
+            override fun undo() {
+                pen.undo()
+            }
+
+            override suspend fun complete(): DrawResult {
+                screen.isVisible = false
+                screen.setOnTouchListener(null)
+                val points = pen.points
+
+                if (points.isEmpty()) {
+                    return DrawResult()
+                }
+
+                val address = try {
+                    getAddress(cameraCenter())
+                } catch (e: Exception) {
+                    null
+                }
+                val name = address
+                    ?.let { context.getString(R.string.text_near, it) }
+                    ?: context.effectiveTimeFormat().dateString()
+                val result = DrawResult(name, points, CoordinateSystem.GCJ02)
+                completeListener?.invoke(result)
+                return result
+            }
+
+            private var completeListener: ((DrawResult) -> Unit)? = null
+            override fun onCompleted(l: (DrawResult) -> Unit) {
+                completeListener = l
+            }
+        }
+
+        screen.isVisible = true
+        screen.setOnTouchListener { _, event ->
+            if (event.pointerCount > 1) {
+                return@setOnTouchListener false
+            }
+            if (event.action == MotionEvent.ACTION_DOWN) {
+                pen.markBegin()
+            }
+            val point = project(event.x.toInt(), event.y.toInt())
+            pen.addPoint(point)
+            true
+        }
+
+        return callback
+    }
+
+    @SuppressLint("MissingPermission")
+    fun useGps(): GpsToolCallback {
+        val pen = usePen()
+        pen.markBegin()
+        val locationManager = context.getSystemService(LocationManager::class.java)
+
+        var paused = false
+        var started = false
+        val listener = LocationListener { location ->
+            val point = location.toPoint()
+            if (!paused)
+                pen.addPoint(point)
+            if (!started) {
+                moveCamera(point, focus = true, animate = true)
+                started = true
+            }
+            updateLocationIndicator(location)
+        }
+        locationManager.requestLocationUpdates(
+            LocationManager.GPS_PROVIDER, 0, mapCaptureAccuracy, listener
+        )
+
+        val callback = object : GpsToolCallback {
+            private var completeListener: ((DrawResult) -> Unit)? = null
+            override val isPaused: Boolean
+                get() = paused
+
+            override fun pause() {
+                paused = true
+            }
+
+            override fun unpause() {
+                pen.markBegin()
+                paused = false
+            }
+
+            override fun undo() {
+                pen.undo()
+            }
+
+            override suspend fun complete(): DrawResult {
+                val points = pen.points
+                val result =
+                    if (points.isEmpty()) DrawResult()
+                    else {
+                        val address = getAddressWithGoogle(points.first().toGoogleLatLng(), context)
+                        val name = address
+                            ?.let { context.getString(R.string.text_near, it) }
+                            ?: context.effectiveTimeFormat().dateString()
+                        DrawResult(
+                            poiName = name,
+                            trace = points,
+                            coordinateSystem = CoordinateSystem.WGS84
+                        )
+                    }
+                completeListener?.invoke(result)
+
+                locationManager.removeUpdates(listener)
+                return result
+            }
+
+            override fun onCompleted(l: (DrawResult) -> Unit) {
+                completeListener = l
+            }
+        }
+
+        return callback
+    }
+
+    abstract fun drawTrace(trace: Trace): MapTraceCallback
+    abstract fun updateLocationIndicator(location: Location)
+    abstract var displayStyle: MapStyle
+    abstract var displayType: MapDisplayType
 }
 
 interface MapTraceCallback {
     fun remove()
 }
 
-const val drawPrecision = 0.5F // in meters
+const val mapCaptureAccuracy = 0.5F // in meters
 
 enum class MapStyle {
     NORMAL, NIGHT, SATELLITE
@@ -166,4 +306,12 @@ enum class MapStyle {
 
 enum class MapDisplayType {
     STILL, INTERACTIVE
+}
+
+interface MapScrawl {
+    val points: List<Point>
+    fun addPoint(point: Point)
+    fun markBegin()
+    fun undo()
+    fun clear()
 }

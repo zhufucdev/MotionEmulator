@@ -1,6 +1,7 @@
 package com.zhufucdev.motion_emulator.ui.map
 
 import android.content.Context
+import android.location.Location
 import com.amap.api.maps.AMap
 import com.amap.api.maps.AMapUtils
 import com.amap.api.maps.CameraUpdateFactory
@@ -9,14 +10,10 @@ import com.amap.api.maps.model.LatLng
 import com.amap.api.maps.model.Polyline
 import com.amap.api.maps.model.PolylineOptions
 import com.zhufucdev.motion_emulator.*
-import com.zhufucdev.motion_emulator.data.CoordinateSystem
 import com.zhufucdev.motion_emulator.data.Point
 import com.zhufucdev.motion_emulator.data.Trace
-import com.zhufucdev.motion_emulator.hook.android
-import com.zhufucdev.motion_emulator.ui.DrawResult
-import com.zhufucdev.motion_emulator.ui.DrawToolCallback
 
-class AMapController(private val map: AMap, val context: Context) : MapController {
+class AMapController(private val map: AMap, context: Context) : MapController(context) {
     init {
         map.apply {
             isMyLocationEnabled = false
@@ -49,67 +46,63 @@ class AMapController(private val map: AMap, val context: Context) : MapControlle
         else map.moveCamera(update)
     }
 
-
-    override fun useDraw(): DrawToolCallback {
+    override fun usePen(): MapScrawl = object : MapScrawl {
         var lastPos = LatLng(0.0, 0.0)
-        val points = PolylineOptions()
-        val lastPoints = arrayListOf<ArrayList<LatLng>>() // for undoing
+        val polyline = PolylineOptions()
+        val backStack = arrayListOf<ArrayList<LatLng>>() // for undoing
         var lastPolyline: Polyline? = null
-        points.color(lineColor)
 
-        val callback = object : DrawToolCallback {
-            private fun project(x: Int, y: Int): LatLng =
-                map.projection.fromScreenLocation(android.graphics.Point(x, y))
-
-            override fun addPoint(x: Int, y: Int) {
-                val al = project(x, y)
-                if (distance(lastPos, al) >= drawPrecision) {
-                    points.add(al)
-                    lastPoints.lastOrNull()?.add(al)
-                    lastPolyline?.remove()
-                    lastPolyline = map.addPolyline(points)
-                }
-                lastPos = al
-            }
-
-            override fun markBegin(x: Int, y: Int) {
-                lastPoints.add(arrayListOf())
-                addPoint(x, y)
-            }
-
-            override fun markEnd(x: Int, y: Int) {}
-
-            override fun undo() {
-                lastPoints.removeLastOrNull()?.let { points.points.removeAll(it) } ?: return
-                lastPolyline?.remove()
-                lastPolyline = map.addPolyline(points)
-                lastPos = points.points.lastOrNull() ?: LatLng(0.0, 0.0)
-            }
-
-            override suspend fun complete(): DrawResult {
-                if (points.points.isEmpty()) {
-                    return DrawResult()
-                }
-
-                val target = map.cameraPosition.target
-                val p = points.points
-                val address = getAddressWithAmap(target)
-                val name = address
-                    ?.let { context.getString(R.string.text_near, it) }
-                    ?: context.effectiveTimeFormat().dateString()
-                val result = DrawResult(name, p.map { it.toPoint() }, CoordinateSystem.GCJ02)
-                completeListener?.invoke(result)
-                return result
-            }
-
-            private var completeListener: ((DrawResult) -> Unit)? = null
-            override fun onCompleted(l: (DrawResult) -> Unit) {
-                completeListener = l
-            }
+        init {
+            polyline.color(lineColor)
         }
 
-        return callback
+        override val points: List<Point> by lazy(lastPos) { polyline.points.map { it.toPoint() } }
+
+        override fun addPoint(point: Point) {
+            val al = point.toAmapLatLng()
+            if (distance(lastPos, al) >= mapCaptureAccuracy) {
+                polyline.add(al)
+                backStack.lastOrNull()?.add(al)
+                lastPolyline?.remove()
+                lastPolyline = map.addPolyline(polyline)
+            }
+            lastPos = al
+        }
+
+        override fun markBegin() {
+            backStack.add(arrayListOf())
+        }
+
+        override fun undo() {
+            backStack.removeLastOrNull()?.let { polyline.points.removeAll(it) } ?: return
+            lastPolyline?.remove()
+            lastPolyline = map.addPolyline(polyline)
+            lastPos = polyline.points.lastOrNull() ?: LatLng(0.0, 0.0)
+        }
+
+        override fun clear() {
+            backStack.removeLastOrNull()?.let {
+                it.forEach { p ->
+                    if (polyline.points.contains(p))
+                        polyline.points.remove(p)
+                    else
+                        polyline.add(p)
+                }
+            } ?: return
+            lastPolyline?.remove()
+            lastPolyline = map.addPolyline(polyline)
+            lastPos = LatLng(0.0, 0.0)
+        }
     }
+
+    override fun project(x: Int, y: Int): Point =
+        map.projection.fromScreenLocation(android.graphics.Point(x, y)).toPoint()
+
+    override suspend fun getAddress(point: Point): String? {
+        return getAddressWithAmap(point.ensureAmapCoordinate().toAmapLatLng())
+    }
+
+    override fun cameraCenter(): Point = map.cameraPosition.target.toPoint()
 
     override fun drawTrace(trace: Trace): MapTraceCallback {
         val options = PolylineOptions()
@@ -124,7 +117,7 @@ class AMapController(private val map: AMap, val context: Context) : MapControlle
         }
     }
 
-    private val locationListener: (Point) -> Unit by lazy {
+    private val locationListener: (Location) -> Unit by lazy {
         var callback: LocationSource.OnLocationChangedListener? = null
         map.setLocationSource(object : LocationSource {
             override fun activate(p0: LocationSource.OnLocationChangedListener?) {
@@ -139,12 +132,12 @@ class AMapController(private val map: AMap, val context: Context) : MapControlle
         map.uiSettings.isMyLocationButtonEnabled = false
 
         return@lazy {
-            callback?.onLocationChanged(it.android())
+            callback?.onLocationChanged(it)
         }
     }
 
-    override fun updateLocationIndicator(point: Point) {
-        locationListener.invoke(point.ensureAmapCoordinate())
+    override fun updateLocationIndicator(location: Location) {
+        locationListener.invoke(location)
     }
 
     private fun distance(p1: LatLng, p2: LatLng): Float =

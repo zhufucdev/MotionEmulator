@@ -162,6 +162,10 @@ operator fun FloatArray.times(other: Float): FloatArray {
     }.toFloatArray()
 }
 
+/**
+ * Returns the corresponding instance of [Point], whose
+ * coordination system is WGS84 of course.
+ */
 fun Location.toPoint(): Point = Point(latitude, longitude, CoordinateSystem.WGS84)
 
 fun Vector2D.lenTo(other: Vector2D): Double =

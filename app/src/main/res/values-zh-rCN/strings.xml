@@ -157,4 +157,12 @@
     <string name="title_gcs_inaccessible">不能访问</string>
     <string name="text_gcs_accessible">将使用谷歌提供的地图</string>
     <string name="text_pending_map_provider">你可以稍后修改这些选项</string>
+    <string name="action_add_trace">新路径</string>
+    <string name="action_sample">GPS采样</string>
+    <string name="action_opt">选择</string>
+    <string name="action_done">完成</string>
+    <string name="action_clear">清空</string>
+    <string name="action_cancel">取消</string>
+    <string name="action_pause">暂停</string>
+    <string name="action_unpause">继续</string>
 </resources>

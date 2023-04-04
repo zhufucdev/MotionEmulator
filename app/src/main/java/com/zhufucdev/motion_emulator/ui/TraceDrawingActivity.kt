@@ -1,7 +1,6 @@
 package com.zhufucdev.motion_emulator.ui
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.database.MatrixCursor
 import android.location.Criteria
@@ -14,13 +13,11 @@ import android.os.Handler
 import android.provider.BaseColumns
 import android.view.Menu
 import android.view.MenuItem
-import android.view.MotionEvent
 import android.widget.CursorAdapter
 import android.widget.SearchView
 import android.widget.SimpleCursorAdapter
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils
 import com.google.android.material.snackbar.Snackbar
@@ -33,6 +30,7 @@ import com.zhufucdev.motion_emulator.data.Traces
 import com.zhufucdev.motion_emulator.databinding.ActivityTraceDrawingBinding
 import com.zhufucdev.motion_emulator.ui.map.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 class TraceDrawingActivity : AppCompatActivity() {
     private lateinit var binding: ActivityTraceDrawingBinding
@@ -172,14 +170,16 @@ class TraceDrawingActivity : AppCompatActivity() {
             return
         }
 
-        val provider = locationManager.getBestProvider(Criteria().apply {
-            accuracy = Criteria.ACCURACY_COARSE
-            isSpeedRequired = false
-        }, true) ?: return
+        val provider = locationManager.getBestProvider(
+            Criteria().apply {
+                accuracy = Criteria.ACCURACY_COARSE
+                isSpeedRequired = false
+            }, true
+        ) ?: return
         locationManager.getLastKnownLocation(provider)
             ?.let {
                 lifecycleScope.launch {
-                    notifyLocated(it.toPoint())
+                    notifyLocated(it)
                 }
                 return
             }
@@ -187,7 +187,7 @@ class TraceDrawingActivity : AppCompatActivity() {
             locationManager.getCurrentLocation(provider, null, application.mainExecutor) {
                 if (it != null) {
                     lifecycleScope.launch {
-                        notifyLocated(it.toPoint())
+                        notifyLocated(it)
                     }
                 } else {
                     loggerW("Trace", "failed to obtain location")
@@ -198,7 +198,7 @@ class TraceDrawingActivity : AppCompatActivity() {
             val listener = object : LocationListener {
                 override fun onLocationChanged(location: Location) {
                     lifecycleScope.launch {
-                        notifyLocated(location.toPoint())
+                        notifyLocated(location)
                     }
                     locationManager.removeUpdates(this)
                 }
@@ -207,10 +207,10 @@ class TraceDrawingActivity : AppCompatActivity() {
         }
     }
 
-    suspend fun notifyLocated(point: Point) {
+    suspend fun notifyLocated(location: Location) {
         binding.mapUnified.requireController().apply {
-            updateLocationIndicator(point)
-            moveCamera(point, focus = true, animate = false)
+            updateLocationIndicator(location)
+            moveCamera(location.toPoint(), focus = true, animate = false)
         }
     }
 
@@ -227,30 +227,74 @@ class TraceDrawingActivity : AppCompatActivity() {
     private var currentToolType: Tool = Tool.MOVE
     private var currentTool: ToolCallback<*> = MoveToolCallback
     private fun initializeToolSlots() {
-        val undoItem = binding.toolSlots.menu.findItem(R.id.slot_undo)
+        val menu = binding.toolSlots.menu
+
+        fun reset() {
+            // idk why. there's a bug from Google
+            val last = menu.getItem(menu.size() - 1)
+            last.isVisible = false
+            last.isVisible = true
+        }
+
         binding.toolSlots.setOnItemSelectedListener {
-            val lastTool = currentTool
-            val working = when (it.itemId) {
+            when (it.itemId) {
                 R.id.slot_hand -> {
                     currentToolType = Tool.MOVE
                     currentTool = useMove()
-                    undoItem.isEnabled = false
                     true
                 }
 
-                R.id.slot_draw -> {
-                    lifecycleScope.launch {
-                        currentToolType = Tool.DRAW
-                        currentTool = useDraw()
-                        undoItem.isEnabled = true
-                    }
-                    true
-                }
-
-                R.id.slot_undo -> {
-                    currentTool.undo()
+                R.id.slot_add -> {
+                    binding.toolSlots.menu.clear()
+                    menuInflater.inflate(R.menu.trace_drawing_tool_selection, binding.toolSlots.menu)
+                    reset()
+                    binding.toolSlots.selectedItemId = R.id.tool_draw
                     false
                 }
+
+                R.id.tool_opt -> {
+                    when (binding.toolSlots.selectedItemId) {
+                        R.id.tool_draw -> {
+                            menu.clear()
+                            menuInflater.inflate(R.menu.trace_drawing_tool_draw, menu)
+                            reset()
+                            binding.toolSlots.selectedItemId = R.id.tool_draw
+
+                            runBlocking {
+                                currentTool = useDraw()
+                            }
+                        }
+                        R.id.tool_gps -> {
+                            menu.clear()
+                            menuInflater.inflate(R.menu.trace_drawing_tool_gps, menu)
+                            reset()
+                            binding.toolSlots.selectedItemId = R.id.tool_gps
+
+                            runBlocking {
+                                currentTool = useGps()
+                            }
+                        }
+                        else -> throw NotImplementedError("Unknown tool: " +
+                                "${menu.findItem(binding.toolSlots.selectedItemId).title}")
+                    }
+                    false
+                }
+
+                R.id.tool_done -> {
+                    lifecycleScope.launch {
+                        currentTool.complete()
+                    }
+
+                    menu.clear()
+                    menuInflater.inflate(R.menu.trace_drawing_tool_slots, menu)
+                    binding.toolSlots.selectedItemId = R.id.slot_hand
+                    reset()
+
+                    false
+                }
+
+                R.id.tool_draw -> true
+                R.id.tool_gps -> true
 
                 R.id.slot_save -> {
                     lifecycleScope.launch {
@@ -274,46 +318,46 @@ class TraceDrawingActivity : AppCompatActivity() {
                     false
                 }
 
+                R.id.tool_clear -> {
+                    val current = currentTool
+                    if (current is DrawToolCallback) {
+                        current.clear()
+                    }
+                    false
+                }
+
+                R.id.tool_undo -> {
+                    currentTool.undo()
+                    false
+                }
+
+                R.id.tool_pause -> {
+                    val current = currentTool
+                    if (current is GpsToolCallback) {
+                        if (current.isPaused) {
+                            current.unpause()
+                            it.setIcon(R.drawable.ic_baseline_pause_24)
+                            it.setTitle(R.string.action_pause)
+                        } else {
+                            current.pause()
+                            it.setIcon(R.drawable.ic_baseline_fiber_manual_record_24)
+                            it.setTitle(R.string.action_unpause)
+                        }
+                    }
+                    false
+                }
+
                 else -> false
             }
-
-            if (working) {
-                lifecycleScope.launch {
-                    lastTool.complete()
-                }
-            }
-
-            working
         }
     }
 
     private fun useMove(): MoveToolCallback {
-        binding.mapUnified.isFocusable = true
-        binding.touchReceiver.apply {
-            isVisible = false
-            setOnTouchListener(null)
-        }
         return MoveToolCallback
     }
 
-    @SuppressLint("ClickableViewAccessibility")
-    private suspend fun useDraw(): DrawToolCallback {
-        binding.mapUnified.isFocusable = false
-        binding.touchReceiver.isVisible = true
-
-        val callback = binding.mapUnified.requireController().useDraw()
-        binding.touchReceiver.setOnTouchListener { _, event ->
-            if (event.pointerCount > 1) {
-                return@setOnTouchListener false
-            }
-            when (event.action) {
-                MotionEvent.ACTION_DOWN -> callback.markBegin(event.x.toInt(), event.y.toInt())
-                MotionEvent.ACTION_UP -> callback.markEnd(event.x.toInt(), event.y.toInt())
-                else -> callback.addPoint(event.x.toInt(), event.y.toInt())
-            }
-            true
-        }
-        callback.onCompleted {
+    private fun ToolCallback<DrawResult>.addCompleteListener() {
+        onCompleted {
             traces.add(
                 Trace(
                     NanoIdUtils.randomNanoId(),
@@ -332,7 +376,19 @@ class TraceDrawingActivity : AppCompatActivity() {
                     .show()
             }
         }
+    }
 
+    private suspend fun useDraw(): DrawToolCallback {
+        binding.mapUnified.isFocusable = false
+
+        val callback = binding.mapUnified.requireController().useDraw(binding.touchReceiver)
+        callback.addCompleteListener()
+        return callback
+    }
+
+    private suspend fun useGps(): GpsToolCallback {
+        val callback = binding.mapUnified.requireController().useGps()
+        callback.addCompleteListener()
         return callback
     }
 
@@ -361,9 +417,13 @@ interface ToolCallback<T : ToolCallbackResult> {
 interface ToolCallbackResult
 
 interface DrawToolCallback : ToolCallback<DrawResult> {
-    fun addPoint(x: Int, y: Int)
-    fun markBegin(x: Int, y: Int)
-    fun markEnd(x: Int, y: Int)
+    fun clear()
+}
+
+interface GpsToolCallback : ToolCallback<DrawResult> {
+    val isPaused: Boolean
+    fun pause()
+    fun unpause()
 }
 
 data class DrawResult(

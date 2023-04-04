@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+            android:id="@+id/tool_done"
+            android:title="@string/action_done"
+            android:icon="@drawable/ic_baseline_arrow_back_24"/>
+    <item
+            android:id="@+id/tool_gps"
+            android:title="@string/action_sample"
+            android:icon="@drawable/ic_baseline_satellite_alt_24"/>
+    <item
+            android:id="@+id/tool_pause"
+            android:title="@string/action_pause"
+            android:icon="@drawable/ic_baseline_pause_24"/>
+    <item
+            android:id="@+id/tool_undo"
+            android:title="@string/action_undo"
+            android:icon="@drawable/ic_baseline_undo_24"/>
+    <item
+            android:id="@+id/tool_clear"
+            android:title="@string/action_clear"
+            android:icon="@drawable/ic_baseline_delete_sweep_24"/>
+</menu>

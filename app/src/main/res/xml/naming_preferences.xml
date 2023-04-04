@@ -4,7 +4,7 @@
     <PreferenceCategory
         app:title="@string/caption_settings_time_format">
         <SwitchPreferenceCompat
-            app:icon="@drawable/baseline_more_time_24"
+            app:icon="@drawable/ic_baseline_more_time_24"
             app:title="@string/title_settings_use_custom_time_format"
             app:key="customize_time_format"
             app:defaultValue="false"/>

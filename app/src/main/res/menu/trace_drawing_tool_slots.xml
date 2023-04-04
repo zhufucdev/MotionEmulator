@@ -5,13 +5,9 @@
             android:icon="@drawable/ic_baseline_pan_tool_24"
             android:title="@string/action_move"/>
     <item
-            android:id="@+id/slot_draw"
-            android:icon="@drawable/ic_baseline_edit_24"
-            android:title="@string/action_draw"/>
-    <item
-            android:id="@+id/slot_undo"
-            android:icon="@drawable/ic_baseline_undo_24"
-            android:title="@string/action_undo"/>
+            android:id="@+id/slot_add"
+            android:icon="@drawable/ic_baseline_add_24"
+            android:title="@string/action_add_trace"/>
     <item
             android:id="@+id/slot_save"
             android:icon="@drawable/ic_baseline_save_24"

@@ -153,7 +153,7 @@ fun OverviewScreen(viewModel: ManagerViewModel) {
             ListItem(
                 modifier = Modifier.fillMaxWidth(),
                 title = { Text(stringResource(R.string.title_share)) },
-                leadingIcon = { Icon(painterResource(R.drawable.baseline_share_24), contentDescription = null) },
+                leadingIcon = { Icon(painterResource(R.drawable.ic_baseline_share_24), contentDescription = null) },
                 onClick = {
                     operation = ExportType.Share
                     state.open = true
