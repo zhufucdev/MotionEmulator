@@ -1,6 +1,7 @@
 package com.zhufucdev.motion_emulator.ui
 
 import android.Manifest
+import android.content.DialogInterface
 import android.content.pm.PackageManager
 import android.database.MatrixCursor
 import android.location.Criteria
@@ -225,7 +226,6 @@ class TraceDrawingActivity : AppCompatActivity() {
         return binding.mapUnified.controller != null
     }
 
-    private var currentToolType: Tool = Tool.MOVE
     private var currentTool: ToolCallback<*> = MoveToolCallback
     private fun initializeToolSlots() {
         val menu = binding.toolSlots.menu
@@ -240,7 +240,6 @@ class TraceDrawingActivity : AppCompatActivity() {
         binding.toolSlots.setOnItemSelectedListener {
             when (it.itemId) {
                 R.id.slot_hand -> {
-                    currentToolType = Tool.MOVE
                     currentTool = useMove()
                     true
                 }
@@ -280,6 +279,7 @@ class TraceDrawingActivity : AppCompatActivity() {
                                         .setTitle(R.string.title_no_gps_provider)
                                         .setMessage(R.string.text_no_gps_provider)
                                         .setNegativeButton(R.string.action_cancel, null)
+                                        .show()
                                 }
                             }
                         }
@@ -419,10 +419,21 @@ class TraceDrawingActivity : AppCompatActivity() {
             involveLocation()
         }
     }
-}
 
-enum class Tool {
-    MOVE, DRAW
+    override fun finish() {
+        if (traces.isNotEmpty() || currentTool is DrawToolCallback || currentTool is GpsToolCallback) {
+            MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.title_unsaved_trace)
+                .setMessage(R.string.text_unsaved_trace)
+                .setNegativeButton(R.string.action_cancel, null)
+                .setPositiveButton(R.string.action_delete) { _, _ ->
+                    super.finish()
+                }
+                .show()
+            return
+        }
+        super.finish()
+    }
 }
 
 interface ToolCallback<T : ToolCallbackResult> {

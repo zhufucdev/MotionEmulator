@@ -175,4 +175,7 @@
     <string name="text_gps_pending">Waiting for GPS location...</string>
     <string name="title_no_gps_provider">No GPS Support</string>
     <string name="text_no_gps_provider">GPS location provider is not supported on your phone</string>
+    <string name="title_unsaved_trace">Unsaved Trace</string>
+    <string name="text_unsaved_trace">There are trace data that\'s not saved yet. Do you know what you are doing?
+    </string>
 </resources>

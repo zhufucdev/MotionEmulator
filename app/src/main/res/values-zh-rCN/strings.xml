@@ -168,4 +168,6 @@
     <string name="text_gps_pending">等待GPS定位...</string>
     <string name="title_no_gps_provider">不支持GPS</string>
     <string name="text_no_gps_provider">你的手机不支持GPS位置提供器</string>
+    <string name="text_unsaved_trace">有尚未保存的路径数据，确定要退出吗？</string>
+    <string name="title_unsaved_trace">未保存的路径</string>
 </resources>
