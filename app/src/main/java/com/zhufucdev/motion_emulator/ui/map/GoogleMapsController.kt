@@ -103,6 +103,7 @@ class GoogleMapsController(context: Context, private val map: GoogleMap) : MapCo
             }
             backStack.add(summary)
             lastPolyline?.remove()
+            lastPolyline = null
             polyline.points.clear()
             lastPos = LatLng(0.0, 0.0)
         }

@@ -74,13 +74,6 @@ class AMapController(private val map: AMap, context: Context) : MapController(co
         }
 
         override fun undo() {
-            backStack.removeLastOrNull()?.let { polyline.points.removeAll(it) } ?: return
-            lastPolyline?.remove()
-            lastPolyline = map.addPolyline(polyline)
-            lastPos = polyline.points.lastOrNull() ?: LatLng(0.0, 0.0)
-        }
-
-        override fun clear() {
             backStack.removeLastOrNull()?.let {
                 it.forEach { p ->
                     if (polyline.points.contains(p))
@@ -91,6 +84,18 @@ class AMapController(private val map: AMap, context: Context) : MapController(co
             } ?: return
             lastPolyline?.remove()
             lastPolyline = map.addPolyline(polyline)
+            lastPos = polyline.points.lastOrNull() ?: LatLng(0.0, 0.0)
+        }
+
+        override fun clear() {
+            val summary = arrayListOf<LatLng>()
+            backStack.forEach {
+                summary.addAll(it)
+            }
+            backStack.add(summary)
+            lastPolyline?.remove()
+            lastPolyline = null
+            polyline.points.clear()
             lastPos = LatLng(0.0, 0.0)
         }
     }
