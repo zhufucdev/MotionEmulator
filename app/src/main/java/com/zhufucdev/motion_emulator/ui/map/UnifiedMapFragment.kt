@@ -6,6 +6,7 @@ import android.content.res.TypedArray
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
+import android.os.Build
 import android.os.Bundle
 import android.util.AttributeSet
 import android.view.LayoutInflater
@@ -26,6 +27,7 @@ import com.zhufucdev.motion_emulator.data.Trace
 import com.zhufucdev.motion_emulator.ui.DrawResult
 import com.zhufucdev.motion_emulator.ui.DrawToolCallback
 import com.zhufucdev.motion_emulator.ui.GpsToolCallback
+import kotlinx.coroutines.coroutineScope
 import kotlin.coroutines.suspendCoroutine
 
 class UnifiedMapFragment : FrameLayout {
@@ -162,6 +164,7 @@ abstract class MapController(protected val context: Context) {
     abstract fun cameraCenter(): Point
 
     abstract fun usePen(): MapScrawl
+
     @SuppressLint("ClickableViewAccessibility")
     fun useDraw(screen: View): DrawToolCallback {
         val pen = usePen()
@@ -220,13 +223,21 @@ abstract class MapController(protected val context: Context) {
     }
 
     @SuppressLint("MissingPermission")
-    fun useGps(): GpsToolCallback {
+    suspend fun useGps(): GpsToolCallback = suspendCoroutine { c ->
         val pen = usePen()
         pen.markBegin()
         val locationManager = context.getSystemService(LocationManager::class.java)
+        val provider = LocationManager.GPS_PROVIDER
+        if (!locationManager.isProviderEnabled(provider)) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !locationManager.hasProvider(provider)) {
+                c.resumeWith(Result.failure(RuntimeException("No $provider")))
+                return@suspendCoroutine
+            }
+        }
 
         var paused = false
         var started = false
+        var callback: GpsToolCallback? = null
         val listener = LocationListener { location ->
             val point = location.toPoint()
             if (!paused)
@@ -234,6 +245,7 @@ abstract class MapController(protected val context: Context) {
             if (!started) {
                 moveCamera(point, focus = true, animate = true)
                 started = true
+                c.resumeWith(Result.success(callback!!))
             }
             updateLocationIndicator(location)
         }
@@ -241,7 +253,7 @@ abstract class MapController(protected val context: Context) {
             LocationManager.GPS_PROVIDER, 0, mapCaptureAccuracy, listener
         )
 
-        val callback = object : GpsToolCallback {
+        callback = object : GpsToolCallback {
             private var completeListener: ((DrawResult) -> Unit)? = null
             override val isPaused: Boolean
                 get() = paused
@@ -284,8 +296,6 @@ abstract class MapController(protected val context: Context) {
                 completeListener = l
             }
         }
-
-        return callback
     }
 
     abstract fun drawTrace(trace: Trace): MapTraceCallback

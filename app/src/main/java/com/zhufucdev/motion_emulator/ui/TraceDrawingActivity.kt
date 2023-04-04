@@ -16,10 +16,12 @@ import android.view.MenuItem
 import android.widget.CursorAdapter
 import android.widget.SearchView
 import android.widget.SimpleCursorAdapter
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.lifecycleScope
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.highcapable.yukihookapi.hook.log.loggerW
 import com.zhufucdev.motion_emulator.*
@@ -264,18 +266,29 @@ class TraceDrawingActivity : AppCompatActivity() {
                                 currentTool = useDraw()
                             }
                         }
+
                         R.id.tool_gps -> {
                             menu.clear()
                             menuInflater.inflate(R.menu.trace_drawing_tool_gps, menu)
                             reset()
                             binding.toolSlots.selectedItemId = R.id.tool_gps
 
-                            runBlocking {
-                                currentTool = useGps()
+                            lifecycleScope.launch {
+                                try {
+                                    currentTool = useGps()
+                                } catch (e: RuntimeException) {
+                                    MaterialAlertDialogBuilder(this@TraceDrawingActivity)
+                                        .setTitle(R.string.title_no_gps_provider)
+                                        .setMessage(R.string.text_no_gps_provider)
+                                        .setNegativeButton(R.string.action_cancel, null)
+                                }
                             }
                         }
-                        else -> throw NotImplementedError("Unknown tool: " +
-                                "${menu.findItem(binding.toolSlots.selectedItemId).title}")
+
+                        else -> throw NotImplementedError(
+                            "Unknown tool: " +
+                                    "${menu.findItem(binding.toolSlots.selectedItemId).title}"
+                        )
                     }
                     false
                 }
@@ -387,7 +400,12 @@ class TraceDrawingActivity : AppCompatActivity() {
     }
 
     private suspend fun useGps(): GpsToolCallback {
+        val pendingMsg =
+            Snackbar.make(binding.root, R.string.text_gps_pending, Snackbar.LENGTH_INDEFINITE)
+                .setAnchorView(binding.toolSlots)
+        pendingMsg.show()
         val callback = binding.mapUnified.requireController().useGps()
+        pendingMsg.dismiss()
         callback.addCompleteListener()
         return callback
     }

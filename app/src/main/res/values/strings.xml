@@ -172,4 +172,7 @@
     <string name="action_cancel">Cancel</string>
     <string name="action_pause">Pause</string>
     <string name="action_unpause">Unpause</string>
+    <string name="text_gps_pending">Waiting for GPS location...</string>
+    <string name="title_no_gps_provider">No GPS Support</string>
+    <string name="text_no_gps_provider">GPS location provider is not supported on your phone</string>
 </resources>
