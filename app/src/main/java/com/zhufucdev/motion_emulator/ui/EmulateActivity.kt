@@ -15,15 +15,15 @@ class EmulateActivity : AppCompatActivity() {
     private lateinit var binding: ActivityEmulateBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        Traces.require(this)
+        Motions.require(this)
+        Cells.require(this)
+
         super.onCreate(savedInstanceState)
         binding = ActivityEmulateBinding.inflate(layoutInflater)
         setContentView(binding.root)
         val navController = findNavController(R.id.nav_host_fragment_activity_emulate)
         initializeToolbar(binding.appBarToolbar, navController)
         setUpStatusBar()
-
-        Traces.require(this)
-        Motions.require(this)
-        Cells.require(this)
     }
 }
