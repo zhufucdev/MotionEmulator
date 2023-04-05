@@ -5,7 +5,7 @@ import com.amap.api.maps.MapsInitializer
 import com.amap.api.maps.model.LatLng
 import com.amap.api.services.core.LatLonPoint
 import com.zhufucdev.motion_emulator.data.*
-import io.ktor.client.call.*
+import io.ktor.client.call.body
 import io.ktor.client.request.*
 import io.ktor.http.*
 import kotlinx.serialization.json.JsonObject
