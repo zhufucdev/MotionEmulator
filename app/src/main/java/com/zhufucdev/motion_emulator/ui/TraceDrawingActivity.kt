@@ -325,6 +325,7 @@ class TraceDrawingActivity : AppCompatActivity() {
                                     .setAnchorView(binding.toolSlots)
                                     .show()
                             }
+                            traces.clear()
                         }
                     }
                     false
