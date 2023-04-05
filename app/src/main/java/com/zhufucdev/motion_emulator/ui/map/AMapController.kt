@@ -5,11 +5,12 @@ import android.location.Location
 import com.amap.api.maps.AMap
 import com.amap.api.maps.AMapUtils
 import com.amap.api.maps.CameraUpdateFactory
-import com.amap.api.maps.LocationSource
 import com.amap.api.maps.model.*
 import com.zhufucdev.motion_emulator.*
 import com.zhufucdev.motion_emulator.data.Point
 import com.zhufucdev.motion_emulator.data.Trace
+import kotlin.math.ln
+import kotlin.math.pow
 
 class AMapController(private val map: AMap, context: Context) : MapController(context) {
     init {
@@ -25,6 +26,21 @@ class AMapController(private val map: AMap, context: Context) : MapController(co
                 displayStyle = MapStyle.NORMAL
             }
         }
+
+        var zoom = map.cameraPosition.zoom
+        map.addOnCameraChangeListener(object : AMap.OnCameraChangeListener {
+            override fun onCameraChange(cam: CameraPosition) {
+                val locationIndicator = locationIndicator ?: return
+                if (map.cameraPosition.zoom != zoom) {
+                    zoom = cam.zoom
+                    redrawLocationIndicator(locationIndicator.center)
+                }
+            }
+
+            override fun onCameraChangeFinish(p0: CameraPosition?) {
+
+            }
+        })
     }
 
     private val lineColor get() = getAttrColor(com.google.android.material.R.attr.colorTertiary, context)
@@ -131,16 +147,6 @@ class AMapController(private val map: AMap, context: Context) : MapController(co
     private var accuracyIndicator: Circle? = null
     override fun updateLocationIndicator(location: Location) {
         val point = location.toPoint().ensureAmapCoordinate(context).toAmapLatLng()
-        locationIndicator?.remove()
-        locationIndicator = map.addCircle(
-            CircleOptions().apply {
-                center(point)
-                fillColor(indicatorColor)
-                strokeColor(indicatorStroke)
-                strokeWidth(0.5F)
-                radius(30.0 / map.cameraPosition.zoom)
-            }
-        )
         accuracyIndicator?.remove()
         accuracyIndicator = map.addCircle(
             CircleOptions().apply {
@@ -148,6 +154,21 @@ class AMapController(private val map: AMap, context: Context) : MapController(co
                 strokeColor(0)
                 fillColor(android.graphics.Color.argb(100, 30, 136, 229))
                 radius(location.accuracy * 1.0)
+            }
+        )
+        redrawLocationIndicator(point)
+    }
+
+    private fun redrawLocationIndicator(point: LatLng) {
+        locationIndicator?.remove()
+        locationIndicator = map.addCircle(
+            CircleOptions().apply {
+                center(point)
+                fillColor(indicatorColor)
+                strokeColor(indicatorStroke)
+                strokeWidth(5F)
+                radius(1_048_576 / 2.0.pow(map.cameraPosition.zoom.toDouble()))
+                zIndex(10F)
             }
         )
     }
