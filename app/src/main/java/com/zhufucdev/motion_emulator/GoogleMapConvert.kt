@@ -12,7 +12,7 @@ import kotlin.coroutines.suspendCoroutine
 
 fun Vector2D.toGoogleLatLng() = LatLng(x, y)
 
-fun LatLng.toPoint() = Point(latitude, longitude)
+fun LatLng.toPoint() = Point(latitude, longitude, CoordinateSystem.WGS84)
 
 suspend fun getAddressWithGoogle(target: LatLng, context: Context): String? =
     suspendCoroutine { res ->

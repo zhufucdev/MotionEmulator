@@ -194,7 +194,7 @@ abstract class MapController(protected val context: Context) {
                 val name = address
                     ?.let { context.getString(R.string.text_near, it) }
                     ?: context.effectiveTimeFormat().dateString()
-                val result = DrawResult(name, points, CoordinateSystem.GCJ02)
+                val result = DrawResult(name, points, points.first().coordinateSystem)
                 completeListener?.invoke(result)
                 return result
             }
