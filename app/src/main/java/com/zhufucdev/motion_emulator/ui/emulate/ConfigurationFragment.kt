@@ -117,7 +117,7 @@ class ConfigurationFragment : Fragment(), MenuProvider {
         findNavController()
             .navigate(
                 R.id.action_configurationFragment_to_emulateStatusFragment,
-                bundleOf("trace" to traceId)
+                bundleOf("target_trace" to traceId)
             )
         btnRun.hide()
     }

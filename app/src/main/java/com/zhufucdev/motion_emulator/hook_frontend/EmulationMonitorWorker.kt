@@ -19,11 +19,14 @@ class EmulationMonitorWorker(appContext: Context, workerParameters: WorkerParame
 
     override suspend fun doWork(): Result {
         while (true) {
-            val emulation = Scheduler.emulation
-            val status = Scheduler.intermediate
-            if (emulation == null) break
+            if (Scheduler.emulation == null) break
 
-            setForeground(createForegroundInfo(status?.progress ?: -1F))
+            val progress =
+                if (Scheduler.intermediate.size == 1)
+                    Scheduler.intermediate.values.first().progress
+                else
+                    -1F
+            setForeground(createForegroundInfo(progress))
             delay(1.0.seconds)
         }
         return Result.success()

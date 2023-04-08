@@ -9,7 +9,6 @@ import com.amap.api.maps.model.*
 import com.zhufucdev.motion_emulator.*
 import com.zhufucdev.motion_emulator.data.Point
 import com.zhufucdev.motion_emulator.data.Trace
-import kotlin.math.ln
 import kotlin.math.pow
 
 class AMapController(private val map: AMap, context: Context) : MapController(context) {
@@ -132,7 +131,8 @@ class AMapController(private val map: AMap, context: Context) : MapController(co
 
     override fun drawTrace(trace: Trace): MapTraceCallback {
         val options = PolylineOptions()
-        options.addAll(trace.points.map { it.toAmapLatLng() }.plus(trace.points[0].toAmapLatLng())) // closed shape
+        options.addAll(trace.points.map { it.ensureAmapCoordinate(context).toAmapLatLng() }
+            .plus(trace.points[0].ensureAmapCoordinate(context).toAmapLatLng())) // closed shape
         options.color(lineColor)
         val line = map.addPolyline(options)
 

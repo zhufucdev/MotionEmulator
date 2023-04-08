@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.work.ExistingWorkPolicy
@@ -16,20 +15,19 @@ import androidx.work.WorkManager
 import com.zhufucdev.motion_emulator.R
 import com.zhufucdev.motion_emulator.data.Traces
 import com.zhufucdev.motion_emulator.databinding.FragmentEmulateStatusBinding
-import com.zhufucdev.motion_emulator.hook.android
-import com.zhufucdev.motion_emulator.hook_frontend.*
+import com.zhufucdev.motion_emulator.hook_frontend.Emulation
+import com.zhufucdev.motion_emulator.hook_frontend.EmulationMonitorWorker
+import com.zhufucdev.motion_emulator.hook_frontend.Scheduler
 import com.zhufucdev.motion_emulator.lazySharedPreferences
 import com.zhufucdev.motion_emulator.skipAmapFuckingLicense
-import com.zhufucdev.motion_emulator.toFixed
+import com.zhufucdev.motion_emulator.ui.map.MapTraceCallback
 import com.zhufucdev.motion_emulator.ui.map.TraceBounds
 import com.zhufucdev.motion_emulator.ui.map.UnifiedMapFragment
 import kotlinx.coroutines.launch
-import kotlin.math.roundToInt
 
 class EmulateStatusFragment : Fragment() {
     private lateinit var binding: FragmentEmulateStatusBinding
-    private val listeners = mutableSetOf<ListenCallback>()
-    private lateinit var emulation: Emulation
+    private val emulation: Emulation = Scheduler.emulation!!
     private val preferences by lazySharedPreferences()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -51,138 +49,27 @@ class EmulateStatusFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        initializeMonitors()
         lifecycleScope.launch {
-            initializeMap()
+            initializeMonitors()
         }
     }
 
+    private var previousTrace: MapTraceCallback? = null
     private suspend fun initializeMap() {
         val controller = binding.mapMotionPreview.requireController()
-        addIntermediateListener {
-            activity?.runOnUiThread {
-                controller.updateLocationIndicator(it.location.android())
-            }
-        }
 
         arguments?.let {
-            val traceId = it.getString("trace") ?: return@let
+            val traceId = it.getString("target_trace") ?: return@let
             val trace = Traces[traceId] ?: return@let
-            controller.drawTrace(trace)
+            previousTrace?.remove()
+            previousTrace = controller.drawTrace(trace)
             controller.boundCamera(TraceBounds(trace))
         }
     }
 
     private fun initializeMonitors() {
-        val expander = binding.layoutBottomSheet.stackMonitors
-        val title = binding.layoutBottomSheet.titleEmulationStatus
-        val caption = binding.layoutBottomSheet.textEmulationStatus
-        val btnAction = binding.layoutBottomSheet.btnDetermine
-        val progressBar = binding.layoutBottomSheet.progressEmulation
-        val velocity = expander.textStatusVelocity
-        val time = expander.textStatusTime
-        val length = expander.textStatusLength
-        val context = requireContext()
-        val span = progressBar.max
-
-        fun notifyTime(remaining: Double) {
-            val t = remaining.toFixed(2)
-            time.text =
-                context.getString(
-                    R.string.status_remaining,
-                    "$t ${context.getString(R.string.suffix_second)}"
-                )
-        }
-
-        fun notifyStopped() {
-            title.text = getString(R.string.title_emulation_stopped)
-            expander.root.isVisible = false
-            caption.isVisible = false
-            btnAction.setOnClickListener {
-                Scheduler.emulation = emulation
-            }
-            btnAction.setText(R.string.action_restart)
-            btnAction.isVisible = true
-            progressBar.isVisible = false
-        }
-
-        fun notifyStarted(info: EmulationInfo) {
-            emulation = Scheduler.emulation!!
-
-            title.setText(R.string.title_emulation_ongoing)
-            velocity.text =
-                context.getString(
-                    R.string.status_velocity,
-                    "${Scheduler.emulation!!.velocity} ${context.getString(R.string.suffix_velocity)}"
-                )
-            length.text =
-                context.getString(
-                    R.string.status_total,
-                    "${info.length.toFixed(2)}${context.getString(R.string.suffix_meter)}"
-                )
-            notifyTime(info.duration)
-            expander.root.isVisible = true
-            caption.isVisible = false
-
-            btnAction.setOnClickListener {
-                Scheduler.emulation = null
-            }
-            btnAction.setText(R.string.action_determine)
-            btnAction.isVisible = true
-            progressBar.isIndeterminate = false
-            progressBar.isVisible = true
-        }
-
-        fun notifyPending() {
-            emulation = Scheduler.emulation!!
-            title.setText(R.string.title_emulation_pending)
-            caption.setText(R.string.text_emulation_pending)
-            expander.root.isVisible = false
-            btnAction.isVisible = false
-            progressBar.isIndeterminate = true
-            progressBar.isVisible = true
-        }
-
-        addIntermediateListener {
-            activity?.runOnUiThread {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    progressBar.setProgress((span * it.progress).roundToInt(), true)
-                } else {
-                    progressBar.progress = (span * it.progress).roundToInt()
-                }
-                Scheduler.info?.duration?.let { t -> t - it.elapsed }?.let {
-                    notifyTime(it)
-                }
-            }
-        }
-
-        fun stateListener(running: Boolean) {
-            val info = Scheduler.info
-            if (running) {
-                if (info != null) {
-                    notifyStarted(info)
-                } else {
-                    notifyPending()
-                }
-            } else {
-                notifyStopped()
-            }
-        }
-
-        stateListener(Scheduler.emulation != null)
-        addEmulationStateListener { running ->
-            activity?.runOnUiThread {
-                stateListener(running)
-            }
-        }
-    }
-
-    private fun addIntermediateListener(l: (Intermediate) -> Unit) {
-        listeners.add(Scheduler.addIntermediateListener(l))
-    }
-
-    private fun addEmulationStateListener(l: (Boolean) -> Unit) {
-        listeners.add(Scheduler.onEmulationStateChanged(l))
+        val viewPager = binding.viewpagerStatus
+        viewPager.adapter = EmulationCardAdapter(this, emulation, binding.mapMotionPreview)
     }
 
     private fun addMonitorWorker() {
@@ -211,12 +98,13 @@ class EmulateStatusFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         removeMonitorWorker()
+        lifecycleScope.launch {
+            initializeMap()
+        }
     }
 
     override fun onStop() {
         super.onStop()
-
-        listeners.forEach { it.cancel() }
         addMonitorWorker()
     }
 

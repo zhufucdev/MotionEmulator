@@ -10,6 +10,7 @@ import android.net.Uri
 import com.zhufucdev.motion_emulator.data.*
 import com.zhufucdev.motion_emulator.hook.EMULATION_START
 import com.zhufucdev.motion_emulator.hook.EMULATION_STOP
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
@@ -63,7 +64,11 @@ class EventProvider : ContentProvider() {
         }
 
         return when (matcher.match(uri)) {
-            REQUEST_NEXT -> present(Scheduler.queue())
+            REQUEST_NEXT -> runBlocking {
+                val id = selectionArgs?.get(0)
+                    ?: error("No id provided. Is the app running an old version of hook?")
+                present(Scheduler.queue(id))
+            }
             REQUEST_CURRENT -> present(Scheduler.emulation)
             else -> null
         }
@@ -89,12 +94,14 @@ class EventProvider : ContentProvider() {
             when (selection) {
                 "state" -> {
                     val running = values.getAsBoolean("state")
+                    val id = values.getAsString("id")
                     if (!running) {
-                        Scheduler.emulation = null
+                        Scheduler.setInfo(id, null)
                     } else {
                         val duration = values.getAsDouble("duration")
                         val length = values.getAsDouble("length")
-                        Scheduler.info = EmulationInfo(duration, length)
+                        val owner = values.getAsString("owner")
+                        Scheduler.setInfo(id, EmulationInfo(duration, length, owner))
                     }
                     return 0
                 }
@@ -104,7 +111,8 @@ class EventProvider : ContentProvider() {
                     val coordSys = CoordinateSystem.values()[values.getAsInteger("coord_sys")]
                     val position = Point(values.getAsDouble("pos_la"), values.getAsDouble("pos_lg"), coordSys)
                     val elapsed = values.getAsDouble("elapsed")
-                    Scheduler.intermediate = Intermediate(position, elapsed, progress)
+                    val id = values.getAsString("id")
+                    Scheduler.setIntermediate(id, Intermediate(position, elapsed, progress))
                     return 0
                 }
             }

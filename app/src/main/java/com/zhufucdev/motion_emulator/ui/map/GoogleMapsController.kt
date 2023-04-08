@@ -112,7 +112,8 @@ class GoogleMapsController(context: Context, private val map: GoogleMap) : MapCo
     override fun drawTrace(trace: Trace): MapTraceCallback {
         val line = map.addPolyline {
             color(lineColor)
-            addAll(trace.points.map { it.toGoogleLatLng() }.plus(trace.points[0].toGoogleLatLng()))
+            addAll(trace.points.map { it.ensureGoogleCoordinate().toGoogleLatLng() }
+                .plus(trace.points[0].ensureGoogleCoordinate().toGoogleLatLng()))
         }
         return object : MapTraceCallback {
             override fun remove() {

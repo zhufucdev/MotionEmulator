@@ -137,7 +137,7 @@
     <string name="text_selected_items">已选择%d项</string>
     <string name="title_select_to_export">导出选中项</string>
     <string name="text_empty_list">空列表</string>
-    <string name="title_send_to">分享到...</string>
+    <string name="title_send_to">分享到…</string>
     <string name="text_imported">导入了%d条记录</string>
     <string name="title_activity_settings">设置</string>
     <string name="title_settings_map">地图</string>
@@ -165,9 +165,12 @@
     <string name="action_cancel">取消</string>
     <string name="action_pause">暂停</string>
     <string name="action_unpause">继续</string>
-    <string name="text_gps_pending">等待GPS定位...</string>
+    <string name="text_gps_pending">等待GPS定位</string>
     <string name="title_no_gps_provider">不支持GPS</string>
     <string name="text_no_gps_provider">你的手机不支持GPS位置提供器</string>
     <string name="text_unsaved_trace">有尚未保存的路径数据，确定要退出吗？</string>
     <string name="title_unsaved_trace">未保存的路径</string>
+    <string name="text_app_received">%s已响应</string>
+    <string name="text_emulation_app_pending">等待应用响应</string>
+    <string name="text_swipe_to_see_more">滑动卡片了解详细</string>
 </resources>

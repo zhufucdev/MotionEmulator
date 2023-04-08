@@ -7,12 +7,12 @@ import android.database.Cursor
 import android.hardware.Sensor
 import android.net.Uri
 import android.os.SystemClock
+import com.aventrix.jnanoid.jnanoid.NanoIdUtils
 import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.highcapable.yukihookapi.hook.log.loggerI
 import com.zhufucdev.motion_emulator.data.*
 import com.zhufucdev.motion_emulator.hook_frontend.AUTHORITY
 import com.zhufucdev.motion_emulator.toPoint
-import io.ktor.http.*
 import kotlinx.coroutines.*
 import kotlinx.serialization.json.Json
 import kotlin.random.Random
@@ -20,8 +20,10 @@ import kotlin.time.Duration.Companion.seconds
 
 object Scheduler {
     private const val TAG = "Scheduler"
+    private val id = NanoIdUtils.randomNanoId()
 
     private lateinit var eventResolver: ContentResolver
+    private lateinit var packageName: String
     private val nextUri = Uri.parse("content://$AUTHORITY/next")
     private val stateUri = Uri.parse("content://$AUTHORITY/state")
     private val currentUri = Uri.parse("content://$AUTHORITY/current")
@@ -32,6 +34,7 @@ object Scheduler {
     fun init(context: Context) {
         if (::eventResolver.isInitialized) return
         eventResolver = context.contentResolver
+        packageName = context.applicationContext.packageName
         GlobalScope.launch {
             eventLoop()
         }
@@ -64,8 +67,9 @@ object Scheduler {
             updateState(started)
         }
 
+        val queryArgs = arrayOf(id)
         // query existing state
-        eventResolver.query(currentUri, null, null, null, null)?.use { cursor ->
+        eventResolver.query(currentUri, null, null, queryArgs, null)?.use { cursor ->
             cursor.moveToNext()
             if (cursor.getInt(0) == EMULATION_START) {
                 handleStart(cursor)
@@ -74,7 +78,7 @@ object Scheduler {
 
         // enter event loop
         while (true) {
-            eventResolver.query(nextUri, null, null, null, null)?.use { cursor ->
+            eventResolver.query(nextUri, null, null, queryArgs, null)?.use { cursor ->
                 cursor.moveToNext()
                 when (cursor.getInt(0)) {
                     EMULATION_START -> handleStart(cursor)
@@ -257,9 +261,9 @@ object Scheduler {
         }
     }
 
-
     private fun notifyProgress() {
         val values = ContentValues()
+        values.put("id", id)
         values.put("progress", progress)
         values.put("pos_la", mLocation!!.latitude)
         values.put("pos_lg", mLocation!!.longitude)
@@ -270,7 +274,9 @@ object Scheduler {
 
     private fun updateState(running: Boolean) {
         val values = ContentValues()
-        loggerI(TAG, "updated state = $running")
+        loggerI(TAG, "updated state[$id] = $running")
+        values.put("id", id)
+        values.put("owner", packageName)
         values.put("state", running)
         if (running) {
             values.put("duration", duration)

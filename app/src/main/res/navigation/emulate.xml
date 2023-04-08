@@ -8,7 +8,9 @@
             android:id="@+id/emulateStatusFragment"
             android:name="com.zhufucdev.motion_emulator.ui.emulate.EmulateStatusFragment"
             android:label="fragment_emulate_status"
-            tools:layout="@layout/fragment_emulate_status"/>
+            tools:layout="@layout/fragment_emulate_status">
+        <argument android:name="target_trace" app:argType="string" app:nullable="true"/>
+    </fragment>
     <fragment
             android:id="@+id/configurationFragment"
             android:name="com.zhufucdev.motion_emulator.ui.emulate.ConfigurationFragment"

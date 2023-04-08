@@ -3,7 +3,7 @@ package com.zhufucdev.motion_emulator.hook_frontend
 import android.util.Log
 import com.zhufucdev.motion_emulator.data.*
 import kotlinx.serialization.Serializable
-import java.util.concurrent.FutureTask
+import kotlin.coroutines.suspendCoroutine
 
 data class Emulation(
     val trace: Trace,
@@ -26,67 +26,100 @@ data class EmulationRef(
 
 data class Intermediate(val location: Point, val elapsed: Double, val progress: Float)
 
-data class EmulationInfo(val duration: Double, val length: Double)
+data class EmulationInfo(val duration: Double, val length: Double, val owner: String)
 
 object Scheduler {
-    private var fts = mutableSetOf<FutureTask<Unit>>()
-    private val stateListeners = mutableSetOf<(Boolean) -> Unit>()
-    private val intermediateListeners = mutableSetOf<(Intermediate) -> Unit>()
+    private val emulationQueue = mutableMapOf<String, (Emulation?) -> Unit>()
+    private val stateListeners = mutableSetOf<(String, Boolean) -> Unit>()
+    private val intermediateListeners = mutableSetOf<(String, Intermediate) -> Unit>()
 
     private var mEmulation: Emulation? = null
-    private var mInfo: EmulationInfo? = null
-    private var mIntermediate: Intermediate? = null
+    private val mInfo: MutableMap<String, EmulationInfo> = hashMapOf()
+    private val mIntermediate: MutableMap<String, Intermediate> = hashMapOf()
 
-    var intermediate: Intermediate?
-        set(value) {
-            if (value != null) {
-                intermediateListeners.forEach { it.invoke(value) }
-            }
-            mIntermediate = value
+    fun setIntermediate(id: String, info: Intermediate?) {
+        if (info != null) {
+            mIntermediate[id] = info
+            intermediateListeners.forEach { it.invoke(id, info) }
+        } else {
+            mIntermediate.remove(id)
         }
-        get() = mIntermediate
-    var info: EmulationInfo?
-        set(value) {
-            mInfo = value
-            Log.d("Scheduler", "info updated with $value")
-            stateListeners.forEach { it.invoke(emulation != null) }
+    }
+
+    val intermediate: Map<String, Intermediate> get() = mIntermediate
+
+    fun setInfo(id: String, info: EmulationInfo?) {
+        if (info != null) {
+            mInfo[id] = info
+            Log.d("Scheduler", "info[$id] updated with $info")
+        } else {
+            mInfo.remove(id)
+            emulationQueue[id]?.invoke(null)
+            emulationQueue.remove(id)
+            Log.d("Scheduler", "info[$id] has been removed")
         }
-        get() = mInfo
+        stateListeners.forEach { it.invoke(id, info != null) }
+    }
+
+    val info: Map<String, EmulationInfo> get() = mInfo
 
     var emulation: Emulation?
         set(value) {
             mEmulation = value
             if (value == null) {
-                mInfo = null
+                mInfo.clear()
             }
-            fts.forEach { it.run() }
-            stateListeners.forEach { it.invoke(value != null) }
+            emulationQueue.forEach { (_, queue) -> queue.invoke(value) }
+            emulationQueue.clear()
         }
         get() = mEmulation
 
-    fun queue(): Emulation? {
-        val ft = FutureTask({}, Unit)
-        fts.add(ft)
-        ft.get()
-        return emulation
+    suspend fun queue(id: String): Emulation? = suspendCoroutine { c ->
+        emulationQueue[id] = { e ->
+            c.resumeWith(Result.success(e))
+        }
     }
 
-    fun onEmulationStateChanged(l: (Boolean) -> Unit): ListenCallback {
+    fun onEmulationStateChanged(l: (String, Boolean) -> Unit): ListenCallback {
         stateListeners.add(l)
 
         return object : ListenCallback {
             override fun cancel() {
+                if (!stateListeners.contains(l)) {
+                    throw IllegalStateException("Already cancelled")
+                }
+
                 stateListeners.remove(l)
+            }
+
+            override fun resume() {
+                if (stateListeners.contains(l)) {
+                    throw IllegalStateException("Already resumed")
+                }
+
+                stateListeners.add(l)
             }
         }
     }
 
-    fun addIntermediateListener(l: (Intermediate) -> Unit): ListenCallback {
+    fun addIntermediateListener(l: (String, Intermediate) -> Unit): ListenCallback {
         intermediateListeners.add(l)
 
         return object : ListenCallback {
             override fun cancel() {
+                if (!intermediateListeners.contains(l)) {
+                    throw IllegalStateException("Already cancelled")
+                }
+
                 intermediateListeners.remove(l)
+            }
+
+            override fun resume() {
+                if (intermediateListeners.contains(l)) {
+                    throw IllegalStateException("Already resumed")
+                }
+
+                intermediateListeners.add(l)
             }
         }
     }
@@ -94,4 +127,5 @@ object Scheduler {
 
 interface ListenCallback {
     fun cancel()
+    fun resume()
 }

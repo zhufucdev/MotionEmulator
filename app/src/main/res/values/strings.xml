@@ -62,7 +62,7 @@
     <string name="status_velocity">running at %s</string>
     <string name="status_total">%s in total</string>
     <string name="status_remaining">%s to go</string>
-    <string name="action_determine">determine</string>
+    <string name="action_determine">Determine</string>
     <string name="suffix_meter">m</string>
     <string name="suffix_second">s</string>
     <string name="title_emulation_stopped">Emulation Stopped</string>
@@ -144,7 +144,7 @@
     <string name="text_selected_items">%d item(s) selected</string>
     <string name="title_select_to_export">Select to Export</string>
     <string name="text_empty_list">empty list</string>
-    <string name="title_send_to">Send to ...</string>
+    <string name="title_send_to">Send to …</string>
     <string name="text_imported">%d records were imported</string>
     <string name="title_activity_settings">Settings</string>
     <string name="title_settings_map">Maps</string>
@@ -172,10 +172,13 @@
     <string name="action_cancel">Cancel</string>
     <string name="action_pause">Pause</string>
     <string name="action_unpause">Unpause</string>
-    <string name="text_gps_pending">Waiting for GPS location...</string>
+    <string name="text_gps_pending">Waiting for GPS location</string>
     <string name="title_no_gps_provider">No GPS Support</string>
     <string name="text_no_gps_provider">GPS location provider is not supported on your phone</string>
     <string name="title_unsaved_trace">Unsaved Trace</string>
     <string name="text_unsaved_trace">There are trace data that\'s not saved yet. Do you know what you are doing?
     </string>
+    <string name="text_app_received">%s has picked up</string>
+    <string name="text_emulation_app_pending">waiting for the app to pick up</string>
+    <string name="text_swipe_to_see_more">Swipe between the cards to see the details</string>
 </resources>
