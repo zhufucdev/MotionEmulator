@@ -57,6 +57,7 @@ class EmulationControlFragment : EmulationMonitoringFragment() {
 
         binding.btnDetermine.setOnClickListener {
             Scheduler.emulation = null
+            notifyStopped()
         }
     }
 
