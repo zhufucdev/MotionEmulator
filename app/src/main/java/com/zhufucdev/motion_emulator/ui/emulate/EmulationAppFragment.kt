@@ -97,8 +97,9 @@ class EmulationAppFragment : EmulationMonitoringFragment() {
 
     private fun notifyStopped() {
         binding.titleEmulationStatus.text = getString(R.string.title_emulation_stopped)
+        binding.textEmulationStatus.isVisible = true
         binding.stackMonitors.root.isVisible = false
-        binding.textEmulationStatus.isVisible = false
+        binding.stackAppReceived.root.isVisible = false
         binding.btnDetermine.setOnClickListener {
             Scheduler.emulation = emulation
             notifyPending()
@@ -112,7 +113,8 @@ class EmulationAppFragment : EmulationMonitoringFragment() {
         val app = binding.stackAppReceived
         val context = requireContext()
 
-        binding.titleEmulationStatus.setText(R.string.title_emulation_ongoing)
+        binding.titleEmulationStatus.text =
+            context.getString(R.string.title_named_emulation_ongoing, id.substring(0..4))
         val appInfo = AppMeta.of(
             packageManager.getApplicationInfo(info.owner, PackageManager.GET_META_DATA),
             packageManager,

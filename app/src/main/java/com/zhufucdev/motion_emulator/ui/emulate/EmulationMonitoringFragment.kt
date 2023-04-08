@@ -20,8 +20,8 @@ abstract class EmulationMonitoringFragment : Fragment() {
         listeners.add(Scheduler.onEmulationStateChanged(l))
     }
 
-    override fun onStop() {
-        super.onStop()
+    override fun onPause() {
+        super.onPause()
         listeners.forEach {
             try {
                 it.cancel()
