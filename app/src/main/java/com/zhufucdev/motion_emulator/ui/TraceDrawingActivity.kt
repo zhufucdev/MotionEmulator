@@ -400,6 +400,10 @@ class TraceDrawingActivity : AppCompatActivity() {
     }
 
     private suspend fun useGps(): GpsToolCallback {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 0)
+        }
+
         val pendingMsg =
             Snackbar.make(binding.root, R.string.text_gps_pending, Snackbar.LENGTH_INDEFINITE)
                 .setAnchorView(binding.toolSlots)
