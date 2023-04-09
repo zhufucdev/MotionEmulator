@@ -173,5 +173,5 @@
     <string name="text_app_received">%s已响应</string>
     <string name="text_emulation_app_pending">等待应用响应</string>
     <string name="text_swipe_to_see_more">滑动卡片了解详细</string>
-    <string name="title_named_emulation_ongoing">模拟%s正在进行</string>
+    <string name="title_named_emulation_ongoing">模拟#%s正在进行</string>
 </resources>
