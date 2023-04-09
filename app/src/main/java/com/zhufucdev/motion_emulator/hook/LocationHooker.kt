@@ -34,7 +34,7 @@ import kotlin.reflect.jvm.isAccessible
 object LocationHooker : YukiBaseHooker() {
     private const val TAG = "Location Hook"
 
-    private val listeners = arrayListOf<(Point) -> Unit>()
+    private val listeners = mutableMapOf<Any, (Point) -> Unit>()
     override fun onHook() {
         invalidateOthers()
         hookGPS()
@@ -43,13 +43,17 @@ object LocationHooker : YukiBaseHooker() {
     }
 
     fun raise(point: Point) {
-        listeners.forEach {
-            it.invoke(point)
+        listeners.forEach { (_, p) ->
+            p.invoke(point)
         }
     }
 
-    private fun redirectListener(l: (Point) -> Unit) {
-        listeners.add(l)
+    private fun redirectListener(original: Any, l: (Point) -> Unit) {
+        listeners[original] = l
+    }
+
+    private fun cancelRedirection(listener: Any) {
+        listeners.remove(listener)
     }
 
     /**
@@ -187,12 +191,24 @@ object LocationHooker : YukiBaseHooker() {
                     if (Scheduler.satellites <= 0) return@replaceAny callOriginal()
 
                     val listener = args.firstOrNull { it is LocationListener } as LocationListener?
+                        ?: return@replaceAny callOriginal()
                     val provider = args.firstOrNull { it is String } as String? ?: LocationManager.GPS_PROVIDER
-                    redirectListener {
+                    redirectListener(listener) {
                         val location = it.android(provider)
-                        listener?.onLocationChanged(location)
+                        listener.onLocationChanged(location)
                     }
-                    listener?.onLocationChanged(Scheduler.location.android(provider))
+                    listener.onLocationChanged(Scheduler.location.android(provider))
+                }
+            }
+
+            injectMember {
+                method {
+                    name = "removeUpdates"
+                    param(classOf<LocationListener>())
+                }
+                replaceAny {
+                    val listener = args(0)
+                    cancelRedirection(listener)
                 }
             }
 
@@ -412,8 +428,9 @@ object LocationHooker : YukiBaseHooker() {
 
                 replaceAny {
                     val listener = args(0).cast<AMapLocationListener>()
-                    redirectListener {
-                        listener?.onLocationChanged(it.amap())
+                        ?: return@replaceAny callOriginal()
+                    redirectListener(listener) {
+                        listener.onLocationChanged(it.amap())
                         loggerI(TAG, "AMap location received")
                     }
                     loggerI(TAG, "AMap location registered")
