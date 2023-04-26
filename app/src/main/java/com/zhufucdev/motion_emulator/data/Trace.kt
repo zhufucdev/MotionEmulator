@@ -1,5 +1,6 @@
 package com.zhufucdev.motion_emulator.data
 
+import com.zhufucdev.motion_emulator.BuildConfig
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
@@ -108,7 +109,7 @@ object Traces : DataStore<Trace>() {
 
 class TraceSerializer : KSerializer<Trace> {
     override val descriptor: SerialDescriptor =
-        buildClassSerialDescriptor("com.zhufucdev.motion_emulator.data.Trace") {
+        buildClassSerialDescriptor("${BuildConfig.APPLICATION_ID}.data.Trace") {
             element("id", serialDescriptor<Int>())
             element("name", serialDescriptor<String>())
             element("coordSys", serialDescriptor<CoordinateSystem>(), isOptional = true)
@@ -151,7 +152,7 @@ class TraceSerializer : KSerializer<Trace> {
 
 class PointSerializer : KSerializer<Point> {
     override val descriptor: SerialDescriptor =
-        buildClassSerialDescriptor("com.zhufucdev.motion_emulator.data.Point") {
+        buildClassSerialDescriptor("${BuildConfig.APPLICATION_ID}.data.Point") {
             element("latitude", serialDescriptor<Double>())
             element("longitude", serialDescriptor<Double>())
         }

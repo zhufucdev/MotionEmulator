@@ -1,42 +1,51 @@
 package com.zhufucdev.motion_emulator.hook
 
-import android.content.ContentResolver
 import android.content.ContentValues
 import android.content.Context
-import android.database.Cursor
 import android.hardware.Sensor
-import android.net.Uri
 import android.os.SystemClock
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils
 import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.highcapable.yukihookapi.hook.log.loggerI
+import com.highcapable.yukihookapi.hook.param.PackageParam
 import com.zhufucdev.motion_emulator.data.*
-import com.zhufucdev.motion_emulator.hook_frontend.AUTHORITY
+import com.zhufucdev.motion_emulator.data.Intermediate
 import com.zhufucdev.motion_emulator.toPoint
+import io.ktor.client.*
+import io.ktor.client.call.*
+import io.ktor.client.engine.android.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.request.*
+import io.ktor.http.*
+import io.ktor.serialization.kotlinx.json.*
 import kotlinx.coroutines.*
-import kotlinx.serialization.json.Json
 import kotlin.random.Random
 import kotlin.time.Duration.Companion.seconds
 
+@OptIn(DelicateCoroutinesApi::class)
 object Scheduler {
     private const val TAG = "Scheduler"
+    private const val LOCALHOST = "http://127.0.0.1"
     private val id = NanoIdUtils.randomNanoId()
-
-    private lateinit var eventResolver: ContentResolver
     private lateinit var packageName: String
-    private val nextUri = Uri.parse("content://$AUTHORITY/next")
-    private val stateUri = Uri.parse("content://$AUTHORITY/state")
-    private val currentUri = Uri.parse("content://$AUTHORITY/current")
 
     private val jobs = arrayListOf<Job>()
+    private val httpClient = HttpClient(Android) {
+        install(ContentNegotiation) {
+            json()
+        }
+    }
 
-    @OptIn(DelicateCoroutinesApi::class)
-    fun init(context: Context) {
-        if (::eventResolver.isInitialized) return
-        eventResolver = context.contentResolver
-        packageName = context.applicationContext.packageName
+    fun PackageParam.init(context: Context) {
+        this@Scheduler.packageName = context.applicationContext.packageName
         GlobalScope.launch {
             eventLoop()
+            loggerI(tag = TAG, msg = "Provider offline. Waiting for data channel broadcast")
+            dataChannel.wait("provider_online") {
+                GlobalScope.launch {
+                    eventLoop()
+                }
+            }
         }
         loggerI(TAG, "Event loop started")
     }
@@ -55,39 +64,33 @@ object Scheduler {
     }
 
     private suspend fun eventLoop() {
-        fun handleStart(cursor: Cursor) {
-            cursor.moveToNext()
-            val trace = cursor.getString(0)
-            val motion = cursor.getString(1)
-            val cells = cursor.getString(2)
-            val velocity = cursor.getDouble(3)
-            val repeat = cursor.getInt(4)
-            val satellites = cursor.getInt(5)
-            val started = startEmulation(trace, motion, cells, velocity, repeat, satellites)
-            updateState(started)
-        }
-
         val queryArgs = arrayOf(id)
         // query existing state
-        eventResolver.query(currentUri, null, null, queryArgs, null)?.use { cursor ->
-            cursor.moveToNext()
-            if (cursor.getInt(0) == EMULATION_START) {
-                handleStart(cursor)
+        httpClient.get("$LOCALHOST/current").apply {
+            if (status == HttpStatusCode.OK) {
+                val emulation = body<Emulation>()
+                startEmulation(emulation)
+            } else {
+                return
             }
         }
 
         // enter event loop
         while (true) {
-            eventResolver.query(nextUri, null, null, queryArgs, null)?.use { cursor ->
-                cursor.moveToNext()
-                when (cursor.getInt(0)) {
-                    EMULATION_START -> handleStart(cursor)
-                    EMULATION_STOP -> {
-                        hooking = false
-                        jobs.joinAll()
-                        loggerI(tag = TAG, msg = "emulation stopped")
-                        updateState(false)
-                    }
+             val res = httpClient.get("$LOCALHOST/next/${id}")
+
+            when (res.status) {
+                HttpStatusCode.OK -> {
+                    val emulation = res.body<Emulation>()
+                    startEmulation(emulation)
+                }
+                HttpStatusCode.NoContent -> {
+                    hooking = false
+                    jobs.joinAll()
+                    loggerI(tag = TAG, msg = "Emulation stopped")
+                }
+                else -> {
+                    return
                 }
             }
         }
@@ -117,33 +120,24 @@ object Scheduler {
     val motion = MotionMoment(0F, mutableMapOf())
 
     private val stepSensors = intArrayOf(Sensor.TYPE_STEP_COUNTER, Sensor.TYPE_STEP_DETECTOR)
-    private fun startEmulation(
-        traceData: String,
-        motionData: String,
-        cellsData: String,
-        velocity: Double,
-        repeat: Int,
-        satellites: Int
-    ): Boolean {
-        val trace = Json.decodeFromString(Trace.serializer(), traceData)
-        val motion = Box.decodeFromString<Motion>(motionData)
-        val cells = Box.decodeFromString<CellTimeline>(cellsData)
+    private fun startEmulation(emulation: Emulation): Boolean {
+        loggerI(tag = TAG, msg = "Emulation started")
 
-        length = trace.circumference(MapProjector)
-        duration = length / velocity // in seconds
+        length = emulation.trace.circumference(MapProjector)
+        duration = length / emulation.velocity // in seconds
         this.satellites = satellites
 
         val scope = CoroutineScope(Dispatchers.Default)
         hooking = true
         scope.async {
-            for (i in 0 until repeat) {
+            for (i in 0 until emulation.repeat) {
                 start = SystemClock.elapsedRealtime()
 
                 val jobs = mutableSetOf<Job>()
-                startStepsEmulation(motion, velocity)?.let { jobs.add(it) }
-                startMotionSimulation(motion)?.let { jobs.add(it) }
-                startTraceEmulation(trace).let { jobs.add(it) }
-                startCellEmulation(cells)?.let { jobs.add(it) }
+                startStepsEmulation(emulation.motion, emulation.velocity)?.let { jobs.add(it) }
+                startMotionSimulation(emulation.motion)?.let { jobs.add(it) }
+                startTraceEmulation(emulation.trace).let { jobs.add(it) }
+                startCellEmulation(emulation.cells)?.let { jobs.add(it) }
 
                 jobs.addAll(jobs)
                 jobs.joinAll()
@@ -154,7 +148,9 @@ object Scheduler {
             hooking = false
             updateState(false)
             scope.cancel()
-        }.start()
+        }.let {
+            jobs.add(it)
+        }
 
         return true
     }
@@ -261,27 +257,27 @@ object Scheduler {
         }
     }
 
-    private fun notifyProgress() {
-        val values = ContentValues()
-        values.put("id", id)
-        values.put("progress", progress)
-        values.put("pos_la", mLocation!!.latitude)
-        values.put("pos_lg", mLocation!!.longitude)
-        values.put("coord_sys", mLocation!!.coordinateSystem.ordinal)
-        values.put("elapsed", elapsed / 1000.0)
-        eventResolver.update(stateUri, values, "progress", null)
+    private suspend fun notifyProgress() {
+        httpClient.post("$LOCALHOST/indeterminate/${id}") {
+            setBody(
+                Intermediate(
+                    progress = progress,
+                    location = mLocation!!,
+                    elapsed = elapsed / 1000.0
+                )
+            )
+        }
     }
 
-    private fun updateState(running: Boolean) {
-        val values = ContentValues()
-        loggerI(TAG, "updated state[$id] = $running")
-        values.put("id", id)
-        values.put("owner", packageName)
-        values.put("state", running)
+    private suspend fun updateState(running: Boolean) {
+        loggerI(TAG, "Updated state[$id] = $running")
         if (running) {
-            values.put("duration", duration)
-            values.put("length", length)
+            val status = EmulationInfo(duration, length, packageName)
+            httpClient.post("$LOCALHOST/state/${id}/running") {
+                setBody(status)
+            }
+        } else {
+            httpClient.get("$LOCALHOST/state/${id}/stopped")
         }
-        eventResolver.update(stateUri, values, "state", null)
     }
 }

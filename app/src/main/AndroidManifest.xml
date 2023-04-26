@@ -78,10 +78,6 @@
         </activity>
 
         <provider
-                android:name=".hook_frontend.EventProvider"
-                android:authorities="com.zhufucdev.motion_emulator.event_provider"
-                android:exported="true"/>
-        <provider
                 android:name="androidx.core.content.FileProvider"
                 android:authorities="com.zhufucdev.motion_emulator.file_provider"
                 android:exported="false"

@@ -1,18 +1,26 @@
 package com.zhufucdev.motion_emulator.hook_frontend
 
+import android.content.Context
 import android.util.Log
-import com.zhufucdev.motion_emulator.data.*
+import com.highcapable.yukihookapi.hook.factory.dataChannel
+import com.highcapable.yukihookapi.hook.factory.modulePrefs
+import com.zhufucdev.motion_emulator.BuildConfig
+import com.zhufucdev.motion_emulator.data.Emulation
+import com.zhufucdev.motion_emulator.data.EmulationInfo
+import com.zhufucdev.motion_emulator.data.Intermediate
+import io.ktor.http.*
+import io.ktor.serialization.kotlinx.json.*
+import io.ktor.server.application.*
+import io.ktor.server.cio.*
+import io.ktor.server.engine.*
+import io.ktor.server.plugins.contentnegotiation.*
+import io.ktor.server.request.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 import kotlinx.serialization.Serializable
 import kotlin.coroutines.suspendCoroutine
-
-data class Emulation(
-    val trace: Trace,
-    val motion: Box<Motion>,
-    val cells: Box<CellTimeline>,
-    val velocity: Double,
-    val repeat: Int,
-    val satelliteCount: Int
-)
+import kotlin.random.Random
+import kotlin.random.nextInt
 
 @Serializable
 data class EmulationRef(
@@ -24,10 +32,6 @@ data class EmulationRef(
     val satelliteCount: Int
 )
 
-data class Intermediate(val location: Point, val elapsed: Double, val progress: Float)
-
-data class EmulationInfo(val duration: Double, val length: Double, val owner: String)
-
 object Scheduler {
     private val emulationQueue = mutableMapOf<String, (Emulation?) -> Unit>()
     private val stateListeners = mutableSetOf<(String, Boolean) -> Unit>()
@@ -36,6 +40,19 @@ object Scheduler {
     private var mEmulation: Emulation? = null
     private val mInfo: MutableMap<String, EmulationInfo> = hashMapOf()
     private val mIntermediate: MutableMap<String, Intermediate> = hashMapOf()
+
+    private val providerPort = Random.nextInt(2000..20000)
+    private val server: ApplicationEngine =
+        embeddedServer(CIO,
+            host = "127.0.0.1",
+            port = providerPort,
+            module = Application::eventServer)
+
+    fun init(context: Context) {
+        context.modulePrefs("events").putInt("provider_port", providerPort)
+        server.start(false)
+        context.dataChannel(BuildConfig.APPLICATION_ID).put("provider_online") // notify host apps
+    }
 
     fun setIntermediate(id: String, info: Intermediate?) {
         if (info != null) {
@@ -74,7 +91,7 @@ object Scheduler {
         }
         get() = mEmulation
 
-    suspend fun queue(id: String): Emulation? = suspendCoroutine { c ->
+    suspend fun next(id: String): Emulation? = suspendCoroutine { c ->
         emulationQueue[id] = { e ->
             c.resumeWith(Result.success(e))
         }
@@ -128,4 +145,64 @@ object Scheduler {
 interface ListenCallback {
     fun cancel()
     fun resume()
+}
+
+fun Application.eventServer() {
+    install(ContentNegotiation) {
+        json()
+    }
+
+    routing {
+        suspend fun ApplicationCall.respondEmulation(emulation: Emulation?) {
+            if (emulation == null) {
+                respond(HttpStatusCode.NoContent)
+            } else {
+                respond(emulation)
+            }
+        }
+
+        get("/current") {
+            // get the current emulation without blocking
+            call.respondEmulation(Scheduler.emulation)
+        }
+
+        get("/next/{id}") {
+            // use the blocking method to query the next emulation change
+            val id = call.parameters["id"]
+            if (id == null) {
+                call.respond(HttpStatusCode.BadRequest)
+                return@get
+            }
+            val next = Scheduler.next(id)
+            call.respondEmulation(next)
+        }
+
+        post("/indeterminate/{id}") {
+            val id = call.parameters["id"]
+            if (id == null) {
+                call.respond(HttpStatusCode.BadRequest)
+                return@post
+            }
+            Scheduler.setIntermediate(id, call.receive<Intermediate>())
+        }
+
+        post("/state/{id}/running") {
+            val id = call.parameters["id"]
+            if (id == null) {
+                call.respond(HttpStatusCode.BadRequest)
+                return@post
+            }
+            Scheduler.setInfo(id, call.receive())
+        }
+
+        get("/state/{id}/stopped") {
+            val id = call.parameters["id"]
+            if (id == null) {
+                call.respond(HttpStatusCode.BadRequest)
+                return@get
+            }
+            Scheduler.setInfo(id, null)
+            Scheduler.setIntermediate(id, null)
+        }
+    }
 }

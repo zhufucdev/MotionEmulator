@@ -12,6 +12,8 @@ import androidx.core.view.isVisible
 import androidx.core.view.setPadding
 import com.zhufucdev.motion_emulator.R
 import com.zhufucdev.motion_emulator.data.AppMeta
+import com.zhufucdev.motion_emulator.data.Emulation
+import com.zhufucdev.motion_emulator.data.EmulationInfo
 import com.zhufucdev.motion_emulator.databinding.FragmentEmulationAppBinding
 import com.zhufucdev.motion_emulator.hook.android
 import com.zhufucdev.motion_emulator.hook_frontend.*
@@ -25,6 +27,11 @@ class EmulationAppFragment : EmulationMonitoringFragment() {
     private lateinit var packageManager: PackageManager
     var emulation: Emulation? = null
     var map: MapController? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        Scheduler.init(requireContext())
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         packageManager = requireContext().packageManager

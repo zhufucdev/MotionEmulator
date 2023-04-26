@@ -86,8 +86,9 @@ dependencies {
     implementation "io.ktor:ktor-client-serialization-jvm:${ktor_version}"
     implementation "io.ktor:ktor-client-content-negotiation:${ktor_version}"
     implementation "io.ktor:ktor-serialization-kotlinx-json:${ktor_version}"
-//    implementation "io.ktor:ktor-server-core:${ktor_version}"
-//    implementation "io.ktor:ktor-server-cio:${ktor_version}"
+    implementation "io.ktor:ktor-server-core:${ktor_version}"
+    implementation "io.ktor:ktor-server-cio:${ktor_version}"
+    implementation "io.ktor:ktor-server-content-negotiation:${ktor_version}"
     // AndroidX
     implementation 'androidx.core:core-ktx:1.9.0'
     implementation 'androidx.preference:preference:1.2.0'

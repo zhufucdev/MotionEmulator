@@ -18,7 +18,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.preference.PreferenceManager
 import com.zhufucdev.motion_emulator.data.*
-import com.zhufucdev.motion_emulator.hook_frontend.Emulation
+import com.zhufucdev.motion_emulator.data.Emulation
 import com.zhufucdev.motion_emulator.hook_frontend.EmulationRef
 import io.ktor.client.*
 import io.ktor.client.engine.android.*
