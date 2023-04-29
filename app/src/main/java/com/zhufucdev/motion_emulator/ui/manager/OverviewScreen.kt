@@ -25,6 +25,7 @@ import com.zhufucdev.motion_emulator.R
 import com.zhufucdev.motion_emulator.data.Data
 import com.zhufucdev.motion_emulator.dateString
 import com.zhufucdev.motion_emulator.effectiveTimeFormat
+import com.zhufucdev.motion_emulator.ui.VerticalSpacer
 import com.zhufucdev.motion_emulator.ui.component.Expandable
 import com.zhufucdev.motion_emulator.ui.theme.paddingCommon
 import com.zhufucdev.motion_emulator.ui.theme.paddingSmall
@@ -261,6 +262,10 @@ private fun SheetContent(onClick: (Map<Data, String>) -> Unit) {
                     }
                 )
             }
+        }
+
+        item {
+            VerticalSpacer()
         }
     }
 }

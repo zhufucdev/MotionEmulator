@@ -98,7 +98,7 @@ fun BottomSheetModal(
                         }
                         .then(modifier),
                     shape = RoundedCornerShape(topStart = 16F, topEnd = 16F),
-                    color = MaterialTheme.colorScheme.surfaceVariant
+                    color = MaterialTheme.colorScheme.surface
                 ) {
                     Column(
                         Modifier
