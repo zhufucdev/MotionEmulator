@@ -5,6 +5,7 @@ import android.hardware.Sensor
 import android.os.SystemClock
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils
 import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
+import com.highcapable.yukihookapi.hook.log.loggerD
 import com.highcapable.yukihookapi.hook.log.loggerI
 import com.highcapable.yukihookapi.hook.param.PackageParam
 import com.zhufucdev.motion_emulator.data.*
@@ -296,6 +297,6 @@ object Scheduler {
         } else {
             httpClient.get("$providerAddr/state/${id}/stopped")
         }
-        loggerI(TAG, "Updated state[$id] = $running")
+        loggerD(TAG, "Updated state[$id] = $running")
     }
 }

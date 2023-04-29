@@ -16,7 +16,6 @@ class EmulateActivity : AppCompatActivity() {
     private lateinit var binding: ActivityEmulateBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        Scheduler.init(this)
         Traces.require(this)
         Motions.require(this)
         Cells.require(this)
@@ -27,10 +26,5 @@ class EmulateActivity : AppCompatActivity() {
         val navController = findNavController(R.id.nav_host_fragment_activity_emulate)
         initializeToolbar(binding.appBarToolbar, navController)
         setUpStatusBar()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        Scheduler.stop()
     }
 }

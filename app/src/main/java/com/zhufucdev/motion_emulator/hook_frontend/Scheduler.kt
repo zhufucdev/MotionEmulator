@@ -39,11 +39,7 @@ object Scheduler {
     private val mIntermediate: MutableMap<String, Intermediate> = hashMapOf()
 
     private val providerPort = 2023
-    private val server: ApplicationEngine =
-        embeddedServer(CIO,
-            host = "127.0.0.1",
-            port = providerPort,
-            module = Application::eventServer)
+    private lateinit var server: ApplicationEngine
     private var serverRunning = false
 
     fun init(context: Context) {
@@ -51,6 +47,12 @@ object Scheduler {
             Log.w("Schedular", "Reinitialize a running instance")
             return
         }
+
+        server = embeddedServer(CIO,
+            host = "127.0.0.1",
+            port = providerPort,
+            module = Application::eventServer)
+
         context.prefs().edit().putInt("provider_port", providerPort).apply()
         loggerD("Schedular", "Put $providerPort as provider_port")
         server.start(false)

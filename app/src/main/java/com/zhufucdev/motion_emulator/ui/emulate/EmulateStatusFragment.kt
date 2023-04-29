@@ -4,6 +4,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -32,6 +33,7 @@ class EmulateStatusFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Scheduler.init(requireContext())
         skipAmapFuckingLicense(requireContext())
         registerChannel()
     }
@@ -92,6 +94,7 @@ class EmulateStatusFragment : Fragment() {
     override fun onDestroy() {
         super.onDestroy()
         Scheduler.emulation = null
+        Scheduler.stop()
         removeMonitorWorker()
     }
 
