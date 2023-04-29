@@ -79,6 +79,7 @@ ext {
 dependencies {
     // Xposed
     implementation "com.highcapable.yukihookapi:api:${yuki_version}"
+    implementation 'io.ktor:ktor-client-android:2.2.4'
     ksp "com.highcapable.yukihookapi:ksp-xposed:${yuki_version}"
     compileOnly 'de.robv.android.xposed:api:82'
     // Ktor
@@ -90,6 +91,7 @@ dependencies {
     implementation "io.ktor:ktor-server-core:${ktor_version}"
     implementation "io.ktor:ktor-server-cio:${ktor_version}"
     implementation "io.ktor:ktor-server-content-negotiation:${ktor_version}"
+    implementation "io.ktor:ktor-network-tls-certificates:${ktor_version}"
     // AndroidX
     implementation 'androidx.core:core-ktx:1.10.0'
     implementation 'androidx.preference:preference:1.2.0'

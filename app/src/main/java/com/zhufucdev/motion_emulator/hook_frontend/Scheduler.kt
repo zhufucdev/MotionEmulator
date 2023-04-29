@@ -2,12 +2,13 @@ package com.zhufucdev.motion_emulator.hook_frontend
 
 import android.content.Context
 import android.util.Log
+import com.aventrix.jnanoid.jnanoid.NanoIdUtils
 import com.highcapable.yukihookapi.hook.factory.prefs
-import com.highcapable.yukihookapi.hook.log.loggerD
 import com.zhufucdev.motion_emulator.data.Emulation
 import com.zhufucdev.motion_emulator.data.EmulationInfo
 import com.zhufucdev.motion_emulator.data.Intermediate
 import io.ktor.http.*
+import io.ktor.network.tls.certificates.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.cio.*
@@ -38,9 +39,42 @@ object Scheduler {
     private val mInfo: MutableMap<String, EmulationInfo> = hashMapOf()
     private val mIntermediate: MutableMap<String, Intermediate> = hashMapOf()
 
-    private val providerPort = 2023
+    private var providerPort = 2023
+    private var providerTls = false
     private lateinit var server: ApplicationEngine
     private var serverRunning = false
+
+    private val environment by lazy(providerTls) {
+        applicationEngineEnvironment {
+            if (providerTls) {
+                val privateKey = NanoIdUtils.randomNanoId()
+                val keyAlias = "motion_provider"
+                val keyStore = buildKeyStore {
+                    certificate(keyAlias) {
+                        password = privateKey
+                        domains = listOf("127.0.0.1", "localhost", "0.0.0.0")
+                    }
+                }
+
+                sslConnector(
+                    keyStore = keyStore,
+                    privateKeyPassword = { privateKey.toCharArray() },
+                    keyAlias = keyAlias,
+                    keyStorePassword = { NanoIdUtils.randomNanoId().toCharArray() }
+                ) {
+                    host = "127.0.0.1"
+                    port = providerPort
+                }
+            } else {
+                connector {
+                    host = "127.0.0.1"
+                    port = providerPort
+                }
+            }
+
+            module(Application::eventServer)
+        }
+    }
 
     fun init(context: Context) {
         if (serverRunning) {
@@ -48,13 +82,9 @@ object Scheduler {
             return
         }
 
-        server = embeddedServer(CIO,
-            host = "127.0.0.1",
-            port = providerPort,
-            module = Application::eventServer)
+        providerPort = context.prefs().getString("provider_port").toIntOrNull() ?: 2023
+        server = embeddedServer(CIO, environment)
 
-        context.prefs().edit().putInt("provider_port", providerPort).apply()
-        loggerD("Schedular", "Put $providerPort as provider_port")
         server.start(false)
         serverRunning = true
     }

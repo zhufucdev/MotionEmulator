@@ -174,4 +174,9 @@
     <string name="text_emulation_app_pending">等待应用响应</string>
     <string name="text_swipe_to_see_more">滑动卡片了解详细</string>
     <string name="title_named_emulation_ongoing">模拟#%s正在进行</string>
+    <string name="title_settings_emulation">模拟</string>
+    <string name="caption_server">服务器</string>
+    <string name="title_server_port">服务器端口</string>
+    <string name="title_use_tls">使用TLS</string>
+    <string name="text_input_invalid">输入无效</string>
 </resources>

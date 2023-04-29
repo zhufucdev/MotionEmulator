@@ -13,4 +13,9 @@
             app:icon="@drawable/ic_baseline_assignment_24"
             app:fragment="com.zhufucdev.motion_emulator.ui.SettingsActivity$NamingFragment"/>
 
+    <Preference
+            app:key="emulation"
+            app:title="@string/title_settings_emulation"
+            app:icon="@drawable/ic_baseline_auto_fix_high_24"
+            app:fragment="com.zhufucdev.motion_emulator.ui.SettingsActivity$EmulationFragment"/>
 </PreferenceScreen>

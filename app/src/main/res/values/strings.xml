@@ -182,4 +182,9 @@
     <string name="text_emulation_app_pending">waiting for the app to pick up</string>
     <string name="text_swipe_to_see_more">Swipe between the cards to see the details</string>
     <string name="title_named_emulation_ongoing">Emulation #%s Ongoing</string>
+    <string name="title_settings_emulation">Emulation</string>
+    <string name="caption_server">SERVER</string>
+    <string name="title_server_port">Server Port</string>
+    <string name="title_use_tls">Use TLS</string>
+    <string name="text_input_invalid">input invalid</string>
 </resources>

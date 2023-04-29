@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+                  xmlns:app="http://schemas.android.com/apk/res-auto">
+    <PreferenceCategory
+            android:title="@string/caption_server">
+        <EditTextPreference
+                android:title="@string/title_server_port"
+                android:key="provider_port"
+                android:icon="@drawable/ic_baseline_electrical_services_24"
+                android:defaultValue="2023"
+                app:useSimpleSummaryProvider="true"/>
+        <SwitchPreferenceCompat
+                android:title="@string/title_use_tls"
+                android:key="provider_tls"
+                android:icon="@drawable/ic_baseline_https_24"
+                android:defaultValue="false"/>
+    </PreferenceCategory>
+</PreferenceScreen>

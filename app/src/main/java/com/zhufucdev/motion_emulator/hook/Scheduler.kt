@@ -19,29 +19,44 @@ import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.coroutines.*
 import java.net.ConnectException
+import javax.net.ssl.SSLContext
 import kotlin.random.Random
 import kotlin.time.Duration.Companion.seconds
 
 @OptIn(DelicateCoroutinesApi::class)
 object Scheduler {
     private const val TAG = "Scheduler"
-    private const val LOCALHOST = "http://127.0.0.1"
+    private const val LOCALHOST = "127.0.0.1"
     private val id = NanoIdUtils.randomNanoId()
+    private var port = 2023
+    private var tls = false
     private lateinit var packageName: String
-    private var port: Int = 2023
 
-    private val providerAddr get() = "$LOCALHOST:$port"
+    private val providerAddr get() = (if (tls) "https://" else "http://") + "$LOCALHOST:$port"
 
     private val jobs = arrayListOf<Job>()
-    private val httpClient = HttpClient(Android) {
-        install(ContentNegotiation) {
-            json()
+    private val httpClient by lazy(tls) {
+        HttpClient(Android) {
+            install(ContentNegotiation) {
+                json()
+            }
+
+            if (tls) {
+                engine {
+                    // disable certificate verification
+                    sslManager = { connection ->
+                        connection.sslSocketFactory = SSLContext.getInstance("TLS").socketFactory
+                    }
+                }
+            }
         }
     }
 
     fun PackageParam.init(context: Context) {
         this@Scheduler.packageName = context.applicationContext.packageName
-        port = prefs.getInt("provider_port", 2023)
+        port = prefs.getString("provider_port").toIntOrNull() ?: 2023
+        tls = prefs.getBoolean("provider_tls")
+
         GlobalScope.launch {
             loggerI(tag = TAG, "Listen event loop on port $port")
 
@@ -108,7 +123,8 @@ object Scheduler {
                 }
             }
         } catch (e: ConnectException) {
-            // ignored
+            // ignored, or more specifically, treat it as offline
+            // who the fuck cares what's going on
         }
     }
 

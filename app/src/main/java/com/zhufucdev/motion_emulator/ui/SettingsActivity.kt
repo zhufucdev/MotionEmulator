@@ -2,12 +2,15 @@ package com.zhufucdev.motion_emulator.ui
 
 import android.app.Dialog
 import android.os.Bundle
+import android.text.InputType
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
+import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction.TRANSIT_FRAGMENT_FADE
 import androidx.preference.*
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.highcapable.yukihookapi.hook.factory.prefs
 import com.zhufucdev.motion_emulator.R
 import com.zhufucdev.motion_emulator.databinding.ActivitySettingsBinding
 
@@ -115,6 +118,44 @@ class SettingsActivity : AppCompatActivity(),
             timeFormat.isEnabled = customTimeFormatSwitch.isChecked
             customTimeFormatSwitch.setOnPreferenceChangeListener { _, use ->
                 timeFormat.isEnabled = use as Boolean
+                true
+            }
+        }
+    }
+
+    class EmulationFragment : M3PreferenceFragment() {
+        override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
+            setPreferencesFromResource(R.xml.emulation_preferences, rootKey)
+            init()
+        }
+
+        private fun init() {
+            val portPreference = findPreference<EditTextPreference>("provider_port")!!
+            val tlsPreference = findPreference<SwitchPreference>("provider_tls")!!
+            val prefs = requireContext().prefs()
+
+            fun Int.isValidPort() = this in 1024..65535
+            portPreference.setOnBindEditTextListener { input ->
+                input.inputType = InputType.TYPE_CLASS_NUMBER
+                input.doAfterTextChanged {
+                    val port = it.toString().toIntOrNull()
+                    if (port == null || !port.isValidPort()) {
+                        input.error = getString(R.string.text_input_invalid)
+                    } else {
+                        prefs.edit {
+                            putString("provider_port", it.toString())
+                        }
+                    }
+                }
+            }
+            portPreference.setOnPreferenceChangeListener { _, newValue ->
+                newValue.toString().toIntOrNull()?.isValidPort() == true
+            }
+
+            tlsPreference.setOnPreferenceClickListener { _ ->
+                prefs.edit {
+                    putBoolean("provider_tls", tlsPreference.isChecked)
+                }
                 true
             }
         }
