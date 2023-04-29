@@ -348,7 +348,10 @@ private suspend fun writeInto(stream: OutputStream, context: Context, items: Map
 private suspend fun getUri(context: Context, items: Map<Data, String>): Uri {
     val sharedDir = exportedDir(context)
     if (!sharedDir.exists()) sharedDir.mkdir()
-    val file = File(sharedDir, "${context.getString(R.string.title_exported, context.effectiveTimeFormat())}.tar.gz")
+    val file = File(
+        sharedDir,
+        "${context.getString(R.string.title_exported, context.effectiveTimeFormat().dateString())}.tar.gz"
+    )
 
     val fileOut = file.outputStream()
     writeInto(fileOut, context, items)
