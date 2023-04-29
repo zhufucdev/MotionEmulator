@@ -29,5 +29,6 @@ suspend fun getAddressWithGoogle(target: LatLng, context: Context): String? =
     }
 
 fun Point.ensureGoogleCoordinate(): Point =
-    if (coordinateSystem == CoordinateSystem.GCJ02) with(MapProjector) { toIdeal() }.toPoint(CoordinateSystem.WGS84)
+    if (coordinateSystem == CoordinateSystem.GCJ02 && MapProjector.outOfChina(latitude, longitude))
+        with(MapProjector) { toIdeal() }.toPoint(CoordinateSystem.WGS84)
     else this

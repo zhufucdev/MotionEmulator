@@ -66,7 +66,7 @@ object MapProjector : Projector {
     private const val a = 6378245.0
     private const val ee = 0.00669342162296594323
 
-    private fun outOfChina(lat: Double, lon: Double): Boolean {
+    fun outOfChina(lat: Double, lon: Double): Boolean {
         return if (lon < 72.004 || lon > 137.8347) true else lat < 0.8293 || lat > 55.8271
     }
 
