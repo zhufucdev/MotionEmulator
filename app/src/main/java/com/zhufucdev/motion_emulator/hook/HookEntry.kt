@@ -35,6 +35,3 @@ class HookEntry : IYukiHookXposedInit {
  * Defaults to false. Use content provider to set.
  */
 var hooking = false
-
-const val EMULATION_START = 0x00
-const val EMULATION_STOP = 0x01

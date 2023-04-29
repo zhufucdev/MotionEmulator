@@ -14,7 +14,7 @@ import com.zhufucdev.motion_emulator.R
 import com.zhufucdev.motion_emulator.data.AppMeta
 import com.zhufucdev.motion_emulator.data.AppMetas
 
-class AppItemAdapter : RecyclerView.Adapter<AppItemViewHolder>() {
+class AppItemAdapter(private val appMetas: AppMetas) : RecyclerView.Adapter<AppItemViewHolder>() {
     var appsSnapshot = emptyList<AppMeta>()
 
     init {
@@ -23,7 +23,7 @@ class AppItemAdapter : RecyclerView.Adapter<AppItemViewHolder>() {
     }
 
     fun refresh() {
-        appsSnapshot = AppMetas.list()
+        appsSnapshot = appMetas.list()
         notifyDataSetChanged()
     }
 
@@ -39,10 +39,10 @@ class AppItemAdapter : RecyclerView.Adapter<AppItemViewHolder>() {
         holder.use(meta)
         holder.onToggle {
             if (it) {
-                AppMetas.markPositive(meta.packageName)
+                appMetas.markPositive(meta.packageName)
             }
             else {
-                AppMetas.markNegative(meta.packageName)
+                appMetas.markNegative(meta.packageName)
             }
         }
     }

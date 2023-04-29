@@ -1,6 +1,5 @@
 package com.zhufucdev.motion_emulator.hook
 
-import android.content.ContentValues
 import android.content.Context
 import android.hardware.Sensor
 import android.os.SystemClock
@@ -9,7 +8,6 @@ import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.highcapable.yukihookapi.hook.log.loggerI
 import com.highcapable.yukihookapi.hook.param.PackageParam
 import com.zhufucdev.motion_emulator.data.*
-import com.zhufucdev.motion_emulator.data.Intermediate
 import com.zhufucdev.motion_emulator.toPoint
 import io.ktor.client.*
 import io.ktor.client.call.*
@@ -19,6 +17,7 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.coroutines.*
+import java.net.ConnectException
 import kotlin.random.Random
 import kotlin.time.Duration.Companion.seconds
 
@@ -28,6 +27,9 @@ object Scheduler {
     private const val LOCALHOST = "http://127.0.0.1"
     private val id = NanoIdUtils.randomNanoId()
     private lateinit var packageName: String
+    private var port: Int = 2023
+
+    private val providerAddr get() = "$LOCALHOST:$port"
 
     private val jobs = arrayListOf<Job>()
     private val httpClient = HttpClient(Android) {
@@ -38,16 +40,22 @@ object Scheduler {
 
     fun PackageParam.init(context: Context) {
         this@Scheduler.packageName = context.applicationContext.packageName
+        port = prefs.getInt("provider_port", 2023)
         GlobalScope.launch {
-            eventLoop()
-            loggerI(tag = TAG, msg = "Provider offline. Waiting for data channel broadcast")
-            dataChannel.wait("provider_online") {
-                GlobalScope.launch {
+            loggerI(tag = TAG, "Listen event loop on port $port")
+
+            var logged = false
+            while (true) {
+                if (port > 0) {
                     eventLoop()
                 }
+                if (!logged) {
+                    loggerI(tag = TAG, msg = "Provider offline. Waiting for data channel broadcast")
+                    logged = true
+                }
+                delay(1.seconds)
             }
         }
-        loggerI(TAG, "Event loop started")
     }
 
     /**
@@ -64,35 +72,42 @@ object Scheduler {
     }
 
     private suspend fun eventLoop() {
-        val queryArgs = arrayOf(id)
-        // query existing state
-        httpClient.get("$LOCALHOST/current").apply {
-            if (status == HttpStatusCode.OK) {
-                val emulation = body<Emulation>()
-                startEmulation(emulation)
-            } else {
-                return
-            }
-        }
-
-        // enter event loop
-        while (true) {
-             val res = httpClient.get("$LOCALHOST/next/${id}")
-
-            when (res.status) {
-                HttpStatusCode.OK -> {
-                    val emulation = res.body<Emulation>()
+        try {
+            // query existing state
+            httpClient.get("$providerAddr/current").apply {
+                if (status == HttpStatusCode.OK) {
+                    val emulation = body<Emulation>()
                     startEmulation(emulation)
-                }
-                HttpStatusCode.NoContent -> {
-                    hooking = false
-                    jobs.joinAll()
-                    loggerI(tag = TAG, msg = "Emulation stopped")
-                }
-                else -> {
+                } else {
                     return
                 }
             }
+
+            // enter event loop
+            loggerI(TAG, "Event loop started on $port")
+
+            while (true) {
+                val res = httpClient.get("$providerAddr/next/${id}")
+
+                when (res.status) {
+                    HttpStatusCode.OK -> {
+                        val emulation = res.body<Emulation>()
+                        startEmulation(emulation)
+                    }
+
+                    HttpStatusCode.NoContent -> {
+                        hooking = false
+                        jobs.joinAll()
+                        loggerI(tag = TAG, msg = "Emulation stopped")
+                    }
+
+                    else -> {
+                        return
+                    }
+                }
+            }
+        } catch (e: ConnectException) {
+            // ignored
         }
     }
 
@@ -120,16 +135,17 @@ object Scheduler {
     val motion = MotionMoment(0F, mutableMapOf())
 
     private val stepSensors = intArrayOf(Sensor.TYPE_STEP_COUNTER, Sensor.TYPE_STEP_DETECTOR)
-    private fun startEmulation(emulation: Emulation): Boolean {
+    private suspend fun startEmulation(emulation: Emulation): Boolean {
         loggerI(tag = TAG, msg = "Emulation started")
 
         length = emulation.trace.circumference(MapProjector)
         duration = length / emulation.velocity // in seconds
         this.satellites = satellites
 
-        val scope = CoroutineScope(Dispatchers.Default)
         hooking = true
-        scope.async {
+        updateState(true)
+        val scope = CoroutineScope(Dispatchers.Default)
+        scope.launch {
             for (i in 0 until emulation.repeat) {
                 start = SystemClock.elapsedRealtime()
 
@@ -146,8 +162,8 @@ object Scheduler {
                 if (!hooking) break
             }
             hooking = false
-            updateState(false)
             scope.cancel()
+            updateState(false)
         }.let {
             jobs.add(it)
         }
@@ -258,7 +274,8 @@ object Scheduler {
     }
 
     private suspend fun notifyProgress() {
-        httpClient.post("$LOCALHOST/indeterminate/${id}") {
+        httpClient.post("$providerAddr/indeterminate/${id}") {
+            contentType(ContentType.Application.Json)
             setBody(
                 Intermediate(
                     progress = progress,
@@ -270,14 +287,15 @@ object Scheduler {
     }
 
     private suspend fun updateState(running: Boolean) {
-        loggerI(TAG, "Updated state[$id] = $running")
         if (running) {
             val status = EmulationInfo(duration, length, packageName)
-            httpClient.post("$LOCALHOST/state/${id}/running") {
+            httpClient.post("$providerAddr/state/${id}/running") {
+                contentType(ContentType.Application.Json)
                 setBody(status)
             }
         } else {
-            httpClient.get("$LOCALHOST/state/${id}/stopped")
+            httpClient.get("$providerAddr/state/${id}/stopped")
         }
+        loggerI(TAG, "Updated state[$id] = $running")
     }
 }

@@ -28,11 +28,6 @@ class EmulationAppFragment : EmulationMonitoringFragment() {
     var emulation: Emulation? = null
     var map: MapController? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        Scheduler.init(requireContext())
-    }
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         packageManager = requireContext().packageManager
         binding = FragmentEmulationAppBinding.inflate(layoutInflater, container, false)

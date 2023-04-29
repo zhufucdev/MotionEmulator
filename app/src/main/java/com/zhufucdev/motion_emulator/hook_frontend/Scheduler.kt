@@ -2,9 +2,8 @@ package com.zhufucdev.motion_emulator.hook_frontend
 
 import android.content.Context
 import android.util.Log
-import com.highcapable.yukihookapi.hook.factory.dataChannel
-import com.highcapable.yukihookapi.hook.factory.modulePrefs
-import com.zhufucdev.motion_emulator.BuildConfig
+import com.highcapable.yukihookapi.hook.factory.prefs
+import com.highcapable.yukihookapi.hook.log.loggerD
 import com.zhufucdev.motion_emulator.data.Emulation
 import com.zhufucdev.motion_emulator.data.EmulationInfo
 import com.zhufucdev.motion_emulator.data.Intermediate
@@ -19,8 +18,6 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.serialization.Serializable
 import kotlin.coroutines.suspendCoroutine
-import kotlin.random.Random
-import kotlin.random.nextInt
 
 @Serializable
 data class EmulationRef(
@@ -41,17 +38,23 @@ object Scheduler {
     private val mInfo: MutableMap<String, EmulationInfo> = hashMapOf()
     private val mIntermediate: MutableMap<String, Intermediate> = hashMapOf()
 
-    private val providerPort = Random.nextInt(2000..20000)
+    private val providerPort = 2023
     private val server: ApplicationEngine =
         embeddedServer(CIO,
             host = "127.0.0.1",
             port = providerPort,
             module = Application::eventServer)
+    private var serverRunning = false
 
     fun init(context: Context) {
-        context.modulePrefs("events").putInt("provider_port", providerPort)
+        if (serverRunning) {
+            Log.w("Schedular", "Reinitialize a running instance")
+            return
+        }
+        context.prefs().edit().putInt("provider_port", providerPort).apply()
+        loggerD("Schedular", "Put $providerPort as provider_port")
         server.start(false)
-        context.dataChannel(BuildConfig.APPLICATION_ID).put("provider_online") // notify host apps
+        serverRunning = true
     }
 
     fun setIntermediate(id: String, info: Intermediate?) {
@@ -140,6 +143,11 @@ object Scheduler {
             }
         }
     }
+
+    fun stop() {
+        server.stop()
+        serverRunning = false
+    }
 }
 
 interface ListenCallback {
@@ -184,6 +192,7 @@ fun Application.eventServer() {
                 return@post
             }
             Scheduler.setIntermediate(id, call.receive<Intermediate>())
+            call.respond(HttpStatusCode.OK)
         }
 
         post("/state/{id}/running") {
@@ -192,7 +201,9 @@ fun Application.eventServer() {
                 call.respond(HttpStatusCode.BadRequest)
                 return@post
             }
+            Log.d("Provider", "$id is running")
             Scheduler.setInfo(id, call.receive())
+            call.respond(HttpStatusCode.OK)
         }
 
         get("/state/{id}/stopped") {
@@ -201,8 +212,10 @@ fun Application.eventServer() {
                 call.respond(HttpStatusCode.BadRequest)
                 return@get
             }
+            Log.d("Provider", "$id has stopped")
             Scheduler.setInfo(id, null)
             Scheduler.setIntermediate(id, null)
+            call.respond(HttpStatusCode.OK)
         }
     }
 }

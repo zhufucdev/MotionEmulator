@@ -8,6 +8,7 @@ import com.zhufucdev.motion_emulator.data.Cells
 import com.zhufucdev.motion_emulator.data.Motions
 import com.zhufucdev.motion_emulator.data.Traces
 import com.zhufucdev.motion_emulator.databinding.ActivityEmulateBinding
+import com.zhufucdev.motion_emulator.hook_frontend.Scheduler
 import com.zhufucdev.motion_emulator.initializeToolbar
 import com.zhufucdev.motion_emulator.setUpStatusBar
 
@@ -15,6 +16,7 @@ class EmulateActivity : AppCompatActivity() {
     private lateinit var binding: ActivityEmulateBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        Scheduler.init(this)
         Traces.require(this)
         Motions.require(this)
         Cells.require(this)
@@ -25,5 +27,10 @@ class EmulateActivity : AppCompatActivity() {
         val navController = findNavController(R.id.nav_host_fragment_activity_emulate)
         initializeToolbar(binding.appBarToolbar, navController)
         setUpStatusBar()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Scheduler.stop()
     }
 }

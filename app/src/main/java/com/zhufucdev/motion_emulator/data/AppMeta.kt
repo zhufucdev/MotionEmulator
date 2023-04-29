@@ -5,9 +5,9 @@ import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.graphics.drawable.Drawable
-import com.highcapable.yukihookapi.hook.factory.modulePrefs
+import com.highcapable.yukihookapi.hook.factory.prefs
 import com.highcapable.yukihookapi.hook.param.PackageParam
-import com.highcapable.yukihookapi.hook.xposed.prefs.YukiHookModulePrefs
+import com.highcapable.yukihookapi.hook.xposed.prefs.YukiHookPrefsBridge
 import com.zhufucdev.motion_emulator.BuildConfig
 import com.zhufucdev.motion_emulator.isSystemApp
 import kotlinx.serialization.Serializable
@@ -33,7 +33,7 @@ data class AppMeta(val name: String?, val icon: Drawable?, val packageName: Stri
     }
 }
 
-val AppMeta.hooked get() = (AppMetas.bypassMode && !positive) || (!AppMetas.bypassMode && positive)
+fun AppMeta.hooked(env: AppMetas) = (env.bypassMode && !positive) || (!env.bypassMode && positive)
 
 fun PackageParam.isHooked(): Boolean {
     if (packageName == BuildConfig.APPLICATION_ID) return false
@@ -56,12 +56,12 @@ fun PackageParam.isHooked(): Boolean {
 @Serializable
 data class AppStrategy(var showSystemApps: Boolean = false, var bypassMode: Boolean = true)
 
-object AppMetas {
-    private lateinit var pm: PackageManager
-    private lateinit var prefs: YukiHookModulePrefs
+class AppMetas(context: Context) {
+    private val pm: PackageManager = context.packageManager
+    private val prefs: YukiHookPrefsBridge = context.prefs()
 
     private val positiveApps = mutableSetOf<String>()
-    private lateinit var config: AppStrategy
+    private val config: AppStrategy
 
     var bypassMode: Boolean
         get() = config.bypassMode
@@ -77,10 +77,7 @@ object AppMetas {
             saveStrategy()
         }
 
-    fun require(context: Context) {
-        prefs = context.modulePrefs
-        pm = context.packageManager
-
+    init {
         val record = prefs.getStringSet("positive_apps", emptySet())
         config = AppStrategy(
             showSystemApps = prefs.getBoolean("use_system"),
@@ -113,11 +110,15 @@ object AppMetas {
     }
 
     private fun saveInfos() {
-        prefs.putStringSet("positive_apps", positiveApps)
+        prefs.edit {
+            putStringSet("positive_apps", positiveApps)
+        }
     }
 
     private fun saveStrategy() {
-        prefs.putBoolean("use_system", showSystemApps)
-        prefs.putBoolean("bypass", bypassMode)
+        prefs.edit {
+            putBoolean("use_system", showSystemApps)
+            putBoolean("bypass", bypassMode)
+        }
     }
 }

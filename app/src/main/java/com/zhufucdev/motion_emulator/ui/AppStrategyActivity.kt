@@ -19,6 +19,7 @@ import com.zhufucdev.motion_emulator.initializeToolbar
 class AppStrategyActivity : AppCompatActivity() {
     private lateinit var binding: ActivityAppStrategyBinding
     private lateinit var mainAdapter: AppItemAdapter
+    private lateinit var appMetas: AppMetas
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,12 +27,12 @@ class AppStrategyActivity : AppCompatActivity() {
         setContentView(binding.root)
         initializeToolbar(binding.appBarToolbar)
 
-        AppMetas.require(this)
+        appMetas = AppMetas(this)
         initializeList()
     }
 
     private fun initializeList() {
-        mainAdapter = AppItemAdapter()
+        mainAdapter = AppItemAdapter(appMetas)
         binding.listApps.adapter = mainAdapter
 
         binding.swipeRefresh.setOnRefreshListener {
@@ -42,8 +43,8 @@ class AppStrategyActivity : AppCompatActivity() {
     }
 
     private fun initializeStrategy(menu: Menu) {
-        menu.findItem(R.id.bypass_mode).isChecked = AppMetas.bypassMode
-        menu.findItem(R.id.show_system).isChecked = AppMetas.showSystemApps
+        menu.findItem(R.id.bypass_mode).isChecked = appMetas.bypassMode
+        menu.findItem(R.id.show_system).isChecked = appMetas.showSystemApps
     }
 
     private fun initializeSearch(view: SearchView) {
@@ -111,14 +112,14 @@ class AppStrategyActivity : AppCompatActivity() {
         when (item.itemId) {
             R.id.show_system -> {
                 item.isChecked = !item.isChecked
-                AppMetas.showSystemApps = item.isChecked
+                appMetas.showSystemApps = item.isChecked
                 mainAdapter.refresh()
                 true
             }
 
             R.id.bypass_mode -> {
                 item.isChecked = !item.isChecked
-                AppMetas.bypassMode = item.isChecked
+                appMetas.bypassMode = item.isChecked
                 true
             }
 
