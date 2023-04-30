@@ -519,13 +519,21 @@ object LocationHooker : YukiBaseHooker() {
             val zeros = FloatArray(Scheduler.satellites) { 0f }
             val ones = FloatArray(Scheduler.satellites) { 1f }
 
-            val constructor = GnssStatus::class.constructors.firstOrNull { it.parameters.size == 6 }
+            val constructor = GnssStatus::class.constructors.firstOrNull { it.parameters.size >= 6 }
             if (constructor == null) {
                 loggerE(TAG, "GnssStatus constructor not available")
                 return null
             }
 
-            return constructor.call(Scheduler.satellites, svid, ones, zeros, zeros, zeros)
+            val constructorArgs = Array(constructor.parameters.size) { index ->
+                when (index) {
+                    0 -> Scheduler.satellites
+                    1 -> svid
+                    2 -> ones
+                    else -> zeros
+                }
+            }
+            return constructor.call(*constructorArgs)
         }
 
     private val fakeSatellites: Iterable<GpsSatellite> =
