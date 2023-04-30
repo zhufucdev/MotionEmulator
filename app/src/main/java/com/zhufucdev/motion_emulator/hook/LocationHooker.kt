@@ -146,7 +146,7 @@ object LocationHooker : YukiBaseHooker() {
                 method {
                     name = "getSSID"
                     emptyParam()
-                    returnType = StringType
+                    returnType = StringClass
                 }
                 replaceTo("null")
             }
@@ -155,7 +155,7 @@ object LocationHooker : YukiBaseHooker() {
                 method {
                     name = "getBSSID"
                     emptyParam()
-                    returnType = StringType
+                    returnType = StringClass
                 }
                 replaceTo("00-00-00-00-00-00-00-00")
             }
@@ -164,7 +164,7 @@ object LocationHooker : YukiBaseHooker() {
                 method {
                     name = "getMacAddress"
                     emptyParam()
-                    returnType = StringType
+                    returnType = StringClass
                 }
                 replaceTo("00-00-00-00-00-00-00-00")
             }
@@ -177,7 +177,7 @@ object LocationHooker : YukiBaseHooker() {
             injectMember {
                 method {
                     name = "getLastKnownLocation"
-                    param(StringType, "android.location.LastLocationRequest".toClass())
+                    param(StringClass, "android.location.LastLocationRequest".toClass())
                     returnType = classOf<Location>()
                 }
                 replaceAny {
@@ -359,7 +359,7 @@ object LocationHooker : YukiBaseHooker() {
                     method {
                         name = "getCurrentLocation"
                         param(
-                            StringType,
+                            StringClass,
                             classOf<LocationRequest>(),
                             classOf<CancellationSignal>(),
                             classOf<Executor>(),
