@@ -335,15 +335,18 @@ object LocationHooker : YukiBaseHooker() {
                 injectMember {
                     method {
                         name = "registerGnssStatusCallback"
-                        param(classOf<Executor>(), classOf<GnssStatus.Callback>())
                         returnType = BooleanType
-                    }
+                    }.all()
                     replaceAny {
                         if (Scheduler.satellites <= 0) {
                             return@replaceAny callOriginal()
                         }
 
-                        val callback = args(1).cast<GnssStatus.Callback>()
+                        val callback = if (args[0] is GnssStatus.Callback) {
+                            args(0).cast<GnssStatus.Callback>()
+                        } else {
+                            args(1).cast<GnssStatus.Callback>()
+                        }
                         callback?.onStarted()
                         callback?.onFirstFix(1000 + Random.nextInt(-500, 500))
                         timer(name = "satellite heartbeat", period = 1000) {
