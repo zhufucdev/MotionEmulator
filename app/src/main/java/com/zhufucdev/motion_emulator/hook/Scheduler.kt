@@ -157,7 +157,7 @@ object Scheduler {
 
         length = emulation.trace.circumference(MapProjector)
         duration = length / emulation.velocity // in seconds
-        this.satellites = satellites
+        this.satellites = emulation.satelliteCount
 
         hooking = true
         updateState(true)
