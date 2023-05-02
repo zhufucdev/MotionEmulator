@@ -131,7 +131,7 @@ class SettingsActivity : AppCompatActivity(),
 
         private fun init() {
             val portPreference = findPreference<EditTextPreference>("provider_port")!!
-            val tlsPreference = findPreference<SwitchPreference>("provider_tls")!!
+            val tlsPreference = findPreference<SwitchPreferenceCompat>("provider_tls")!!
             val prefs = requireContext().prefs()
 
             fun Int.isValidPort() = this in 1024..65535
