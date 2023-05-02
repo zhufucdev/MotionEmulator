@@ -4,20 +4,26 @@ import android.content.Context
 import android.util.Log
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils
 import com.highcapable.yukihookapi.hook.factory.prefs
+import com.zhufucdev.motion_emulator.BuildConfig
 import com.zhufucdev.motion_emulator.data.Emulation
 import com.zhufucdev.motion_emulator.data.EmulationInfo
 import com.zhufucdev.motion_emulator.data.Intermediate
 import io.ktor.http.*
-import io.ktor.network.tls.certificates.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
-import io.ktor.server.cio.*
 import io.ktor.server.engine.*
+import io.ktor.server.netty.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.serialization.Serializable
+import org.spongycastle.jce.provider.BouncyCastleProvider
+import java.security.KeyFactory
+import java.security.KeyPairGenerator
+import java.security.KeyStore
+import java.security.Security
+import java.security.cert.X509Certificate
 import kotlin.coroutines.suspendCoroutine
 
 @Serializable
@@ -47,20 +53,15 @@ object Scheduler {
     private val environment by lazy(providerTls) {
         applicationEngineEnvironment {
             if (providerTls) {
-                val privateKey = NanoIdUtils.randomNanoId()
-                val keyAlias = "motion_provider"
-                val keyStore = buildKeyStore {
-                    certificate(keyAlias) {
-                        password = privateKey
-                        domains = listOf("127.0.0.1", "localhost", "0.0.0.0")
-                    }
-                }
+                val keyAlis = "motion_provider"
+                val keyPassword = NanoIdUtils.randomNanoId().toCharArray()
+                val keyStore = generateSelfSignedKeyStore(keyAlis, keyPassword)
 
                 sslConnector(
                     keyStore = keyStore,
-                    privateKeyPassword = { privateKey.toCharArray() },
-                    keyAlias = keyAlias,
-                    keyStorePassword = { NanoIdUtils.randomNanoId().toCharArray() }
+                    privateKeyPassword = { keyPassword },
+                    keyStorePassword = { keyPassword },
+                    keyAlias = keyAlis
                 ) {
                     host = "127.0.0.1"
                     port = providerPort
@@ -83,7 +84,8 @@ object Scheduler {
         }
 
         providerPort = context.prefs().getString("provider_port").toIntOrNull() ?: 2023
-        server = embeddedServer(CIO, environment)
+        providerTls = context.prefs().getBoolean("provider_tls")
+        server = embeddedServer(Netty, environment)
 
         server.start(false)
         serverRunning = true
