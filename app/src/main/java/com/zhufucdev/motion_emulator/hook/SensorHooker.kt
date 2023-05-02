@@ -46,18 +46,30 @@ object SensorHooker : YukiBaseHooker() {
     suspend fun raise(moment: MotionMoment) {
         val eventConstructor =
             SensorEvent::class.constructors.firstOrNull { it.parameters.size == 4 }
-                ?: error("sensor event constructor not available")
+                ?: SensorEvent::class.constructors.firstOrNull { it.parameters.size == 1 }
+                ?: error("SensorEvent constructor not available")
         val elapsed = SystemClock.elapsedRealtimeNanos()
         moment.data.forEach { (t, v) ->
             val sensor =
                 appContext!!.getSystemService(SensorManager::class.java).getDefaultSensor(t)
             val values = Scheduler.motion.data[t] ?: v
-            val event = eventConstructor.call(
-                sensor,
-                SensorManager.SENSOR_STATUS_ACCURACY_HIGH,
-                elapsed,
-                values
-            )
+            val event = when (val pars = eventConstructor.parameters.size) {
+                4 -> eventConstructor.call(
+                    sensor,
+                    SensorManager.SENSOR_STATUS_ACCURACY_HIGH,
+                    elapsed,
+                    values
+                )
+
+                1 -> eventConstructor.call(values.size).apply {
+                    values.copyInto(this.values)
+                    accuracy = SensorManager.SENSOR_STATUS_ACCURACY_HIGH
+                    timestamp = elapsed
+                    this.sensor = sensor
+                }
+
+                else -> throw NotImplementedError("Constructor to SensorEvent with $pars parameters not implemented")
+            }
             listeners.forEach { (lt, l, h) ->
                 if (lt == t) {
                     supervisorScope {
