@@ -4,7 +4,6 @@ import android.content.Context
 import android.util.Log
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils
 import com.highcapable.yukihookapi.hook.factory.prefs
-import com.zhufucdev.motion_emulator.BuildConfig
 import com.zhufucdev.motion_emulator.data.Emulation
 import com.zhufucdev.motion_emulator.data.EmulationInfo
 import com.zhufucdev.motion_emulator.data.Intermediate
@@ -18,12 +17,6 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.serialization.Serializable
-import org.spongycastle.jce.provider.BouncyCastleProvider
-import java.security.KeyFactory
-import java.security.KeyPairGenerator
-import java.security.KeyStore
-import java.security.Security
-import java.security.cert.X509Certificate
 import kotlin.coroutines.suspendCoroutine
 
 @Serializable

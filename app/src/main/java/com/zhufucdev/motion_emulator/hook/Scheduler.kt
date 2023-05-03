@@ -19,6 +19,7 @@ import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.coroutines.*
 import java.net.ConnectException
+import java.security.SecureRandom
 import javax.net.ssl.SSLContext
 import kotlin.random.Random
 import kotlin.time.Duration.Companion.seconds
@@ -45,7 +46,9 @@ object Scheduler {
                 engine {
                     // disable certificate verification
                     sslManager = { connection ->
-                        connection.sslSocketFactory = SSLContext.getInstance("TLS").socketFactory
+                        connection.sslSocketFactory = SSLContext.getInstance("TLS").apply {
+                            init(null, arrayOf(TrustAllX509TrustManager), SecureRandom())
+                        }.socketFactory
                     }
                 }
             }
@@ -58,7 +61,7 @@ object Scheduler {
         tls = prefs.getBoolean("provider_tls")
 
         GlobalScope.launch {
-            loggerI(tag = TAG, "Listen event loop on port $port")
+            loggerI(tag = TAG, "Listen event loop on port $port, tls = $tls")
 
             var logged = false
             while (true) {
