@@ -1,22 +1,19 @@
 package com.zhufucdev.motion_emulator.data
 
-import com.zhufucdev.motion_emulator.BuildConfig
 import com.zhufucdev.motion_emulator.hook.Toggle
-import kotlinx.serialization.KSerializer
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.descriptors.SerialDescriptor
-import kotlinx.serialization.descriptors.buildClassSerialDescriptor
-import kotlinx.serialization.descriptors.serialDescriptor
-import kotlinx.serialization.encoding.CompositeDecoder
-import kotlinx.serialization.encoding.Decoder
-import kotlinx.serialization.encoding.Encoder
-import kotlinx.serialization.encoding.decodeStructure
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 
 open class Box<T>(val value: T? = null) {
     open val status: Toggle
         get() = Toggle.PRESENT
+
+    override fun equals(other: Any?): Boolean =
+        other is Box<*> && other.value == value && other.status == status
+
+    override fun hashCode(): Int {
+        return (value?.hashCode() ?: 0) + status.hashCode()
+    }
 
     companion object {
         inline fun <reified T> decodeFromString(str: String): Box<T> {
