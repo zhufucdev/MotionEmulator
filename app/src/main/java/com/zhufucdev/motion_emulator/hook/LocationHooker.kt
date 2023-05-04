@@ -1,5 +1,6 @@
 package com.zhufucdev.motion_emulator.hook
 
+import android.content.Context
 import android.location.*
 import android.net.NetworkInfo
 import android.net.wifi.ScanResult
@@ -26,20 +27,9 @@ import com.highcapable.yukihookapi.hook.type.java.*
 import com.zhufucdev.motion_emulator.data.Point
 import java.util.concurrent.Executor
 import java.util.function.Consumer
-import kotlin.collections.Iterable
-import kotlin.collections.List
-import kotlin.collections.buildList
 import kotlin.collections.component1
 import kotlin.collections.component2
-import kotlin.collections.count
-import kotlin.collections.emptyList
-import kotlin.collections.filter
-import kotlin.collections.firstOrNull
-import kotlin.collections.forEach
-import kotlin.collections.listOf
-import kotlin.collections.mutableMapOf
 import kotlin.collections.set
-import kotlin.collections.toTypedArray
 import kotlin.concurrent.timer
 import kotlin.random.Random
 import kotlin.reflect.jvm.isAccessible
@@ -435,12 +425,13 @@ object LocationHooker : YukiBaseHooker() {
      * Specially designed for it
      */
     private fun hookAMap() {
-        fun YukiMemberHookCreator.MemberHookCreator.hookListener() {
+        fun YukiMemberHookCreator.MemberHookCreator.hookListener(classloader: ClassLoader) {
             replaceAny {
-                val listener = args(0).cast<AMapLocationListener>()
+                val listener = args[0]
                     ?: return@replaceAny callOriginal()
+                val method = classOf<AMapLocationListener>(classloader).getMethod("onLocationChanged",classOf<AMapLocation>(classloader))
                 redirectListener(listener) {
-                    listener.onLocationChanged(it.amap())
+                    method.invoke(listener,it.amap())
                     loggerI(TAG, "AMap location received")
                 }
                 loggerI(TAG, "AMap location registered")
@@ -457,48 +448,50 @@ object LocationHooker : YukiBaseHooker() {
 
                 beforeHook {
                     val classLoader = instanceClass.classLoader
-                    classOf<AMapLocationClient>(classLoader).hook {
-                        method {
-                            name = "setLocationListener"
-                            param(classOf<AMapLocationListener>(classLoader))
+                    classOf<AMapLocation>(classLoader).hook {
+                        injectMember {
+                            method {
+                                name = "getSatellites"
+                                emptyParam()
+                            }
+                            beforeHook {
+                                result = 20
+                            }
                         }
-                        hookListener()
                     }
-                }
-            }
-        }
+                    classOf<AMapLocationClient>(classLoader).hook {
+                        injectMember {
+                            method {
+                                name = "setLocationListener"
+                                param(classOf<AMapLocationListener>(classLoader))
+                            }
+                            hookListener(classLoader)
+                        }
+                        injectMember {
+                            method {
+                                name = "startLocation"
+                                emptyParam()
+                            }
 
-        classOf<AMapLocationClient>().hook {
-            injectMember {
-                method {
-                    name = "setLocationListener"
-                    param(classOf<AMapLocationListener>())
-                }
-                hookListener()
-            }
+                            beforeHook {
+                                loggerI(TAG, "AMap location started")
+                            }
+                        }
+                    }
+                    classOf<AMapLocationClientOption>(classLoader).hook {
+                        injectMember {
+                            method {
+                                name = "setLocationMode"
+                                param(classOf<AMapLocationMode>(classLoader))
+                            }
 
-            injectMember {
-                method {
-                    name = "startLocation"
-                    emptyParam()
-                }
-
-                beforeHook {
-                    loggerI(TAG, "AMap location started")
-                }
-            }
-        }
-
-        classOf<AMapLocationClientOption>().hook {
-            injectMember {
-                method {
-                    name = "setLocationMode"
-                    param(classOf<AMapLocationMode>())
-                }
-
-                beforeHook {
-                    args[0] = AMapLocationMode.Device_Sensors
-                    loggerI(TAG, "Modified amap location mode")
+                            beforeHook {
+                                val enums = classOf<AMapLocationMode>(classLoader).enumConstants
+                                args[0] = enums?.get(1)
+                                loggerI(TAG, "Modified amap location mode")
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -534,9 +527,19 @@ object LocationHooker : YukiBaseHooker() {
         classOf<Location>().hook {
             common()
         }
-
-        classOf<AMapLocation>().hook {
-            common()
+        ApplicationClass.hook {
+            injectMember {
+                method {
+                    name = "onCreate"
+                    emptyParam()
+                }
+                beforeHook {
+                    val classLoader = (args[0] as Context).classLoader
+                    classOf<AMapLocation>(classLoader).hook {
+                        common()
+                    }
+                }
+            }
         }
     }
 
