@@ -21,6 +21,7 @@ import com.highcapable.yukihookapi.hook.factory.field
 import com.highcapable.yukihookapi.hook.log.loggerD
 import com.highcapable.yukihookapi.hook.log.loggerE
 import com.highcapable.yukihookapi.hook.log.loggerI
+import com.highcapable.yukihookapi.hook.type.android.ApplicationClass
 import com.highcapable.yukihookapi.hook.type.java.*
 import com.zhufucdev.motion_emulator.data.Point
 import java.util.concurrent.Executor
@@ -434,22 +435,46 @@ object LocationHooker : YukiBaseHooker() {
      * Specially designed for it
      */
     private fun hookAMap() {
+        fun YukiMemberHookCreator.MemberHookCreator.hookListener() {
+            replaceAny {
+                val listener = args(0).cast<AMapLocationListener>()
+                    ?: return@replaceAny callOriginal()
+                redirectListener(listener) {
+                    listener.onLocationChanged(it.amap())
+                    loggerI(TAG, "AMap location received")
+                }
+                loggerI(TAG, "AMap location registered")
+            }
+        }
+
+        // counter-proguard
+        ApplicationClass.hook {
+            injectMember {
+                method {
+                    name = "onCreate"
+                    emptyParam()
+                }
+
+                beforeHook {
+                    val classLoader = instanceClass.classLoader
+                    classOf<AMapLocationClient>(classLoader).hook {
+                        method {
+                            name = "setLocationListener"
+                            param(classOf<AMapLocationListener>(classLoader))
+                        }
+                        hookListener()
+                    }
+                }
+            }
+        }
+
         classOf<AMapLocationClient>().hook {
             injectMember {
                 method {
                     name = "setLocationListener"
                     param(classOf<AMapLocationListener>())
                 }
-
-                replaceAny {
-                    val listener = args(0).cast<AMapLocationListener>()
-                        ?: return@replaceAny callOriginal()
-                    redirectListener(listener) {
-                        listener.onLocationChanged(it.amap())
-                        loggerI(TAG, "AMap location received")
-                    }
-                    loggerI(TAG, "AMap location registered")
-                }
+                hookListener()
             }
 
             injectMember {
