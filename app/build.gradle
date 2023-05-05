@@ -74,7 +74,7 @@ android {
 ext {
     yuki_version = '1.1.11'
     nav_version = '2.5.3'
-    ktor_version = '2.2.4'
+    ktor_version = '2.3.0'
     compose_ui_version = '1.5.0-alpha03'
 }
 
@@ -98,14 +98,14 @@ dependencies {
     implementation 'androidx.core:core-ktx:1.10.0'
     implementation 'androidx.preference:preference:1.2.0'
     implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'com.google.android.material:material:1.8.0'
+    implementation 'com.google.android.material:material:1.9.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
     implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
     implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
     implementation "androidx.navigation:navigation-dynamic-features-fragment:$nav_version"
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4'
-    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1'
+    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0'
     implementation "androidx.work:work-runtime-ktx:2.8.1"
     // Compose
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.6.1'
