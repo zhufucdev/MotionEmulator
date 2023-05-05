@@ -56,10 +56,16 @@ echo AMAP_SDK_KEY="<Your Key>" >> local.properties
 echo GCP_MAPS_KEY="<Your Key>" >> local.properties
 ```
 
+By the way, in case you are not familiar with Android dev, fill in
+your own SDK like so:
+```shell
+echo sdk.dir=<Your SDK Full Path> >> local.properties
+```
+
 ## License
 
 ```
-Copyright 2022 zhufucdev
+Copyright 2022-2023 zhufucdev
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

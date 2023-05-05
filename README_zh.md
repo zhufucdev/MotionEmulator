@@ -55,10 +55,15 @@ echo AMAP_SDK_KEY="<Your Key>" >> local.properties
 echo GCP_MAPS_KEY="<Your Key>" >> local.properties
 ```
 
+顺便说一句，万一你不熟悉Android开发，你要把自己的SDK填进去，就像这样：
+```shell
+echo sdk.dir=<Your SDK Full Path> >> local.properties
+```
+
 ## 营业执照
 
 ```
-Copyright 2022 zhufucdev
+Copyright 2022-2023 zhufucdev
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
