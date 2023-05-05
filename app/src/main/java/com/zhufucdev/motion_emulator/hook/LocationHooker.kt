@@ -26,6 +26,7 @@ import com.highcapable.yukihookapi.hook.type.android.ApplicationClass
 import com.highcapable.yukihookapi.hook.type.java.*
 import com.zhufucdev.motion_emulator.data.MapProjector
 import com.zhufucdev.motion_emulator.data.Point
+import com.zhufucdev.motion_emulator.estimateSpeed
 import java.util.concurrent.Executor
 import java.util.function.Consumer
 import kotlin.collections.component1
@@ -50,8 +51,7 @@ object LocationHooker : YukiBaseHooker() {
 
     fun raise(point: Point) {
         listeners.forEach { (_, p) ->
-            estimatedSpeed = (with(MapProjector) { point.offsetFixed().distanceIdeal(lastLocation.first) }
-                            / (System.currentTimeMillis() - lastLocation.second)).toFloat()
+            estimatedSpeed = estimateSpeed(point to System.currentTimeMillis(), lastLocation).toFloat()
             p.invoke(point)
             lastLocation = point to System.currentTimeMillis()
         }

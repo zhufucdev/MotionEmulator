@@ -220,3 +220,17 @@ fun Activity.setUpStatusBar() {
 fun Context.lazySharedPreferences() = lazy { PreferenceManager.getDefaultSharedPreferences(this) }
 
 fun Fragment.lazySharedPreferences() = lazy { PreferenceManager.getDefaultSharedPreferences(requireContext()) }
+
+fun estimateSpeed(current: Pair<Point, Long>, last: Pair<Point, Long>) =
+    if (current.first.coordinateSystem == CoordinateSystem.WGS84 && last.first.coordinateSystem == CoordinateSystem.WGS84) {
+        with(MapProjector) {
+            current.first.distanceIdeal(last.first)
+        }
+    } else if (current.first.coordinateSystem == CoordinateSystem.GCJ02 && last.first.coordinateSystem == CoordinateSystem.GCJ02) {
+        with(MapProjector) {
+            current.first.distance(last.first)
+        }
+    } else {
+        throw IllegalArgumentException("current comes with a different coordination " +
+                "system (${current.first.coordinateSystem.name}) than last")
+    } / (current.second - last.second) * 1000
