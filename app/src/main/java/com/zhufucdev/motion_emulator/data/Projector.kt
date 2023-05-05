@@ -22,11 +22,18 @@ import kotlin.math.*
  */
 interface Projector {
     /**
-     * Square distances between two [Vector2D] in **target** plane
+     * Squared distance between two [Vector2D] in **target** plane
      *
      * Direct norm can be resolved by [Vector2D.lenTo] or taking a [BypassProjector]
      */
     fun Vector2D.distance(other: Vector2D): Double
+
+    /**
+     * Squared distance between two [Vector2D] in **ideal** plane
+     *
+     * See [Projector.distance] if you prefer target plane
+     */
+    fun Vector2D.distanceIdeal(other: Vector2D): Double
 
     /**
      * Project some [Vector2D] to the target plane
@@ -50,6 +57,8 @@ object BypassProjector : Projector {
         val dy = y - other.y
         return sqrt(dx * dx + dy * dy)
     }
+
+    override fun Vector2D.distanceIdeal(other: Vector2D): Double = distance(other)
 
     override fun Vector2D.toTarget(): Vector2D = this
 
@@ -89,6 +98,9 @@ object MapProjector : Projector {
     override fun Vector2D.distance(other: Vector2D): Double =
         AMapUtils.calculateLineDistance(this.toAmapLatLng(), other.toAmapLatLng()).toDouble()
 
+    override fun Vector2D.distanceIdeal(other: Vector2D): Double =
+        SphericalUtil.computeDistanceBetween(this.toGoogleLatLng(), other.toGoogleLatLng())
+
     private val cache =
         CacheBuilder.newBuilder()
             .maximumSize(1000)
@@ -127,6 +139,8 @@ class CanvasProjector(scope: DrawScope, val boundLeft: Float, val boundBottom: F
     override fun Vector2D.distance(other: Vector2D): Double =
         sqrt((x - other.x) * drawingSize.width.pow(2) + (y - other.y) * drawingSize.height.pow(2))
 
+    override fun Vector2D.distanceIdeal(other: Vector2D): Double = lenTo(other)
+
     override fun Vector2D.toTarget(): Vector2D =
         Vector2D(x * drawingSize.width + boundLeft, (1 - y) * drawingSize.height)
 
@@ -150,6 +164,9 @@ class AMapProjector(context: Context) : Projector {
 
     override fun Vector2D.distance(other: Vector2D): Double =
         AMapUtils.calculateLineDistance(this.toAmapLatLng(), other.toAmapLatLng()).toDouble()
+
+    override fun Vector2D.distanceIdeal(other: Vector2D): Double =
+        throw UnsupportedOperationException("Projection from AMap is not supported")
 
 
     override fun Vector2D.toTarget(): Vector2D =

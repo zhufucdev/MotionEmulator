@@ -25,6 +25,7 @@ fun Point.offsetFixed(): Point =
 
 fun Point.android(
     provider: String = LocationManager.GPS_PROVIDER,
+    speed: Float = 0F
 ): Location {
     val result = Location(provider).apply {
         // fake some data
@@ -37,12 +38,19 @@ fun Point.android(
             verticalAccuracyMeters = Random.nextFloat() * 10
         }
         accuracy = 1F
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            verticalAccuracyMeters = 0.1F
+            if (speed > 0) {
+                speedAccuracyMetersPerSecond = 0.01F
+            }
+        }
     }
 
 
     val fixed = offsetFixed()
     result.latitude = fixed.latitude
     result.longitude = fixed.longitude
+    result.speed = speed
 
     return result
 }

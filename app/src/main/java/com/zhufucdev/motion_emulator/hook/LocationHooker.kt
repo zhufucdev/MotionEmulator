@@ -24,6 +24,7 @@ import com.highcapable.yukihookapi.hook.log.loggerE
 import com.highcapable.yukihookapi.hook.log.loggerI
 import com.highcapable.yukihookapi.hook.type.android.ApplicationClass
 import com.highcapable.yukihookapi.hook.type.java.*
+import com.zhufucdev.motion_emulator.data.MapProjector
 import com.zhufucdev.motion_emulator.data.Point
 import java.util.concurrent.Executor
 import java.util.function.Consumer
@@ -36,6 +37,8 @@ import kotlin.reflect.jvm.isAccessible
 
 object LocationHooker : YukiBaseHooker() {
     private const val TAG = "Location Hook"
+    private var lastLocation = Scheduler.location to System.currentTimeMillis()
+    private var estimatedSpeed = 0F
 
     private val listeners = mutableMapOf<Any, (Point) -> Unit>()
     override fun onHook() {
@@ -47,7 +50,10 @@ object LocationHooker : YukiBaseHooker() {
 
     fun raise(point: Point) {
         listeners.forEach { (_, p) ->
+            estimatedSpeed = (with(MapProjector) { point.offsetFixed().distanceIdeal(lastLocation.first) }
+                            / (System.currentTimeMillis() - lastLocation.second)).toFloat()
             p.invoke(point)
+            lastLocation = point to System.currentTimeMillis()
         }
     }
 
@@ -172,7 +178,7 @@ object LocationHooker : YukiBaseHooker() {
                     returnType = classOf<Location>()
                 }
                 replaceAny {
-                    Scheduler.location.android(args(0).string())
+                    Scheduler.location.android(args(0).string(), estimatedSpeed)
                 }
             }
 
@@ -183,7 +189,7 @@ object LocationHooker : YukiBaseHooker() {
                     returnType = classOf<Location>()
                 }
                 replaceAny {
-                    Scheduler.location.android()
+                    Scheduler.location.android(speed = estimatedSpeed)
                 }
             }
 
@@ -197,10 +203,10 @@ object LocationHooker : YukiBaseHooker() {
                         ?: return@replaceAny callOriginal()
                     val provider = args.firstOrNull { it is String } as String? ?: LocationManager.GPS_PROVIDER
                     redirectListener(listener) {
-                        val location = it.android(provider)
+                        val location = it.android(provider, estimatedSpeed)
                         listener.onLocationChanged(location)
                     }
-                    listener.onLocationChanged(Scheduler.location.android(provider))
+                    listener.onLocationChanged(Scheduler.location.android(provider, estimatedSpeed))
                 }
             }
 
@@ -364,7 +370,7 @@ object LocationHooker : YukiBaseHooker() {
                     replaceAny {
                         args(4).cast<Consumer<Location>>()
                             ?.accept(
-                                Scheduler.location.android(args(0).string())
+                                Scheduler.location.android(args(0).string(), estimatedSpeed)
                             )
                     }
                 }
@@ -429,9 +435,12 @@ object LocationHooker : YukiBaseHooker() {
             replaceAny {
                 val listener = args[0]
                     ?: return@replaceAny callOriginal()
-                val method = classOf<AMapLocationListener>(classloader).getMethod("onLocationChanged",classOf<AMapLocation>(classloader))
+                val method = classOf<AMapLocationListener>(classloader).getMethod(
+                    "onLocationChanged",
+                    classOf<AMapLocation>(classloader)
+                )
                 redirectListener(listener) {
-                    method.invoke(listener,it.amap())
+                    method.invoke(listener, it.amap())
                     loggerI(TAG, "AMap location received")
                 }
                 loggerI(TAG, "AMap location registered")
