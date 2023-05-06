@@ -1,3 +1,18 @@
 <resources>
-    <string name="app_name">MeMockLocationPlugin</string>
+    <string name="app_name">ME Mock Location Plugin</string>
+    <string name="title_not_available">Mock Location not Available</string>
+    <string name="text_not_available">The app is not selected as the mock location provider</string>
+    <string name="title_alert_channel">Alert</string>
+    <string name="title_test">Test</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_carrying">Test Ongoing</string>
+    <string name="text_service_availability">location service availability</string>
+    <string name="text_developer_options">developer options</string>
+    <string name="text_emulation_provider">connectivity with emulation provider</string>
+    <string name="title_test_done">Test Completed</string>
+    <string name="title_test_fragment">Availability Test</string>
+    <string name="title_guidance_fragment">Guidance</string>
+    <string name="action_rerun_test">rerun test</string>
+    <string name="action_cancel_test">cancel test</string>
 </resources>

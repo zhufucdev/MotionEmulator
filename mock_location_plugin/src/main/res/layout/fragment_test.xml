@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingLeft="@dimen/padding_container"
+        android:paddingRight="@dimen/padding_container"
+        android:animateLayoutChanges="true"
+        tools:context=".ui.TestFragment">
+
+    <TextView android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:id="@+id/text_title"
+              android:text="@string/title_carrying"
+              style="@style/TextAppearance.Material3.HeadlineMedium"
+              app:layout_constraintTop_toTopOf="parent"
+              app:layout_constraintStart_toStartOf="parent"
+              app:layout_constraintEnd_toEndOf="parent"/>
+
+    <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/test_card"
+            app:layout_constraintTop_toBottomOf="@id/text_title"
+            android:layout_marginTop="@dimen/margin_content">
+        <androidx.appcompat.widget.LinearLayoutCompat
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:padding="@dimen/margin_content">
+            <com.zhufucdev.motion_emulator.mock_location_plugin.ui.TestItemView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/test_availability"
+                    android:text="@string/text_service_availability"/>
+
+            <com.zhufucdev.motion_emulator.mock_location_plugin.ui.TestItemView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/test_developer_options"
+                    android:layout_marginTop="@dimen/margin_content"
+                    android:text="@string/text_developer_options"/>
+
+            <com.zhufucdev.motion_emulator.mock_location_plugin.ui.TestItemView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/test_emulation_provider"
+                    android:layout_marginTop="@dimen/margin_content"
+                    android:text="@string/text_emulation_provider"/>
+        </androidx.appcompat.widget.LinearLayoutCompat>
+    </com.google.android.material.card.MaterialCardView>
+
+    <com.google.android.material.button.MaterialButton
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/btn_primary"
+            android:text="@string/action_rerun_test"
+            android:layout_marginTop="@dimen/margin_content"
+            app:layout_constraintTop_toBottomOf="@id/test_card"
+            app:icon="@drawable/ic_baseline_refresh"/>
+</androidx.constraintlayout.widget.ConstraintLayout>

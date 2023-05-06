@@ -30,6 +30,9 @@ android {
     kotlinOptions {
         jvmTarget = '11'
     }
+    buildFeatures {
+        viewBinding true
+    }
 }
 
 ext {
@@ -40,7 +43,12 @@ dependencies {
     // Android stuff
     implementation 'androidx.core:core-ktx:1.10.0'
     implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'io.ktor:ktor-client-android:2.3.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'androidx.navigation:navigation-fragment-ktx:2.5.3'
+    implementation 'androidx.navigation:navigation-ui-ktx:2.5.3'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.6.1'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1'
     testImplementation 'junit:junit:4.13.2'
     implementation 'com.google.android.material:material:1.9.0'
     // Misc
@@ -48,8 +56,8 @@ dependencies {
     // Internal
     implementation project(':data')
     // Ktor
-    implementation "io.ktor:ktor-client-core-jvm:${ktor_version}"
-    implementation "io.ktor:ktor-client-android-jvm:${ktor_version}"
+    implementation "io.ktor:ktor-client-core:${ktor_version}"
+    implementation "io.ktor:ktor-client-android:${ktor_version}"
     implementation "io.ktor:ktor-client-serialization-jvm:${ktor_version}"
     implementation "io.ktor:ktor-client-content-negotiation:${ktor_version}"
     implementation "io.ktor:ktor-serialization-kotlinx-json:${ktor_version}"

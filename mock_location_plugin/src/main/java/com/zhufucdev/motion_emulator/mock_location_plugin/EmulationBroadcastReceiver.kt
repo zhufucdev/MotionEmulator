@@ -6,13 +6,11 @@ import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import androidx.core.content.getSystemService
 import com.zhufucdev.data.BROADCAST_AUTHORITY
 
 class EmulationBroadcastReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        Log.i("EmulationBroadcastReceiver", "${intent.action} received")
         val js = context.getSystemService<JobScheduler>() ?: return
 
         val job = js.getPendingJob(0)

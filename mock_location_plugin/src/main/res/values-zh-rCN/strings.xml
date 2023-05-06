@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ME模拟位置插件</string>
+    <string name="title_not_available">模拟位置不可用</string>
+    <string name="text_not_available">此应用未被设为模拟位置提供器</string>
+    <string name="title_alert_channel">警告</string>
+    <string name="title_test">测试</string>
+    <string name="title_carrying">测试正在进行</string>
+    <string name="text_service_availability">位置服务可达性</string>
+    <string name="text_developer_options">开发者选项</string>
+    <string name="text_emulation_provider">模拟提供器连通性</string>
+    <string name="title_test_done">测试已完成</string>
+    <string name="title_test_fragment">可用性测试</string>
+    <string name="title_guidance_fragment">指南</string>
+    <string name="action_rerun_test">重新测试</string>
+    <string name="action_cancel_test">取消测试</string>
+</resources>
