@@ -1,10 +1,6 @@
-package com.zhufucdev.motion_emulator
+package com.zhufucdev.data
 
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils
-import com.zhufucdev.data.*
-import com.zhufucdev.motion_emulator.data.*
-import com.zhufucdev.motion_emulator.hook.at
-import com.zhufucdev.motion_emulator.hook.center
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
@@ -116,7 +112,7 @@ class SaltUnitTest {
 
     @Test
     fun transformers_parsing_correct() {
-        val resolution = salts[0].resolve(MapProjector, trace)
+        val resolution = salts[0].resolve(BypassProjector, trace)
         assertEquals("size not match", 2, resolution.size)
         assertEquals("size of transforms not match", 1, resolution[0].transforms.size)
         assertEquals("type of transforms not match", TransformationChain::class, resolution[0].transforms[0]::class)
@@ -125,7 +121,7 @@ class SaltUnitTest {
 
     @Test
     fun center_correct() {
-        val resolution = salts[0].resolve(MapProjector, trace)
+        val resolution = salts[0].resolve(BypassProjector, trace)
         assertEquals("anchor not match", Vector2D.zero, resolution[1].anchor)
     }
 
@@ -149,7 +145,7 @@ class SaltUnitTest {
         val center = trace2.center(MapProjector)
         val points = mutableListOf<Vector2D>()
         val references = mutableListOf<Vector2D>()
-        val salted = trace2.generateSaltedPoints()
+        val salted = trace2.generateSaltedPoints(MapProjector)
         repeat(10) {
             val p = Random.nextFloat()
             points.add(salted.at(p, MapProjector).point)
