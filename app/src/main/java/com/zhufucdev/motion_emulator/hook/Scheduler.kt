@@ -43,15 +43,17 @@ object Scheduler {
                 json()
             }
 
-            if (tls) {
-                engine {
-                    // disable certificate verification
+            engine {
+                // disable certificate verification
+                if (tls) {
                     sslManager = { connection ->
                         connection.sslSocketFactory = SSLContext.getInstance("TLS").apply {
                             init(null, arrayOf(TrustAllX509TrustManager), SecureRandom())
                         }.socketFactory
                     }
                 }
+                connectTimeout = 0
+                socketTimeout = 0
             }
         }
     }
