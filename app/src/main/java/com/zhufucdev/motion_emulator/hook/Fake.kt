@@ -13,140 +13,15 @@ import android.telephony.cdma.CdmaCellLocation
 import android.telephony.gsm.GsmCellLocation
 import androidx.core.os.bundleOf
 import com.amap.api.location.AMapLocation
-import com.amap.api.maps.AMapUtils
+import com.zhufucdev.data.*
 import com.zhufucdev.motion_emulator.*
 import com.zhufucdev.motion_emulator.data.*
 import kotlin.random.Random
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
-fun Point.offsetFixed(): Point =
-    with(if (coordinateSystem == CoordinateSystem.GCJ02) MapProjector else BypassProjector) { toIdeal() }.toPoint()
-
-fun Point.android(
-    provider: String = LocationManager.GPS_PROVIDER,
-    speed: Float = 0F
-): Location {
-    val result = Location(provider).apply {
-        // fake some data
-        time = System.currentTimeMillis()
-        elapsedRealtimeNanos = SystemClock.elapsedRealtimeNanos()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            elapsedRealtimeUncertaintyNanos = 5000.0 + (Random.nextDouble() - 0.5) * 1000
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            verticalAccuracyMeters = Random.nextFloat() * 10
-        }
-        accuracy = 1F
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            verticalAccuracyMeters = 0.1F
-            if (speed > 0) {
-                speedAccuracyMetersPerSecond = 0.01F
-            }
-        }
-    }
-
-
-    val fixed = offsetFixed()
-    result.latitude = fixed.latitude
-    result.longitude = fixed.longitude
-    result.speed = speed
-
-    return result
-}
-
-fun Point.amap(
-    provider: String = LocationManager.GPS_PROVIDER,
-): AMapLocation =
-    AMapLocation(android(provider))
-
-/**
- * Result for [ClosedShape.at]
- *
- * @param point the interpolated point
- * @param index the bigger index between which the point was interpolated
- * @param totalLen length of the [ClosedShape] used to interpolate, in target panel's measure
- * @param cache some distance cache humans don't really care
- */
-data class ClosedShapeInterp(
-    val point: Vector2D,
-    val index: Int,
-    val totalLen: Double,
-    val cache: List<Double>
-)
-
-/**
- * Interpolate a point, given [progress] valued
- * between 0 and 1
- *
- * The point may have never been drawn
- *
- * @param from if this algorithm is called many times in an increasing [progress] manner,
- * its last result can be used to help calculate faster
- * @param projector The interpolation will happen on the **ideal** plane. Basically, it's projected to
- * the ideal plane, and back to the target plane
- * @see [ClosedShapeInterp]
- */
-fun List<Vector2D>.at(
-    progress: Float,
-    projector: Projector = BypassProjector,
-    from: ClosedShapeInterp? = null
-): ClosedShapeInterp {
-    if (progress > 1) {
-        return ClosedShapeInterp(last(), size - 1, 0.0, emptyList())
-    } else if (progress < 0) {
-        return ClosedShapeInterp(first(), 0, 0.0, emptyList())
-    }
-
-    var totalLen = 0.0
-    val cache = if (from == null || from.cache.isEmpty()) {
-        buildList {
-            add(0.0)
-            for (i in 1 until this@at.size) {
-                totalLen += with(projector) { this@at[i].distance(this@at[i - 1]) }
-                add(totalLen)
-            }
-        }
-    } else {
-        totalLen = from.totalLen
-        from.cache
-    }
-    val required = totalLen * progress
-    val range = if (from == null) {
-        1 until this.size
-    } else {
-        from.index until this.size
-    }
-    for (i in range) {
-        val current = cache[i]
-        if (required == current) {
-            return ClosedShapeInterp(this[i], i, totalLen, cache)
-        } else if (current > required) {
-            val a = with(projector) { this@at[i - 1].toIdeal() }
-            val b = with(projector) { this@at[i].toIdeal() }
-            val f = (required - cache[i - 1]) / (cache[i] - cache[i - 1])
-            return ClosedShapeInterp(
-                point = with(projector) {
-                    Vector2D(
-                        x = (b.x - a.x) * f + a.x,
-                        y = (b.y - a.y) * f + a.y
-                    ).toTarget()
-                },
-                index = i,
-                totalLen, cache
-            )
-        }
-    }
-    return ClosedShapeInterp(this.last(), this.lastIndex, totalLen, cache)
-}
-
-fun Trace.length(): Double {
-    var sum = 0.0
-    for (i in 1 until points.size) {
-        sum += AMapUtils.calculateLineDistance(points[i - 1].toAmapLatLng(), points[i].toAmapLatLng())
-    }
-    return sum
-}
+fun Point.amap(provider: String = LocationManager.GPS_PROVIDER) =
+    AMapLocation(android(provider, mapProjector = MapProjector))
 
 /**
  * Result for [Motion.at]
@@ -337,39 +212,6 @@ fun Motion.estimateSpeed(): Double? {
 fun Motion.estimateTimespan(): Duration {
     if (moments.size < 2) return 0.seconds
     return (moments.last().elapsed - moments.first().elapsed * 1.0).seconds
-}
-
-/**
- * Get the geometric center of a [ClosedShape].
- *
- * @param projector The calculation will happen on the **ideal**
- * plane. Basically, a point is projected to the ideal plane, then
- * back to target plane.
- */
-fun ClosedShape.center(projector: Projector = BypassProjector): Vector2D {
-    if (points.isEmpty()) throw IllegalArgumentException("points is empty")
-
-    var sum = points.first()
-    for (i in 1 until points.size) sum += with(projector) { points[i].toIdeal() }
-
-    return with(projector) { Vector2D(sum.x / points.size, sum.y / points.size).toTarget() }
-}
-
-/**
- * Get circumference of a [ClosedShape].
- *
- * @param projector The calculation will happen on the **ideal**
- * plane. Basically, a point is projected to the ideal plane, then
- * back to target plane.
- */
-fun ClosedShape.circumference(projector: Projector = BypassProjector): Double {
-    var c = 0.0
-    if (points.isEmpty()) return c
-    for (i in 0 until points.lastIndex - 1) {
-        c += with(projector) { points[i].distance(points[i + 1]) }
-    }
-    if (points.size > 2) c += with(projector) { points[0].distance(points.last()) }
-    return c
 }
 
 /**

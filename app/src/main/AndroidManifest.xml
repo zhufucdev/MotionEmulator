@@ -28,7 +28,7 @@
             tools:targetApi="33">
 
         <receiver
-                android:name=".hook_frontend.EmulationMonitorReceiver"
+                android:name=".provider.EmulationMonitorReceiver"
                 android:enabled="true"
                 android:exported="false">
             <intent-filter>

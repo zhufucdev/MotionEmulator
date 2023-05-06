@@ -1,9 +1,9 @@
 package com.zhufucdev.motion_emulator.ui.emulate
 
 import androidx.fragment.app.Fragment
-import com.zhufucdev.motion_emulator.data.Intermediate
-import com.zhufucdev.motion_emulator.hook_frontend.ListenCallback
-import com.zhufucdev.motion_emulator.hook_frontend.Scheduler
+import com.zhufucdev.data.Intermediate
+import com.zhufucdev.motion_emulator.provider.ListenCallback
+import com.zhufucdev.motion_emulator.provider.Scheduler
 
 /**
  * A [Fragment] capable of receiving emulation changes

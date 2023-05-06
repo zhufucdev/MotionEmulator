@@ -15,12 +15,14 @@ import androidx.navigation.fragment.findNavController
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputEditText
+import com.zhufucdev.data.*
 import com.zhufucdev.motion_emulator.*
 import com.zhufucdev.motion_emulator.data.*
 import com.zhufucdev.motion_emulator.databinding.FragmentConfigurationBinding
-import com.zhufucdev.motion_emulator.data.Emulation
-import com.zhufucdev.motion_emulator.hook_frontend.EmulationRef
-import com.zhufucdev.motion_emulator.hook_frontend.Scheduler
+import com.zhufucdev.data.Emulation
+import com.zhufucdev.motion_emulator.R
+import com.zhufucdev.motion_emulator.provider.EmulationRef
+import com.zhufucdev.motion_emulator.provider.Scheduler
 import com.zhufucdev.motion_emulator.ui.map.MapDisplayType
 import com.zhufucdev.motion_emulator.ui.map.MapTraceCallback
 import com.zhufucdev.motion_emulator.ui.map.TraceBounds

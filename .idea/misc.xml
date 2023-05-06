@@ -1,43 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="DesignSurface">
-    <option name="filePathToZoomLevelMap">
-      <map>
-        <entry key="app/src/main/res/drawable/ic_baseline_question_mark_24.xml" value="0.2045" />
-        <entry key="app/src/main/res/layout/activity_app_selector.xml" value="0.26647296162974166" />
-        <entry key="app/src/main/res/layout/activity_emulate.xml" value="0.2850777102772083" />
-        <entry key="app/src/main/res/layout/activity_main.xml" value="0.3027075482229901" />
-        <entry key="app/src/main/res/layout/activity_record.xml" value="0.22056159420289856" />
-        <entry key="app/src/main/res/layout/activity_trace_drawing.xml" value="0.20919422639048957" />
-        <entry key="app/src/main/res/layout/bottom_sheet_emulation_action.xml" value="0.2411604714415231" />
-        <entry key="app/src/main/res/layout/element_telephony.xml" value="0.2411604714415231" />
-        <entry key="app/src/main/res/layout/fragment_configuration.xml" value="0.2411604714415231" />
-        <entry key="app/src/main/res/layout/fragment_emulate_status.xml" value="0.2411604714415231" />
-        <entry key="app/src/main/res/layout/fragment_first.xml" value="0.22056159420289856" />
-        <entry key="app/src/main/res/layout/fragment_record_data.xml" value="0.3211185400036798" />
-        <entry key="app/src/main/res/layout/fragment_record_sensor.xml" value="0.31351508541383605" />
-        <entry key="app/src/main/res/layout/fragment_second.xml" value="0.22056159420289856" />
-        <entry key="app/src/main/res/layout/item_app.xml" value="0.34852844238281255" />
-        <entry key="app/src/main/res/layout/stack_monitor.xml" value="0.2411604714415231" />
-        <entry key="app/src/main/res/menu/app_selector_actionbar.xml" value="0.2935897435897436" />
-        <entry key="app/src/main/res/menu/config_actionbar.xml" value="0.2935897435897436" />
-        <entry key="app/src/main/res/menu/trace_drawing_actionbar.xml" value="0.2937152629328773" />
-        <entry key="app/src/main/res/menu/trace_drawing_tool_slots.xml" value="0.2935897435897436" />
-      </map>
-    </option>
-  </component>
-  <component name="EntryPointsManager">
-    <list size="1">
-      <item index="0" class="java.lang.String" itemvalue="android.annotation.SuppressLint" />
-    </list>
-  </component>
   <component name="FrameworkDetectionExcludesConfiguration">
     <file type="web" url="file://$PROJECT_DIR$" />
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="Android API 33, extension level 3 Platform" project-jdk-type="Android SDK">
-    <output url="file://$PROJECT_DIR$/build/classes" />
-  </component>
-  <component name="ProjectType">
-    <option name="id" value="Android" />
-  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" project-jdk-name="zulu-11" project-jdk-type="JavaSDK" />
 </project>

@@ -1,7 +1,8 @@
+@file:Suppress("DEPRECATION")
+
 package com.zhufucdev.motion_emulator.data
 
 import android.Manifest
-import android.app.ActivityManager
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
@@ -15,6 +16,8 @@ import android.telephony.TelephonyCallback
 import android.telephony.TelephonyManager
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils
 import com.highcapable.yukihookapi.hook.log.loggerW
+import com.zhufucdev.data.CellMoment
+import com.zhufucdev.data.CellTimeline
 import java.util.Timer
 import java.util.concurrent.Executor
 import kotlin.concurrent.timer

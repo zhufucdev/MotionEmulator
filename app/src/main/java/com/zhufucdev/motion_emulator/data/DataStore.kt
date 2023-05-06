@@ -1,6 +1,7 @@
 package com.zhufucdev.motion_emulator.data
 
 import android.content.Context
+import com.zhufucdev.data.Data
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json

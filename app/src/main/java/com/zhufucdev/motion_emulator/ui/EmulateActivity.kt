@@ -8,7 +8,6 @@ import com.zhufucdev.motion_emulator.data.Cells
 import com.zhufucdev.motion_emulator.data.Motions
 import com.zhufucdev.motion_emulator.data.Traces
 import com.zhufucdev.motion_emulator.databinding.ActivityEmulateBinding
-import com.zhufucdev.motion_emulator.hook_frontend.Scheduler
 import com.zhufucdev.motion_emulator.initializeToolbar
 import com.zhufucdev.motion_emulator.setUpStatusBar
 

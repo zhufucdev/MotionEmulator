@@ -1,6 +1,7 @@
 package com.zhufucdev.motion_emulator
 
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils
+import com.zhufucdev.data.*
 import com.zhufucdev.motion_emulator.data.*
 import com.zhufucdev.motion_emulator.hook.at
 import com.zhufucdev.motion_emulator.hook.center
@@ -10,7 +11,6 @@ import kotlinx.serialization.serializer
 import org.junit.Test
 
 import org.junit.Assert.*
-import org.junit.Before
 import kotlin.math.sqrt
 import kotlin.random.Random
 
@@ -149,9 +149,10 @@ class SaltUnitTest {
         val center = trace2.center(MapProjector)
         val points = mutableListOf<Vector2D>()
         val references = mutableListOf<Vector2D>()
+        val salted = trace2.generateSaltedPoints()
         repeat(10) {
             val p = Random.nextFloat()
-            points.add(trace2.saltedPoints.at(p, MapProjector).point)
+            points.add(salted.at(p, MapProjector).point)
             references.add(trace2.points.at(p, MapProjector).point)
         }
 

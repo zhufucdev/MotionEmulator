@@ -1,7 +1,6 @@
 package com.zhufucdev.motion_emulator.ui
 
 import android.Manifest
-import android.content.DialogInterface
 import android.content.pm.PackageManager
 import android.database.MatrixCursor
 import android.location.Criteria
@@ -25,9 +24,10 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.highcapable.yukihookapi.hook.log.loggerW
 import com.zhufucdev.motion_emulator.*
-import com.zhufucdev.motion_emulator.data.CoordinateSystem
-import com.zhufucdev.motion_emulator.data.Point
-import com.zhufucdev.motion_emulator.data.Trace
+import com.zhufucdev.data.CoordinateSystem
+import com.zhufucdev.data.Point
+import com.zhufucdev.data.Trace
+import com.zhufucdev.data.toPoint
 import com.zhufucdev.motion_emulator.data.Traces
 import com.zhufucdev.motion_emulator.databinding.ActivityTraceDrawingBinding
 import com.zhufucdev.motion_emulator.ui.map.*

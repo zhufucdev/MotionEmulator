@@ -13,7 +13,8 @@ import com.highcapable.yukihookapi.hook.param.HookParam
 import com.highcapable.yukihookapi.hook.type.java.BooleanType
 import com.highcapable.yukihookapi.hook.type.java.IntType
 import com.highcapable.yukihookapi.hook.type.java.UnitType
-import com.zhufucdev.motion_emulator.data.MotionMoment
+import com.zhufucdev.data.MotionMoment
+import com.zhufucdev.data.Toggle
 import kotlinx.coroutines.async
 import kotlinx.coroutines.supervisorScope
 

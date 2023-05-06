@@ -7,7 +7,8 @@ import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.highcapable.yukihookapi.hook.factory.classOf
 import com.highcapable.yukihookapi.hook.type.java.IntType
 import com.highcapable.yukihookapi.hook.type.java.UnitType
-import com.zhufucdev.motion_emulator.data.CellMoment
+import com.zhufucdev.data.CellMoment
+import com.zhufucdev.data.Toggle
 import java.util.concurrent.Executor
 
 object CellHooker : YukiBaseHooker() {

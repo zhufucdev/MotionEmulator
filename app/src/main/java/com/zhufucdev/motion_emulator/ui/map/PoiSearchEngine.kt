@@ -3,14 +3,12 @@ package com.zhufucdev.motion_emulator.ui.map
 import android.content.Context
 import android.location.Address
 import android.location.Geocoder
-import android.util.Log
 import com.amap.api.services.core.PoiItemV2
 import com.amap.api.services.poisearch.PoiResultV2
 import com.amap.api.services.poisearch.PoiSearchV2
 import com.zhufucdev.motion_emulator.*
-import com.zhufucdev.motion_emulator.data.CoordinateSystem
-import com.zhufucdev.motion_emulator.data.Point
-import io.ktor.client.call.*
+import com.zhufucdev.data.Point
+import com.zhufucdev.data.toPoint
 import io.ktor.client.call.body
 import io.ktor.client.request.*
 import io.ktor.http.*

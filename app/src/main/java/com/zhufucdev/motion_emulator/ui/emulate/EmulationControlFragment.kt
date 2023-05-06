@@ -10,8 +10,8 @@ import androidx.core.view.isVisible
 import androidx.core.view.setPadding
 import com.zhufucdev.motion_emulator.R
 import com.zhufucdev.motion_emulator.databinding.FragmentEmulationControlBinding
-import com.zhufucdev.motion_emulator.data.Emulation
-import com.zhufucdev.motion_emulator.hook_frontend.Scheduler
+import com.zhufucdev.data.Emulation
+import com.zhufucdev.motion_emulator.provider.Scheduler
 import kotlin.math.roundToInt
 
 class EmulationControlFragment : EmulationMonitoringFragment() {

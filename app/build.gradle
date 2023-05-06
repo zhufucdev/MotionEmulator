@@ -7,7 +7,7 @@ plugins {
 }
 
 def localProperties = new Properties()
-localProperties.load(new FileReader("local.properties"))
+localProperties.load(new FileReader(rootProject.file("local.properties")))
 
 android {
     compileSdk 33
@@ -79,14 +79,16 @@ ext {
 }
 
 dependencies {
+    // Internal
+    implementation project(':data')
     // Xposed
     implementation "com.highcapable.yukihookapi:api:${yuki_version}"
-    implementation 'io.ktor:ktor-client-android:2.2.4'
     ksp "com.highcapable.yukihookapi:ksp-xposed:${yuki_version}"
     compileOnly 'de.robv.android.xposed:api:82'
     // Ktor
     implementation "io.ktor:ktor-client-core-jvm:${ktor_version}"
     implementation "io.ktor:ktor-client-android-jvm:${ktor_version}"
+    implementation "io.ktor:ktor-client-android:${ktor_version}"
     implementation "io.ktor:ktor-client-serialization-jvm:${ktor_version}"
     implementation "io.ktor:ktor-client-content-negotiation:${ktor_version}"
     implementation "io.ktor:ktor-serialization-kotlinx-json:${ktor_version}"

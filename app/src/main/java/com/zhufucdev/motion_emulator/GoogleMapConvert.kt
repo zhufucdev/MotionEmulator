@@ -3,10 +3,11 @@ package com.zhufucdev.motion_emulator
 import android.content.Context
 import android.location.Geocoder
 import com.google.android.gms.maps.model.LatLng
-import com.zhufucdev.motion_emulator.data.CoordinateSystem
+import com.zhufucdev.data.CoordinateSystem
 import com.zhufucdev.motion_emulator.data.MapProjector
-import com.zhufucdev.motion_emulator.data.Point
-import com.zhufucdev.motion_emulator.data.Vector2D
+import com.zhufucdev.data.Point
+import com.zhufucdev.data.Vector2D
+import com.zhufucdev.data.toPoint
 import java.io.IOException
 import kotlin.coroutines.suspendCoroutine
 

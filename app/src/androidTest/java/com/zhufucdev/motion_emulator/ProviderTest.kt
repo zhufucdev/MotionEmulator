@@ -4,11 +4,11 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils
 import com.highcapable.yukihookapi.hook.factory.prefs
-import com.zhufucdev.motion_emulator.data.EmptyBox
-import com.zhufucdev.motion_emulator.data.Emulation
-import com.zhufucdev.motion_emulator.data.Trace
+import com.zhufucdev.data.EmptyBox
+import com.zhufucdev.data.Emulation
+import com.zhufucdev.data.Trace
 import com.zhufucdev.motion_emulator.hook.TrustAllX509TrustManager
-import com.zhufucdev.motion_emulator.hook_frontend.Scheduler
+import com.zhufucdev.motion_emulator.provider.Scheduler
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.android.*
@@ -69,7 +69,7 @@ class ProviderTest {
         runBlocking(Dispatchers.IO) {
             assertEquals(targetEmulation, client.get("$protocol://$addr/current").body<Emulation>())
         }
-        Scheduler.stop()
+        Scheduler.stop(appContext)
     }
 }
 

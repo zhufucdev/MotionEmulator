@@ -179,4 +179,7 @@
     <string name="title_server_port">服务器端口</string>
     <string name="title_use_tls">使用TLS</string>
     <string name="text_input_invalid">输入无效</string>
+    <string name="caption_test_provider">测试提供器</string>
+    <string name="title_use_test_provider">使用测试提供器</string>
+    <string name="text_test_provider_enabled">请确保此应用被在开发者模式中选为模拟位置应用</string>
 </resources>

@@ -2,9 +2,9 @@ package com.zhufucdev.motion_emulator.ui.map
 
 import android.content.Context
 import com.zhufucdev.motion_emulator.*
-import com.zhufucdev.motion_emulator.data.CoordinateSystem
-import com.zhufucdev.motion_emulator.data.Point
-import com.zhufucdev.motion_emulator.data.Trace
+import com.zhufucdev.data.CoordinateSystem
+import com.zhufucdev.data.Point
+import com.zhufucdev.data.Trace
 
 data class TraceBounds(val northeast: Point, val southwest: Point)
 

@@ -17,9 +17,9 @@ import androidx.core.view.WindowCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.preference.PreferenceManager
-import com.zhufucdev.motion_emulator.data.*
-import com.zhufucdev.motion_emulator.data.Emulation
-import com.zhufucdev.motion_emulator.hook_frontend.EmulationRef
+import com.zhufucdev.data.*
+import com.zhufucdev.data.Emulation
+import com.zhufucdev.motion_emulator.provider.EmulationRef
 import io.ktor.client.*
 import io.ktor.client.engine.android.*
 import io.ktor.client.plugins.*
@@ -168,11 +168,6 @@ operator fun FloatArray.times(other: Float): FloatArray {
  */
 fun Location.toPoint(): Point = Point(latitude, longitude, CoordinateSystem.WGS84)
 
-fun Vector2D.lenTo(other: Vector2D): Double =
-    sqrt((x - other.x).pow(2) + (y - other.y).pow(2))
-
-fun Vector2D.toPoint(coordinateSystem: CoordinateSystem = CoordinateSystem.GCJ02) = Point(x, y, coordinateSystem)
-
 val ApplicationInfo.isSystemApp get() = flags and ApplicationInfo.FLAG_SYSTEM != 0
 
 fun AppCompatActivity.initializeToolbar(
@@ -220,17 +215,3 @@ fun Activity.setUpStatusBar() {
 fun Context.lazySharedPreferences() = lazy { PreferenceManager.getDefaultSharedPreferences(this) }
 
 fun Fragment.lazySharedPreferences() = lazy { PreferenceManager.getDefaultSharedPreferences(requireContext()) }
-
-fun estimateSpeed(current: Pair<Point, Long>, last: Pair<Point, Long>) =
-    if (current.first.coordinateSystem == CoordinateSystem.WGS84 && last.first.coordinateSystem == CoordinateSystem.WGS84) {
-        with(MapProjector) {
-            current.first.distanceIdeal(last.first)
-        }
-    } else if (current.first.coordinateSystem == CoordinateSystem.GCJ02 && last.first.coordinateSystem == CoordinateSystem.GCJ02) {
-        with(MapProjector) {
-            current.first.distance(last.first)
-        }
-    } else {
-        throw IllegalArgumentException("current comes with a different coordination " +
-                "system (${current.first.coordinateSystem.name}) than last")
-    } / (current.second - last.second) * 1000

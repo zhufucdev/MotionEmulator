@@ -9,7 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import com.zhufucdev.motion_emulator.R
-import com.zhufucdev.motion_emulator.data.CellTimeline
+import com.zhufucdev.data.CellTimeline
 import com.zhufucdev.motion_emulator.effectiveTimeFormat
 import com.zhufucdev.motion_emulator.ui.theme.paddingCommon
 

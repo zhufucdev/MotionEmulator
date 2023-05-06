@@ -4,7 +4,6 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,9 +15,9 @@ import androidx.work.WorkManager
 import com.zhufucdev.motion_emulator.R
 import com.zhufucdev.motion_emulator.data.Traces
 import com.zhufucdev.motion_emulator.databinding.FragmentEmulateStatusBinding
-import com.zhufucdev.motion_emulator.data.Emulation
-import com.zhufucdev.motion_emulator.hook_frontend.EmulationMonitorWorker
-import com.zhufucdev.motion_emulator.hook_frontend.Scheduler
+import com.zhufucdev.data.Emulation
+import com.zhufucdev.motion_emulator.provider.EmulationMonitorWorker
+import com.zhufucdev.motion_emulator.provider.Scheduler
 import com.zhufucdev.motion_emulator.lazySharedPreferences
 import com.zhufucdev.motion_emulator.skipAmapFuckingLicense
 import com.zhufucdev.motion_emulator.ui.map.MapTraceCallback
@@ -94,7 +93,7 @@ class EmulateStatusFragment : Fragment() {
     override fun onDestroy() {
         super.onDestroy()
         Scheduler.emulation = null
-        Scheduler.stop()
+        Scheduler.stop(requireContext())
         removeMonitorWorker()
     }
 

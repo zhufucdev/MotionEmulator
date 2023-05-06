@@ -187,4 +187,8 @@
     <string name="title_server_port">Server Port</string>
     <string name="title_use_tls">Use TLS</string>
     <string name="text_input_invalid">input invalid</string>
+    <string name="caption_test_provider">TEST PROVIDER</string>
+    <string name="title_use_test_provider">Use test provider</string>
+    <string name="text_test_provider_enabled">Make sure the app is selected as mock location app in developer options
+    </string>
 </resources>

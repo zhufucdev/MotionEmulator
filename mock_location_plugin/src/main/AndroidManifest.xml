@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-permission
+            android:name="android.permission.ACCESS_MOCK_LOCATION"
+            tools:ignore="MockLocation,ProtectedPermissions"/>
+
+    <application
+            android:allowBackup="true"
+            android:icon="@mipmap/ic_launcher"
+            android:label="@string/app_name"
+            android:supportsRtl="true"
+            android:theme="@style/Theme.MotionEmulator">
+        <service
+                android:name=".EmulationService"
+                android:permission="android.permission.BIND_JOB_SERVICE"
+                android:enabled="true"
+                android:exported="false">
+        </service>
+
+        <receiver
+                android:name=".EmulationBroadcastReceiver"
+                android:exported="true"/>
+    </application>
+
+</manifest>

@@ -24,9 +24,11 @@ import com.highcapable.yukihookapi.hook.log.loggerE
 import com.highcapable.yukihookapi.hook.log.loggerI
 import com.highcapable.yukihookapi.hook.type.android.ApplicationClass
 import com.highcapable.yukihookapi.hook.type.java.*
-import com.zhufucdev.motion_emulator.data.MapProjector
-import com.zhufucdev.motion_emulator.data.Point
-import com.zhufucdev.motion_emulator.estimateSpeed
+import com.zhufucdev.data.Point
+import com.zhufucdev.data.android
+import com.zhufucdev.data.estimateSpeed
+import com.zhufucdev.data.offsetFixed
+import com.zhufucdev.motion_emulator.data.*
 import java.util.concurrent.Executor
 import java.util.function.Consumer
 import kotlin.collections.component1
@@ -51,7 +53,8 @@ object LocationHooker : YukiBaseHooker() {
 
     fun raise(point: Point) {
         listeners.forEach { (_, p) ->
-            estimatedSpeed = estimateSpeed(point to System.currentTimeMillis(), lastLocation).toFloat()
+            estimatedSpeed =
+                estimateSpeed(point to System.currentTimeMillis(), lastLocation, MapProjector).toFloat()
             p.invoke(point)
             lastLocation = point to System.currentTimeMillis()
         }
@@ -178,7 +181,7 @@ object LocationHooker : YukiBaseHooker() {
                     returnType = classOf<Location>()
                 }
                 replaceAny {
-                    Scheduler.location.android(args(0).string(), estimatedSpeed)
+                    Scheduler.location.android(args(0).string(), estimatedSpeed, MapProjector)
                 }
             }
 
@@ -189,7 +192,7 @@ object LocationHooker : YukiBaseHooker() {
                     returnType = classOf<Location>()
                 }
                 replaceAny {
-                    Scheduler.location.android(speed = estimatedSpeed)
+                    Scheduler.location.android(speed = estimatedSpeed, mapProjector = MapProjector)
                 }
             }
 
@@ -203,10 +206,10 @@ object LocationHooker : YukiBaseHooker() {
                         ?: return@replaceAny callOriginal()
                     val provider = args.firstOrNull { it is String } as String? ?: LocationManager.GPS_PROVIDER
                     redirectListener(listener) {
-                        val location = it.android(provider, estimatedSpeed)
+                        val location = it.android(provider, estimatedSpeed, MapProjector)
                         listener.onLocationChanged(location)
                     }
-                    listener.onLocationChanged(Scheduler.location.android(provider, estimatedSpeed))
+                    listener.onLocationChanged(Scheduler.location.android(provider, estimatedSpeed, MapProjector))
                 }
             }
 
@@ -370,7 +373,7 @@ object LocationHooker : YukiBaseHooker() {
                     replaceAny {
                         args(4).cast<Consumer<Location>>()
                             ?.accept(
-                                Scheduler.location.android(args(0).string(), estimatedSpeed)
+                                Scheduler.location.android(args(0).string(), estimatedSpeed, MapProjector)
                             )
                     }
                 }
@@ -516,7 +519,7 @@ object LocationHooker : YukiBaseHooker() {
                 }
 
                 afterHook {
-                    result = Scheduler.location.offsetFixed().latitude
+                    result = Scheduler.location.offsetFixed(MapProjector).latitude
                 }
             }
 
@@ -528,7 +531,7 @@ object LocationHooker : YukiBaseHooker() {
                 }
 
                 afterHook {
-                    result = Scheduler.location.offsetFixed().longitude
+                    result = Scheduler.location.offsetFixed(MapProjector).longitude
                 }
             }
         }

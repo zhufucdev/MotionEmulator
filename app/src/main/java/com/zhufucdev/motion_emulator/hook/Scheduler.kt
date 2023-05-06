@@ -8,6 +8,7 @@ import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.highcapable.yukihookapi.hook.log.loggerD
 import com.highcapable.yukihookapi.hook.log.loggerI
 import com.highcapable.yukihookapi.hook.param.PackageParam
+import com.zhufucdev.data.*
 import com.zhufucdev.motion_emulator.data.*
 import com.zhufucdev.motion_emulator.toPoint
 import io.ktor.client.*
@@ -64,12 +65,20 @@ object Scheduler {
             loggerI(tag = TAG, "Listen event loop on port $port, tls = $tls")
 
             var logged = false
-            while (true) {
-                if (port > 0) {
-                    eventLoop()
+            // query existing state
+            httpClient.get("$providerAddr/current").apply {
+                if (status == HttpStatusCode.OK) {
+                    val emulation = body<Emulation>()
+                    launch {
+                        startEmulation(emulation)
+                    }
                 }
+            }
+
+            while (true) {
+                eventLoop()
                 if (!logged) {
-                    loggerI(tag = TAG, msg = "Provider offline. Waiting for data channel broadcast")
+                    loggerI(tag = TAG, msg = "Provider offline. Waiting for data channel to become online")
                     logged = true
                 }
                 delay(1.seconds)
@@ -92,17 +101,6 @@ object Scheduler {
 
     private suspend fun eventLoop() {
         try {
-            // query existing state
-            httpClient.get("$providerAddr/current").apply {
-                if (status == HttpStatusCode.OK) {
-                    val emulation = body<Emulation>()
-                    startEmulation(emulation)
-                } else {
-                    return
-                }
-            }
-
-            // enter event loop
             loggerI(TAG, "Event loop started on $port")
 
             while (true) {
@@ -158,7 +156,7 @@ object Scheduler {
     private suspend fun startEmulation(emulation: Emulation): Boolean {
         loggerI(tag = TAG, msg = "Emulation started")
 
-        length = emulation.trace.circumference(MapProjector)
+        length = emulation.trace.length(MapProjector)
         duration = length / emulation.velocity // in seconds
         this.satellites = emulation.satelliteCount
 
@@ -195,7 +193,7 @@ object Scheduler {
     private fun CoroutineScope.startStepsEmulation(motion: Box<Motion>, velocity: Double): Job? {
         SensorHooker.toggle = motion.status
 
-        return if (motion.value != null && motion.value.sensorsInvolved.any { it in stepSensors }) {
+        return if (motion.value != null && motion.value!!.sensorsInvolved.any { it in stepSensors }) {
             val pause = (1.2 / velocity).seconds
             launch {
                 if (stepsCount == -1) {
@@ -250,9 +248,10 @@ object Scheduler {
 
     private fun CoroutineScope.startTraceEmulation(trace: Trace): Job =
         launch {
-            var traceInterp = trace.saltedPoints.at(0F, MapProjector)
+            val salted = trace.generateSaltedPoints(MapProjector)
+            var traceInterp = salted.at(0F, MapProjector)
             while (hooking && progress <= 1) {
-                val interp = trace.saltedPoints.at(progress, MapProjector, traceInterp)
+                val interp = salted.at(progress, MapProjector, traceInterp)
                 traceInterp = interp
                 mLocation = interp.point.toPoint(trace.coordinateSystem)
                 LocationHooker.raise(interp.point.toPoint())
@@ -264,24 +263,25 @@ object Scheduler {
 
     private fun CoroutineScope.startCellEmulation(cells: Box<CellTimeline>): Job? {
         CellHooker.toggle = cells.status
+        val value = cells.value
 
-        return if (cells.value != null) {
+        return if (value != null) {
             launch {
                 var ptr = 0
-                val timespan = cells.value.moments.timespan()
-                while (hooking && progress <= 1 && ptr < cells.value.moments.size) {
-                    val current = cells.value.moments[ptr]
+                val timespan = value.moments.timespan()
+                while (hooking && progress <= 1 && ptr < value.moments.size) {
+                    val current = value.moments[ptr]
                     mCellMoment = current
                     CellHooker.raise(current)
 
-                    if (cells.value.moments.size == 1) {
+                    if (value.moments.size == 1) {
                         delay(duration.seconds) // halt
                     } else {
-                        if (ptr == cells.value.moments.lastIndex - 1) {
+                        if (ptr == value.moments.lastIndex - 1) {
                             break
                         }
                         val pause =
-                            (cells.value.moments[ptr].elapsed - cells.value.moments[ptr + 1].elapsed) /
+                            (value.moments[ptr].elapsed - value.moments[ptr + 1].elapsed) /
                                     timespan * duration
                         ptr++
                         delay(pause.seconds)
