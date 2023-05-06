@@ -13,7 +13,7 @@
                 android:title="@string/title_use_tls"
                 android:key="provider_tls"
                 android:icon="@drawable/ic_baseline_https_24"
-                android:defaultValue="false"/>
+                android:defaultValue="true"/>
     </PreferenceCategory>
 
     <PreferenceCategory

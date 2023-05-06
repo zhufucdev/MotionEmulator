@@ -84,7 +84,7 @@ object Scheduler {
         }
         val prefs = context.prefs()
         providerPort = prefs.getString("provider_port").toIntOrNull() ?: 2023
-        providerTls = prefs.getBoolean("provider_tls")
+        providerTls = prefs.getBoolean("provider_tls", true)
         server = embeddedServer(Netty, environment)
 
         server.start(false)

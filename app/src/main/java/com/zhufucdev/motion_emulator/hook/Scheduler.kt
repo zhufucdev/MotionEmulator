@@ -59,7 +59,7 @@ object Scheduler {
     fun PackageParam.init(context: Context) {
         this@Scheduler.packageName = context.applicationContext.packageName
         port = prefs.getString("provider_port").toIntOrNull() ?: 2023
-        tls = prefs.getBoolean("provider_tls")
+        tls = prefs.getBoolean("provider_tls", true)
 
         GlobalScope.launch {
             loggerI(tag = TAG, "Listen event loop on port $port, tls = $tls")
