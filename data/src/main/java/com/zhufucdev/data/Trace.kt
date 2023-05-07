@@ -127,6 +127,9 @@ class TraceSerializer : KSerializer<Trace> {
 
 }
 
+/**
+ * **This serializer doesn't come with coordination system support**
+ */
 class PointSerializer : KSerializer<Point> {
     override val descriptor: SerialDescriptor =
         buildClassSerialDescriptor("$SERIALIZATION_ID.data.Point") {
@@ -152,5 +155,37 @@ class PointSerializer : KSerializer<Point> {
         encoder.encodeStructure(descriptor) {
             encodeDoubleElement(descriptor, 0, value.latitude)
             encodeDoubleElement(descriptor, 1, value.longitude)
+        }
+}
+
+class PointSerializerCoord : KSerializer<Point> {
+    override val descriptor: SerialDescriptor =
+        buildClassSerialDescriptor("$SERIALIZATION_ID.data.Point") {
+            element("latitude", serialDescriptor<Double>())
+            element("longitude", serialDescriptor<Double>())
+            element("coordSys", serialDescriptor<CoordinateSystem>())
+        }
+
+    override fun deserialize(decoder: Decoder): Point = decoder.decodeStructure(descriptor) {
+        var latitude = 0.0
+        var longitude = 0.0
+        var coordinateSystem = CoordinateSystem.WGS84
+        loop@ while (true) {
+            when (val index = decodeElementIndex(descriptor)) {
+                DECODE_DONE -> break@loop
+                0 -> latitude = decodeDoubleElement(descriptor, index)
+                1 -> longitude = decodeDoubleElement(descriptor, index)
+                2 -> coordinateSystem = decodeSerializableElement(descriptor, index, serializer())
+            }
+        }
+
+        Point(latitude, longitude, coordinateSystem)
+    }
+
+    override fun serialize(encoder: Encoder, value: Point) =
+        encoder.encodeStructure(descriptor) {
+            encodeDoubleElement(descriptor, 0, value.latitude)
+            encodeDoubleElement(descriptor, 1, value.longitude)
+            encodeSerializableElement(descriptor, 2, serializer(), value.coordinateSystem)
         }
 }
