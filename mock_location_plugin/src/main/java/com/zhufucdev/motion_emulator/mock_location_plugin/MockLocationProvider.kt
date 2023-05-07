@@ -175,6 +175,9 @@ object MockLocationProvider {
         }
         if (!res.status.isSuccess()) {
             Log.w(TAG, "while updating progress, server responded with ${res.status.value}")
+            Availability.notifyConnected(false)
+        } else {
+            Availability.notifyConnected(true)
         }
     }
 

@@ -26,24 +26,28 @@ object Availability {
         viewModel.developerSet.postValue(TestStatus.ONGOING)
         viewModel.providerConnected.postValue(TestStatus.ONGOING)
 
-        try {
-            val (powerUsage, accuracy) = if (Build.VERSION.SDK_INT >= 30) 1 to 2 else 0 to 5
-            locationManager.addTestProvider(
-                LocationManager.GPS_PROVIDER,
-                false,
-                false,
-                false,
-                false,
-                true,
-                true,
-                true,
-                powerUsage,
-                accuracy
-            )
+        if (MockLocationProvider.isEmulating) {
             viewModel.developerSet.postValue(TestStatus.PASSED)
-            locationManager.removeTestProvider(LocationManager.GPS_PROVIDER)
-        } catch (_: SecurityException) {
-            viewModel.developerSet.postValue(TestStatus.FAILED)
+        } else {
+            try {
+                val (powerUsage, accuracy) = if (Build.VERSION.SDK_INT >= 30) 1 to 2 else 0 to 5
+                locationManager.addTestProvider(
+                    LocationManager.GPS_PROVIDER,
+                    false,
+                    false,
+                    false,
+                    false,
+                    true,
+                    true,
+                    true,
+                    powerUsage,
+                    accuracy
+                )
+                viewModel.developerSet.postValue(TestStatus.PASSED)
+                locationManager.removeTestProvider(LocationManager.GPS_PROVIDER)
+            } catch (_: SecurityException) {
+                viewModel.developerSet.postValue(TestStatus.FAILED)
+            }
         }
 
         connectionCallback = {
