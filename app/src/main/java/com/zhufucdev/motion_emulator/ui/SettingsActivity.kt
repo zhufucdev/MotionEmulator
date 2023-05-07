@@ -186,7 +186,7 @@ class SettingsActivity : AppCompatActivity(),
                                 val url =
                                     when (index) {
                                         0 -> getString(R.string.url_github_releases)
-                                        1 -> getString(R.string.url_fdroid)
+                                        1 -> getString(R.string.url_blog)
                                         else -> "" // this is not possible
                                     }
                                 val intent = Intent(Intent.ACTION_VIEW).apply {

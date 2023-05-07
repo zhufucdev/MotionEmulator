@@ -184,4 +184,5 @@
     <string name="text_test_provider_enabled">请确保此应用被在开发者模式中选为模拟位置应用</string>
     <string name="text_plugin_not_installed">插件未安装</string>
     <string name="title_install_plugin">安装插件</string>
+    <string name="name_my_blog">Steve的博客</string>
 </resources>

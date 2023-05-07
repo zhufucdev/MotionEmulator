@@ -12,6 +12,6 @@
 
     <string-array name="plugin_sources">
         <item>GitHub</item>
-        <item>F-Droid</item>
+        <item>@string/name_my_blog</item>
     </string-array>
 </resources>
