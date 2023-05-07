@@ -15,4 +15,6 @@
     <string name="title_guidance_fragment">Guidance</string>
     <string name="action_rerun_test">rerun test</string>
     <string name="action_cancel_test">cancel test</string>
+    <string name="title_connection_timeout">Connection Timeout</string>
+    <string name="text_connection_timeout">"Timeout trying to connect to an emulation provider. Make sure you have triggered an emulation in a supported provider.</string>
 </resources>

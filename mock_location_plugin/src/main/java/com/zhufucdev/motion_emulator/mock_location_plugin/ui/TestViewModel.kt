@@ -4,9 +4,9 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
 class TestViewModel : ViewModel() {
-    val serviceAvailable by lazy { MutableLiveData(TestStatus.UNKNOWN) }
-    val developerSet by lazy { MutableLiveData(TestStatus.UNKNOWN) }
-    val providerConnected by lazy { MutableLiveData(TestStatus.UNKNOWN) }
+    val serviceAvailable by lazy { MutableLiveData(TestStatus.ONGOING) }
+    val developerSet by lazy { MutableLiveData(TestStatus.ONGOING) }
+    val providerConnected by lazy { MutableLiveData(TestStatus.ONGOING) }
     val carrying by lazy { MutableLiveData<Boolean>() }
 
     fun cancel() {

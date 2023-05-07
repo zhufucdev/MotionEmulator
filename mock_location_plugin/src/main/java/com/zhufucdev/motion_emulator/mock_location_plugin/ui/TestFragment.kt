@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -39,6 +40,7 @@ class TestFragment : Fragment() {
         }
         viewModel.providerConnected.observe(viewLifecycleOwner) {
             binding.testEmulationProvider.status = it
+            binding.cardTimeout.root.isVisible = it == TestStatus.UNKNOWN
         }
         viewModel.carrying.observe(viewLifecycleOwner) { running ->
             binding.textTitle.setText(if (running) R.string.title_carrying else R.string.title_test_done)

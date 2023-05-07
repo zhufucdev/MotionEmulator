@@ -14,4 +14,6 @@
     <string name="title_guidance_fragment">指南</string>
     <string name="action_rerun_test">重新测试</string>
     <string name="action_cancel_test">取消测试</string>
+    <string name="title_connection_timeout">连接超时</string>
+    <string name="text_connection_timeout">尝试连接到模拟提供器时超时。请确保你在支持的提供器内启动了模拟。</string>
 </resources>
