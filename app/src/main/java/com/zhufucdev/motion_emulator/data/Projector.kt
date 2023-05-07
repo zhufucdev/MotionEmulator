@@ -16,11 +16,6 @@ import com.zhufucdev.motion_emulator.ui.manager.FactorCanvas
 import kotlin.math.pow
 import kotlin.math.sqrt
 
-/**
- * A [Projector] targeting GCJ-02 coordinating system
- *
- * The ideal plane is WGS-84 coordination
- */
 object MapProjector : AbstractMapProjector() {
     override fun Vector2D.distance(other: Vector2D): Double =
         AMapUtils.calculateLineDistance(this.toAmapLatLng(), other.toAmapLatLng()).toDouble()

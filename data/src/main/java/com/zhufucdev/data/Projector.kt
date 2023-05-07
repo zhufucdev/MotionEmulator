@@ -44,6 +44,11 @@ interface Projector {
     fun Vector2D.toIdeal(): Vector2D
 }
 
+/**
+ * A [Projector] targeting GCJ-02 coordinating system
+ *
+ * The ideal plane is WGS-84 coordination
+ */
 abstract class AbstractMapProjector : Projector {
     companion object {
         private const val pi = 3.14159265358979324
