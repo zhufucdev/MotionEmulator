@@ -7,7 +7,7 @@
     <string name="title_test">测试</string>
     <string name="title_carrying">测试正在进行</string>
     <string name="text_service_availability">位置服务可达性</string>
-    <string name="text_developer_options">开发者选项</string>
+    <string name="text_developer_options">已启用开发者选项</string>
     <string name="text_emulation_provider">模拟提供器连通性</string>
     <string name="title_test_done">测试已完成</string>
     <string name="title_test_fragment">可用性测试</string>
