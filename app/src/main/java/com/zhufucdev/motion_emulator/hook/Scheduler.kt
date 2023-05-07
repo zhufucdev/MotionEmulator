@@ -10,7 +10,6 @@ import com.highcapable.yukihookapi.hook.log.loggerI
 import com.highcapable.yukihookapi.hook.param.PackageParam
 import com.zhufucdev.data.*
 import com.zhufucdev.motion_emulator.data.*
-import com.zhufucdev.motion_emulator.toPoint
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.android.*
@@ -250,7 +249,7 @@ object Scheduler {
 
     private fun CoroutineScope.startTraceEmulation(trace: Trace): Job =
         launch {
-            val salted = trace.generateSaltedPoints(MapProjector)
+            val salted = trace.generateSaltedTrace(MapProjector)
             var traceInterp = salted.at(0F, MapProjector)
             while (hooking && progress <= 1) {
                 val interp = salted.at(progress, MapProjector, traceInterp)
@@ -296,7 +295,7 @@ object Scheduler {
     }
 
     private suspend fun notifyProgress() {
-        httpClient.post("$providerAddr/indeterminate/${id}") {
+        httpClient.post("$providerAddr/intermediate/${id}") {
             contentType(ContentType.Application.Json)
             setBody(
                 Intermediate(

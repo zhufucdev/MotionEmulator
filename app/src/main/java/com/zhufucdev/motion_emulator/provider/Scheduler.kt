@@ -243,13 +243,15 @@ fun Application.eventServer() {
             call.respondEmulation(next)
         }
 
-        post("/indeterminate/{id}") {
+        post("/intermediate/{id}") {
             val id = call.parameters["id"]
             if (id == null) {
                 call.respond(HttpStatusCode.BadRequest)
                 return@post
             }
-            Scheduler.setIntermediate(id, call.receive<Intermediate>())
+            Scheduler.setIntermediate(id, call.receive<Intermediate>().also {
+                Log.d("EmulationApp", "coord = ${it.location.coordinateSystem}")
+            })
             call.respond(HttpStatusCode.OK)
         }
 

@@ -14,7 +14,8 @@ fun DateFormat.dateString(time: Long = System.currentTimeMillis()): String =
 const val SERIALIZATION_ID = "com.zhufucdev.motion_emulator"
 
 fun Point.offsetFixed(mapProjector: AbstractMapProjector): Point =
-    with(if (coordinateSystem == CoordinateSystem.GCJ02) mapProjector else BypassProjector) { toIdeal() }.toPoint()
+    with(if (coordinateSystem == CoordinateSystem.GCJ02) mapProjector else BypassProjector) { toIdeal() }
+        .toPoint(CoordinateSystem.WGS84)
 
 fun Point.android(
     provider: String = LocationManager.GPS_PROVIDER,
@@ -49,7 +50,16 @@ fun Point.android(
     return result
 }
 
-fun Trace.generateSaltedPoints(mapProjector: AbstractMapProjector): List<Vector2D> {
+/**
+ * Generate a salted trace, where all points are
+ * involved with random factors
+ *
+ * @param mapProjector Requires projection in case
+ * the trace's coordination system is not WGS84,
+ * in which points will be project to WGS84, then
+ * back to GCJ02
+ */
+fun Trace.generateSaltedTrace(mapProjector: AbstractMapProjector): List<Point> {
     val salt = this.salt
     return if (salt != null) {
         val runtime = salt.runtime()
@@ -60,7 +70,7 @@ fun Trace.generateSaltedPoints(mapProjector: AbstractMapProjector): List<Vector2
                 point = it,
                 projector = projector,
                 parent = this
-            )
+            ).toPoint(this.coordinateSystem)
         }
     } else {
         points

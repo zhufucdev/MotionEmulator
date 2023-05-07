@@ -67,6 +67,7 @@ object MockLocationProvider {
             TARGET_PROVIDERS.forEach {
                 // this is a perfect provider
                 locationManager.addTestProvider(it, false, false, false, false, false, true, true, powerUsage, accuracy)
+                locationManager.setTestProviderEnabled(it, true)
             }
         } catch (_: SecurityException) {
             notifyNotAvailable(context)
@@ -109,22 +110,26 @@ object MockLocationProvider {
 
         notifyStatus(EmulationInfo(duration, length, BuildConfig.APPLICATION_ID), providerAddr)
 
-        val salted = trace.generateSaltedPoints(MapProjector)
+        val salted = trace.generateSaltedTrace(MapProjector)
         var traceInterp = salted.at(0F, MapProjector)
         var loopStart: Long
         var currentLoop = 0
         while (isEmulating && currentLoop < emulation.repeat) {
             var progress = 0F
+            var elapsed = 0.0
             loopStart = System.currentTimeMillis()
 
-            while (progress <= 1F) {
+            while (progress <= 1F && isEmulating) {
                 val interp = salted.at(progress, MapProjector, traceInterp)
                 traceInterp = interp
+
                 val current = interp.point.toPoint(trace.coordinateSystem)
                 current.push()
+                notifyProgress(Intermediate(current, elapsed, progress), providerAddr)
                 delay(1000)
 
-                progress = ((System.currentTimeMillis() - loopStart) / duration).toFloat()
+                elapsed = (System.currentTimeMillis() - loopStart) / 1000.0
+                progress = (elapsed / duration).toFloat()
             }
             currentLoop++
         }
@@ -163,6 +168,16 @@ object MockLocationProvider {
         }
     }
 
+    private suspend fun notifyProgress(intermediate: Intermediate, providerAddr: String) {
+        val res = ktor.post("$providerAddr/intermediate/${emulationId}") {
+            contentType(ContentType.Application.Json)
+            setBody(intermediate)
+        }
+        if (!res.status.isSuccess()) {
+            Log.w(TAG, "while updating progress, server responded with ${res.status.value}")
+        }
+    }
+
     private var lastLocation = Point(0.0, 0.0) to System.currentTimeMillis()
     private fun Point.push() {
         lastLocation = lastLocation.first.toPoint(coordinateSystem) to lastLocation.second
@@ -170,7 +185,7 @@ object MockLocationProvider {
         TARGET_PROVIDERS.forEach {
             locationManager.setTestProviderLocation(
                 it, android(
-                    provider = LocationManager.GPS_PROVIDER, speed = speed, mapProjector = MapProjector
+                    provider = it, speed = speed, mapProjector = MapProjector
                 )
             )
         }
