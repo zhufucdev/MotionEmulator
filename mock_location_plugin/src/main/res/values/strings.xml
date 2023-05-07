@@ -4,8 +4,6 @@
     <string name="text_not_available">The app is not selected as the mock location provider</string>
     <string name="title_alert_channel">Alert</string>
     <string name="title_test">Test</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_carrying">Test Ongoing</string>
     <string name="text_service_availability">location service availability</string>
     <string name="text_developer_options">developer options enabled</string>
@@ -17,4 +15,12 @@
     <string name="action_cancel_test">cancel test</string>
     <string name="title_connection_timeout">Connection Timeout</string>
     <string name="text_connection_timeout">"Timeout trying to connect to an emulation provider. Make sure you have triggered an emulation in a supported provider.</string>
+    <string name="text_guidance_welcome">Welcome to the Plugin. This is a general purpose mock location implemetation. To enable, take the following steps</string>
+    <string name="title_guidance_1">Enable Developer Options</string>
+    <string name="text_guidance_1">In Settings > About, click Build number several times until developer options is enabled. Use password when necessary.</string>
+    <string name="action_open_about">Open About Device</string>
+    <string name="text_activity_not_found">Activity not found</string>
+    <string name="title_guidance_2">Select as Mock Location App</string>
+    <string name="text_guidance_2">In developer options, scroll to Location, click Select mock location app, then click on this app.</string>
+    <string name="action_open_developer">Open Developer Options</string>
 </resources>

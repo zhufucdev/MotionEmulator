@@ -1,14 +1,78 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             xmlns:tools="http://schemas.android.com/tools"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent"
-             tools:context=".ui.GuidanceFragment">
-
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+<androidx.core.widget.NestedScrollView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:paddingStart="@dimen/padding_container"
+        android:paddingEnd="@dimen/padding_container"
+        tools:context=".ui.GuidanceFragment">
+    <androidx.appcompat.widget.LinearLayoutCompat
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text="@string/hello_blank_fragment"/>
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
-</FrameLayout>
+        <TextView android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:text="@string/text_guidance_welcome"
+                  style="@style/TextAppearance.Material3.BodyMedium"/>
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_content">
+            <androidx.appcompat.widget.AppCompatImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    app:tint="?attr/colorOnSurfaceVariant"
+                    app:srcCompat="@drawable/ic_step1"/>
+            <TextView android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:text="@string/title_guidance_1"
+                      android:textAlignment="center"
+                      style="@style/TextAppearance.Material3.HeadlineSmall"/>
+        </androidx.appcompat.widget.LinearLayoutCompat>
+
+        <TextView android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:text="@string/text_guidance_1"
+                  android:layout_marginTop="@dimen/margin_content"
+                  style="@style/TextAppearance.Material3.BodyMedium"/>
+
+        <com.google.android.material.button.MaterialButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/btn_open_about"
+                android:layout_marginTop="@dimen/margin_content"
+                android:text="@string/action_open_about"/>
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_content">
+            <androidx.appcompat.widget.AppCompatImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    app:tint="?attr/colorOnSurfaceVariant"
+                    app:srcCompat="@drawable/ic_step2"/>
+            <TextView android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:text="@string/title_guidance_2"
+                      android:textAlignment="center"
+                      style="@style/TextAppearance.Material3.HeadlineSmall"/>
+        </androidx.appcompat.widget.LinearLayoutCompat>
+
+        <TextView android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:text="@string/text_guidance_2"
+                  android:layout_marginTop="@dimen/margin_content"
+                  style="@style/TextAppearance.Material3.BodyMedium"/>
+
+        <com.google.android.material.button.MaterialButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/btn_open_developer"
+                android:layout_marginTop="@dimen/margin_content"
+                android:text="@string/action_open_developer"/>
+    </androidx.appcompat.widget.LinearLayoutCompat>
+</androidx.core.widget.NestedScrollView>

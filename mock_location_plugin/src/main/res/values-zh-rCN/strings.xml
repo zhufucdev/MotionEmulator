@@ -16,4 +16,12 @@
     <string name="action_cancel_test">取消测试</string>
     <string name="title_connection_timeout">连接超时</string>
     <string name="text_connection_timeout">尝试连接到模拟提供器时超时。请确保你在支持的提供器内启动了模拟。</string>
+    <string name="text_guidance_welcome">欢迎来到此插件。插件实现了通用模拟位置。要启用，请按以下步骤。</string>
+    <string name="title_guidance_1">启用开发者选项</string>
+    <string name="text_guidance_1">在设置 > 关于，点击构建版本，直到开发者模式启用。有必要时输入密码。</string>
+    <string name="action_open_about">打开关于设备</string>
+    <string name="text_activity_not_found">活动未找到</string>
+    <string name="title_guidance_2">设为模拟位置提供程序</string>
+    <string name="text_guidance_2">在开发者选项，翻到定位，点击选择模拟位置应用，然后选择此应用。</string>
+    <string name="action_open_developer">打开开发者选项</string>
 </resources>
