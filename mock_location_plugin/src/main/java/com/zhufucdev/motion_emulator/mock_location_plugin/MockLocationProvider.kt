@@ -124,7 +124,12 @@ object MockLocationProvider {
                 traceInterp = interp
 
                 val current = interp.point.toPoint(trace.coordinateSystem)
-                current.push()
+                try {
+                    current.push()
+                } catch (_: SecurityException) {
+                    stop()
+                    break
+                }
                 notifyProgress(Intermediate(current, elapsed, progress), providerAddr)
                 delay(1000)
 
