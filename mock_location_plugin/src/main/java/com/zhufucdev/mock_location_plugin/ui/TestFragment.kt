@@ -1,4 +1,4 @@
-package com.zhufucdev.motion_emulator.mock_location_plugin.ui
+package com.zhufucdev.mock_location_plugin.ui
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -8,9 +8,9 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
-import com.zhufucdev.motion_emulator.mock_location_plugin.Availability
-import com.zhufucdev.motion_emulator.mock_location_plugin.R
-import com.zhufucdev.motion_emulator.mock_location_plugin.databinding.FragmentTestBinding
+import com.zhufucdev.mock_location_plugin.Availability
+import com.zhufucdev.mock_location_plugin.R
+import com.zhufucdev.mock_location_plugin.databinding.FragmentTestBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancelAndJoin

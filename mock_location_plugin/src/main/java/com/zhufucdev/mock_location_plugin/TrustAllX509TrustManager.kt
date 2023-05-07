@@ -1,4 +1,4 @@
-package com.zhufucdev.motion_emulator.mock_location_plugin
+package com.zhufucdev.mock_location_plugin
 
 import android.annotation.SuppressLint
 import java.security.cert.X509Certificate

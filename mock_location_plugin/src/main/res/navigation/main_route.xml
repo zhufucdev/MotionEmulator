@@ -5,13 +5,13 @@
             app:startDestination="@id/guidanceFragment">
 
     <fragment android:id="@+id/guidanceFragment"
-              android:name="com.zhufucdev.motion_emulator.mock_location_plugin.ui.GuidanceFragment"
+              android:name="com.zhufucdev.mock_location_plugin.ui.GuidanceFragment"
               android:label="@string/title_guidance_fragment" tools:layout="@layout/fragment_guidance">
         <action android:id="@+id/action_guidanceFragment_to_testFragment" app:destination="@id/testFragment"
                 app:enterAnim="@anim/nav_default_enter_anim" app:exitAnim="@anim/nav_default_exit_anim"
                 app:popEnterAnim="@anim/nav_default_pop_enter_anim" app:popExitAnim="@anim/nav_default_pop_exit_anim"/>
     </fragment>
     <fragment android:id="@+id/testFragment"
-              android:name="com.zhufucdev.motion_emulator.mock_location_plugin.ui.TestFragment"
+              android:name="com.zhufucdev.mock_location_plugin.ui.TestFragment"
               tools:layout="@layout/fragment_test" android:label="@string/title_test_fragment"/>
 </navigation>

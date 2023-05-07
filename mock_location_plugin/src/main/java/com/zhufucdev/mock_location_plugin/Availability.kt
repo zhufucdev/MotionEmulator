@@ -1,11 +1,11 @@
-package com.zhufucdev.motion_emulator.mock_location_plugin
+package com.zhufucdev.mock_location_plugin
 
 import android.content.Context
 import android.location.LocationManager
 import android.os.Build
 import androidx.core.content.getSystemService
-import com.zhufucdev.motion_emulator.mock_location_plugin.ui.TestStatus
-import com.zhufucdev.motion_emulator.mock_location_plugin.ui.TestViewModel
+import com.zhufucdev.mock_location_plugin.ui.TestStatus
+import com.zhufucdev.mock_location_plugin.ui.TestViewModel
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.seconds
 

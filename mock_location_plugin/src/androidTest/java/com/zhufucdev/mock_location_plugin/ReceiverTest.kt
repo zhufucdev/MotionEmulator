@@ -1,7 +1,8 @@
-package com.zhufucdev.motion_emulator.mock_location_plugin
+package com.zhufucdev.mock_location_plugin
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.zhufucdev.mock_location_plugin.MockLocationProvider
 import kotlinx.coroutines.runBlocking
 
 import org.junit.Test

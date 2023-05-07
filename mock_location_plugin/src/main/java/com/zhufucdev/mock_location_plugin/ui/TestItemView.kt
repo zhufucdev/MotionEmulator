@@ -1,4 +1,4 @@
-package com.zhufucdev.motion_emulator.mock_location_plugin.ui
+package com.zhufucdev.mock_location_plugin.ui
 
 import android.content.Context
 import android.util.AttributeSet
@@ -8,7 +8,7 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.core.view.isVisible
-import com.zhufucdev.motion_emulator.mock_location_plugin.R
+import com.zhufucdev.mock_location_plugin.R
 
 class TestItemView : FrameLayout {
     private val progressBar: ProgressBar

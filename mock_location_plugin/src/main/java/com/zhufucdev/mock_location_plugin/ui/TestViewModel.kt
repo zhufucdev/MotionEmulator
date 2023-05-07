@@ -1,4 +1,4 @@
-package com.zhufucdev.motion_emulator.mock_location_plugin.ui
+package com.zhufucdev.mock_location_plugin.ui
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel

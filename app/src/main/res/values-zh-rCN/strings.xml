@@ -182,4 +182,6 @@
     <string name="caption_test_provider">测试提供器</string>
     <string name="title_use_test_provider">使用测试提供器</string>
     <string name="text_test_provider_enabled">请确保此应用被在开发者模式中选为模拟位置应用</string>
+    <string name="text_plugin_not_installed">插件未安装</string>
+    <string name="title_install_plugin">安装插件</string>
 </resources>

@@ -191,4 +191,8 @@
     <string name="title_use_test_provider">Use test provider</string>
     <string name="text_test_provider_enabled">Make sure the app is selected as mock location app in developer options
     </string>
+    <string name="text_plugin_not_installed">Plugin not installed</string>
+    <string name="title_install_plugin">Install Plugin</string>
+    <string name="url_github_releases" translatable="false">https://github.com/zhufucdev/MotionEmulator/releases</string>
+    <string name="url_fdroid" translatable="false">https://f-droid.org</string>
 </resources>

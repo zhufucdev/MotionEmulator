@@ -28,20 +28,20 @@
                 android:layout_height="match_parent"
                 android:orientation="vertical"
                 android:padding="@dimen/margin_content">
-            <com.zhufucdev.motion_emulator.mock_location_plugin.ui.TestItemView
+            <com.zhufucdev.mock_location_plugin.ui.TestItemView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:id="@+id/test_availability"
                     android:text="@string/text_service_availability"/>
 
-            <com.zhufucdev.motion_emulator.mock_location_plugin.ui.TestItemView
+            <com.zhufucdev.mock_location_plugin.ui.TestItemView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:id="@+id/test_developer_options"
                     android:layout_marginTop="@dimen/margin_content"
                     android:text="@string/text_developer_options"/>
 
-            <com.zhufucdev.motion_emulator.mock_location_plugin.ui.TestItemView
+            <com.zhufucdev.mock_location_plugin.ui.TestItemView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:id="@+id/test_emulation_provider"

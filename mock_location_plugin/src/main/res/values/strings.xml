@@ -6,7 +6,7 @@
     <string name="title_test">Test</string>
     <string name="title_carrying">Test Ongoing</string>
     <string name="text_service_availability">location service availability</string>
-    <string name="text_developer_options">developer options enabled</string>
+    <string name="text_developer_options">mock location app selection</string>
     <string name="text_emulation_provider">connectivity with emulation provider</string>
     <string name="title_test_done">Test Completed</string>
     <string name="title_test_fragment">Availability Test</string>

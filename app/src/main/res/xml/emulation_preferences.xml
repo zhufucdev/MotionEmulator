@@ -17,11 +17,11 @@
     </PreferenceCategory>
 
     <PreferenceCategory
-            android:title="@string/caption_test_provider">
+            android:title="@string/caption_test_provider"
+            android:key="category_test_provider">
         <SwitchPreferenceCompat
                 android:title="@string/title_use_test_provider"
                 android:key="use_test_provider"
-                android:summaryOn="@string/text_test_provider_enabled"
                 android:defaultValue="false"/>
     </PreferenceCategory>
 </PreferenceScreen>

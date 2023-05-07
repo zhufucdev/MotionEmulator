@@ -1,4 +1,4 @@
-package com.zhufucdev.motion_emulator.mock_location_plugin
+package com.zhufucdev.mock_location_plugin
 
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.SphericalUtil

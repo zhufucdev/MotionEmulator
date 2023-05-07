@@ -1,4 +1,4 @@
-package com.zhufucdev.motion_emulator.mock_location_plugin.ui
+package com.zhufucdev.mock_location_plugin.ui
 
 import android.content.ActivityNotFoundException
 import android.content.Intent
@@ -8,8 +8,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.google.android.material.snackbar.Snackbar
-import com.zhufucdev.motion_emulator.mock_location_plugin.R
-import com.zhufucdev.motion_emulator.mock_location_plugin.databinding.FragmentGuidanceBinding
+import com.zhufucdev.mock_location_plugin.R
+import com.zhufucdev.mock_location_plugin.databinding.FragmentGuidanceBinding
 
 class GuidanceFragment : Fragment() {
     private lateinit var binding: FragmentGuidanceBinding

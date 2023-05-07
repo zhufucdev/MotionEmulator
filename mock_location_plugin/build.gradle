@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace 'com.zhufucdev.motion_emulator.mock_location_plugin'
+    namespace 'com.zhufucdev.mock_location_plugin'
     compileSdk 33
 
     defaultConfig {
-        applicationId "com.zhufucdev.motion_emulator.mock_location_plugin"
+        applicationId "com.zhufucdev.mock_location_plugin"
         minSdk 24
         targetSdk 33
         versionCode 1

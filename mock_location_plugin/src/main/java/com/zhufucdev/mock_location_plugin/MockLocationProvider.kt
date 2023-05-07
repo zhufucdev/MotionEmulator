@@ -1,4 +1,4 @@
-package com.zhufucdev.motion_emulator.mock_location_plugin
+package com.zhufucdev.mock_location_plugin
 
 import android.Manifest
 import android.app.PendingIntent
@@ -13,8 +13,8 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils
 import com.zhufucdev.data.*
-import com.zhufucdev.motion_emulator.mock_location_plugin.ui.MainActivity
-import com.zhufucdev.motion_emulator.mock_location_plugin.ui.TestFragment
+import com.zhufucdev.mock_location_plugin.ui.MainActivity
+import com.zhufucdev.mock_location_plugin.ui.TestFragment
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.android.*
@@ -166,18 +166,18 @@ object MockLocationProvider {
     private suspend fun notifyStatus(status: EmulationInfo?, providerAddr: String) {
         if (status != null) {
             Log.i(TAG, "emulation ($status) running")
-            ktor.post("$providerAddr/state/${emulationId}/running") {
+            ktor.post("$providerAddr/state/$emulationId/running") {
                 contentType(ContentType.Application.Json)
                 setBody(status)
             }
         } else {
             Log.i(TAG, "emulation stopped")
-            ktor.get("$providerAddr/state/${emulationId}/stopped")
+            ktor.get("$providerAddr/state/$emulationId/stopped")
         }
     }
 
     private suspend fun notifyProgress(intermediate: Intermediate, providerAddr: String) {
-        val res = ktor.post("$providerAddr/intermediate/${emulationId}") {
+        val res = ktor.post("$providerAddr/intermediate/$emulationId") {
             contentType(ContentType.Application.Json)
             setBody(intermediate)
         }

@@ -1,4 +1,4 @@
-package com.zhufucdev.motion_emulator.mock_location_plugin
+package com.zhufucdev.mock_location_plugin
 
 import android.app.Application
 import com.google.android.material.color.DynamicColors

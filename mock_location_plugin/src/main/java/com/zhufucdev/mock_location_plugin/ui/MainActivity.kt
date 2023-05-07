@@ -1,4 +1,4 @@
-package com.zhufucdev.motion_emulator.mock_location_plugin.ui
+package com.zhufucdev.mock_location_plugin.ui
 
 import android.Manifest
 import android.app.NotificationChannel
@@ -14,9 +14,9 @@ import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupWithNavController
-import com.zhufucdev.motion_emulator.mock_location_plugin.CHANNEL_ID
-import com.zhufucdev.motion_emulator.mock_location_plugin.R
-import com.zhufucdev.motion_emulator.mock_location_plugin.databinding.ActivityMainBinding
+import com.zhufucdev.mock_location_plugin.CHANNEL_ID
+import com.zhufucdev.mock_location_plugin.R
+import com.zhufucdev.mock_location_plugin.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
 

@@ -1,4 +1,4 @@
-package com.zhufucdev.motion_emulator.mock_location_plugin
+package com.zhufucdev.mock_location_plugin
 
 import android.app.job.JobParameters
 import android.app.job.JobService
