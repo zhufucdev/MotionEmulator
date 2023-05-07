@@ -1,6 +1,8 @@
 package com.zhufucdev.motion_emulator.ui
 
 import android.app.Dialog
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.text.InputType
 import androidx.appcompat.app.AppCompatActivity
@@ -13,6 +15,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.highcapable.yukihookapi.hook.factory.prefs
 import com.zhufucdev.motion_emulator.R
 import com.zhufucdev.motion_emulator.databinding.ActivitySettingsBinding
+import com.zhufucdev.motion_emulator.provider.Plugin
 
 private const val TITLE_TAG = "settingsActivityTitle"
 
@@ -132,6 +135,8 @@ class SettingsActivity : AppCompatActivity(),
         private fun init() {
             val portPreference = findPreference<EditTextPreference>("provider_port")!!
             val tlsPreference = findPreference<SwitchPreferenceCompat>("provider_tls")!!
+            val pluginPreference = findPreference<SwitchPreferenceCompat>("use_test_provider")!!
+            val pluginCategory = findPreference<PreferenceCategory>("category_test_provider")!!
             val prefs = requireContext().prefs()
 
             fun Int.isValidPort() = this in 1024..65535
@@ -157,6 +162,44 @@ class SettingsActivity : AppCompatActivity(),
                     putBoolean("provider_tls", tlsPreference.isChecked)
                 }
                 true
+            }
+
+            val pluginInstalled = Plugin.isInstalled(requireContext())
+            pluginPreference.isEnabled = pluginInstalled
+            pluginPreference.setSummaryProvider {
+                if (!pluginInstalled) {
+                    getString(R.string.text_plugin_not_installed)
+                } else if (pluginPreference.isChecked) {
+                    getString(R.string.text_test_provider_enabled)
+                } else {
+                    null
+                }
+            }
+
+            if (!pluginInstalled) {
+                val installPreference = Preference(requireContext()).apply {
+                    setTitle(R.string.title_install_plugin)
+                    setOnPreferenceClickListener {
+                        MaterialAlertDialogBuilder(requireContext())
+                            .setTitle(R.string.title_install_plugin)
+                            .setItems(R.array.plugin_sources) { _, index ->
+                                val url =
+                                    when (index) {
+                                        0 -> getString(R.string.url_github_releases)
+                                        1 -> getString(R.string.url_fdroid)
+                                        else -> "" // this is not possible
+                                    }
+                                val intent = Intent(Intent.ACTION_VIEW).apply {
+                                    data = Uri.parse(url)
+                                }
+                                requireContext().startActivity(intent)
+                            }
+                            .setNegativeButton(R.string.action_cancel, null)
+                            .show()
+                        true
+                    }
+                }
+                pluginCategory.addPreference(installPreference)
             }
         }
     }

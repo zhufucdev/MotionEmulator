@@ -1,19 +1,14 @@
 package com.zhufucdev.motion_emulator.provider
 
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.util.Log
-import androidx.preference.PreferenceManager
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils
 import com.highcapable.yukihookapi.hook.factory.prefs
 import com.zhufucdev.data.BROADCAST_AUTHORITY
 import com.zhufucdev.data.Emulation
 import com.zhufucdev.data.EmulationInfo
 import com.zhufucdev.data.Intermediate
-import com.zhufucdev.motion_emulator.BuildConfig
-import com.zhufucdev.motion_emulator.lazySharedPreferences
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
@@ -90,26 +85,7 @@ object Scheduler {
         server.start(false)
         serverRunning = true
 
-        handlePlugins(context)
-    }
-
-    private fun handlePlugins(context: Context) {
-        val pluginPackage = "${BuildConfig.APPLICATION_ID}.mock_location_plugin"
-        try {
-            context.packageManager.getApplicationInfo(pluginPackage, PackageManager.MATCH_ALL)
-        } catch (_: PackageManager.NameNotFoundException) {
-            return
-        }
-
-        if (context.lazySharedPreferences().value.getBoolean("use_test_provider", false)) {
-            context.sendBroadcast(Intent("$BROADCAST_AUTHORITY.EMULATION_START").apply {
-                component = ComponentName(pluginPackage, "$pluginPackage.EmulationBroadcastReceiver")
-                addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
-                putExtra("port", providerPort)
-                putExtra("tls", providerTls)
-            })
-            Log.i("Schedular", "broadcast sent")
-        }
+        Plugin.wakeUp(context, providerPort, providerTls)
     }
 
     fun setIntermediate(id: String, info: Intermediate?) {
