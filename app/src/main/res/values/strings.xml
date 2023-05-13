@@ -193,8 +193,12 @@
     </string>
     <string name="text_plugin_not_installed">Plugin not installed</string>
     <string name="title_install_plugin">Install Plugin</string>
-    <string name="url_github_releases" translatable="false">https://github.com/zhufucdev/MotionEmulator/releases</string>
+    <string name="url_github_releases" translatable="false">https://github.com/zhufucdev/MotionEmulator/releases
+    </string>
     <string name="url_blog" translatable="false">https://zhufucdev.com/article/peBx_1w5Njt27VZxxQvGi</string>
     <string name="name_github" translatable="false">GitHub</string>
     <string name="name_my_blog">Steve Reed\'s blog</string>
+    <string name="title_activity_updater">App Updater</string>
+    <string name="title_update_found">A new version found</string>
+    <string name="action_upgrade">upgrade</string>
 </resources>

@@ -185,4 +185,7 @@
     <string name="text_plugin_not_installed">插件未安装</string>
     <string name="title_install_plugin">安装插件</string>
     <string name="name_my_blog">Steve的博客</string>
+    <string name="title_activity_updater">软件更新</string>
+    <string name="title_update_found">找到新版本</string>
+    <string name="action_upgrade">升级</string>
 </resources>

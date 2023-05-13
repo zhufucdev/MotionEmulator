@@ -26,6 +26,11 @@
             android:supportsRtl="true"
             android:theme="@style/Theme.MotionEmulator"
             tools:targetApi="33">
+        <activity
+                android:name=".UpdaterActivity"
+                android:exported="false"
+                android:label="@string/title_activity_updater"
+                android:theme="@style/Theme.MotionEmulator"/>
 
         <receiver
                 android:name=".provider.EmulationMonitorReceiver"

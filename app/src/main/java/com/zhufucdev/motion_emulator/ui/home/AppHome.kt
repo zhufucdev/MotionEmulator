@@ -10,17 +10,37 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.zhufucdev.motion_emulator.R
 import com.zhufucdev.motion_emulator.ui.*
 import com.zhufucdev.motion_emulator.ui.theme.*
+import com.zhufucdev.motion_emulator.updater
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppHome(activatedState: State<Boolean>, onClick: (AppHomeDestination) -> Unit) {
     val behavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
+    val snackbar = remember { SnackbarHostState() }
+
+    LaunchedEffect(Unit) {
+        val updater = LocalContext.current.updater()
+        try {
+            updater.check()
+        } catch (_: Exception) {
+            // ignored
+        }
+        if (updater.update != null) {
+            snackbar.showSnackbar(
+                stringResource(R.string.title_update_found),
+                stringResource(R.string.action_upgrade),
+                true
+            )
+        }
+    }
+
     Scaffold(
         topBar = {
             HomeAppbar(
@@ -28,7 +48,8 @@ fun AppHome(activatedState: State<Boolean>, onClick: (AppHomeDestination) -> Uni
                 scrollBehavior = behavior
             )
         },
-        modifier = Modifier.nestedScroll(behavior.nestedScrollConnection)
+        modifier = Modifier.nestedScroll(behavior.nestedScrollConnection),
+        snackbarHost = { SnackbarHost(snackbar) }
     ) {
         LazyColumn(modifier = Modifier.padding(it)) {
             item {
@@ -145,7 +166,7 @@ fun HomeAppbar(onClick: (AppHomeDestination) -> Unit, scrollBehavior: TopAppBarS
                 content = {
                     IconButton(
                         onClick = { onClick(AppHomeDestination.Settings) },
-                        modifier = Modifier.tooltipAnchor(),
+                        modifier = Modifier.tooltipTrigger(),
                         content = {
                             Icon(
                                 Icons.Default.Settings,

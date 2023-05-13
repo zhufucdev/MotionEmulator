@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="title_updater">App Update</string>
+    <string name="action_navigate_up">navigate up</string>
+    <string name="title_new_version">New Version Found</string>
+    <string name="title_download">Download</string>
+    <string name="title_looking">Looking for Update</string>
+    <string name="title_no_update">No Update</string>
+    <string name="action_rerun">rerun lookup</string>
+
+</resources>

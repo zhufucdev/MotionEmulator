@@ -8,6 +8,8 @@ plugins {
 
 def localProperties = new Properties()
 localProperties.load(new FileReader(rootProject.file("local.properties")))
+def serverProperties = new Properties()
+serverProperties.load(new FileReader(project.file("server.properties")))
 
 android {
     compileSdk 33
@@ -23,6 +25,10 @@ android {
         vectorDrawables {
             useSupportLibrary true
         }
+
+        buildConfigField("String", "AMAP_WEB_KEY", localProperties["amap.web.key"])
+        buildConfigField("String", "PRODUCT", serverProperties["PRODUCT"])
+        buildConfigField("String", "SERVER_URI", serverProperties["SERVER_URI"])
     }
 
     viewBinding {
@@ -40,11 +46,6 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            buildConfigField("String", "AMAP_WEB_KEY", localProperties["amap.web.key"])
-        }
-
-        debug {
-            buildConfigField("String", "AMAP_WEB_KEY", localProperties["amap.web.key"])
         }
     }
     compileOptions {
@@ -76,6 +77,7 @@ android {
 dependencies {
     // Internal
     implementation project(':data')
+    implementation project(':update')
     // Xposed
     implementation "com.highcapable.yukihookapi:api:${yuki_version}"
     ksp "com.highcapable.yukihookapi:ksp-xposed:${yuki_version}"

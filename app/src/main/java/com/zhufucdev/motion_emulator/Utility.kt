@@ -20,6 +20,7 @@ import androidx.preference.PreferenceManager
 import com.zhufucdev.data.*
 import com.zhufucdev.data.Emulation
 import com.zhufucdev.motion_emulator.provider.EmulationRef
+import com.zhufucdev.update.Updater
 import io.ktor.client.*
 import io.ktor.client.engine.android.*
 import io.ktor.client.plugins.*
@@ -215,3 +216,5 @@ fun Activity.setUpStatusBar() {
 fun Context.lazySharedPreferences() = lazy { PreferenceManager.getDefaultSharedPreferences(this) }
 
 fun Fragment.lazySharedPreferences() = lazy { PreferenceManager.getDefaultSharedPreferences(requireContext()) }
+
+fun Context.updater() = Updater(BuildConfig.SERVER_URI, BuildConfig.PRODUCT, this)

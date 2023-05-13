@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="title_updater">软件更新</string>
+    <string name="action_navigate_up">向上导航</string>
+    <string name="title_new_version">发现新版本</string>
+    <string name="title_download">下载</string>
+    <string name="title_looking">正在查找更新</string>
+    <string name="title_no_update">未找到更新</string>
+    <string name="action_rerun">更新查找</string>
+</resources>
