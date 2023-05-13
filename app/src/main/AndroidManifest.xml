@@ -27,7 +27,7 @@
             android:theme="@style/Theme.MotionEmulator"
             tools:targetApi="33">
         <activity
-                android:name=".UpdaterActivity"
+                android:name=".ui.UpdaterActivity"
                 android:exported="false"
                 android:label="@string/title_activity_updater"
                 android:theme="@style/Theme.MotionEmulator"/>
