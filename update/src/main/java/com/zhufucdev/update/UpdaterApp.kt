@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
-
 package com.zhufucdev.update
 
 import androidx.compose.animation.AnimatedVisibility
@@ -21,6 +19,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UpdaterApp(navigateUp: () -> Unit, updater: Updater) {
     val coroutine = rememberCoroutineScope()
@@ -93,6 +92,7 @@ fun UpdaterApp(navigateUp: () -> Unit, updater: Updater) {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AppBar(scrollBehavior: TopAppBarScrollBehavior, finish: () -> Unit) {
     LargeTopAppBar(

@@ -24,9 +24,10 @@ import com.zhufucdev.motion_emulator.updater
 fun AppHome(activatedState: State<Boolean>, onClick: (AppHomeDestination) -> Unit) {
     val behavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
     val snackbar = remember { SnackbarHostState() }
+    val context = LocalContext.current
 
     LaunchedEffect(Unit) {
-        val updater = LocalContext.current.updater()
+        val updater = context.updater()
         try {
             updater.check()
         } catch (_: Exception) {
@@ -34,8 +35,8 @@ fun AppHome(activatedState: State<Boolean>, onClick: (AppHomeDestination) -> Uni
         }
         if (updater.update != null) {
             snackbar.showSnackbar(
-                stringResource(R.string.title_update_found),
-                stringResource(R.string.action_upgrade),
+                context.getString(R.string.title_update_found),
+                context.getString(R.string.action_upgrade),
                 true
             )
         }
