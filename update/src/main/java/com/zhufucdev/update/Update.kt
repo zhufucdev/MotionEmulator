@@ -90,32 +90,13 @@ class Updater(private val apiUri: String, private val productAlias: String, priv
 
         val coroutineContext = coroutineContext
         return suspendCoroutine { c ->
-            val observer = object : BroadcastReceiver() {
-                override fun onReceive(context: Context, intent: Intent) {
-                    if (intent.action != DownloadManager.ACTION_DOWNLOAD_COMPLETE) return
-                    val progress = queryDownload(manager, taskId)
-                    if (progress < 1) {
-                        this@Updater.progress = progress
-                    } else {
-                        context.unregisterReceiver(this)
-                        c.resumeWith(Result.success(result))
-                    }
-                }
-            }
-            context.registerReceiver(
-                observer,
-                IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)
-            )
-
             CoroutineScope(coroutineContext).launch {
                 while (true) {
                     val progress = queryDownload(manager, taskId)
                     if (progress >= 1F) {
-                        context.unregisterReceiver(observer)
                         c.resumeWith(Result.success(result))
                         break
                     } else if (progress == -2F) {
-                        context.unregisterReceiver(observer)
                         c.resumeWith(
                             Result.failure(
                                 IllegalStateException(
