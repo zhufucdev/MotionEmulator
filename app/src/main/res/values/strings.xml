@@ -200,5 +200,5 @@
     <string name="name_my_blog">Steve Reed\'s blog</string>
     <string name="title_activity_updater">App Updater</string>
     <string name="title_update_found">A new version found</string>
-    <string name="action_upgrade">upgrade</string>
+    <string name="action_upgrade">Upgrade</string>
 </resources>
