@@ -41,8 +41,8 @@ import kotlin.time.Duration.Companion.seconds
 class Updater(private val apiUri: String, private val productAlias: String, private val context: Context) {
     private val ktor = HttpClient(Android) {
         engine {
-            connectTimeout = 100_000
-            socketTimeout = 100_000
+            connectTimeout = 10_000
+            socketTimeout = 10_000
         }
 
         install(ContentNegotiation) {
@@ -64,7 +64,7 @@ class Updater(private val apiUri: String, private val productAlias: String, priv
         try {
             val currentVersion = context.packageManager.getPackageInfo(context.packageName, 0).versionName
             val arch = Build.SUPPORTED_ABIS[0].standardArchitect()
-            val req = ktor.get("${apiUri}/release?product=${productAlias}&current=${currentVersion}&arch=${arch}}")
+            val req = ktor.get("${apiUri}/release?product=${productAlias}&current=${currentVersion}&arch=${arch}")
             if (!req.status.isSuccess()) {
                 return null
             }
