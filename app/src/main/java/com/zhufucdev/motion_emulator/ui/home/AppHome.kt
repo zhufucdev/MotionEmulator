@@ -1,5 +1,6 @@
 package com.zhufucdev.motion_emulator.ui.home
 
+import android.content.Intent
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
@@ -34,11 +35,14 @@ fun AppHome(activatedState: State<Boolean>, onClick: (AppHomeDestination) -> Uni
             // ignored
         }
         if (updater.update != null) {
-            snackbar.showSnackbar(
+            val callback = snackbar.showSnackbar(
                 context.getString(R.string.title_update_found),
                 context.getString(R.string.action_upgrade),
                 true
             )
+            if (callback == SnackbarResult.ActionPerformed) {
+                context.startActivity(Intent(context, UpdaterActivity::class.java))
+            }
         }
     }
 
