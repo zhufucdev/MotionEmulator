@@ -3,10 +3,7 @@ package com.zhufucdev.update
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
@@ -17,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -40,35 +38,44 @@ fun UpdaterApp(navigateUp: () -> Unit, updater: Updater) {
                             updater.download()
                         }
                     },
-                    content = {
-                        Icon(painterResource(R.drawable.ic_baseline_download), contentDescription = null)
-                        Text(stringResource(R.string.title_download))
-                    },
+                    icon = { Icon(painterResource(R.drawable.ic_baseline_download), contentDescription = null) },
+                    text = { Text(stringResource(R.string.title_download)) }
                 )
             }
         }
     ) {
-        Column(Modifier.padding(it)) {
-            Row(Modifier.align(Alignment.CenterHorizontally)) {
-                Icon(painterResource(R.drawable.ic_baseline_update), contentDescription = null)
-                val title =
-                    if (updater.checking) {
-                        stringResource(R.string.title_looking)
-                    } else if (updater.update != null) {
-                        stringResource(R.string.title_new_version)
-                    } else {
-                        stringResource(R.string.title_no_update)
-                    }
-                Text(title, style = MaterialTheme.typography.headlineSmall)
-            }
+        Column(Modifier.padding(it).fillMaxWidth()) {
+            Icon(
+                painterResource(R.drawable.ic_baseline_update),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            )
 
-            if (updater.downloading && updater.progress >= 0) {
-                LinearProgressIndicator(
-                    modifier = Modifier.fillMaxWidth(),
-                    progress = updater.progress
-                )
-            } else if (updater.checking || updater.downloading && updater.progress < 0) {
-                LinearProgressIndicator(Modifier.fillMaxWidth())
+            val title =
+                if (updater.checking) {
+                    stringResource(R.string.title_looking)
+                } else if (updater.update != null) {
+                    stringResource(R.string.title_new_version)
+                } else {
+                    stringResource(R.string.title_no_update)
+                }
+            Text(
+                title,
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            )
+
+            Box(Modifier.fillMaxWidth().padding(horizontal = 12.dp)) {
+                if (updater.downloading && updater.progress >= 0) {
+                    LinearProgressIndicator(
+                        modifier = Modifier.fillMaxWidth(),
+                        progress = updater.progress
+                    )
+                } else if (updater.checking || updater.downloading && updater.progress < 0) {
+                    LinearProgressIndicator(Modifier.fillMaxWidth())
+                }
             }
 
             AnimatedVisibility(
@@ -104,7 +111,8 @@ private fun AppBar(scrollBehavior: TopAppBarScrollBehavior, finish: () -> Unit) 
             ) {
                 IconButton(
                     onClick = { finish() },
-                    content = { Icons.Default.ArrowBack }
+                    content = { Icon(Icons.Default.ArrowBack, null) },
+                    modifier = Modifier.tooltipTrigger()
                 )
             }
         }
