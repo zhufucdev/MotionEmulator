@@ -19,3 +19,4 @@ rootProject.name = "MotionEmulator"
 include ':data'
 include ':app'
 include ':mock_location_plugin'
+include ':update'
