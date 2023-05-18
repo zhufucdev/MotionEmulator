@@ -28,6 +28,7 @@ import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
+import java.io.File
 import java.math.RoundingMode
 import java.text.DateFormat
 import java.text.DecimalFormat
@@ -217,4 +218,4 @@ fun Context.lazySharedPreferences() = lazy { PreferenceManager.getDefaultSharedP
 
 fun Fragment.lazySharedPreferences() = lazy { PreferenceManager.getDefaultSharedPreferences(requireContext()) }
 
-fun Context.updater() = Updater(BuildConfig.SERVER_URI, BuildConfig.PRODUCT, this)
+fun Context.updater() = Updater(BuildConfig.SERVER_URI, BuildConfig.PRODUCT, this, File(externalCacheDir, "update"))

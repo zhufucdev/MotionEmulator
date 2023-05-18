@@ -2,10 +2,16 @@
 <resources>
     <string name="title_updater">App Update</string>
     <string name="action_navigate_up">navigate up</string>
-    <string name="title_new_version">New Version Found</string>
+    <string name="text_new_version">New version found</string>
     <string name="title_download">Download</string>
-    <string name="title_looking">Looking for Update</string>
-    <string name="title_no_update">No Update</string>
-    <string name="action_rerun">rerun lookup</string>
+    <string name="text_looking">Looking for update</string>
+    <string name="text_no_update">No update</string>
+    <string name="action_rerun">Refresh</string>
+    <string name="text_unable_to_install_update">Unable to install the update</string>
+    <string name="action_reveal_in_files">Reveal in Files</string>
+    <string name="text_download_failed">Download failed: %s</string>
+    <string name="title_downloading">Fetching update</string>
+    <string name="action_install">Install</string>
+    <string name="title_ready_to_install">Ready to install</string>
 
 </resources>

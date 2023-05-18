@@ -23,6 +23,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.core.content.FileProvider
 import com.zhufucdev.motion_emulator.R
 import com.zhufucdev.data.Data
+import com.zhufucdev.motion_emulator.FILE_PROVIDER_AUTHORITY
 import com.zhufucdev.motion_emulator.dateString
 import com.zhufucdev.motion_emulator.effectiveTimeFormat
 import com.zhufucdev.motion_emulator.ui.VerticalSpacer
@@ -363,7 +364,7 @@ private suspend fun getUri(context: Context, items: Map<Data, String>): Uri {
     withContext(Dispatchers.IO) {
         fileOut.close()
     }
-    return FileProvider.getUriForFile(context, "com.zhufucdev.motion_emulator.file_provider", file)
+    return FileProvider.getUriForFile(context, FILE_PROVIDER_AUTHORITY, file)
 }
 
 private fun exportedDir(context: Context) = File(context.filesDir, "exported")

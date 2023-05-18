@@ -14,29 +14,22 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import com.zhufucdev.motion_emulator.R
 import com.zhufucdev.motion_emulator.ui.*
 import com.zhufucdev.motion_emulator.ui.theme.*
-import com.zhufucdev.motion_emulator.updater
+import com.zhufucdev.update.Updater
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppHome(activatedState: State<Boolean>, onClick: (AppHomeDestination) -> Unit) {
+fun AppHome(activatedState: State<Boolean>, updater: Updater, onClick: (AppHomeDestination) -> Unit) {
     val behavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
     val snackbar = remember { SnackbarHostState() }
     val context = LocalContext.current
 
-    LaunchedEffect(Unit) {
-        val updater = context.updater()
-        try {
-            updater.check()
-        } catch (_: Exception) {
-            // ignored
-        }
+    LaunchedEffect(updater.update) {
         if (updater.update != null) {
             val callback = snackbar.showSnackbar(
-                context.getString(R.string.title_update_found),
+                context.getString(R.string.text_update_found),
                 context.getString(R.string.action_upgrade),
                 true
             )
@@ -185,15 +178,6 @@ fun HomeAppbar(onClick: (AppHomeDestination) -> Unit, scrollBehavior: TopAppBarS
         },
         scrollBehavior = scrollBehavior
     )
-}
-
-@Preview
-@Composable
-fun HomePreview() {
-    MotionEmulatorTheme {
-        val state = remember { mutableStateOf(false) }
-        AppHome(state) {}
-    }
 }
 
 enum class AppHomeDestination(val activity: Class<*>, val mapping: Boolean = false) {

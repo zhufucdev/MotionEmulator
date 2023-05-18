@@ -12,6 +12,7 @@
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/data" />
             <option value="$PROJECT_DIR$/mock_location_plugin" />
+            <option value="$PROJECT_DIR$/update" />
           </set>
         </option>
       </GradleProjectSettings>
