@@ -2,6 +2,7 @@ package com.zhufucdev.update
 
 import android.annotation.SuppressLint
 import android.app.DownloadManager
+import android.app.DownloadManager.COLUMN_LOCAL_URI
 import android.app.DownloadManager.Query
 import android.content.Context
 import android.net.Uri
@@ -108,8 +109,6 @@ class Updater(
             setDestinationUri(Uri.fromFile(result))
         })
 
-        val coroutine = coroutineContext
-
         return suspendCoroutine { c ->
             val progress = mutableStateOf(0F)
             val status = StatusDownloading(progress, manager, taskId)
@@ -121,7 +120,7 @@ class Updater(
                     if (query >= 1F) {
                         updateStatus(StatusReadyToInstall(result))
                         c.resumeWith(Result.success(result))
-                        break
+                        return@thread
                     } else if (query == -2F) {
                         updateStatus(StatusDownloadFailed(result))
                         c.resumeWith(
@@ -144,42 +143,6 @@ class Updater(
         }
     }
 
-    @SuppressLint("Range")
-    private fun queryDownload(
-        manager: DownloadManager,
-        taskId: Long
-    ): Float {
-        val query = Query().apply { setFilterById(taskId) }
-        val cursor = manager.query(query)
-        if (!cursor.moveToFirst()) {
-            cursor.close()
-            return -2F
-        }
-
-        val statusCol = cursor.getColumnIndex(DownloadManager.COLUMN_STATUS)
-        if (statusCol < 0) return 0F
-        when (cursor.getInt(statusCol)) {
-            DownloadManager.STATUS_SUCCESSFUL -> {
-                return 1F
-            }
-
-            DownloadManager.STATUS_FAILED -> {
-                return -2F
-            }
-
-            DownloadManager.STATUS_RUNNING -> {
-                val downloaded =
-                    cursor.getLong(cursor.getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR))
-                val total =
-                    cursor.getLong(cursor.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES))
-                return downloaded * 1F / total
-            }
-        }
-
-        cursor.close()
-        return -1F
-    }
-
     fun close() {
         ktor.close()
         status.onDestroy()
@@ -192,6 +155,42 @@ class Updater(
         "x86_64" -> "amd64"
         else -> this
     }
+}
+
+@SuppressLint("Range")
+private fun queryDownload(
+    manager: DownloadManager,
+    taskId: Long
+): Float {
+    val query = Query().apply { setFilterById(taskId) }
+    val cursor = manager.query(query)
+    if (!cursor.moveToFirst()) {
+        cursor.close()
+        return -2F
+    }
+
+    val statusCol = cursor.getColumnIndex(DownloadManager.COLUMN_STATUS)
+    if (statusCol < 0) return 0F
+    when (cursor.getInt(statusCol)) {
+        DownloadManager.STATUS_SUCCESSFUL -> {
+            return 1F
+        }
+
+        DownloadManager.STATUS_FAILED -> {
+            return -2F
+        }
+
+        DownloadManager.STATUS_RUNNING -> {
+            val downloaded =
+                cursor.getLong(cursor.getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR))
+            val total =
+                cursor.getLong(cursor.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES))
+            return downloaded * 1F / total
+        }
+    }
+
+    cursor.close()
+    return -1F
 }
 
 @Serializable
@@ -229,7 +228,9 @@ data class StatusDownloading(
     private val taskId: Long,
 ) : Downloading {
     override fun onDestroy() {
-        manager.remove(taskId)
+        if (queryDownload(manager, taskId) < 1) {
+            manager.remove(taskId)
+        }
     }
 }
 
