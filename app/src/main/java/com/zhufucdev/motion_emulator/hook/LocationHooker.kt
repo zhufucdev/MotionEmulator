@@ -546,7 +546,7 @@ object LocationHooker : YukiBaseHooker() {
                     emptyParam()
                 }
                 beforeHook {
-                    val classLoader = (args[0] as Context).classLoader
+                    val classLoader = instanceClass.classLoader
                     classOf<AMapLocation>(classLoader).hook {
                         common()
                     }
