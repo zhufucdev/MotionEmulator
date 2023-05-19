@@ -5,10 +5,10 @@
     <uses-permission
             android:name="android.permission.ACCESS_MOCK_LOCATION"
             tools:ignore="MockLocation,ProtectedPermissions"/>
-
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES"/>
 
     <application
             android:name=".PluginApplication"
@@ -17,6 +17,9 @@
             android:label="@string/app_name"
             android:supportsRtl="true"
             android:theme="@style/Theme.MotionEmulator">
+        <activity
+                android:name=".ui.UpdaterActivity"
+                android:exported="false"/>
         <activity
                 android:name=".ui.MainActivity"
                 android:exported="true"
@@ -30,14 +33,23 @@
 
         <service
                 android:name=".EmulationService"
-                android:permission="android.permission.BIND_JOB_SERVICE"
                 android:enabled="true"
-                android:exported="false">
+                android:exported="false"
+                android:permission="android.permission.BIND_JOB_SERVICE">
         </service>
 
         <receiver
                 android:name=".EmulationBroadcastReceiver"
                 android:exported="true"/>
+
+        <provider android:authorities="com.zhufucdev.mock_location_plugin.file_provider"
+                  android:name="androidx.core.content.FileProvider"
+                  android:exported="false"
+                  android:grantUriPermissions="true">
+            <meta-data
+                    android:name="android.support.FILE_PROVIDER_PATHS"
+                    android:resource="@xml/shared_paths"/>
+        </provider>
     </application>
 
 </manifest>

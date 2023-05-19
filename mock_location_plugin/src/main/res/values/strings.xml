@@ -23,4 +23,6 @@
     <string name="title_guidance_2">Select as Mock Location App</string>
     <string name="text_guidance_2">In developer options, scroll to Location, click Select mock location app, then click on this app.</string>
     <string name="action_open_developer">Open Developer Options</string>
+    <string name="text_update_found">A new version found</string>
+    <string name="action_upgrade">Upgrade</string>
 </resources>

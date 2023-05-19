@@ -24,4 +24,6 @@
     <string name="title_guidance_2">设为模拟位置提供程序</string>
     <string name="text_guidance_2">在开发者选项，翻到定位，点击选择模拟位置应用，然后选择此应用。</string>
     <string name="action_open_developer">打开开发者选项</string>
+    <string name="text_update_found">找到新版本</string>
+    <string name="action_upgrade">升级</string>
 </resources>

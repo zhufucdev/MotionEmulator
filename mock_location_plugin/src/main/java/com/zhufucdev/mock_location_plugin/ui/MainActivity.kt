@@ -3,6 +3,7 @@ package com.zhufucdev.mock_location_plugin.ui
 import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -10,13 +11,17 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.getSystemService
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupWithNavController
+import com.google.android.material.snackbar.Snackbar
 import com.zhufucdev.mock_location_plugin.CHANNEL_ID
 import com.zhufucdev.mock_location_plugin.R
 import com.zhufucdev.mock_location_plugin.databinding.ActivityMainBinding
+import com.zhufucdev.mock_location_plugin.updater
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
@@ -46,6 +51,21 @@ class MainActivity : AppCompatActivity() {
         }
 
         initNotifications()
+
+        lifecycleScope.launch {
+            val update = updater().check()
+            if (update != null) {
+                Snackbar.make(
+                    binding.root,
+                    getString(R.string.text_update_found),
+                    Snackbar.LENGTH_INDEFINITE
+                )
+                    .setAction(R.string.action_upgrade) {
+                        startActivity(Intent(this@MainActivity, UpdaterActivity::class.java))
+                    }
+                    .show()
+            }
+        }
     }
 
     private fun initNotifications() {

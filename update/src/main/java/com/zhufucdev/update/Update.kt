@@ -105,7 +105,7 @@ class Updater(
             return result // TODO Manifest verification
         }
         val taskId = manager.enqueue(DownloadManager.Request(Uri.parse(update.url)).apply {
-            setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+            setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE)
             setDestinationUri(Uri.fromFile(result))
         })
 

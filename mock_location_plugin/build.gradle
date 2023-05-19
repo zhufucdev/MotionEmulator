@@ -3,6 +3,9 @@ plugins {
     id 'org.jetbrains.kotlin.android'
 }
 
+def servers = new Properties()
+servers.load(new FileReader(project.file('server.properties')))
+
 android {
     namespace 'com.zhufucdev.mock_location_plugin'
     compileSdk 33
@@ -15,6 +18,8 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField("String", "SERVER_URI", servers["SERVER_URI"])
+        buildConfigField("String", "PRODUCT", servers["PRODUCT"])
     }
 
     buildTypes {
@@ -27,11 +32,15 @@ android {
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11
     }
+    composeOptions {
+        kotlinCompilerExtensionVersion '1.4.6'
+    }
     kotlinOptions {
         jvmTarget = '11'
     }
     buildFeatures {
         viewBinding true
+        compose true
     }
 }
 
@@ -46,10 +55,19 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.6.1'
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1'
     implementation "com.google.android.material:material:${material_version}"
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:${lifecycle_runtime_version}"
+    implementation "androidx.activity:activity-compose:${compose_activity_version}"
+    implementation "androidx.compose.ui:ui:$compose_ui_version"
+    implementation "androidx.compose.ui:ui-tooling-preview:$compose_ui_version"
+    implementation "androidx.compose.material3:material3:${compose_material_version}"
+    androidTestImplementation "androidx.compose.ui:ui-test-junit4:$compose_ui_version"
+    debugImplementation "androidx.compose.ui:ui-tooling:$compose_ui_version"
+    debugImplementation "androidx.compose.ui:ui-test-manifest:$compose_ui_version"
     // Misc
     implementation 'com.aventrix.jnanoid:jnanoid:2.0.0'
     // Internal
     implementation project(':data')
+    implementation project(':update')
     // Ktor
     implementation "io.ktor:ktor-client-core:${ktor_version}"
     implementation "io.ktor:ktor-client-android:${ktor_version}"
