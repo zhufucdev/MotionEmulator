@@ -23,5 +23,14 @@
                 android:title="@string/title_use_test_provider"
                 android:key="use_test_provider"
                 android:defaultValue="false"/>
+
+        <ListPreference
+                android:title="@string/title_emulation_method"
+                android:key="method"
+                app:entries="@array/emulation_methods_entries"
+                app:entryValues="@array/emulation_methods_values"
+                app:defaultValue="xposed_only"
+                app:dependency="use_test_provider"
+                app:useSimpleSummaryProvider="true"/>
     </PreferenceCategory>
 </PreferenceScreen>

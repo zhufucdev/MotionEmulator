@@ -179,8 +179,8 @@
     <string name="title_server_port">服务器端口</string>
     <string name="title_use_tls">使用TLS</string>
     <string name="text_input_invalid">输入无效</string>
-    <string name="caption_test_provider">测试提供器</string>
-    <string name="title_use_test_provider">使用测试提供器</string>
+    <string name="caption_test_provider">调试提供器</string>
+    <string name="title_use_test_provider">使用调试提供器</string>
     <string name="text_test_provider_enabled">请确保此应用被在开发者模式中选为模拟位置应用</string>
     <string name="text_plugin_not_installed">插件未安装</string>
     <string name="title_install_plugin">安装插件</string>
@@ -188,4 +188,8 @@
     <string name="title_activity_updater">软件更新</string>
     <string name="text_update_found">找到新版本</string>
     <string name="action_upgrade">升级</string>
+    <string name="title_emulation_method">模拟方式</string>
+    <string name="title_method_xposed_only">仅Xposed</string>
+    <string name="title_method_hybrid">混合模式</string>
+    <string name="title_method_test_provider_only">仅调试提供器</string>
 </resources>

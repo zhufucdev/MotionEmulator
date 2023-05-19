@@ -127,16 +127,21 @@ class SettingsActivity : AppCompatActivity(),
     }
 
     class EmulationFragment : M3PreferenceFragment() {
+        private var installPluginPreference: Preference? = null
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.emulation_preferences, rootKey)
             init()
         }
 
+        override fun onResume() {
+            super.onResume()
+            notifyPluginInstallation()
+        }
+
         private fun init() {
             val portPreference = findPreference<EditTextPreference>("provider_port")!!
             val tlsPreference = findPreference<SwitchPreferenceCompat>("provider_tls")!!
-            val pluginPreference = findPreference<SwitchPreferenceCompat>("use_test_provider")!!
-            val pluginCategory = findPreference<PreferenceCategory>("category_test_provider")!!
+            val methodPreference = findPreference<ListPreference>("method")!!
             val prefs = requireContext().prefs()
 
             fun Int.isValidPort() = this in 1024..65535
@@ -149,6 +154,8 @@ class SettingsActivity : AppCompatActivity(),
                     } else {
                         prefs.edit {
                             putString("provider_port", it.toString())
+                            // IDK why it's not implemented in an isolated way
+                            // but this is logically not a duplication
                         }
                     }
                 }
@@ -164,19 +171,33 @@ class SettingsActivity : AppCompatActivity(),
                 true
             }
 
+            methodPreference.setOnPreferenceChangeListener { _, newValue ->
+                prefs.edit {
+                    putString("method", newValue as String)
+                }
+                true
+            }
+
+            notifyPluginInstallation()
+        }
+
+        private fun notifyPluginInstallation() {
+            val usePluginPreference = findPreference<SwitchPreferenceCompat>("use_test_provider")!!
+            val pluginCategory = findPreference<PreferenceCategory>("category_test_provider")!!
+
             val pluginInstalled = Plugin.isInstalled(requireContext())
-            pluginPreference.isEnabled = pluginInstalled
-            pluginPreference.setSummaryProvider {
+            usePluginPreference.isEnabled = pluginInstalled
+            usePluginPreference.setSummaryProvider {
                 if (!pluginInstalled) {
                     getString(R.string.text_plugin_not_installed)
-                } else if (pluginPreference.isChecked) {
+                } else if (usePluginPreference.isChecked) {
                     getString(R.string.text_test_provider_enabled)
                 } else {
                     null
                 }
             }
 
-            if (!pluginInstalled) {
+            if (!pluginInstalled && installPluginPreference == null) {
                 val installPreference = Preference(requireContext()).apply {
                     setTitle(R.string.title_install_plugin)
                     setOnPreferenceClickListener {
@@ -200,6 +221,9 @@ class SettingsActivity : AppCompatActivity(),
                     }
                 }
                 pluginCategory.addPreference(installPreference)
+                installPluginPreference = installPreference
+            } else if (pluginInstalled && installPluginPreference != null) {
+                pluginCategory.removePreference(installPluginPreference!!)
             }
         }
     }

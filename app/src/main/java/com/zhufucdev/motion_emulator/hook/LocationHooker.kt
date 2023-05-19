@@ -1,6 +1,7 @@
+@file:Suppress("DEPRECATION")
+
 package com.zhufucdev.motion_emulator.hook
 
-import android.content.Context
 import android.location.*
 import android.net.NetworkInfo
 import android.net.wifi.ScanResult
@@ -28,7 +29,7 @@ import com.zhufucdev.data.Point
 import com.zhufucdev.data.android
 import com.zhufucdev.data.estimateSpeed
 import com.zhufucdev.data.offsetFixed
-import com.zhufucdev.motion_emulator.data.*
+import com.zhufucdev.motion_emulator.data.MapProjector
 import java.util.concurrent.Executor
 import java.util.function.Consumer
 import kotlin.collections.component1
@@ -42,6 +43,8 @@ object LocationHooker : YukiBaseHooker() {
     private const val TAG = "Location Hook"
     private var lastLocation = Scheduler.location to System.currentTimeMillis()
     private var estimatedSpeed = 0F
+    private val hookingMethod: Method
+        get() = prefs.getString("method", "xposed_only").let { Method.valueOf(it.uppercase()) }
 
     private val listeners = mutableMapOf<Any, (Point) -> Unit>()
     override fun onHook() {
@@ -49,6 +52,7 @@ object LocationHooker : YukiBaseHooker() {
         hookGPS()
         hookAMap()
         hookLocation()
+        testProviderTrick()
     }
 
     fun raise(point: Point) {
@@ -80,7 +84,8 @@ object LocationHooker : YukiBaseHooker() {
                     returnType = classOf<List<ScanResult>>()
                 }
                 afterHook {
-                    result = emptyList<ScanResult>()
+                    if (hookingMethod.directHook)
+                        result = emptyList<ScanResult>()
                 }
             }
 
@@ -90,7 +95,13 @@ object LocationHooker : YukiBaseHooker() {
                     emptyParam()
                     returnType = IntType
                 }
-                replaceTo(WifiManager.WIFI_STATE_ENABLED)
+                replaceAny {
+                    if (hookingMethod.directHook) {
+                        WifiManager.WIFI_STATE_ENABLED
+                    } else {
+                        callOriginal()
+                    }
+                }
             }
 
             injectMember {
@@ -99,7 +110,13 @@ object LocationHooker : YukiBaseHooker() {
                     emptyParam()
                     returnType = BooleanType
                 }
-                replaceTo(true)
+                replaceAny {
+                    if (hookingMethod.directHook) {
+                        true
+                    } else {
+                        callOriginal()
+                    }
+                }
             }
 
             injectMember {
@@ -108,7 +125,13 @@ object LocationHooker : YukiBaseHooker() {
                     emptyParam()
                     returnType = classOf<WifiInfo>()
                 }
-                replaceTo(null)
+                replaceAny {
+                    if (hookingMethod.directHook) {
+                        null
+                    } else {
+                        callOriginal()
+                    }
+                }
             }
         }
 
@@ -119,7 +142,13 @@ object LocationHooker : YukiBaseHooker() {
                     emptyParam()
                     returnType = BooleanType
                 }
-                replaceTo(true)
+                replaceAny {
+                    if (hookingMethod.directHook) {
+                        true
+                    } else {
+                        callOriginal()
+                    }
+                }
             }
 
             injectMember {
@@ -128,7 +157,13 @@ object LocationHooker : YukiBaseHooker() {
                     emptyParam()
                     returnType = BooleanType
                 }
-                replaceTo(true)
+                replaceAny {
+                    if (hookingMethod.directHook) {
+                        true
+                    } else {
+                        callOriginal()
+                    }
+                }
             }
 
             injectMember {
@@ -137,7 +172,13 @@ object LocationHooker : YukiBaseHooker() {
                     emptyParam()
                     returnType = BooleanType
                 }
-                replaceTo(true)
+                replaceAny {
+                    if (hookingMethod.directHook) {
+                        true
+                    } else {
+                        callOriginal()
+                    }
+                }
             }
         }
 
@@ -148,7 +189,13 @@ object LocationHooker : YukiBaseHooker() {
                     emptyParam()
                     returnType = StringClass
                 }
-                replaceTo("null")
+                replaceAny {
+                    if (hookingMethod.directHook) {
+                        "null"
+                    } else {
+                        callOriginal()
+                    }
+                }
             }
 
             injectMember {
@@ -157,7 +204,13 @@ object LocationHooker : YukiBaseHooker() {
                     emptyParam()
                     returnType = StringClass
                 }
-                replaceTo("00-00-00-00-00-00-00-00")
+                replaceAny {
+                    if (hookingMethod.directHook) {
+                        "00-00-00-00-00-00-00-00"
+                    } else {
+                        callOriginal()
+                    }
+                }
             }
 
             injectMember {
@@ -166,7 +219,13 @@ object LocationHooker : YukiBaseHooker() {
                     emptyParam()
                     returnType = StringClass
                 }
-                replaceTo("00-00-00-00-00-00-00-00")
+                replaceAny {
+                    if (hookingMethod.directHook) {
+                        "00-00-00-00-00-00-00-00"
+                    } else {
+                        callOriginal()
+                    }
+                }
             }
         }
     }
@@ -181,7 +240,11 @@ object LocationHooker : YukiBaseHooker() {
                     returnType = classOf<Location>()
                 }
                 replaceAny {
-                    Scheduler.location.android(args(0).string(), estimatedSpeed, MapProjector)
+                    if (hookingMethod.directHook) {
+                        Scheduler.location.android(args(0).string(), estimatedSpeed, MapProjector)
+                    } else {
+                        callOriginal()
+                    }
                 }
             }
 
@@ -192,7 +255,11 @@ object LocationHooker : YukiBaseHooker() {
                     returnType = classOf<Location>()
                 }
                 replaceAny {
-                    Scheduler.location.android(speed = estimatedSpeed, mapProjector = MapProjector)
+                    if (hookingMethod.directHook) {
+                        Scheduler.location.android(speed = estimatedSpeed, mapProjector = MapProjector)
+                    } else {
+                        callOriginal()
+                    }
                 }
             }
 
@@ -200,7 +267,8 @@ object LocationHooker : YukiBaseHooker() {
                 members(*classOfLM.methods.filter { it.name == "requestLocationUpdates" || it.name == "requestSingleUpdate" }
                     .toTypedArray())
                 replaceAny {
-                    if (Scheduler.satellites <= 0) return@replaceAny callOriginal()
+                    if (Scheduler.satellites <= 0 || !hookingMethod.directHook)
+                        return@replaceAny callOriginal()
 
                     val listener = args.firstOrNull { it is LocationListener } as LocationListener?
                         ?: return@replaceAny callOriginal()
@@ -220,7 +288,11 @@ object LocationHooker : YukiBaseHooker() {
                 }
                 replaceAny {
                     val listener = args(0)
-                    cancelRedirection(listener)
+                    if (listeners.contains(listener)) {
+                        cancelRedirection(listener)
+                    } else {
+                        callOriginal()
+                    }
                 }
             }
 
@@ -232,7 +304,8 @@ object LocationHooker : YukiBaseHooker() {
                     returnType = classOf<GpsStatus>()
                 }
                 afterHook {
-                    if (Scheduler.satellites <= 0) return@afterHook
+                    if (Scheduler.satellites <= 0 || !hookingMethod.directHook)
+                        return@afterHook
 
                     val info = args(0).cast<GpsStatus>() ?: result as GpsStatus
                     val method7 =
@@ -309,7 +382,7 @@ object LocationHooker : YukiBaseHooker() {
                 }
 
                 replaceAny {
-                    if (Scheduler.satellites <= 0) {
+                    if (Scheduler.satellites <= 0 || !hookingMethod.directHook) {
                         return@replaceAny callOriginal()
                     }
                     false
@@ -324,7 +397,7 @@ object LocationHooker : YukiBaseHooker() {
                 }
 
                 replaceAny {
-                    if (Scheduler.satellites <= 0) {
+                    if (Scheduler.satellites <= 0 || !hookingMethod.directHook) {
                         return@replaceAny callOriginal()
                     }
                     false
@@ -338,7 +411,7 @@ object LocationHooker : YukiBaseHooker() {
                         returnType = BooleanType
                     }.all()
                     replaceAny {
-                        if (Scheduler.satellites <= 0) {
+                        if (Scheduler.satellites <= 0 || !hookingMethod.directHook) {
                             return@replaceAny callOriginal()
                         }
 
@@ -371,10 +444,14 @@ object LocationHooker : YukiBaseHooker() {
                         returnType = UnitType
                     }
                     replaceAny {
-                        args(4).cast<Consumer<Location>>()
-                            ?.accept(
-                                Scheduler.location.android(args(0).string(), estimatedSpeed, MapProjector)
-                            )
+                        if (hookingMethod.directHook) {
+                            args(4).cast<Consumer<Location>>()
+                                ?.accept(
+                                    Scheduler.location.android(args(0).string(), estimatedSpeed, MapProjector)
+                                )
+                        } else {
+                            callOriginal()
+                        }
                     }
                 }
             }
@@ -389,7 +466,8 @@ object LocationHooker : YukiBaseHooker() {
                 }
 
                 afterHook {
-                    if (Scheduler.satellites <= 0) return@afterHook
+                    if (Scheduler.satellites <= 0 || !hookingMethod.directHook)
+                        return@afterHook
 
                     result = fakeSatellites.also {
                         loggerD(TAG, "${it.count()} satellites are fixed")
@@ -405,7 +483,7 @@ object LocationHooker : YukiBaseHooker() {
                 }
 
                 replaceAny {
-                    if (Scheduler.satellites <= 0) callOriginal()
+                    if (Scheduler.satellites <= 0 || !hookingMethod.directHook) callOriginal()
                     else Scheduler.satellites
                 }
             }
@@ -420,7 +498,7 @@ object LocationHooker : YukiBaseHooker() {
                 }
 
                 replaceAny {
-                    if (Scheduler.satellites <= 0) callOriginal()
+                    if (Scheduler.satellites <= 0 || !hookingMethod.directHook) callOriginal()
                     else true
                 }
             }
@@ -436,6 +514,8 @@ object LocationHooker : YukiBaseHooker() {
     private fun hookAMap() {
         fun YukiMemberHookCreator.MemberHookCreator.hookListener(classloader: ClassLoader) {
             replaceAny {
+                if (!hookingMethod.directHook)
+                    return@replaceAny callOriginal()
                 val listener = args[0]
                     ?: return@replaceAny callOriginal()
                 val method = classOf<AMapLocationListener>(classloader).getMethod(
@@ -459,7 +539,7 @@ object LocationHooker : YukiBaseHooker() {
                 }
 
                 beforeHook {
-                    val classLoader = instanceClass.classLoader
+                    val classLoader = instanceClass.classLoader!!
                     classOf<AMapLocation>(classLoader).hook {
                         injectMember {
                             method {
@@ -467,7 +547,7 @@ object LocationHooker : YukiBaseHooker() {
                                 emptyParam()
                             }
                             beforeHook {
-                                result = 20
+                                result = Scheduler.satellites
                             }
                         }
                     }
@@ -555,6 +635,38 @@ object LocationHooker : YukiBaseHooker() {
         }
     }
 
+    private fun testProviderTrick() {
+        classOf<Location>().hook {
+            injectMember {
+                method {
+                    name = "isMock"
+                    emptyParam()
+                }
+                replaceAny {
+                    if (hookingMethod.testProviderTrick) {
+                        false
+                    } else {
+                        callOriginal()
+                    }
+                }
+            }
+
+            injectMember {
+                method {
+                    name = "isFromMockProvider"
+                    emptyParam()
+                }
+                replaceAny {
+                    if (hookingMethod.testProviderTrick) {
+                        false
+                    } else {
+                        callOriginal()
+                    }
+                }
+            }
+        }
+    }
+
     @get:RequiresApi(Build.VERSION_CODES.N)
     val fakeGnssStatus: GnssStatus?
         get() {
@@ -598,4 +710,8 @@ object LocationHooker : YukiBaseHooker() {
                 add(instance)
             }
         }
+
+    enum class Method(val directHook: Boolean, val testProviderTrick: Boolean) {
+        XPOSED_ONLY(true, false), HYBRID(false, true), TEST_PROVIDER_ONLY(false, false)
+    }
 }

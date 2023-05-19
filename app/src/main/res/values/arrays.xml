@@ -14,4 +14,16 @@
         <item>GitHub</item>
         <item>@string/name_my_blog</item>
     </string-array>
+
+    <string-array name="emulation_methods_entries">
+        <item>@string/title_method_xposed_only</item>
+        <item>@string/title_method_hybrid</item>
+        <item>@string/title_method_test_provider_only</item>
+    </string-array>
+
+    <string-array name="emulation_methods_values">
+        <item>xposed_only</item>
+        <item>hybrid</item>
+        <item>test_provider_only</item>
+    </string-array>
 </resources>

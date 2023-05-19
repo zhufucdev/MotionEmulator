@@ -197,4 +197,8 @@
     <string name="title_activity_updater">App Updater</string>
     <string name="text_update_found">A new version found</string>
     <string name="action_upgrade">Upgrade</string>
+    <string name="title_emulation_method">Emulation method</string>
+    <string name="title_method_xposed_only">Xposed only</string>
+    <string name="title_method_hybrid">Hybrid</string>
+    <string name="title_method_test_provider_only">Test provider only</string>
 </resources>
