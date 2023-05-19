@@ -134,8 +134,7 @@
     <string name="title_random_factor">Random Factor</string>
     <string name="title_custom_matrix">Custom Matrix</string>
     <string name="text_salt_common">Adding salt means modifying the data to make it different for each run</string>
-    <string name="text_salt_trace">When adding salt to a trace, consider the order of magnitude to be E-4 or smaller
-    </string>
+    <string name="text_salt_trace">When adding salt to a trace, consider the order of magnitude to be E-4 or smaller</string>
     <string name="title_overview">Overview</string>
     <string name="title_exported">Export at %s</string>
     <string name="title_export">Export</string>
@@ -152,7 +151,7 @@
     <string name="title_settings_map_provider">Map provider</string>
     <string name="name_google_maps">Google Maps</string>
     <string name="name_amap">AMap</string>
-    <string name="title_settings_poi_provider">POI Provider</string>
+    <string name="title_settings_poi_provider">POI provider</string>
     <string name="caption_settings_time_format">TIME FORMAT</string>
     <string name="title_settings_use_custom_time_format">Use custom time format</string>
     <string name="settings_title_time_format">Time format</string>
@@ -176,25 +175,22 @@
     <string name="title_no_gps_provider">No GPS Support</string>
     <string name="text_no_gps_provider">GPS location provider is not supported on your phone</string>
     <string name="title_unsaved_trace">Unsaved Trace</string>
-    <string name="text_unsaved_trace">There are trace data that\'s not saved yet. Do you know what you are doing?
-    </string>
+    <string name="text_unsaved_trace">There are trace data that\'s not saved yet. Do you know what you are doing?</string>
     <string name="text_app_received">%s has picked up</string>
     <string name="text_emulation_app_pending">waiting for the app to pick up</string>
     <string name="text_swipe_to_see_more">Swipe between the cards to see the details</string>
     <string name="title_named_emulation_ongoing">Emulation #%s Ongoing</string>
     <string name="title_settings_emulation">Emulation</string>
     <string name="caption_server">SERVER</string>
-    <string name="title_server_port">Server Port</string>
+    <string name="title_server_port">Server port</string>
     <string name="title_use_tls">Use TLS</string>
     <string name="text_input_invalid">input invalid</string>
     <string name="caption_test_provider">TEST PROVIDER</string>
     <string name="title_use_test_provider">Use test provider</string>
-    <string name="text_test_provider_enabled">Make sure the app is selected as mock location app in developer options
-    </string>
+    <string name="text_test_provider_enabled">Make sure the app is selected as mock location app in developer options</string>
     <string name="text_plugin_not_installed">Plugin not installed</string>
-    <string name="title_install_plugin">Install Plugin</string>
-    <string name="url_github_releases" translatable="false">https://github.com/zhufucdev/MotionEmulator/releases
-    </string>
+    <string name="title_install_plugin">Install plugin</string>
+    <string name="url_github_releases" translatable="false">https://github.com/zhufucdev/MotionEmulator/releases</string>
     <string name="url_blog" translatable="false">https://zhufucdev.com/article/peBx_1w5Njt27VZxxQvGi</string>
     <string name="name_github" translatable="false">GitHub</string>
     <string name="name_my_blog">Steve Reed\'s blog</string>
