@@ -114,12 +114,12 @@ object MockLocationProvider {
         notifyStatus(EmulationInfo(duration, length, BuildConfig.APPLICATION_ID), providerAddr)
 
         val salted = trace.generateSaltedTrace(MapProjector)
-        var traceInterp = salted.at(0F, MapProjector)
         var loopStart: Long
         var currentLoop = 0
         while (isEmulating && currentLoop < emulation.repeat) {
             var progress = 0F
             var elapsed = 0.0
+            var traceInterp = salted.at(0F, MapProjector)
             loopStart = System.currentTimeMillis()
 
             while (progress <= 1F && isEmulating) {
