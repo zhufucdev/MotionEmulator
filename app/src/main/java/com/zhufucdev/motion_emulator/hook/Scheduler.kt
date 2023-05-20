@@ -9,6 +9,7 @@ import com.highcapable.yukihookapi.hook.log.loggerD
 import com.highcapable.yukihookapi.hook.log.loggerI
 import com.highcapable.yukihookapi.hook.param.PackageParam
 import com.zhufucdev.data.*
+import com.zhufucdev.motion_emulator.PREFERENCE_NAME_BRIDGE
 import com.zhufucdev.motion_emulator.data.*
 import io.ktor.client.*
 import io.ktor.client.call.*
@@ -32,6 +33,8 @@ object Scheduler {
     private var port = 2023
     private var tls = false
     private lateinit var packageName: String
+    var hookingMethod: Method = Method.XPOSED_ONLY
+        private set
 
     private val providerAddr get() = (if (tls) "https://" else "http://") + "$LOCALHOST:$port"
 
@@ -59,8 +62,13 @@ object Scheduler {
 
     fun PackageParam.init(context: Context) {
         this@Scheduler.packageName = context.applicationContext.packageName
+        val prefs = prefs(PREFERENCE_NAME_BRIDGE)
         port = prefs.getString("provider_port").toIntOrNull() ?: 2023
         tls = prefs.getBoolean("provider_tls", true)
+        val use = prefs.getBoolean("use_test_provider_effective")
+        hookingMethod =
+            if (!use) Method.XPOSED_ONLY
+            else prefs.getString("method", "xposed_only").let { Method.valueOf(it.uppercase()) }
 
         GlobalScope.launch {
             loggerI(tag = TAG, "Listen event loop on port $port, tls = $tls")
@@ -318,5 +326,12 @@ object Scheduler {
             httpClient.get("$providerAddr/state/${id}/stopped")
         }
         loggerD(TAG, "Updated state[$id] = $running")
+    }
+
+    enum class Method(val directHook: Boolean, val testProviderTrick: Boolean) {
+        XPOSED_ONLY(true, false), HYBRID(false, true), TEST_PROVIDER_ONLY(false, false);
+
+        val involveXposed: Boolean
+            get() = directHook || testProviderTrick
     }
 }

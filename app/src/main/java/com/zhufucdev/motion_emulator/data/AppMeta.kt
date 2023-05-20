@@ -9,6 +9,7 @@ import com.highcapable.yukihookapi.hook.factory.prefs
 import com.highcapable.yukihookapi.hook.param.PackageParam
 import com.highcapable.yukihookapi.hook.xposed.prefs.YukiHookPrefsBridge
 import com.zhufucdev.motion_emulator.BuildConfig
+import com.zhufucdev.motion_emulator.PREFERENCE_NAME_BRIDGE
 import com.zhufucdev.motion_emulator.isSystemApp
 import kotlinx.serialization.Serializable
 
@@ -38,6 +39,7 @@ fun AppMeta.hooked(env: AppMetas) = (env.bypassMode && !positive) || (!env.bypas
 fun PackageParam.isHooked(): Boolean {
     if (packageName == BuildConfig.APPLICATION_ID) return false
 
+    val prefs = prefs(PREFERENCE_NAME_BRIDGE)
     val positiveApps = prefs.getStringSet("positive_apps", emptySet())
     val bypassMode = prefs.getBoolean("bypass", true)
     val showSystemApps = prefs.getBoolean("use_system")
@@ -58,7 +60,7 @@ data class AppStrategy(var showSystemApps: Boolean = false, var bypassMode: Bool
 
 class AppMetas(context: Context) {
     private val pm: PackageManager = context.packageManager
-    private val prefs: YukiHookPrefsBridge = context.prefs()
+    private val prefs: YukiHookPrefsBridge = context.prefs(PREFERENCE_NAME_BRIDGE)
 
     private val positiveApps = mutableSetOf<String>()
     private val config: AppStrategy

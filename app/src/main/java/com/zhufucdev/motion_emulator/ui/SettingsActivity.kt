@@ -13,6 +13,7 @@ import androidx.fragment.app.FragmentTransaction.TRANSIT_FRAGMENT_FADE
 import androidx.preference.*
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.highcapable.yukihookapi.hook.factory.prefs
+import com.zhufucdev.motion_emulator.PREFERENCE_NAME_BRIDGE
 import com.zhufucdev.motion_emulator.R
 import com.zhufucdev.motion_emulator.databinding.ActivitySettingsBinding
 import com.zhufucdev.motion_emulator.provider.Plugin
@@ -142,7 +143,7 @@ class SettingsActivity : AppCompatActivity(),
             val portPreference = findPreference<EditTextPreference>("provider_port")!!
             val tlsPreference = findPreference<SwitchPreferenceCompat>("provider_tls")!!
             val methodPreference = findPreference<ListPreference>("method")!!
-            val prefs = requireContext().prefs()
+            val prefs = requireContext().prefs(PREFERENCE_NAME_BRIDGE)
 
             fun Int.isValidPort() = this in 1024..65535
             portPreference.setOnBindEditTextListener { input ->

@@ -9,6 +9,7 @@ import com.zhufucdev.data.BROADCAST_AUTHORITY
 import com.zhufucdev.data.Emulation
 import com.zhufucdev.data.EmulationInfo
 import com.zhufucdev.data.Intermediate
+import com.zhufucdev.motion_emulator.PREFERENCE_NAME_BRIDGE
 import com.zhufucdev.motion_emulator.lazySharedPreferences
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
@@ -78,7 +79,7 @@ object Scheduler {
             Log.w("Schedular", "Reinitialize a running instance")
             return
         }
-        val prefs = context.prefs()
+        val prefs = context.prefs(PREFERENCE_NAME_BRIDGE)
         providerPort = prefs.getString("provider_port").toIntOrNull() ?: 2023
         providerTls = prefs.getBoolean("provider_tls", true)
         server = embeddedServer(Netty, environment)
