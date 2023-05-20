@@ -9,6 +9,7 @@ import com.zhufucdev.data.BROADCAST_AUTHORITY
 import com.zhufucdev.data.Emulation
 import com.zhufucdev.data.EmulationInfo
 import com.zhufucdev.data.Intermediate
+import com.zhufucdev.motion_emulator.lazySharedPreferences
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
@@ -82,10 +83,21 @@ object Scheduler {
         providerTls = prefs.getBoolean("provider_tls", true)
         server = embeddedServer(Netty, environment)
 
+        val sharedPrefs by context.lazySharedPreferences()
+        prefs.edit {
+            val shareProviderKey = "use_test_provider"
+            putBoolean(
+                "${shareProviderKey}_effective",
+                Plugin.isInstalled(context) && sharedPrefs.getBoolean(shareProviderKey, false)
+            )
+        }
+
         server.start(false)
         serverRunning = true
 
-        Plugin.wakeUp(context, providerPort, providerTls)
+        if (sharedPrefs.getBoolean("use_test_provider", false)) {
+            Plugin.wakeUp(context, providerPort, providerTls)
+        }
     }
 
     fun setIntermediate(id: String, info: Intermediate?) {

@@ -44,7 +44,11 @@ object LocationHooker : YukiBaseHooker() {
     private var lastLocation = Scheduler.location to System.currentTimeMillis()
     private var estimatedSpeed = 0F
     private val hookingMethod: Method
-        get() = prefs.getString("method", "xposed_only").let { Method.valueOf(it.uppercase()) }
+        get() {
+            val use = prefs.getBoolean("use_test_provider_effective")
+            if (!use) return Method.XPOSED_ONLY
+            return prefs.getString("method", "xposed_only").let { Method.valueOf(it.uppercase()) }
+        }
 
     private val listeners = mutableMapOf<Any, (Point) -> Unit>()
     override fun onHook() {
@@ -599,7 +603,8 @@ object LocationHooker : YukiBaseHooker() {
                 }
 
                 afterHook {
-                    result = Scheduler.location.offsetFixed(MapProjector).latitude
+                    if (hookingMethod.directHook)
+                        result = Scheduler.location.offsetFixed(MapProjector).latitude
                 }
             }
 
@@ -611,7 +616,8 @@ object LocationHooker : YukiBaseHooker() {
                 }
 
                 afterHook {
-                    result = Scheduler.location.offsetFixed(MapProjector).longitude
+                    if (hookingMethod.directHook)
+                        result = Scheduler.location.offsetFixed(MapProjector).longitude
                 }
             }
         }
@@ -712,6 +718,8 @@ object LocationHooker : YukiBaseHooker() {
         }
 
     enum class Method(val directHook: Boolean, val testProviderTrick: Boolean) {
-        XPOSED_ONLY(true, false), HYBRID(false, true), TEST_PROVIDER_ONLY(false, false)
+        XPOSED_ONLY(true, false), HYBRID(false, true), TEST_PROVIDER_ONLY(false, false);
+        val involveXposed: Boolean
+            get() = directHook || testProviderTrick
     }
 }

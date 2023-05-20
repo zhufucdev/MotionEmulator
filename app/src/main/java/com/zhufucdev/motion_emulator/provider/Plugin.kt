@@ -21,14 +21,12 @@ object Plugin {
     }
 
     fun wakeUp(context: Context, port: Int, tls: Boolean) {
-        if (context.lazySharedPreferences().value.getBoolean("use_test_provider", false)) {
-            context.sendBroadcast(Intent("$BROADCAST_AUTHORITY.EMULATION_START").apply {
-                component = ComponentName(pluginPackage, "$pluginPackage.EmulationBroadcastReceiver")
-                addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
-                putExtra("port", port)
-                putExtra("tls", tls)
-            })
-            Log.i("Schedular", "broadcast sent")
-        }
+        context.sendBroadcast(Intent("$BROADCAST_AUTHORITY.EMULATION_START").apply {
+            component = ComponentName(pluginPackage, "$pluginPackage.EmulationBroadcastReceiver")
+            addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
+            putExtra("port", port)
+            putExtra("tls", tls)
+        })
+        Log.i("Schedular", "broadcast sent")
     }
 }
