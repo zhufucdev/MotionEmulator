@@ -86,10 +86,10 @@ object Scheduler {
 
         val sharedPrefs by context.lazySharedPreferences()
         prefs.edit {
-            val shareProviderKey = "use_test_provider"
+            val testProviderKey = "use_test_provider"
             putBoolean(
-                "${shareProviderKey}_effective",
-                Plugin.isInstalled(context) && sharedPrefs.getBoolean(shareProviderKey, false)
+                "${testProviderKey}_effective",
+                Plugin.isInstalled(context) && sharedPrefs.getBoolean(testProviderKey, false)
             )
         }
 
@@ -238,9 +238,7 @@ fun Application.eventServer() {
                 call.respond(HttpStatusCode.BadRequest)
                 return@post
             }
-            Scheduler.setIntermediate(id, call.receive<Intermediate>().also {
-                Log.d("EmulationApp", "coord = ${it.location.coordinateSystem}")
-            })
+            Scheduler.setIntermediate(id, call.receive<Intermediate>())
             call.respond(HttpStatusCode.OK)
         }
 

@@ -18,9 +18,6 @@ class HookEntry : IYukiHookXposedInit {
     override fun onHook() = YukiHookAPI.encase {
         loadApp {
             if (isHooked()) {
-                loadHooker(SensorHooker)
-                loadHooker(LocationHooker)
-                loadHooker(CellHooker)
                 loadHooker(Scheduler.hook)
 
                 loggerI("MotionEmulator", "Hooked $packageName")

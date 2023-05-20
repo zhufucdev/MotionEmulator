@@ -241,6 +241,7 @@ object MockLocationProvider {
 
     fun stop() {
         isEmulating = false
+        jobs.forEach { it.cancel() }
         scope.cancel()
         TARGET_PROVIDERS.forEach {
             locationManager.removeTestProvider(it)

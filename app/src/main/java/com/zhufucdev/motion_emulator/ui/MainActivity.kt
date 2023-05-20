@@ -2,11 +2,14 @@ package com.zhufucdev.motion_emulator.ui
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.lifecycleScope
 import com.highcapable.yukihookapi.YukiHookAPI
+import com.highcapable.yukihookapi.hook.factory.prefs
+import com.zhufucdev.motion_emulator.PREFERENCE_NAME_BRIDGE
 import com.zhufucdev.motion_emulator.lazySharedPreferences
 import com.zhufucdev.motion_emulator.setUpStatusBar
 import com.zhufucdev.motion_emulator.ui.home.AppHome

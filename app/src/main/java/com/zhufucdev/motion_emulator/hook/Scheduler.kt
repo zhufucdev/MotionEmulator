@@ -68,7 +68,14 @@ object Scheduler {
         val use = prefs.getBoolean("use_test_provider_effective")
         hookingMethod =
             if (!use) Method.XPOSED_ONLY
-            else prefs.getString("method", "xposed_only").let { Method.valueOf(it.uppercase()) }
+            else prefs.getString("method", "xposed_only").let {
+                Method.valueOf(it.uppercase())
+            }
+        loggerI(TAG, "Hooking method is ${hookingMethod.name.lowercase()}")
+
+        if (!hookingMethod.involveXposed) {
+            return
+        }
 
         GlobalScope.launch {
             loggerI(tag = TAG, "Listen event loop on port $port, tls = $tls")
@@ -93,6 +100,7 @@ object Scheduler {
                 delay(1.seconds)
             }
         }
+
     }
 
     /**
@@ -103,6 +111,10 @@ object Scheduler {
             onAppLifecycle {
                 onCreate {
                     init(applicationContext)
+
+                    loadHooker(SensorHooker)
+                    loadHooker(LocationHooker)
+                    loadHooker(CellHooker)
                 }
             }
         }
@@ -303,29 +315,33 @@ object Scheduler {
     }
 
     private suspend fun notifyProgress() {
-        httpClient.post("$providerAddr/intermediate/${id}") {
-            contentType(ContentType.Application.Json)
-            setBody(
-                Intermediate(
-                    progress = progress,
-                    location = mLocation!!,
-                    elapsed = elapsed / 1000.0
+        runCatching {
+            httpClient.post("$providerAddr/intermediate/${id}") {
+                contentType(ContentType.Application.Json)
+                setBody(
+                    Intermediate(
+                        progress = progress,
+                        location = mLocation!!,
+                        elapsed = elapsed / 1000.0
+                    )
                 )
-            )
+            }
         }
     }
 
     private suspend fun updateState(running: Boolean) {
-        if (running) {
-            val status = EmulationInfo(duration, length, packageName)
-            httpClient.post("$providerAddr/state/${id}/running") {
-                contentType(ContentType.Application.Json)
-                setBody(status)
+        runCatching {
+            if (running) {
+                val status = EmulationInfo(duration, length, packageName)
+                httpClient.post("$providerAddr/state/${id}/running") {
+                    contentType(ContentType.Application.Json)
+                    setBody(status)
+                }
+            } else {
+                httpClient.get("$providerAddr/state/${id}/stopped")
             }
-        } else {
-            httpClient.get("$providerAddr/state/${id}/stopped")
+            loggerD(TAG, "Updated state[$id] = $running")
         }
-        loggerD(TAG, "Updated state[$id] = $running")
     }
 
     enum class Method(val directHook: Boolean, val testProviderTrick: Boolean) {
