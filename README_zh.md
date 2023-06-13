@@ -40,6 +40,15 @@ Motion Emulator是个模拟连续定位和传感器变化的Xposed模块
 好奇的话，参阅
 [Restrictions on geographic data in China](https://en.wikipedia.org/wiki/Restrictions_on_geographic_data_in_China)
 
+## 快照版
+
+如果你无聊，可以试试一些新东西，比如我在
+[这儿](https://build.zhufucdev.com/job/Motion%20Emulator/)
+自建的一个快照编译器
+
+我得说，这里面很多都是调试版，它们的签名和正式版不一样。如果你想安装这些
+调试版，需要先卸载正式版
+
 ## 构建指南
 
 如果你是开发者，请使用Android Studio或Jetbrains IDEA构建和维护这个项目

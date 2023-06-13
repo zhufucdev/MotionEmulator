@@ -41,6 +41,16 @@ of the pending trace in Manage -> Trace page is set to **GCJ02**
 If you are curious, go ahead to
 [Restrictions on geographic data in China](https://en.wikipedia.org/wiki/Restrictions_on_geographic_data_in_China)
 
+## Snapshot Builds
+
+If you are bored, it's possible to try something new, as I host
+a private CI for snapshot builds
+[here](https://build.zhufucdev.com/job/Motion%20Emulator/)
+
+It's worth noticing that some of these are debug builds, whose
+signature is very different from the release ones. If you wanted
+to install, you were about to uninstall first
+
 ## Build Instructions
 
 Build and maintain this project with Android Studio
