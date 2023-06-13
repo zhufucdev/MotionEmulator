@@ -9,5 +9,5 @@ jobs:
       - name: HTTP Request
         uses: fjogeleit/http-request-action@v1
         with:
-          url: 'https://build.zhufucdev.com/job/Motion%20Emulator/build?token={{ secrets.JENKINS_TOKEN }}'
+          url: 'https://build.zhufucdev.com/job/Motion%20Emulator/build?token=${{ secrets.JENKINS_TOKEN }}'
           method: 'GET'
