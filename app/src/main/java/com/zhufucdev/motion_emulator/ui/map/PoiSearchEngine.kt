@@ -3,6 +3,7 @@ package com.zhufucdev.motion_emulator.ui.map
 import android.content.Context
 import android.location.Address
 import android.location.Geocoder
+import android.os.Build
 import com.amap.api.services.core.PoiItemV2
 import com.amap.api.services.poisearch.PoiResultV2
 import com.amap.api.services.poisearch.PoiSearchV2
@@ -74,21 +75,34 @@ class GooglePoiEngine(private val context: Context) : PoiSearchEngine {
     override suspend fun search(point: Point) = suspendCoroutine { res ->
         if (!Geocoder.isPresent()) res.resumeWith(Result.failure(IllegalStateException("Geocoder not present")))
         val coder = Geocoder(context)
-        val result = coder.getFromLocation(point.latitude, point.longitude, 1)?.get(0)
-        if (result == null) {
-            res.resumeWith(Result.success(null))
-            return@suspendCoroutine
-        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            coder.getFromLocation(point.latitude, point.longitude, 1) {
+                res.resumeWith(Result.success(it.getOrNull(0)?.poi()))
+            }
+        } else {
+            @Suppress("DEPRECATION")
+            val result = coder.getFromLocation(point.latitude, point.longitude, 1)?.get(0)
+            if (result == null) {
+                res.resumeWith(Result.success(null))
+                return@suspendCoroutine
+            }
 
-        res.resumeWith(Result.success(result.poi()))
+            res.resumeWith(Result.success(result.poi()))
+        }
     }
 
     override suspend fun search(text: String, limit: Int) = suspendCoroutine { res ->
         if (!Geocoder.isPresent()) res.resumeWith(Result.failure(IllegalStateException("Geocoder not present")))
         val coder = Geocoder(context)
-        val results = coder.getFromLocationName(text, limit) ?: emptyList()
-
-        res.resumeWith(Result.success(results.map { it.poi() }))
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            coder.getFromLocationName(text, limit) { addr ->
+                res.resumeWith(Result.success(addr.map { it.poi() }))
+            }
+        } else {
+            @Suppress("DEPRECATION")
+            val results = coder.getFromLocationName(text, limit) ?: emptyList()
+            res.resumeWith(Result.success(results.map { it.poi() }))
+        }
     }
 
     private fun Address.poi() = Poi(

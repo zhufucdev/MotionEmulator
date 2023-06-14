@@ -2,7 +2,6 @@ package com.zhufucdev.update
 
 import android.annotation.SuppressLint
 import android.app.DownloadManager
-import android.app.DownloadManager.COLUMN_LOCAL_URI
 import android.app.DownloadManager.Query
 import android.content.Context
 import android.net.Uri
@@ -12,7 +11,6 @@ import androidx.compose.runtime.*
 import androidx.core.content.getSystemService
 import io.ktor.client.*
 import io.ktor.client.call.*
-import io.ktor.client.call.body
 import io.ktor.client.engine.android.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
@@ -22,9 +20,7 @@ import kotlinx.coroutines.*
 import kotlinx.serialization.Serializable
 import java.io.File
 import kotlin.concurrent.thread
-import kotlin.coroutines.coroutineContext
 import kotlin.coroutines.suspendCoroutine
-import kotlin.time.Duration.Companion.seconds
 
 /**
  * Something checks and downloads app updates
@@ -111,7 +107,7 @@ class Updater(
         })
 
         return suspendCoroutine { c ->
-            val progress = mutableStateOf(0F)
+            val progress = mutableFloatStateOf(0F)
             val status = StatusDownloading(progress, manager, taskId)
 
             thread(start = true) {
