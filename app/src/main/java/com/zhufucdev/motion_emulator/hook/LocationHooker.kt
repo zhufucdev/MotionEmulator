@@ -25,6 +25,7 @@ import com.highcapable.yukihookapi.hook.factory.field
 import com.highcapable.yukihookapi.hook.log.loggerD
 import com.highcapable.yukihookapi.hook.log.loggerE
 import com.highcapable.yukihookapi.hook.log.loggerI
+import com.highcapable.yukihookapi.hook.log.loggerW
 import com.highcapable.yukihookapi.hook.type.android.ApplicationClass
 import com.highcapable.yukihookapi.hook.type.java.*
 import com.zhufucdev.data.Point
@@ -32,6 +33,7 @@ import com.zhufucdev.data.android
 import com.zhufucdev.data.estimateSpeed
 import com.zhufucdev.data.offsetFixed
 import com.zhufucdev.motion_emulator.data.MapProjector
+import com.zhufucdev.motion_emulator.toFixed
 import java.util.concurrent.Executor
 import java.util.function.Consumer
 import kotlin.collections.component1
@@ -79,6 +81,8 @@ object LocationHooker : YukiBaseHooker() {
      * Make network and cell providers invalid
      */
     private fun invalidateOthers() {
+        loggerI(TAG, "-- block other location methods --")
+
         classOf<WifiManager>().hook {
             injectMember {
                 method {
@@ -179,6 +183,8 @@ object LocationHooker : YukiBaseHooker() {
     }
 
     private fun hookGPS() {
+        loggerI(TAG, "-- hook GPS --")
+
         val classOfLM = classOf<LocationManager>()
         classOfLM.hook {
             injectMember {
@@ -205,7 +211,13 @@ object LocationHooker : YukiBaseHooker() {
 
             injectMember {
                 members(*classOfLM.methods.filter { it.name == "requestLocationUpdates" || it.name == "requestSingleUpdate" }
-                    .toTypedArray())
+                    .toTypedArray().also {
+                        if (it.isEmpty()) {
+                            loggerW(TAG, "active update block failed: no such method")
+                        } else {
+                            loggerD(TAG, "active update block finished with ${it.size} methods hooked")
+                        }
+                    })
                 replaceAny {
                     if (Scheduler.satellites <= 0)
                         return@replaceAny callOriginal()
@@ -349,7 +361,7 @@ object LocationHooker : YukiBaseHooker() {
                     method {
                         name = "registerGnssStatusCallback"
                         returnType = BooleanType
-                    }.all()
+                    }
                     replaceAny {
                         if (Scheduler.satellites <= 0) {
                             return@replaceAny callOriginal()
@@ -448,6 +460,8 @@ object LocationHooker : YukiBaseHooker() {
      * Specially designed for it
      */
     private fun hookAMap() {
+        loggerI(TAG, "-- hook Amap --")
+
         fun YukiMemberHookCreator.MemberHookCreator.hookListener(classloader: ClassLoader) {
             replaceAny {
                 val listener = args[0]
@@ -458,9 +472,9 @@ object LocationHooker : YukiBaseHooker() {
                 )
                 redirectListener(listener) {
                     method.invoke(listener, it.amap())
-                    loggerI(TAG, "AMap location received")
+                    loggerD(TAG, "AMap location received")
                 }
-                loggerI(TAG, "AMap location registered")
+                loggerD(TAG, "AMap location registered")
             }
         }
 
@@ -532,6 +546,7 @@ object LocationHooker : YukiBaseHooker() {
     }
 
     private fun hookLocation() {
+        loggerI(TAG, "-- hook location --")
         fun YukiMemberHookCreator.common() {
             injectMember {
                 method {
@@ -541,7 +556,9 @@ object LocationHooker : YukiBaseHooker() {
                 }
 
                 afterHook {
-                    result = Scheduler.location.offsetFixed(MapProjector).latitude
+                    result = Scheduler.location.offsetFixed(MapProjector).latitude.also {
+                        loggerD(TAG, "replaced #getLatitude to ${it.toFixed(2)}")
+                    }
                 }
             }
 
@@ -553,7 +570,9 @@ object LocationHooker : YukiBaseHooker() {
                 }
 
                 afterHook {
-                    result = Scheduler.location.offsetFixed(MapProjector).longitude
+                    result = Scheduler.location.offsetFixed(MapProjector).longitude.also {
+                        loggerD(TAG, "replaced #getLongitude to ${it.toFixed(2)}")
+                    }
                 }
             }
         }
@@ -578,6 +597,8 @@ object LocationHooker : YukiBaseHooker() {
     }
 
     private fun testProviderTrick() {
+        loggerI(TAG, "-- make test provider undetectable --")
+
         classOf<Location>().hook {
             injectMember {
                 method {
