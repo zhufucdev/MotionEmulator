@@ -12,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.core.content.getSystemService
 import io.ktor.client.*
 import io.ktor.client.call.*
+import io.ktor.client.call.body
 import io.ktor.client.engine.android.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
@@ -240,7 +241,7 @@ data class StatusReadyToInstall(val file: File) : UpdaterStatus, HasUpdate {
     }
 }
 
-data class StatusDownloadFailed(private val file: File): UpdaterStatus {
+data class StatusDownloadFailed(private val file: File) : UpdaterStatus {
     override fun onDestroy() {
         if (file.exists())
             file.delete()

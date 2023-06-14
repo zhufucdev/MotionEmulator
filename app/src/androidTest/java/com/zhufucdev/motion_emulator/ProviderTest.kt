@@ -11,6 +11,7 @@ import com.zhufucdev.motion_emulator.hook.TrustAllX509TrustManager
 import com.zhufucdev.motion_emulator.provider.Scheduler
 import io.ktor.client.*
 import io.ktor.client.call.*
+import io.ktor.client.call.body
 import io.ktor.client.engine.android.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
