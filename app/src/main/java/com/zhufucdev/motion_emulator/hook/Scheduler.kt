@@ -28,7 +28,7 @@ import kotlin.time.Duration.Companion.seconds
 @OptIn(DelicateCoroutinesApi::class)
 object Scheduler {
     private const val TAG = "Scheduler"
-    private const val LOCALHOST = "127.0.0.1"
+    private const val LOCALHOST = "localhost"
     private val id = NanoIdUtils.randomNanoId()
     private var port = 2023
     private var tls = false
@@ -65,9 +65,9 @@ object Scheduler {
         val prefs = prefs(PREFERENCE_NAME_BRIDGE)
         port = prefs.getString("provider_port").toIntOrNull() ?: 2023
         tls = prefs.getBoolean("provider_tls", true)
-        val use = prefs.getBoolean("use_test_provider_effective")
+        val useTestProvider = prefs.getBoolean("use_test_provider_effective")
         hookingMethod =
-            if (!use) Method.XPOSED_ONLY
+            if (!useTestProvider) Method.XPOSED_ONLY
             else prefs.getString("method", "xposed_only").let {
                 Method.valueOf(it.uppercase())
             }
@@ -81,14 +81,18 @@ object Scheduler {
             loggerI(tag = TAG, "Listen event loop on port $port, tls = $tls")
 
             var logged = false
-            // query existing state
-            httpClient.get("$providerAddr/current").apply {
-                if (status == HttpStatusCode.OK) {
-                    val emulation = body<Emulation>()
-                    launch {
-                        startEmulation(emulation)
+            try {
+                // query existing state
+                httpClient.get("$providerAddr/current").apply {
+                    if (status == HttpStatusCode.OK) {
+                        val emulation = body<Emulation>()
+                        launch {
+                            startEmulation(emulation)
+                        }
                     }
                 }
+            } catch (e: ConnectException) {
+                // ignored
             }
 
             while (true) {
@@ -147,6 +151,7 @@ object Scheduler {
         } catch (e: ConnectException) {
             // ignored, or more specifically, treat it as offline
             // who the fuck cares what's going on
+            delay(10.seconds)
         }
     }
 
