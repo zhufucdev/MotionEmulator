@@ -81,21 +81,22 @@ object Scheduler {
             loggerI(tag = TAG, "Listen event loop on port $port, tls = $tls")
 
             var logged = false
-            try {
-                // query existing state
-                httpClient.get("$providerAddr/current").apply {
-                    if (status == HttpStatusCode.OK) {
-                        val emulation = body<Emulation>()
-                        launch {
+
+            while (true) {
+                try {
+                    // query existing state
+                    httpClient.get("$providerAddr/current").apply {
+                        if (status == HttpStatusCode.OK) {
+                            val emulation = body<Emulation>()
                             startEmulation(emulation)
                         }
                     }
+                } catch (e: ConnectException) {
+                    // ignored
                 }
-            } catch (e: ConnectException) {
-                // ignored
-            }
 
-            while (true) {
+                loggerI(TAG, "current emulation vanished. Entering event loop...")
+
                 eventLoop()
                 if (!logged) {
                     loggerI(tag = TAG, msg = "Provider offline. Waiting for data channel to become online")
@@ -133,6 +134,7 @@ object Scheduler {
 
                 when (res.status) {
                     HttpStatusCode.OK -> {
+                        hooking = true
                         val emulation = res.body<Emulation>()
                         startEmulation(emulation)
                     }
@@ -151,7 +153,6 @@ object Scheduler {
         } catch (e: ConnectException) {
             // ignored, or more specifically, treat it as offline
             // who the fuck cares what's going on
-            delay(10.seconds)
         }
     }
 
