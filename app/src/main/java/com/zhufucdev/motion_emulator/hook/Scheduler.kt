@@ -77,7 +77,7 @@ object Scheduler {
         }
 
         GlobalScope.launch {
-            loggerI(tag = TAG, "service listens on localhost:$port")
+            loggerI(tag = TAG, "service listens on $providerAddr")
 
             var logged = false
 
