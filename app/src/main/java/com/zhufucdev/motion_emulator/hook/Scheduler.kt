@@ -77,7 +77,7 @@ object Scheduler {
         }
 
         GlobalScope.launch {
-            loggerI(tag = TAG, "Listen event loop on port $port, tls = $tls")
+            loggerI(tag = TAG, "service listens on localhost:$port")
 
             var logged = false
 
@@ -124,9 +124,10 @@ object Scheduler {
         }
     }
 
-    private suspend fun eventLoop() {
+    private suspend fun eventLoop() = coroutineScope {
         try {
             loggerI(TAG, "Event loop started on $port")
+            var currentEmu: Job? = null
 
             while (true) {
                 val res = httpClient.get("$providerAddr/next/${id}")
@@ -135,16 +136,19 @@ object Scheduler {
                     HttpStatusCode.OK -> {
                         hooking = true
                         val emulation = res.body<Emulation>()
-                        startEmulation(emulation)
+                        currentEmu = launch {
+                            startEmulation(emulation)
+                        }
                     }
 
                     HttpStatusCode.NoContent -> {
                         hooking = false
-                        loggerI(tag = TAG, msg = "Emulation stopped")
+                        currentEmu?.cancelAndJoin()
+                        loggerI(tag = TAG, msg = "Emulation cancelled")
                     }
 
                     else -> {
-                        return
+                        return@coroutineScope
                     }
                 }
             }
