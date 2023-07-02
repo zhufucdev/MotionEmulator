@@ -34,6 +34,7 @@ import com.zhufucdev.data.estimateSpeed
 import com.zhufucdev.data.offsetFixed
 import com.zhufucdev.motion_emulator.data.MapProjector
 import com.zhufucdev.motion_emulator.toFixed
+import java.lang.Exception
 import java.util.concurrent.Executor
 import java.util.function.Consumer
 import kotlin.collections.component1
@@ -110,7 +111,7 @@ object LocationHooker : YukiBaseHooker() {
                     emptyParam()
                     returnType = BooleanType
                 }
-                replaceToTrue()
+                replaceTo(true)
             }
 
             injectMember {
@@ -130,7 +131,7 @@ object LocationHooker : YukiBaseHooker() {
                     emptyParam()
                     returnType = BooleanType
                 }
-                replaceToTrue()
+                replaceTo(true)
             }
 
             injectMember {
@@ -139,7 +140,7 @@ object LocationHooker : YukiBaseHooker() {
                     emptyParam()
                     returnType = BooleanType
                 }
-                replaceToTrue()
+                replaceTo(true)
             }
 
             injectMember {
@@ -148,7 +149,7 @@ object LocationHooker : YukiBaseHooker() {
                     emptyParam()
                     returnType = BooleanType
                 }
-                replaceToTrue()
+                replaceTo(true)
             }
         }
 
@@ -360,6 +361,7 @@ object LocationHooker : YukiBaseHooker() {
                 injectMember {
                     method {
                         name = "registerGnssStatusCallback"
+                        param(classOf<Executor>(), classOf<GnssStatus.Callback>())
                         returnType = BooleanType
                     }
                     replaceAny {
@@ -367,11 +369,7 @@ object LocationHooker : YukiBaseHooker() {
                             return@replaceAny callOriginal()
                         }
 
-                        val callback = if (args[0] is GnssStatus.Callback) {
-                            args(0).cast<GnssStatus.Callback>()
-                        } else {
-                            args(1).cast<GnssStatus.Callback>()
-                        }
+                        val callback = args(1).cast<GnssStatus.Callback>()
                         callback?.onStarted()
                         callback?.onFirstFix(1000 + Random.nextInt(-500, 500))
                         timer(name = "satellite heartbeat", period = 1000) {
@@ -524,18 +522,20 @@ object LocationHooker : YukiBaseHooker() {
                         }
                     }
 
-                    runCatching {
-                        classOf<AMapLocationClientOption>(classLoader).hook {
-                            injectMember {
-                                method {
-                                    name = "setLocationMode"
-                                    param(classOf<AMapLocationMode>(classLoader))
-                                }
+                    classOf<AMapLocationClientOption>(classLoader).hook {
+                        injectMember {
+                            method {
+                                name = "setLocationMode"
+                                param(classOf<AMapLocationMode>(classLoader))
+                            }
 
-                                beforeHook {
-                                    val enums = classOf<Any>(classLoader).enumConstants
+                            beforeHook {
+                                try {
+                                    val enums = classOf<AMapLocationMode>(classLoader).enumConstants
                                     args[0] = enums?.get(1)
                                     loggerI(TAG, "Modified amap location mode")
+                                } catch (e: Exception) {
+                                    loggerW(TAG, "failed to modify amap location mode: $e")
                                 }
                             }
                         }
