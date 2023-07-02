@@ -38,7 +38,6 @@ object Scheduler {
 
     private val providerAddr get() = (if (tls) "https://" else "http://") + "$LOCALHOST:$port"
 
-    private val jobs = arrayListOf<Job>()
     private val httpClient by lazy(tls) {
         HttpClient(Android) {
             install(ContentNegotiation) {
@@ -141,7 +140,6 @@ object Scheduler {
 
                     HttpStatusCode.NoContent -> {
                         hooking = false
-                        jobs.joinAll()
                         loggerI(tag = TAG, msg = "Emulation stopped")
                     }
 
@@ -180,143 +178,125 @@ object Scheduler {
     val motion = MotionMoment(0F, mutableMapOf())
 
     private val stepSensors = intArrayOf(Sensor.TYPE_STEP_COUNTER, Sensor.TYPE_STEP_DETECTOR)
-    private suspend fun startEmulation(emulation: Emulation): Boolean {
+    private suspend fun startEmulation(emulation: Emulation) {
         loggerI(tag = TAG, msg = "Emulation started")
 
         length = emulation.trace.length(MapProjector)
         duration = length / emulation.velocity // in seconds
-        this.satellites = emulation.satelliteCount
+        this@Scheduler.satellites = emulation.satelliteCount
 
         hooking = true
         updateState(true)
-        val scope = CoroutineScope(Dispatchers.Default)
-        scope.launch {
-            for (i in 0 until emulation.repeat) {
-                start = SystemClock.elapsedRealtime()
-
-                val jobs = mutableSetOf<Job>()
-                startStepsEmulation(emulation.motion, emulation.velocity)?.let { jobs.add(it) }
-                startMotionSimulation(emulation.motion)?.let { jobs.add(it) }
-                startTraceEmulation(emulation.trace).let { jobs.add(it) }
-                startCellEmulation(emulation.cells)?.let { jobs.add(it) }
-
-                jobs.addAll(jobs)
-                jobs.joinAll()
-                jobs.clear()
-
-                if (!hooking) break
+        for (i in 0 until emulation.repeat) {
+            start = SystemClock.elapsedRealtime()
+            coroutineScope {
+                launch {
+                    startStepsEmulation(emulation.motion, emulation.velocity)
+                }
+                launch {
+                    startMotionSimulation(emulation.motion)
+                }
+                launch {
+                    startTraceEmulation(emulation.trace)
+                }
+                launch {
+                    startCellEmulation(emulation.cells)
+                }
             }
-            hooking = false
-            scope.cancel()
-            updateState(false)
-        }.let {
-            jobs.add(it)
-        }
 
-        return true
+            if (!hooking) break
+        }
+        hooking = false
+        updateState(false)
     }
 
     private var stepsCount: Int = -1
-    private fun CoroutineScope.startStepsEmulation(motion: Box<Motion>, velocity: Double): Job? {
+    private suspend fun startStepsEmulation(motion: Box<Motion>, velocity: Double) {
         SensorHooker.toggle = motion.status
 
-        return if (motion.value != null && motion.value!!.sensorsInvolved.any { it in stepSensors }) {
+        if (motion.value != null && motion.value!!.sensorsInvolved.any { it in stepSensors }) {
             val pause = (1.2 / velocity).seconds
-            launch {
-                if (stepsCount == -1) {
-                    stepsCount =
-                        (Random.nextFloat() * 5000).toInt() + 2000 // beginning with a random steps count
-                }
-                while (hooking && progress <= 1) {
-                    val moment =
-                        MotionMoment(
-                            elapsed / 1000F,
-                            mutableMapOf(
-                                Sensor.TYPE_STEP_COUNTER to floatArrayOf(1F * stepsCount++),
-                                Sensor.TYPE_STEP_DETECTOR to floatArrayOf(1F)
-                            )
-                        )
-                    SensorHooker.raise(moment)
-
-                    notifyProgress()
-                    delay(pause)
-                }
+            if (stepsCount == -1) {
+                stepsCount =
+                    (Random.nextFloat() * 5000).toInt() + 2000 // beginning with a random steps count
             }
-        } else {
-            SensorHooker.toggle = motion.status
-            null
+            while (hooking && progress <= 1) {
+                val moment =
+                    MotionMoment(
+                        elapsed / 1000F,
+                        mutableMapOf(
+                            Sensor.TYPE_STEP_COUNTER to floatArrayOf(1F * stepsCount++),
+                            Sensor.TYPE_STEP_DETECTOR to floatArrayOf(1F)
+                        )
+                    )
+                SensorHooker.raise(moment)
+
+                notifyProgress()
+                delay(pause)
+            }
         }
     }
 
-    private fun CoroutineScope.startMotionSimulation(motion: Box<Motion>): Job? {
+    private suspend fun startMotionSimulation(motion: Box<Motion>) {
         SensorHooker.toggle = motion.status
         val partial = motion.value?.validPart()
 
-        return if (partial != null && partial.sensorsInvolved.any { it !in stepSensors }) {
-            launch {
-                // data other than steps
-                while (hooking && progress <= 1) {
-                    var lastIndex = 0
-                    while (hooking && lastIndex < partial.moments.size && progress <= 1) {
-                        val interp = partial.at(progress, lastIndex)
+        if (partial != null && partial.sensorsInvolved.any { it !in stepSensors }) {
+            // data other than steps
+            while (hooking && progress <= 1) {
+                var lastIndex = 0
+                while (hooking && lastIndex < partial.moments.size && progress <= 1) {
+                    val interp = partial.at(progress, lastIndex)
 
-                        SensorHooker.raise(interp.moment)
-                        lastIndex = interp.index
+                    SensorHooker.raise(interp.moment)
+                    lastIndex = interp.index
 
-                        notifyProgress()
-                        delay(100)
-                    }
+                    notifyProgress()
+                    delay(100)
                 }
             }
-        } else {
-            null
         }
     }
 
-    private fun CoroutineScope.startTraceEmulation(trace: Trace): Job =
-        launch {
-            val salted = trace.generateSaltedTrace(MapProjector)
-            var traceInterp = salted.at(0F, MapProjector)
-            while (hooking && progress <= 1) {
-                val interp = salted.at(progress, MapProjector, traceInterp)
-                traceInterp = interp
-                mLocation = interp.point.toPoint(trace.coordinateSystem)
-                LocationHooker.raise(interp.point.toPoint())
+    private suspend fun startTraceEmulation(trace: Trace) {
+        val salted = trace.generateSaltedTrace(MapProjector)
+        var traceInterp = salted.at(0F, MapProjector)
+        while (hooking && progress <= 1) {
+            val interp = salted.at(progress, MapProjector, traceInterp)
+            traceInterp = interp
+            mLocation = interp.point.toPoint(trace.coordinateSystem)
+            LocationHooker.raise(interp.point.toPoint())
 
-                notifyProgress()
-                delay(1000)
-            }
+            notifyProgress()
+            delay(1000)
         }
+    }
 
-    private fun CoroutineScope.startCellEmulation(cells: Box<CellTimeline>): Job? {
+    private suspend fun startCellEmulation(cells: Box<CellTimeline>) {
         CellHooker.toggle = cells.status
         val value = cells.value
 
-        return if (value != null) {
-            launch {
-                var ptr = 0
-                val timespan = value.moments.timespan()
-                while (hooking && progress <= 1 && ptr < value.moments.size) {
-                    val current = value.moments[ptr]
-                    mCellMoment = current
-                    CellHooker.raise(current)
+        if (value != null) {
+            var ptr = 0
+            val timespan = value.moments.timespan()
+            while (hooking && progress <= 1 && ptr < value.moments.size) {
+                val current = value.moments[ptr]
+                mCellMoment = current
+                CellHooker.raise(current)
 
-                    if (value.moments.size == 1) {
-                        delay(duration.seconds) // halt
-                    } else {
-                        if (ptr == value.moments.lastIndex - 1) {
-                            break
-                        }
-                        val pause =
-                            (value.moments[ptr].elapsed - value.moments[ptr + 1].elapsed) /
-                                    timespan * duration
-                        ptr++
-                        delay(pause.seconds)
+                if (value.moments.size == 1) {
+                    delay(duration.seconds) // halt
+                } else {
+                    if (ptr == value.moments.lastIndex - 1) {
+                        break
                     }
+                    val pause =
+                        (value.moments[ptr].elapsed - value.moments[ptr + 1].elapsed) /
+                                timespan * duration
+                    ptr++
+                    delay(pause.seconds)
                 }
             }
-        } else {
-            null
         }
     }
 
