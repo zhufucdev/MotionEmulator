@@ -5,7 +5,6 @@ import android.hardware.Sensor
 import android.os.SystemClock
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils
 import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
-import com.highcapable.yukihookapi.hook.log.loggerD
 import com.highcapable.yukihookapi.hook.param.PackageParam
 import com.zhufucdev.stub.*
 import kotlinx.coroutines.*
@@ -13,18 +12,30 @@ import kotlin.random.Random
 import kotlin.time.Duration.Companion.seconds
 
 abstract class AbstractScheduler {
-    val id = NanoIdUtils.randomNanoId()
+    private lateinit var sensorHooker: SensorHooker
+    private lateinit var locationHooker: LocationHooker
+    private lateinit var cellHooker: CellHooker
+
     protected lateinit var packageName: String
+    val id: String = NanoIdUtils.randomNanoId()
     var hookingMethod: Method = Method.XPOSED_ONLY
         protected set
 
     fun PackageParam.init(context: Context) {
         this@AbstractScheduler.packageName = context.applicationContext.packageName
+
         initialize()
 
         if (!hookingMethod.involveXposed) {
             return
         }
+
+        sensorHooker = SensorHooker(this@AbstractScheduler)
+        locationHooker = LocationHooker(this@AbstractScheduler)
+        cellHooker = CellHooker(this@AbstractScheduler)
+        loadHooker(sensorHooker)
+        loadHooker(locationHooker)
+        loadHooker(cellHooker)
     }
 
     abstract fun PackageParam.initialize()
@@ -37,10 +48,6 @@ abstract class AbstractScheduler {
             onAppLifecycle {
                 onCreate {
                     init(applicationContext)
-
-                    loadHooker(SensorHooker)
-                    loadHooker(LocationHooker)
-                    loadHooker(CellHooker)
                 }
             }
         }
@@ -102,7 +109,7 @@ abstract class AbstractScheduler {
 
     private var stepsCount: Int = -1
     private suspend fun startStepsEmulation(motion: Box<Motion>, velocity: Double) {
-        SensorHooker.toggle = motion.status
+        sensorHooker.toggle = motion.status
 
         if (motion.value != null && motion.value!!.sensorsInvolved.any { it in stepSensors }) {
             val pause = (1.2 / velocity).seconds
@@ -119,7 +126,7 @@ abstract class AbstractScheduler {
                             Sensor.TYPE_STEP_DETECTOR to floatArrayOf(1F)
                         )
                     )
-                SensorHooker.raise(moment)
+                sensorHooker.raise(moment)
 
                 notifyProgress()
                 delay(pause)
@@ -128,7 +135,7 @@ abstract class AbstractScheduler {
     }
 
     private suspend fun startMotionSimulation(motion: Box<Motion>) {
-        SensorHooker.toggle = motion.status
+        sensorHooker.toggle = motion.status
         val partial = motion.value?.validPart()
 
         if (partial != null && partial.sensorsInvolved.any { it !in stepSensors }) {
@@ -138,7 +145,7 @@ abstract class AbstractScheduler {
                 while (hooking && lastIndex < partial.moments.size && progress <= 1) {
                     val interp = partial.at(progress, lastIndex)
 
-                    SensorHooker.raise(interp.moment)
+                    sensorHooker.raise(interp.moment)
                     lastIndex = interp.index
 
                     notifyProgress()
@@ -155,7 +162,7 @@ abstract class AbstractScheduler {
             val interp = salted.at(progress, MapProjector, traceInterp)
             traceInterp = interp
             mLocation = interp.point.toPoint(trace.coordinateSystem)
-            LocationHooker.raise(interp.point.toPoint())
+            locationHooker.raise(interp.point.toPoint())
 
             notifyProgress()
             delay(1000)
@@ -163,7 +170,7 @@ abstract class AbstractScheduler {
     }
 
     private suspend fun startCellEmulation(cells: Box<CellTimeline>) {
-        CellHooker.toggle = cells.status
+        cellHooker.toggle = cells.status
         val value = cells.value
 
         if (value != null) {
@@ -172,7 +179,7 @@ abstract class AbstractScheduler {
             while (hooking && progress <= 1 && ptr < value.moments.size) {
                 val current = value.moments[ptr]
                 mCellMoment = current
-                CellHooker.raise(current)
+                cellHooker.raise(current)
 
                 if (value.moments.size == 1) {
                     delay(duration.seconds) // halt

@@ -18,8 +18,10 @@ import com.zhufucdev.stub.Toggle
 import kotlinx.coroutines.async
 import kotlinx.coroutines.supervisorScope
 
-object SensorHooker : YukiBaseHooker() {
-    private const val TAG = "SensorHook"
+class SensorHooker(private val scheduler: AbstractScheduler) : YukiBaseHooker() {
+    companion object {
+        private const val TAG = "SensorHook"
+    }
 
     private val listeners = mutableSetOf<SensorListener>()
 
@@ -53,7 +55,7 @@ object SensorHooker : YukiBaseHooker() {
         moment.data.forEach { (t, v) ->
             val sensor =
                 appContext!!.getSystemService(SensorManager::class.java).getDefaultSensor(t)
-            val values = AbstractScheduler.motion.data[t] ?: v
+            val values = scheduler.motion.data[t] ?: v
             val event = when (val pars = eventConstructor.parameters.size) {
                 4 -> eventConstructor.call(
                     sensor,

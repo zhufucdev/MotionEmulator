@@ -34,19 +34,21 @@ import kotlin.concurrent.timer
 import kotlin.random.Random
 import kotlin.reflect.jvm.isAccessible
 
-object LocationHooker : YukiBaseHooker() {
-    private const val TAG = "Location Hook"
-    private var lastLocation = AbstractScheduler.location to System.currentTimeMillis()
+class LocationHooker(private val scheduler: AbstractScheduler) : YukiBaseHooker() {
+    companion object {
+        private const val TAG = "Location Hook"
+    }
+    private var lastLocation = scheduler.location to System.currentTimeMillis()
     private var estimatedSpeed = 0F
 
     private val listeners = mutableMapOf<Any, (Point) -> Unit>()
     override fun onHook() {
-        if (AbstractScheduler.hookingMethod.directHook) {
+        if (scheduler.hookingMethod.directHook) {
             invalidateOthers()
             hookGPS()
             hookAMap()
             hookLocation()
-        } else if (AbstractScheduler.hookingMethod.testProviderTrick) {
+        } else if (scheduler.hookingMethod.testProviderTrick) {
             testProviderTrick()
         }
     }
@@ -185,7 +187,7 @@ object LocationHooker : YukiBaseHooker() {
                     returnType = classOf<Location>()
                 }
                 replaceAny {
-                    AbstractScheduler.location.android(args(0).string(), estimatedSpeed)
+                    scheduler.location.android(args(0).string(), estimatedSpeed)
                 }
             }
 
@@ -196,7 +198,7 @@ object LocationHooker : YukiBaseHooker() {
                     returnType = classOf<Location>()
                 }
                 replaceAny {
-                    AbstractScheduler.location.android(speed = estimatedSpeed)
+                    scheduler.location.android(speed = estimatedSpeed)
                 }
             }
 
@@ -210,7 +212,7 @@ object LocationHooker : YukiBaseHooker() {
                         }
                     })
                 replaceAny {
-                    if (AbstractScheduler.satellites <= 0)
+                    if (scheduler.satellites <= 0)
                         return@replaceAny callOriginal()
 
                     val listener = args.firstOrNull { it is LocationListener } as LocationListener?
@@ -220,7 +222,7 @@ object LocationHooker : YukiBaseHooker() {
                         val location = it.android(provider, estimatedSpeed)
                         listener.onLocationChanged(location)
                     }
-                    listener.onLocationChanged(AbstractScheduler.location.android(provider, estimatedSpeed))
+                    listener.onLocationChanged(scheduler.location.android(provider, estimatedSpeed))
                 }
             }
 
@@ -247,7 +249,7 @@ object LocationHooker : YukiBaseHooker() {
                     returnType = classOf<GpsStatus>()
                 }
                 afterHook {
-                    if (AbstractScheduler.satellites <= 0)
+                    if (scheduler.satellites <= 0)
                         return@afterHook
 
                     val info = args(0).cast<GpsStatus>() ?: result as GpsStatus
@@ -257,9 +259,9 @@ object LocationHooker : YukiBaseHooker() {
                     if (method7 != null) {
                         method7.isAccessible = true
 
-                        val prns = IntArray(AbstractScheduler.satellites) { it }
-                        val ones = FloatArray(AbstractScheduler.satellites) { 1f }
-                        val zeros = FloatArray(AbstractScheduler.satellites) { 0f }
+                        val prns = IntArray(scheduler.satellites) { it }
+                        val ones = FloatArray(scheduler.satellites) { 1f }
+                        val zeros = FloatArray(scheduler.satellites) { 0f }
                         val ephemerisMask = 0x1f
                         val almanacMask = 0x1f
 
@@ -268,7 +270,7 @@ object LocationHooker : YukiBaseHooker() {
 
                         method7.call(
                             info,
-                            AbstractScheduler.satellites,
+                            scheduler.satellites,
                             prns,
                             ones,
                             zeros,
@@ -304,7 +306,7 @@ object LocationHooker : YukiBaseHooker() {
                 }
 
                 replaceAny {
-                    if (AbstractScheduler.satellites <= 0) {
+                    if (scheduler.satellites <= 0) {
                         return@replaceAny callOriginal()
                     }
                     val listener = args(0).cast<GpsStatus.Listener>()
@@ -325,7 +327,7 @@ object LocationHooker : YukiBaseHooker() {
                 }
 
                 replaceAny {
-                    if (AbstractScheduler.satellites <= 0) {
+                    if (scheduler.satellites <= 0) {
                         return@replaceAny callOriginal()
                     }
                     false
@@ -340,7 +342,7 @@ object LocationHooker : YukiBaseHooker() {
                 }
 
                 replaceAny {
-                    if (AbstractScheduler.satellites <= 0) {
+                    if (scheduler.satellites <= 0) {
                         return@replaceAny callOriginal()
                     }
                     false
@@ -355,7 +357,7 @@ object LocationHooker : YukiBaseHooker() {
                         returnType = BooleanType
                     }
                     replaceAny {
-                        if (AbstractScheduler.satellites <= 0) {
+                        if (scheduler.satellites <= 0) {
                             return@replaceAny callOriginal()
                         }
 
@@ -386,7 +388,7 @@ object LocationHooker : YukiBaseHooker() {
                     replaceAny {
                         args(4).cast<Consumer<Location>>()
                             ?.accept(
-                                AbstractScheduler.location.android(args(0).string(), estimatedSpeed)
+                                scheduler.location.android(args(0).string(), estimatedSpeed)
                             )
                     }
                 }
@@ -402,7 +404,7 @@ object LocationHooker : YukiBaseHooker() {
                 }
 
                 afterHook {
-                    if (AbstractScheduler.satellites <= 0)
+                    if (scheduler.satellites <= 0)
                         return@afterHook
 
                     result = fakeSatellites.also {
@@ -419,8 +421,8 @@ object LocationHooker : YukiBaseHooker() {
                 }
 
                 replaceAny {
-                    if (AbstractScheduler.satellites <= 0) callOriginal()
-                    else AbstractScheduler.satellites
+                    if (scheduler.satellites <= 0) callOriginal()
+                    else scheduler.satellites
                 }
             }
         }
@@ -434,7 +436,7 @@ object LocationHooker : YukiBaseHooker() {
                 }
 
                 replaceAny {
-                    if (AbstractScheduler.satellites <= 0) callOriginal()
+                    if (scheduler.satellites <= 0) callOriginal()
                     else true
                 }
             }
@@ -518,7 +520,7 @@ object LocationHooker : YukiBaseHooker() {
                                     emptyParam()
                                 }
                                 replaceAny {
-                                    AbstractScheduler.satellites
+                                    scheduler.satellites
                                 }
                             }
                         }
@@ -578,7 +580,7 @@ object LocationHooker : YukiBaseHooker() {
             }
 
             afterHook {
-                result = AbstractScheduler.location.offsetFixed().latitude.also {
+                result = scheduler.location.offsetFixed().latitude.also {
                     loggerD(TAG, "replaced #getLatitude to ${it.toFixed(2)}")
                 }
             }
@@ -592,7 +594,7 @@ object LocationHooker : YukiBaseHooker() {
             }
 
             afterHook {
-                result = AbstractScheduler.location.offsetFixed().longitude.also {
+                result = scheduler.location.offsetFixed().longitude.also {
                     loggerD(TAG, "replaced #getLongitude to ${it.toFixed(2)}")
                 }
             }
@@ -661,9 +663,9 @@ object LocationHooker : YukiBaseHooker() {
     @get:RequiresApi(Build.VERSION_CODES.N)
     val fakeGnssStatus: GnssStatus?
         get() {
-            val svid = IntArray(AbstractScheduler.satellites) { it }
-            val zeros = FloatArray(AbstractScheduler.satellites) { 0f }
-            val ones = FloatArray(AbstractScheduler.satellites) { 1f }
+            val svid = IntArray(scheduler.satellites) { it }
+            val zeros = FloatArray(scheduler.satellites) { 0f }
+            val ones = FloatArray(scheduler.satellites) { 1f }
 
             val constructor = GnssStatus::class.constructors.firstOrNull { it.parameters.size >= 6 }
             if (constructor == null) {
@@ -673,7 +675,7 @@ object LocationHooker : YukiBaseHooker() {
 
             val constructorArgs = Array(constructor.parameters.size) { index ->
                 when (index) {
-                    0 -> AbstractScheduler.satellites
+                    0 -> scheduler.satellites
                     1 -> svid
                     2 -> ones
                     else -> zeros
@@ -685,7 +687,7 @@ object LocationHooker : YukiBaseHooker() {
     private val fakeSatellites: Iterable<GpsSatellite> =
         buildList {
             val clz = classOf<GpsSatellite>()
-            for (i in 1..AbstractScheduler.satellites) {
+            for (i in 1..scheduler.satellites) {
                 val instance =
                     clz.constructor {
                         param(IntType)

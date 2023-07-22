@@ -11,7 +11,7 @@ import com.zhufucdev.stub.CellMoment
 import com.zhufucdev.stub.Toggle
 import java.util.concurrent.Executor
 
-object CellHooker : YukiBaseHooker() {
+class CellHooker(private val scheduler: AbstractScheduler) : YukiBaseHooker() {
     private val listeners = mutableSetOf<(CellMoment) -> Unit>()
 
     var toggle = Toggle.PRESENT
@@ -30,7 +30,7 @@ object CellHooker : YukiBaseHooker() {
                     result = if (toggle == Toggle.BLOCK)
                         null
                     else {
-                        AbstractScheduler.cells.cellLocation()
+                        scheduler.cells.cellLocation()
                     }
                 }
             }
@@ -48,7 +48,7 @@ object CellHooker : YukiBaseHooker() {
                         if (toggle == Toggle.BLOCK)
                             null
                         else
-                            AbstractScheduler.cells.cell.takeIf { it.isNotEmpty() }
+                            scheduler.cells.cell.takeIf { it.isNotEmpty() }
                 }
             }
 
@@ -65,7 +65,7 @@ object CellHooker : YukiBaseHooker() {
                         if (toggle == Toggle.BLOCK)
                             null
                         else
-                            AbstractScheduler.cells.neighboringInfo().takeIf { it.isNotEmpty() }
+                            scheduler.cells.neighboringInfo().takeIf { it.isNotEmpty() }
                 }
             }
 
@@ -111,7 +111,7 @@ object CellHooker : YukiBaseHooker() {
                     val callback = args(1).cast<TelephonyCallback>()
                     addListener {
                         executor?.execute {
-                            callback?.treatWith(AbstractScheduler.cells)
+                            callback?.treatWith(scheduler.cells)
                         }
                     }
                 }
@@ -154,7 +154,7 @@ object CellHooker : YukiBaseHooker() {
     }
 
     private fun addListener(l: (CellMoment) -> Unit) {
-        l(AbstractScheduler.cells)
+        l(scheduler.cells)
         listeners.add(l)
     }
 

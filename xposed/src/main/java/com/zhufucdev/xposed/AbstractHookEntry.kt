@@ -6,7 +6,6 @@ import com.highcapable.yukihookapi.hook.factory.configs
 import com.highcapable.yukihookapi.hook.param.PackageParam
 import com.highcapable.yukihookapi.hook.xposed.proxy.IYukiHookXposedInit
 
-@InjectYukiHookWithXposed
 abstract class AbstractHookEntry : IYukiHookXposedInit {
     override fun onInit() = configs {
         isDebug = BuildConfig.DEBUG
