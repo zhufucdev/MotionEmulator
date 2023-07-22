@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="deploymentTargetDropDown">
+    <value>
+      <entry key="Android.MotionEmulator.mock_location_plugin">
+        <State />
+      </entry>
+      <entry key="app">
+        <State />
+      </entry>
+      <entry key="cp_plugin">
+        <State />
+      </entry>
+      <entry key="ws_plugin">
+        <State />
+      </entry>
+    </value>
+  </component>
+</project>

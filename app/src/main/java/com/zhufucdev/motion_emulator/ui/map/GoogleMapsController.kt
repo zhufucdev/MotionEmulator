@@ -13,8 +13,8 @@ import com.google.android.gms.maps.model.PolylineOptions
 import com.google.maps.android.SphericalUtil
 import com.google.maps.android.ktx.addPolyline
 import com.zhufucdev.motion_emulator.*
-import com.zhufucdev.data.Point
-import com.zhufucdev.data.Trace
+import com.zhufucdev.stub.Point
+import com.zhufucdev.stub.Trace
 
 @SuppressLint("MissingPermission")
 class GoogleMapsController(context: Context, private val map: GoogleMap) : MapController(context) {

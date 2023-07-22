@@ -6,11 +6,11 @@ plugins {
 
 android {
     namespace 'com.zhufucdev.update'
-    compileSdk 33
+    compileSdk target_sdk
 
     defaultConfig {
-        minSdk 23
-        targetSdk 33
+        minSdk min_sdk
+        targetSdk target_sdk
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
@@ -31,7 +31,7 @@ android {
         targetCompatibility JavaVersion.VERSION_11
     }
     composeOptions {
-        kotlinCompilerExtensionVersion '1.4.6'
+        kotlinCompilerExtensionVersion compose_compiler_version
     }
 
     kotlinOptions {
@@ -56,7 +56,7 @@ dependencies {
     implementation "androidx.activity:activity-compose:$compose_activity_version"
     implementation "androidx.compose.ui:ui:$compose_ui_version"
     implementation "androidx.compose.ui:ui-tooling-preview:$compose_ui_version"
-    implementation 'androidx.compose.material3:material3:1.2.0-alpha02'
+    implementation "androidx.compose.material3:material3:$compose_material_version"
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'

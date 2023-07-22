@@ -21,7 +21,7 @@ import com.zhufucdev.update.Updater
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppHome(activatedState: State<Boolean>, updater: Updater, onClick: (AppHomeDestination) -> Unit) {
+fun AppHome(updater: Updater, onClick: (AppHomeDestination) -> Unit) {
     val behavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
     val snackbar = remember { SnackbarHostState() }
     val context = LocalContext.current
@@ -51,28 +51,15 @@ fun AppHome(activatedState: State<Boolean>, updater: Updater, onClick: (AppHomeD
     ) {
         LazyColumn(modifier = Modifier.padding(it)) {
             item {
-                val activated by remember { activatedState }
-                if (activated) {
-                    HomeCard(
-                        onClick = { onClick(AppHomeDestination.AppStrategy) },
-                        title = stringResource(id = R.string.title_status_activated),
-                        subtitle = stringResource(id = R.string.text_status_activated),
-                        icon = painterResource(id = R.drawable.ic_baseline_error_outline_24),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer
-                        )
+                HomeCard(
+                    onClick = { onClick(AppHomeDestination.Plugins) },
+                    title = stringResource(id = R.string.title_status_activated),
+                    subtitle = stringResource(id = R.string.text_status_activated),
+                    icon = painterResource(id = R.drawable.ic_baseline_done_all_24),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer
                     )
-                } else {
-                    HomeCard(
-                        onClick = { onClick(AppHomeDestination.AppStrategy) },
-                        title = stringResource(id = R.string.title_status_inactivated),
-                        subtitle = stringResource(id = R.string.text_status_inactivated),
-                        icon = painterResource(id = R.drawable.ic_baseline_error_outline_24),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.errorContainer
-                        )
-                    )
-                }
+                )
             }
 
             item {
@@ -181,7 +168,7 @@ fun HomeAppbar(onClick: (AppHomeDestination) -> Unit, scrollBehavior: TopAppBarS
 }
 
 enum class AppHomeDestination(val activity: Class<*>, val mapping: Boolean = false) {
-    AppStrategy(AppStrategyActivity::class.java),
+    Plugins(PluginActivity::class.java),
     Record(RecordActivity::class.java),
     Trace(TraceDrawingActivity::class.java, true),
     Emulation(EmulateActivity::class.java, true),

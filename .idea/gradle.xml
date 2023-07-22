@@ -5,15 +5,20 @@
     <option name="linkedExternalProjectsSettings">
       <GradleProjectSettings>
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="gradleJvm" value="corretto-17" />
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
-            <option value="$PROJECT_DIR$/data" />
+            <option value="$PROJECT_DIR$/cp_plugin" />
             <option value="$PROJECT_DIR$/mock_location_plugin" />
+            <option value="$PROJECT_DIR$/stub" />
             <option value="$PROJECT_DIR$/update" />
+            <option value="$PROJECT_DIR$/ws_plugin" />
+            <option value="$PROJECT_DIR$/xposed" />
           </set>
         </option>
+        <option name="resolveExternalAnnotations" value="false" />
       </GradleProjectSettings>
     </option>
   </component>

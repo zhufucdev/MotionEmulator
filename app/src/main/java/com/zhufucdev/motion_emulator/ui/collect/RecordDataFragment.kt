@@ -17,7 +17,7 @@ import com.github.mikephil.charting.charts.BarLineChartBase
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.data.*
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-import com.zhufucdev.data.CellMoment
+import com.zhufucdev.stub.CellMoment
 import com.zhufucdev.motion_emulator.R
 import com.zhufucdev.motion_emulator.data.*
 import com.zhufucdev.motion_emulator.getAttrColor

@@ -15,14 +15,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils
-import com.zhufucdev.motion_emulator.R
-import com.zhufucdev.data.Motion
-import com.zhufucdev.motion_emulator.effectiveTimeFormat
-import com.zhufucdev.motion_emulator.hook.estimateSpeed
-import com.zhufucdev.motion_emulator.hook.estimateTimespan
-import com.zhufucdev.motion_emulator.toFixed
+import com.zhufucdev.motion_emulator.*
+import com.zhufucdev.stub.Motion
 import com.zhufucdev.motion_emulator.ui.theme.paddingCard
 import com.zhufucdev.motion_emulator.ui.theme.paddingSmall
+import com.zhufucdev.stub.toFixed
 import kotlin.random.Random
 import kotlin.time.DurationUnit
 

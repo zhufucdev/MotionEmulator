@@ -6,22 +6,15 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import com.amap.api.maps.AMapUtils
 import com.amap.api.maps.CoordinateConverter
 import com.google.maps.android.SphericalUtil
-import com.zhufucdev.data.AbstractMapProjector
-import com.zhufucdev.data.Projector
-import com.zhufucdev.data.Vector2D
-import com.zhufucdev.data.lenTo
+import com.zhufucdev.stub.MapProjector
+import com.zhufucdev.stub.Projector
+import com.zhufucdev.stub.Vector2D
+import com.zhufucdev.stub.lenTo
 import com.zhufucdev.motion_emulator.toAmapLatLng
 import com.zhufucdev.motion_emulator.toGoogleLatLng
 import com.zhufucdev.motion_emulator.ui.manager.FactorCanvas
 import kotlin.math.pow
 import kotlin.math.sqrt
-
-object MapProjector : AbstractMapProjector() {
-    override fun Vector2D.distance(other: Vector2D): Double =
-        AMapUtils.calculateLineDistance(this.toAmapLatLng(), other.toAmapLatLng()).toDouble()
-    override fun Vector2D.distanceIdeal(other: Vector2D): Double =
-        SphericalUtil.computeDistanceBetween(this.toGoogleLatLng(), other.toGoogleLatLng())
-}
 
 
 /**

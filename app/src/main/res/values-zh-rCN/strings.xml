@@ -74,7 +74,6 @@
     <string name="action_bypass_mode">黑名单模式</string>
     <string name="action_set_as_default">设为默认</string>
     <string name="text_saved_as_default">已将当前配置存为默认</string>
-        <string name="title_app_strategy">应用策略</string>
         <string name="name_none">不使用</string>
     <string name="name_block">屏蔽</string>
         <string name="title_manager">数据管理器</string>
@@ -192,4 +191,5 @@
     <string name="title_method_xposed_only">仅Xposed</string>
     <string name="title_method_hybrid">混合模式</string>
     <string name="title_method_test_provider_only">仅调试提供器</string>
+    <string name="title_activity_plugin">插件</string>
 </resources>

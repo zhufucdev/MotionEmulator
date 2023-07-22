@@ -29,12 +29,11 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.zhufucdev.data.Data
+import com.zhufucdev.stub.Data
 import com.zhufucdev.motion_emulator.R
 import com.zhufucdev.motion_emulator.ui.component.BottomSheetModal
 import com.zhufucdev.motion_emulator.ui.component.BottomSheetModalState
 import com.zhufucdev.motion_emulator.ui.component.Swipeable
-import com.zhufucdev.motion_emulator.data.*
 import com.zhufucdev.motion_emulator.ui.theme.MotionEmulatorTheme
 import com.zhufucdev.motion_emulator.ui.theme.paddingCommon
 

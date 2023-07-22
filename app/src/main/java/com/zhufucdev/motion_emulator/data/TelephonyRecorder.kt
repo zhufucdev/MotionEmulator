@@ -14,10 +14,10 @@ import android.telephony.NeighboringCellInfo
 import android.telephony.PhoneStateListener
 import android.telephony.TelephonyCallback
 import android.telephony.TelephonyManager
+import android.util.Log
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils
-import com.highcapable.yukihookapi.hook.log.loggerW
-import com.zhufucdev.data.CellMoment
-import com.zhufucdev.data.CellTimeline
+import com.zhufucdev.stub.CellMoment
+import com.zhufucdev.stub.CellTimeline
 import java.util.Timer
 import java.util.concurrent.Executor
 import kotlin.concurrent.timer
@@ -34,6 +34,7 @@ object TelephonyRecorder {
         }
     }
 
+    @Suppress("UNCHECKED_CAST")
     fun start(): TelephonyRecordCallback {
         if (!checkPermission()) {
             return noop()
@@ -105,7 +106,7 @@ object TelephonyRecorder {
                 val method =
                     TelephonyManager::class.memberFunctions.firstOrNull { it.name.startsWith("getNeighboringCellInfo") }
                 if (method == null) {
-                    loggerW(tag = "telephony recorder", "method to get neighboring cell info isn't available")
+                    Log.w("telephony recorder", "method to get neighboring cell info isn't available")
                 } else {
                     timer = timer("neighboring daemon", period = 1500L) {
                         val infos = method.call(manager) as List<NeighboringCellInfo>? ?: return@timer

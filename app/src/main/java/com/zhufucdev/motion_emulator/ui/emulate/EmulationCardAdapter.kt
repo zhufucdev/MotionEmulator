@@ -3,7 +3,7 @@ package com.zhufucdev.motion_emulator.ui.emulate
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
-import com.zhufucdev.data.Emulation
+import com.zhufucdev.stub.Emulation
 import com.zhufucdev.motion_emulator.provider.Scheduler
 import com.zhufucdev.motion_emulator.ui.map.UnifiedMapFragment
 import kotlinx.coroutines.runBlocking

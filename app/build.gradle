@@ -12,12 +12,12 @@ def serverProperties = new Properties()
 serverProperties.load(new FileReader(project.file("server.properties")))
 
 android {
-    compileSdk 33
+    compileSdk target_sdk
 
     defaultConfig {
         applicationId "com.zhufucdev.motion_emulator"
-        minSdk 23
-        targetSdk 33
+        minSdk min_sdk
+        targetSdk target_sdk
         versionCode 21
         versionName "1.1.7"
 
@@ -61,7 +61,7 @@ android {
     }
     namespace 'com.zhufucdev.motion_emulator'
     composeOptions {
-        kotlinCompilerExtensionVersion '1.4.6'
+        kotlinCompilerExtensionVersion compose_compiler_version
     }
     packagingOptions {
         resources {
@@ -74,13 +74,8 @@ android {
 
 dependencies {
     // Internal
-    implementation project(':data')
+    implementation project(':stub')
     implementation project(':update')
-    // Xposed
-    implementation "com.highcapable.yukihookapi:api:${yuki_version}"
-    ksp "com.highcapable.yukihookapi:ksp-xposed:${yuki_version}"
-    compileOnly 'de.robv.android.xposed:api:82'
-    implementation 'com.madgag.spongycastle:bcpkix-jdk15on:1.58.0.0'
     // Ktor
     implementation "io.ktor:ktor-client-core-jvm:${ktor_version}"
     implementation "io.ktor:ktor-client-android-jvm:${ktor_version}"
@@ -90,17 +85,20 @@ dependencies {
     implementation "io.ktor:ktor-server-core-jvm:${ktor_version}"
     implementation "io.ktor:ktor-server-netty-jvm:${ktor_version}"
     implementation "io.ktor:ktor-server-content-negotiation:${ktor_version}"
+    implementation "io.ktor:ktor-server-websockets:${ktor_version}"
+    implementation "io.ktor:ktor-server-websockets-jvm:${ktor_version}"
+    implementation 'com.madgag.spongycastle:bcpkix-jdk15on:1.58.0.0'
     // AndroidX
     implementation "androidx.core:core-ktx:${corektx_version}"
-    implementation 'androidx.preference:preference:1.2.0'
-    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'androidx.preference:preference-ktx:1.2.0'
+    implementation "androidx.appcompat:appcompat:${appcompat_version}"
     implementation "com.google.android.material:material:${material_version}"
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
     implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
     implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
     implementation "androidx.navigation:navigation-dynamic-features-fragment:$nav_version"
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4'
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:${corotinues_version}"
     implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1'
     implementation "androidx.work:work-runtime-ktx:2.8.1"
     // Compose
@@ -115,12 +113,12 @@ dependencies {
     debugImplementation "androidx.compose.ui:ui-tooling:$compose_ui_version"
     debugImplementation "androidx.compose.ui:ui-test-manifest:$compose_ui_version"
 
-    implementation "org.jetbrains.kotlin:kotlin-reflect:1.8.20"
+    implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
-    implementation 'com.aventrix.jnanoid:jnanoid:2.0.0'
     implementation 'net.edwardday.serialization:kprefs:0.12.0'
     implementation 'com.github.Redempt:Crunch:1.1.2'
     implementation 'com.google.guava:guava:31.1-android'
+    implementation 'com.aventrix.jnanoid:jnanoid:2.0.0'
     implementation 'org.apache.commons:commons-compress:1.22'
 
     // AMap SDK

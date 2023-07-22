@@ -9,7 +9,7 @@
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
-    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES"/>
     <uses-permission
             android:name="android.permission.QUERY_ALL_PACKAGES"
             tools:ignore="QueryAllPackagesPermission"/>
@@ -43,6 +43,11 @@
         </receiver>
 
         <activity
+                android:name=".ui.PluginActivity"
+                android:exported="false"
+                android:label="@string/title_activity_plugin"
+                android:theme="@style/Theme.MotionEmulator"/>
+        <activity
                 android:name=".ui.MapPendingActivity"
                 android:exported="false"
                 android:label="@string/title_activity_map_pending"
@@ -52,10 +57,6 @@
                 android:exported="false"
                 android:label="@string/title_activity_settings"
                 android:theme="@style/Theme.MotionEmulator.Preference"/>
-        <activity
-                android:name=".ui.AppStrategyActivity"
-                android:exported="false"
-                android:label="@string/title_app_strategy"/>
         <activity
                 android:name=".ui.EmulateActivity"
                 android:exported="false"
@@ -92,19 +93,11 @@
                     android:name="android.support.FILE_PROVIDER_PATHS"
                     android:resource="@xml/shared_paths"/>
         </provider>
+        <provider
+                android:name=".provider.SettingsProvider"
+                android:authorities="com.zhufucdev.motion_emulator.settings_provider"
+                android:exported="true"/>
 
-        <meta-data
-                android:name="xposedmodule"
-                android:value="true"/>
-        <meta-data
-                android:name="xposeddescription"
-                android:value="Motion simulator with sensor support."/>
-        <meta-data
-                android:name="xposedminversion"
-                android:value="93"/>
-        <meta-data
-                android:name="xposedsharedprefs"
-                android:value="true"/>
         <meta-data
                 android:name="com.amap.api.v2.apikey"
                 android:value="${AMAP_SDK_KEY}"/>

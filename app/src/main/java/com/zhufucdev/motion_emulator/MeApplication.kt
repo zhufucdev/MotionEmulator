@@ -1,9 +1,9 @@
 package com.zhufucdev.motion_emulator
 
+import android.app.Application
 import com.google.android.material.color.DynamicColors
-import com.highcapable.yukihookapi.hook.xposed.application.ModuleApplication
 
-class MeApplication : ModuleApplication() {
+class MeApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         DynamicColors.applyToActivitiesIfAvailable(this)

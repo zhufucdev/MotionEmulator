@@ -8,12 +8,12 @@ servers.load(new FileReader(project.file('server.properties')))
 
 android {
     namespace 'com.zhufucdev.mock_location_plugin'
-    compileSdk 33
+    compileSdk target_sdk
 
     defaultConfig {
         applicationId "com.zhufucdev.mock_location_plugin"
-        minSdk 24
-        targetSdk 33
+        minSdk min_sdk
+        targetSdk target_sdk
         versionCode 1
         versionName "1.0"
 
@@ -33,7 +33,7 @@ android {
         targetCompatibility JavaVersion.VERSION_11
     }
     composeOptions {
-        kotlinCompilerExtensionVersion '1.4.6'
+        kotlinCompilerExtensionVersion compose_compiler_version
     }
     kotlinOptions {
         jvmTarget = '11'
@@ -47,36 +47,33 @@ android {
 dependencies {
     // Android stuff
     implementation "androidx.core:core-ktx:${corektx_version}"
-    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation "androidx.appcompat:appcompat:${appcompat_version}"
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-    implementation 'androidx.navigation:navigation-fragment-ktx:2.5.3'
-    implementation 'androidx.navigation:navigation-ui-ktx:2.5.3'
+    implementation "androidx.navigation:navigation-fragment-ktx:${nav_version}"
+    implementation "androidx.navigation:navigation-ui-ktx:${nav_version}"
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.6.1'
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1'
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:${lifecycle_runtime_version}"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:${lifecycle_runtime_version}"
     implementation "com.google.android.material:material:${material_version}"
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:${lifecycle_runtime_version}"
     implementation "androidx.activity:activity-compose:${compose_activity_version}"
     implementation "androidx.compose.ui:ui:$compose_ui_version"
     implementation "androidx.compose.ui:ui-tooling-preview:$compose_ui_version"
     implementation "androidx.compose.material3:material3:${compose_material_version}"
-    implementation 'io.ktor:ktor-client-core-jvm:2.3.1'
-    implementation 'io.ktor:ktor-client-android-jvm:2.3.1'
-    implementation 'io.ktor:ktor-client-serialization-jvm:2.3.1'
-    implementation 'io.ktor:ktor-client-content-negotiation:2.3.1'
-    implementation 'io.ktor:ktor-serialization-kotlinx-json:2.3.1'
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:$compose_ui_version"
     debugImplementation "androidx.compose.ui:ui-tooling:$compose_ui_version"
     debugImplementation "androidx.compose.ui:ui-test-manifest:$compose_ui_version"
     // Misc
     implementation 'com.aventrix.jnanoid:jnanoid:2.0.0'
+    implementation project(':stub')
     // Internal
-    implementation project(':data')
     implementation project(':update')
     // Ktor
-    // Maps
-    implementation 'com.google.maps.android:android-maps-utils:3.4.0'
-    implementation 'com.google.android.gms:play-services-maps:18.1.0'
+    implementation 'io.ktor:ktor-client-core-jvm:2.3.1'
+    implementation 'io.ktor:ktor-client-android-jvm:2.3.1'
+    implementation 'io.ktor:ktor-client-serialization-jvm:2.3.1'
+    implementation 'io.ktor:ktor-client-content-negotiation:2.3.1'
+    implementation 'io.ktor:ktor-serialization-kotlinx-json:2.3.1'
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'

@@ -11,6 +11,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.provider.BaseColumns
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.CursorAdapter
@@ -22,12 +23,11 @@ import androidx.lifecycle.lifecycleScope
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
-import com.highcapable.yukihookapi.hook.log.loggerW
 import com.zhufucdev.motion_emulator.*
-import com.zhufucdev.data.CoordinateSystem
-import com.zhufucdev.data.Point
-import com.zhufucdev.data.Trace
-import com.zhufucdev.data.toPoint
+import com.zhufucdev.stub.CoordinateSystem
+import com.zhufucdev.stub.Point
+import com.zhufucdev.stub.Trace
+import com.zhufucdev.stub.toPoint
 import com.zhufucdev.motion_emulator.data.Traces
 import com.zhufucdev.motion_emulator.databinding.ActivityTraceDrawingBinding
 import com.zhufucdev.motion_emulator.ui.map.*
@@ -192,7 +192,7 @@ class TraceDrawingActivity : AppCompatActivity() {
                         notifyLocated(it)
                     }
                 } else {
-                    loggerW("Trace", "failed to obtain location")
+                    Log.w("Trace", "failed to obtain location")
                 }
             }
         } else {

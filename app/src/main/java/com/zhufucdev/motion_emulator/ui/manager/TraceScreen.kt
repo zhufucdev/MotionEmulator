@@ -7,12 +7,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.zhufucdev.motion_emulator.R
-import com.zhufucdev.data.Trace
-import com.zhufucdev.data.length
-import com.zhufucdev.motion_emulator.data.MapProjector
-import com.zhufucdev.motion_emulator.toFixed
+import com.zhufucdev.stub.Trace
+import com.zhufucdev.stub.length
 import com.zhufucdev.motion_emulator.ui.theme.paddingCard
 import com.zhufucdev.motion_emulator.ui.theme.paddingSmall
+import com.zhufucdev.stub.MapProjector
+import com.zhufucdev.stub.toFixed
 
 @Composable
 fun TraceScreen(viewModel: EditorViewModel<Trace>) {
@@ -23,7 +23,7 @@ fun TraceScreen(viewModel: EditorViewModel<Trace>) {
             Text(
                 text = stringResource(
                     R.string.text_in_length,
-                    "${it.length(MapProjector).toFixed(2)}${stringResource(R.string.suffix_meter)}"
+                    "${it.length().toFixed(2)}${stringResource(R.string.suffix_meter)}"
                 ),
                 style = MaterialTheme.typography.labelSmall
             )

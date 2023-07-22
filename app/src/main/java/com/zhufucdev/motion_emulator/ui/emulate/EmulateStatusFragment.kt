@@ -15,7 +15,7 @@ import androidx.work.WorkManager
 import com.zhufucdev.motion_emulator.R
 import com.zhufucdev.motion_emulator.data.Traces
 import com.zhufucdev.motion_emulator.databinding.FragmentEmulateStatusBinding
-import com.zhufucdev.data.Emulation
+import com.zhufucdev.stub.Emulation
 import com.zhufucdev.motion_emulator.provider.EmulationMonitorWorker
 import com.zhufucdev.motion_emulator.provider.Scheduler
 import com.zhufucdev.motion_emulator.lazySharedPreferences

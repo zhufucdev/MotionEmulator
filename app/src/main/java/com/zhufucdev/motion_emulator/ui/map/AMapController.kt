@@ -7,8 +7,8 @@ import com.amap.api.maps.AMapUtils
 import com.amap.api.maps.CameraUpdateFactory
 import com.amap.api.maps.model.*
 import com.zhufucdev.motion_emulator.*
-import com.zhufucdev.data.Point
-import com.zhufucdev.data.Trace
+import com.zhufucdev.stub.Point
+import com.zhufucdev.stub.Trace
 import kotlin.math.pow
 
 class AMapController(private val map: AMap, context: Context) : MapController(context) {

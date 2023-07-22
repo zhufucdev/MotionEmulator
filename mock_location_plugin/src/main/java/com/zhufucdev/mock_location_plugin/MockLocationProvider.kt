@@ -12,7 +12,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils
-import com.zhufucdev.data.*
+import com.zhufucdev.stub.*
 import com.zhufucdev.mock_location_plugin.ui.MainActivity
 import com.zhufucdev.mock_location_plugin.ui.TestFragment
 import io.ktor.client.*
@@ -108,7 +108,7 @@ object MockLocationProvider {
         isEmulating = true
 
         val trace = emulation.trace
-        val length = trace.length(MapProjector)
+        val length = trace.length()
         val duration = length / emulation.velocity
 
         notifyStatus(EmulationInfo(duration, length, BuildConfig.APPLICATION_ID), providerAddr)
@@ -192,12 +192,10 @@ object MockLocationProvider {
     private var lastLocation = Point(0.0, 0.0) to System.currentTimeMillis()
     private fun Point.push() {
         lastLocation = lastLocation.first.toPoint(coordinateSystem) to lastLocation.second
-        val speed = estimateSpeed(this to System.currentTimeMillis(), lastLocation, MapProjector).toFloat()
+        val speed = estimateSpeed(this to System.currentTimeMillis(), lastLocation).toFloat()
         TARGET_PROVIDERS.forEach {
             locationManager.setTestProviderLocation(
-                it, android(
-                    provider = it, speed = speed, mapProjector = MapProjector
-                )
+                it, android(provider = it, speed = speed)
             )
         }
         lastLocation = this to System.currentTimeMillis()

@@ -39,7 +39,7 @@
         </service>
 
         <receiver
-                android:name=".EmulationBroadcastReceiver"
+                android:name=".PluginBroadcastReceiver"
                 android:exported="true"/>
 
         <provider android:authorities="com.zhufucdev.mock_location_plugin.file_provider"

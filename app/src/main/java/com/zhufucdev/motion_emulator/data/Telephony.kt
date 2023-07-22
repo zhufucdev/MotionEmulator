@@ -2,7 +2,7 @@
 
 package com.zhufucdev.motion_emulator.data
 
-import com.zhufucdev.data.CellTimeline
+import com.zhufucdev.stub.CellTimeline
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.serializer
 

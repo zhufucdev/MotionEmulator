@@ -6,8 +6,8 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils
-import com.zhufucdev.data.Motion
-import com.zhufucdev.data.MotionMoment
+import com.zhufucdev.stub.Motion
+import com.zhufucdev.stub.MotionMoment
 import kotlin.math.abs
 
 interface MotionCallback {

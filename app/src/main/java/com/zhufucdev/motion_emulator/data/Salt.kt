@@ -4,8 +4,8 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.runtime.mutableStateListOf
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils
-import com.zhufucdev.data.SaltElement
-import com.zhufucdev.data.SaltType
+import com.zhufucdev.stub.SaltElement
+import com.zhufucdev.stub.SaltType
 
 
 /**

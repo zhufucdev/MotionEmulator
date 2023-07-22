@@ -12,16 +12,16 @@ import androidx.core.view.isVisible
 import androidx.core.view.setPadding
 import com.zhufucdev.motion_emulator.R
 import com.zhufucdev.motion_emulator.data.AppMeta
-import com.zhufucdev.data.Emulation
-import com.zhufucdev.data.EmulationInfo
-import com.zhufucdev.data.android
-import com.zhufucdev.motion_emulator.data.MapProjector
+import com.zhufucdev.stub.Emulation
+import com.zhufucdev.stub.EmulationInfo
+import com.zhufucdev.stub.android
 import com.zhufucdev.motion_emulator.databinding.FragmentEmulationAppBinding
 import com.zhufucdev.motion_emulator.provider.*
-import com.zhufucdev.motion_emulator.toFixed
 import com.zhufucdev.motion_emulator.ui.map.MapController
+import com.zhufucdev.stub.toFixed
 import kotlin.math.roundToInt
 
+@Suppress("DEPRECATION")
 class EmulationAppFragment : EmulationMonitoringFragment() {
     private lateinit var id: String
     private lateinit var binding: FragmentEmulationAppBinding
@@ -52,7 +52,7 @@ class EmulationAppFragment : EmulationMonitoringFragment() {
                 Scheduler.info[id]?.duration?.let { t -> t - info.elapsed }?.let {
                     notifyTime(it)
                 }
-                map?.updateLocationIndicator(info.location.android(mapProjector = MapProjector))
+                map?.updateLocationIndicator(info.location.android())
             }
         }
 
@@ -152,7 +152,7 @@ class EmulationAppFragment : EmulationMonitoringFragment() {
         // recover from missed intermediate
         Scheduler.intermediate[id]?.let {
             notifyProgress(it.progress)
-            map?.updateLocationIndicator(it.location.android(mapProjector = MapProjector))
+            map?.updateLocationIndicator(it.location.android())
             map?.moveCamera(it.location, focus = true, animate = true)
         }
     }

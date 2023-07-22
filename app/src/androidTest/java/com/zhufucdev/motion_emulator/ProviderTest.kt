@@ -4,10 +4,10 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils
 import com.highcapable.yukihookapi.hook.factory.prefs
-import com.zhufucdev.data.EmptyBox
-import com.zhufucdev.data.Emulation
-import com.zhufucdev.data.Trace
-import com.zhufucdev.motion_emulator.hook.TrustAllX509TrustManager
+import com.zhufucdev.stub.EmptyBox
+import com.zhufucdev.stub.Emulation
+import com.zhufucdev.stub.Trace
+import com.zhufucdev.cp_plugin.hook.TrustAllX509TrustManager
 import com.zhufucdev.motion_emulator.provider.Scheduler
 import io.ktor.client.*
 import io.ktor.client.call.*
@@ -58,7 +58,7 @@ class ProviderTest {
                 // disable certificate verification
                 sslManager = { connection ->
                     connection.sslSocketFactory = SSLContext.getInstance("TLS").apply {
-                        init(null, arrayOf(TrustAllX509TrustManager), SecureRandom())
+                        init(null, arrayOf(com.zhufucdev.cp_plugin.hook.TrustAllX509TrustManager), SecureRandom())
                     }.socketFactory
                 }
             }

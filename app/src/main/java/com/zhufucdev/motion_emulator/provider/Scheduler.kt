@@ -3,24 +3,28 @@ package com.zhufucdev.motion_emulator.provider
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import androidx.core.content.edit
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils
-import com.highcapable.yukihookapi.hook.factory.prefs
-import com.zhufucdev.data.BROADCAST_AUTHORITY
-import com.zhufucdev.data.Emulation
-import com.zhufucdev.data.EmulationInfo
-import com.zhufucdev.data.Intermediate
-import com.zhufucdev.motion_emulator.PREFERENCE_NAME_BRIDGE
+import com.zhufucdev.stub.BROADCAST_AUTHORITY
+import com.zhufucdev.stub.Emulation
+import com.zhufucdev.stub.EmulationInfo
+import com.zhufucdev.stub.Intermediate
 import com.zhufucdev.motion_emulator.lazySharedPreferences
 import io.ktor.http.*
+import io.ktor.serialization.kotlinx.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.plugins.contentnegotiation.*
-import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import io.ktor.server.websocket.*
+import io.ktor.util.reflect.*
+import io.ktor.websocket.*
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
+import java.nio.charset.Charset
 import kotlin.coroutines.suspendCoroutine
 
 @Serializable
@@ -42,15 +46,15 @@ object Scheduler {
     private val mInfo: MutableMap<String, EmulationInfo> = hashMapOf()
     private val mIntermediate: MutableMap<String, Intermediate> = hashMapOf()
 
-    private var providerPort = 2023
-    private var providerTls = false
+    private var port = 20230
+    private var tls = false
     private lateinit var server: ApplicationEngine
     private var serverRunning = false
 
     private val environment
         get() =
             applicationEngineEnvironment {
-                if (providerTls) {
+                if (tls) {
                     val keyAlis = "motion_provider"
                     val keyPassword = NanoIdUtils.randomNanoId().toCharArray()
                     val keyStore = generateSelfSignedKeyStore(keyAlis, keyPassword)
@@ -62,12 +66,12 @@ object Scheduler {
                         keyAlias = keyAlis
                     ) {
                         host = "127.0.0.1"
-                        port = providerPort
+                        port = this@Scheduler.port
                     }
                 } else {
                     connector {
                         host = "127.0.0.1"
-                        port = providerPort
+                        port = this@Scheduler.port
                     }
                 }
 
@@ -79,25 +83,24 @@ object Scheduler {
             Log.w("Schedular", "Reinitialize a running instance")
             return
         }
-        val prefs = context.prefs(PREFERENCE_NAME_BRIDGE)
-        providerPort = prefs.getString("provider_port").toIntOrNull() ?: 2023
-        providerTls = prefs.getBoolean("provider_tls", true)
+        val prefs by context.lazySharedPreferences()
+        port = prefs.getInt("provider_port", 20230)
+        tls = prefs.getBoolean("provider_tls", true)
         server = embeddedServer(Netty, environment)
 
-        val sharedPrefs by context.lazySharedPreferences()
         prefs.edit {
             val testProviderKey = "use_test_provider"
             putBoolean(
                 "${testProviderKey}_effective",
-                Plugin.isInstalled(context) && sharedPrefs.getBoolean(testProviderKey, false)
+                Plugin.isInstalled(context) && prefs.getBoolean(testProviderKey, false)
             )
         }
 
         server.start(false)
         serverRunning = true
 
-        if (sharedPrefs.getBoolean("use_test_provider", false)) {
-            Plugin.wakeUp(context, providerPort, providerTls)
+        if (prefs.getBoolean("use_test_provider", false)) {
+            Plugin.wakeUp(context)
         }
     }
 
@@ -207,6 +210,14 @@ fun Application.eventServer() {
         json()
     }
 
+    install(WebSockets) {
+        pingPeriodMillis = 15_000
+        timeoutMillis = 15_000
+        maxFrameSize = Long.MAX_VALUE
+        masking = false
+        contentConverter = KotlinxWebsocketSerializationConverter(Json)
+    }
+
     routing {
         suspend fun ApplicationCall.respondEmulation(emulation: Emulation?) {
             if (emulation == null) {
@@ -216,53 +227,24 @@ fun Application.eventServer() {
             }
         }
 
+        webSocket("/join") {
+            val id = (incoming.tryReceive().getOrNull() as Frame.Text? ?: return@webSocket).readText()
+            sendSerialized(Scheduler.emulation)
+            val info = receiveDeserialized<EmulationInfo>()
+            Scheduler.setInfo(id, info)
+
+            for (frame in incoming) {
+                val data = converter!!.deserialize(Charset.defaultCharset(), typeInfo<Intermediate>(), frame)
+                Scheduler.setIntermediate(id, (data ?: continue) as Intermediate)
+            }
+
+            Scheduler.setInfo(id, null)
+            Scheduler.setIntermediate(id, null)
+        }
+
         get("/current") {
             // get the current emulation without blocking
             call.respondEmulation(Scheduler.emulation)
-        }
-
-        get("/next/{id}") {
-            // use the blocking method to query the next emulation change
-            val id = call.parameters["id"]
-            if (id == null) {
-                call.respond(HttpStatusCode.BadRequest)
-                return@get
-            }
-            val next = Scheduler.next(id)
-            call.respondEmulation(next)
-        }
-
-        post("/intermediate/{id}") {
-            val id = call.parameters["id"]
-            if (id == null) {
-                call.respond(HttpStatusCode.BadRequest)
-                return@post
-            }
-            Scheduler.setIntermediate(id, call.receive<Intermediate>())
-            call.respond(HttpStatusCode.OK)
-        }
-
-        post("/state/{id}/running") {
-            val id = call.parameters["id"]
-            if (id == null) {
-                call.respond(HttpStatusCode.BadRequest)
-                return@post
-            }
-            Log.d("Provider", "$id is running")
-            Scheduler.setInfo(id, call.receive())
-            call.respond(HttpStatusCode.OK)
-        }
-
-        get("/state/{id}/stopped") {
-            val id = call.parameters["id"]
-            if (id == null) {
-                call.respond(HttpStatusCode.BadRequest)
-                return@get
-            }
-            Log.d("Provider", "$id has stopped")
-            Scheduler.setInfo(id, null)
-            Scheduler.setIntermediate(id, null)
-            call.respond(HttpStatusCode.OK)
         }
     }
 }

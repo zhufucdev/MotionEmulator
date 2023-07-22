@@ -12,11 +12,10 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction.TRANSIT_FRAGMENT_FADE
 import androidx.preference.*
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.highcapable.yukihookapi.hook.factory.prefs
-import com.zhufucdev.motion_emulator.PREFERENCE_NAME_BRIDGE
 import com.zhufucdev.motion_emulator.R
 import com.zhufucdev.motion_emulator.databinding.ActivitySettingsBinding
 import com.zhufucdev.motion_emulator.provider.Plugin
+import com.zhufucdev.motion_emulator.sharedPreferences
 
 private const val TITLE_TAG = "settingsActivityTitle"
 
@@ -143,7 +142,7 @@ class SettingsActivity : AppCompatActivity(),
             val portPreference = findPreference<EditTextPreference>("provider_port")!!
             val tlsPreference = findPreference<SwitchPreferenceCompat>("provider_tls")!!
             val methodPreference = findPreference<ListPreference>("method")!!
-            val prefs = requireContext().prefs(PREFERENCE_NAME_BRIDGE)
+            val prefs = requireContext().sharedPreferences()
 
             fun Int.isValidPort() = this in 1024..65535
             portPreference.setOnBindEditTextListener { input ->
@@ -152,12 +151,6 @@ class SettingsActivity : AppCompatActivity(),
                     val port = it.toString().toIntOrNull()
                     if (port == null || !port.isValidPort()) {
                         input.error = getString(R.string.text_input_invalid)
-                    } else {
-                        prefs.edit {
-                            putString("provider_port", it.toString())
-                            // IDK why it's not implemented in an isolated way
-                            // but this is logically not a duplication
-                        }
                     }
                 }
             }
@@ -166,16 +159,12 @@ class SettingsActivity : AppCompatActivity(),
             }
 
             tlsPreference.setOnPreferenceClickListener { _ ->
-                prefs.edit {
-                    putBoolean("provider_tls", tlsPreference.isChecked)
-                }
+
                 true
             }
 
             methodPreference.setOnPreferenceChangeListener { _, newValue ->
-                prefs.edit {
-                    putString("method", newValue as String)
-                }
+
                 true
             }
 

@@ -7,7 +7,7 @@
                 android:title="@string/title_server_port"
                 android:key="provider_port"
                 android:icon="@drawable/ic_baseline_electrical_services_24"
-                android:defaultValue="2023"
+                android:defaultValue="20230"
                 app:useSimpleSummaryProvider="true"/>
         <SwitchPreferenceCompat
                 android:title="@string/title_use_tls"

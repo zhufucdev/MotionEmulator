@@ -1,6 +1,6 @@
 package com.zhufucdev.motion_emulator
 
-import com.zhufucdev.data.Vector2D
+import com.zhufucdev.stub.Vector2D
 import com.zhufucdev.motion_emulator.data.MapProjector
 import org.junit.Assert.*
 import org.junit.Test
