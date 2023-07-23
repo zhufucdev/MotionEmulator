@@ -1,6 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
                   xmlns:app="http://schemas.android.com/apk/res-auto">
+    <ListPreference
+            android:title="@string/title_emulation_method"
+            android:key="method"
+            app:entries="@array/emulation_methods_entries"
+            app:entryValues="@array/emulation_methods_values"
+            app:defaultValue="xposed_only"
+            app:dependency="use_test_provider"
+            app:useSimpleSummaryProvider="true"/>
+
     <PreferenceCategory
             android:title="@string/caption_server">
         <EditTextPreference
@@ -14,23 +23,5 @@
                 android:key="provider_tls"
                 android:icon="@drawable/ic_baseline_https_24"
                 android:defaultValue="true"/>
-    </PreferenceCategory>
-
-    <PreferenceCategory
-            android:title="@string/caption_test_provider"
-            android:key="category_test_provider">
-        <SwitchPreferenceCompat
-                android:title="@string/title_use_test_provider"
-                android:key="use_test_provider"
-                android:defaultValue="false"/>
-
-        <ListPreference
-                android:title="@string/title_emulation_method"
-                android:key="method"
-                app:entries="@array/emulation_methods_entries"
-                app:entryValues="@array/emulation_methods_values"
-                app:defaultValue="xposed_only"
-                app:dependency="use_test_provider"
-                app:useSimpleSummaryProvider="true"/>
     </PreferenceCategory>
 </PreferenceScreen>

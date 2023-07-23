@@ -12,9 +12,20 @@ import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils
-import com.zhufucdev.stub.*
 import com.zhufucdev.mock_location_plugin.ui.MainActivity
 import com.zhufucdev.mock_location_plugin.ui.TestFragment
+import com.zhufucdev.stub.Emulation
+import com.zhufucdev.stub.EmulationInfo
+import com.zhufucdev.stub.Intermediate
+import com.zhufucdev.stub.MapProjector
+import com.zhufucdev.stub.Point
+import com.zhufucdev.stub.android
+import com.zhufucdev.stub.at
+import com.zhufucdev.stub.estimateSpeed
+import com.zhufucdev.stub.generateSaltedTrace
+import com.zhufucdev.stub.length
+import com.zhufucdev.stub.toPoint
+import com.zhufucdev.stub_plugin.Server
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.android.*
@@ -61,7 +72,8 @@ object MockLocationProvider {
     }
 
     private lateinit var locationManager: LocationManager
-    fun init(context: Context, port: Int, tls: Boolean) {
+    fun init(context: Context, server: Server) {
+        val (port, tls) = server
         locationManager = context.getSystemService(LocationManager::class.java)
         val (powerUsage, accuracy) = if (Build.VERSION.SDK_INT >= 30) 1 to 2 else 0 to 5
         val providerAddr = (if (tls) "https://" else "http://") + "127.0.0.1:$port"
@@ -94,7 +106,7 @@ object MockLocationProvider {
         jobs.add(scope.launch {
             while (true) {
                 eventLoop(providerAddr)
-                jobs.removeIf { !it.isActive }
+                jobs.removeAll { !it.isActive }
                 delay(1.seconds)
             }
         })
@@ -156,7 +168,7 @@ object MockLocationProvider {
                 } else {
                     isEmulating = false
                 }
-                jobs.removeIf { !it.isActive }
+                jobs.removeAll { !it.isActive }
             }
         } catch (_: Exception) {
             // ignored

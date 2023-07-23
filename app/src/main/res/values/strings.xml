@@ -1,9 +1,10 @@
 <resources>
     <string name="app_name">Motion Emulator</string>
-    <string name="title_status_activated">Module Is Activated</string>
-    <string name="text_status_activated">Tune the following options to get started</string>
-    <string name="title_status_inactivated">Module Not Activated</string>
-    <string name="text_status_inactivated">Check your framework options</string>
+    <string name="title_status_ready">The App is Ready</string>
+    <plurals name="text_status_ready">
+        <item quantity="one">%d plug-in is activated</item>
+        <item quantity="other">%d plug-ins are activated</item>
+    </plurals>
     <string name="title_record">Record</string>
     <string name="text_record">Collect sensor data with which the motion is simulated</string>
     <string name="title_activity_record">Record</string>
@@ -186,17 +187,6 @@
     <string name="title_server_port">Server port</string>
     <string name="title_use_tls">Use TLS</string>
     <string name="text_input_invalid">input invalid</string>
-    <string name="caption_test_provider">TEST PROVIDER</string>
-    <string name="title_use_test_provider">Use test provider</string>
-    <string name="text_test_provider_enabled">Make sure the app is selected as mock location app in developer options
-    </string>
-    <string name="text_plugin_not_installed">Plugin not installed</string>
-    <string name="title_install_plugin">Install plugin</string>
-    <string name="url_github_releases" translatable="false">https://github.com/zhufucdev/MotionEmulator/releases
-    </string>
-    <string name="url_blog" translatable="false">https://zhufucdev.com/article/peBx_1w5Njt27VZxxQvGi</string>
-    <string name="name_github" translatable="false">GitHub</string>
-    <string name="name_my_blog">Steve Reed\'s blog</string>
     <string name="title_activity_updater">App Updater</string>
     <string name="text_update_found">A new version found</string>
     <string name="action_upgrade">Upgrade</string>
@@ -204,5 +194,10 @@
     <string name="title_method_xposed_only">Xposed only</string>
     <string name="title_method_hybrid">Hybrid</string>
     <string name="title_method_test_provider_only">Test provider only</string>
-    <string name="title_activity_plugin">Plugins</string>
+    <string name="title_activity_plugin">Plug-ins</string>
+    <string name="title_status_no_plugin_installed">No Plug-ins Found</string>
+    <string name="text_status_no_plugin_installed">To really do something, install one or more plug-ins</string>
+    <string name="title_drop_to_enable">Drag &amp; drop here to enable</string>
+    <string name="title_drop_to_disable">Drag &amp; drop here to disable</string>
+    <string name="caption_enabled">ENABLED</string>
 </resources>

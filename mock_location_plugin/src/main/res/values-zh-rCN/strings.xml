@@ -26,4 +26,5 @@
     <string name="action_open_developer">打开开发者选项</string>
     <string name="text_update_found">找到新版本</string>
     <string name="action_upgrade">升级</string>
+    <string name="text_description">基于Android调试特性，实现了部分功能</string>
 </resources>

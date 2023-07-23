@@ -1,8 +1,6 @@
 package com.zhufucdev.motion_emulator.ui
 
 import android.app.Dialog
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.text.InputType
 import androidx.appcompat.app.AppCompatActivity
@@ -14,8 +12,6 @@ import androidx.preference.*
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.zhufucdev.motion_emulator.R
 import com.zhufucdev.motion_emulator.databinding.ActivitySettingsBinding
-import com.zhufucdev.motion_emulator.provider.Plugin
-import com.zhufucdev.motion_emulator.sharedPreferences
 
 private const val TITLE_TAG = "settingsActivityTitle"
 
@@ -127,22 +123,15 @@ class SettingsActivity : AppCompatActivity(),
     }
 
     class EmulationFragment : M3PreferenceFragment() {
-        private var installPluginPreference: Preference? = null
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.emulation_preferences, rootKey)
             init()
-        }
-
-        override fun onResume() {
-            super.onResume()
-            notifyPluginInstallation()
         }
 
         private fun init() {
             val portPreference = findPreference<EditTextPreference>("provider_port")!!
             val tlsPreference = findPreference<SwitchPreferenceCompat>("provider_tls")!!
             val methodPreference = findPreference<ListPreference>("method")!!
-            val prefs = requireContext().sharedPreferences()
 
             fun Int.isValidPort() = this in 1024..65535
             portPreference.setOnBindEditTextListener { input ->
@@ -166,54 +155,6 @@ class SettingsActivity : AppCompatActivity(),
             methodPreference.setOnPreferenceChangeListener { _, newValue ->
 
                 true
-            }
-
-            notifyPluginInstallation()
-        }
-
-        private fun notifyPluginInstallation() {
-            val usePluginPreference = findPreference<SwitchPreferenceCompat>("use_test_provider")!!
-            val pluginCategory = findPreference<PreferenceCategory>("category_test_provider")!!
-
-            val pluginInstalled = Plugin.isInstalled(requireContext())
-            usePluginPreference.isEnabled = pluginInstalled
-            usePluginPreference.setSummaryProvider {
-                if (!pluginInstalled) {
-                    getString(R.string.text_plugin_not_installed)
-                } else if (usePluginPreference.isChecked) {
-                    getString(R.string.text_test_provider_enabled)
-                } else {
-                    null
-                }
-            }
-
-            if (!pluginInstalled && installPluginPreference == null) {
-                val installPreference = Preference(requireContext()).apply {
-                    setTitle(R.string.title_install_plugin)
-                    setOnPreferenceClickListener {
-                        MaterialAlertDialogBuilder(requireContext())
-                            .setTitle(R.string.title_install_plugin)
-                            .setItems(R.array.plugin_sources) { _, index ->
-                                val url =
-                                    when (index) {
-                                        0 -> getString(R.string.url_github_releases)
-                                        1 -> getString(R.string.url_blog)
-                                        else -> "" // this is not possible
-                                    }
-                                val intent = Intent(Intent.ACTION_VIEW).apply {
-                                    data = Uri.parse(url)
-                                }
-                                requireContext().startActivity(intent)
-                            }
-                            .setNegativeButton(R.string.action_cancel, null)
-                            .show()
-                        true
-                    }
-                }
-                pluginCategory.addPreference(installPreference)
-                installPluginPreference = installPreference
-            } else if (pluginInstalled && installPluginPreference != null) {
-                pluginCategory.removePreference(installPluginPreference!!)
             }
         }
     }

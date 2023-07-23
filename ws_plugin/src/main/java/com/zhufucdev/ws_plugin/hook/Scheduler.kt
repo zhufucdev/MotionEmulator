@@ -9,9 +9,7 @@ import com.zhufucdev.stub.Method
 import com.zhufucdev.xposed.AbstractScheduler
 import com.zhufucdev.xposed.PREFERENCE_NAME_BRIDGE
 import com.zhufucdev.xposed.TrustAllX509TrustManager
-import com.zhufucdev.xposed.hooking
 import io.ktor.client.HttpClient
-import io.ktor.client.call.body
 import io.ktor.client.engine.android.Android
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.websocket.DefaultClientWebSocketSession
@@ -19,20 +17,14 @@ import io.ktor.client.plugins.websocket.WebSockets
 import io.ktor.client.plugins.websocket.receiveDeserialized
 import io.ktor.client.plugins.websocket.sendSerialized
 import io.ktor.client.plugins.websocket.ws
-import io.ktor.client.request.get
-import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.kotlinx.KotlinxWebsocketSerializationConverter
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.websocket.Frame
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancelAndJoin
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
-import java.net.ConnectException
 import java.security.SecureRandom
 import javax.net.ssl.SSLContext
 import kotlin.time.Duration.Companion.seconds
@@ -73,12 +65,10 @@ object Scheduler : AbstractScheduler() {
     @OptIn(DelicateCoroutinesApi::class)
     override fun PackageParam.initialize() {
         val prefs = prefs(PREFERENCE_NAME_BRIDGE)
-        port = prefs.getString("provider_port").toIntOrNull() ?: 2023
-        tls = prefs.getBoolean("provider_tls", true)
-        val useTestProvider = prefs.getBoolean("use_test_provider_effective")
+        port = prefs.getString("me_server_port").toIntOrNull() ?: 2023
+        tls = prefs.getBoolean("me_server_tls", true)
         hookingMethod =
-            if (!useTestProvider) Method.XPOSED_ONLY
-            else prefs.getString("method", "xposed_only").let {
+            prefs.getString("me_method", "xposed_only").let {
                 Method.valueOf(it.uppercase())
             }
 
@@ -115,7 +105,7 @@ object Scheduler : AbstractScheduler() {
     }
 
     override suspend fun notifyStopped() {
-        // left to web socket lifecycle
+        // handled by web socket lifecycle
     }
 
     override suspend fun notifyProgress(intermediate: Intermediate) {

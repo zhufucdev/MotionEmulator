@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">运动模拟器</string>
-    <string name="title_status_activated">模块已激活</string>
-    <string name="text_status_activated">调整下列选项来开始</string>
-    <string name="title_status_inactivated">模块未激活</string>
-    <string name="text_status_inactivated">检查框架设置</string>
+    <string name="title_status_ready">此应用已就绪</string>
+    <plurals name="text_status_ready">
+        <item quantity="other">已激活%d个插件</item>
+    </plurals>
     <string name="title_record">记录</string>
     <string name="text_record">采集用于运动模拟的数据</string>
     <string name="title_activity_record">记录</string>
@@ -178,12 +178,6 @@
     <string name="title_server_port">服务器端口</string>
     <string name="title_use_tls">使用TLS</string>
     <string name="text_input_invalid">输入无效</string>
-    <string name="caption_test_provider">调试提供器</string>
-    <string name="title_use_test_provider">使用调试提供器</string>
-    <string name="text_test_provider_enabled">请确保此应用被在开发者模式中选为模拟位置应用</string>
-    <string name="text_plugin_not_installed">插件未安装</string>
-    <string name="title_install_plugin">安装插件</string>
-    <string name="name_my_blog">Steve的博客</string>
     <string name="title_activity_updater">软件更新</string>
     <string name="text_update_found">找到新版本</string>
     <string name="action_upgrade">升级</string>
@@ -192,4 +186,9 @@
     <string name="title_method_hybrid">混合模式</string>
     <string name="title_method_test_provider_only">仅调试提供器</string>
     <string name="title_activity_plugin">插件</string>
+    <string name="title_status_no_plugin_installed">找不到插件</string>
+    <string name="text_status_no_plugin_installed">真的要做一些事情，请安装一个或更多插件</string>
+    <string name="title_drop_to_enable">拖放到这里来启用</string>
+    <string name="title_drop_to_disable">拖放到这里来禁用</string>
+    <string name="caption_enabled">已启用</string>
 </resources>

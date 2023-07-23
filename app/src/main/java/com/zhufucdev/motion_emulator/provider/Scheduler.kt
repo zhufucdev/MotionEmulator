@@ -10,6 +10,8 @@ import com.zhufucdev.stub.Emulation
 import com.zhufucdev.stub.EmulationInfo
 import com.zhufucdev.stub.Intermediate
 import com.zhufucdev.motion_emulator.lazySharedPreferences
+import com.zhufucdev.motion_emulator.plugin.Plugin
+import com.zhufucdev.motion_emulator.plugin.Plugins
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.*
 import io.ktor.serialization.kotlinx.json.*
@@ -80,7 +82,7 @@ object Scheduler {
 
     fun init(context: Context) {
         if (serverRunning) {
-            Log.w("Schedular", "Reinitialize a running instance")
+            Log.w("Scheduler", "Reinitialize a running instance")
             return
         }
         val prefs by context.lazySharedPreferences()
@@ -88,19 +90,11 @@ object Scheduler {
         tls = prefs.getBoolean("provider_tls", true)
         server = embeddedServer(Netty, environment)
 
-        prefs.edit {
-            val testProviderKey = "use_test_provider"
-            putBoolean(
-                "${testProviderKey}_effective",
-                Plugin.isInstalled(context) && prefs.getBoolean(testProviderKey, false)
-            )
-        }
-
         server.start(false)
         serverRunning = true
 
-        if (prefs.getBoolean("use_test_provider", false)) {
-            Plugin.wakeUp(context)
+        Plugins.enabled.forEach {
+            it.notifyStart(context)
         }
     }
 
@@ -192,11 +186,9 @@ object Scheduler {
     }
 
     fun stop(context: Context) {
+        Plugins.enabled.forEach { it.notifyStop(context) }
         server.stop()
         serverRunning = false
-        context.sendBroadcast(Intent().apply {
-            action = "$BROADCAST_AUTHORITY.EMULATION_STOP"
-        })
     }
 }
 

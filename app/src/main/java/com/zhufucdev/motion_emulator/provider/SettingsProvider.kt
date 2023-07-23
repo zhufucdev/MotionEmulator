@@ -7,12 +7,12 @@ import android.content.UriMatcher
 import android.database.Cursor
 import android.database.MatrixCursor
 import android.net.Uri
-import com.zhufucdev.motion_emulator.SETTINGS_PROVIDER_AUTHORITY
 import com.zhufucdev.motion_emulator.sharedPreferences
 import com.zhufucdev.stub.Method
+import com.zhufucdev.stub.SETTINGS_PROVIDER_AUTHORITY
 
 private val uriMatcher = UriMatcher(UriMatcher.NO_MATCH).apply {
-    addURI(SETTINGS_PROVIDER_AUTHORITY, "provider", 1)
+    addURI(SETTINGS_PROVIDER_AUTHORITY, "server", 1)
     addURI(SETTINGS_PROVIDER_AUTHORITY, "method", 2)
 }
 
@@ -36,7 +36,7 @@ class SettingsProvider : ContentProvider() {
         return when (uriMatcher.match(uri)) {
             1 -> {
                 val cursor = MatrixCursor(arrayOf("port", "tls"), 1)
-                cursor.addRow(arrayOf(port, tls))
+                cursor.addRow(arrayOf(port, if (tls) 1 else 0))
                 cursor
             }
 

@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import com.zhufucdev.motion_emulator.R
 import com.zhufucdev.motion_emulator.ui.*
@@ -21,7 +22,7 @@ import com.zhufucdev.update.Updater
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppHome(updater: Updater, onClick: (AppHomeDestination) -> Unit) {
+fun AppHome(enabledPlugins: Int, updater: Updater, onClick: (AppHomeDestination) -> Unit) {
     val behavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
     val snackbar = remember { SnackbarHostState() }
     val context = LocalContext.current
@@ -51,15 +52,29 @@ fun AppHome(updater: Updater, onClick: (AppHomeDestination) -> Unit) {
     ) {
         LazyColumn(modifier = Modifier.padding(it)) {
             item {
-                HomeCard(
-                    onClick = { onClick(AppHomeDestination.Plugins) },
-                    title = stringResource(id = R.string.title_status_activated),
-                    subtitle = stringResource(id = R.string.text_status_activated),
-                    icon = painterResource(id = R.drawable.ic_baseline_done_all_24),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer
+                if (enabledPlugins > 0) {
+                    HomeCard(
+                        onClick = { onClick(AppHomeDestination.Plugins) },
+                        title = stringResource(id = R.string.title_status_ready),
+                        subtitle = pluralStringResource(
+                            id = R.plurals.text_status_ready,
+                            count = enabledPlugins,
+                            enabledPlugins
+                        ),
+                        icon = painterResource(id = R.drawable.ic_baseline_done_all_24),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer
+                        )
                     )
-                )
+                } else {
+                    HomeCard(
+                        onClick = { onClick(AppHomeDestination.Plugins) },
+                        title = stringResource(id = R.string.title_status_no_plugin_installed),
+                        subtitle = stringResource(id = R.string.text_status_no_plugin_installed),
+                        icon = painterResource(id = R.drawable.outline_info_24),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)
+                    )
+                }
             }
 
             item {

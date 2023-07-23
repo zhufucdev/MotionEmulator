@@ -25,4 +25,5 @@
     <string name="action_open_developer">Open Developer Options</string>
     <string name="text_update_found">A new version found</string>
     <string name="action_upgrade">Upgrade</string>
+    <string name="text_description">Based on Android debugging features, partial functionality implemented</string>
 </resources>

@@ -68,6 +68,7 @@ dependencies {
     implementation project(':stub')
     // Internal
     implementation project(':update')
+    implementation project(':stub_plugin')
     // Ktor
     implementation 'io.ktor:ktor-client-core-jvm:2.3.1'
     implementation 'io.ktor:ktor-client-android-jvm:2.3.1'

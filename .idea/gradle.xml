@@ -13,6 +13,7 @@
             <option value="$PROJECT_DIR$/cp_plugin" />
             <option value="$PROJECT_DIR$/mock_location_plugin" />
             <option value="$PROJECT_DIR$/stub" />
+            <option value="$PROJECT_DIR$/stub_plugin" />
             <option value="$PROJECT_DIR$/update" />
             <option value="$PROJECT_DIR$/ws_plugin" />
             <option value="$PROJECT_DIR$/xposed" />
