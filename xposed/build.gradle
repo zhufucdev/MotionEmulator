@@ -37,10 +37,15 @@ dependencies {
     // Internal
     implementation project(':stub')
     // Misc
+    implementation "androidx.core:core-ktx:${corektx_version}"
     implementation 'androidx.annotation:annotation-jvm:1.6.0'
     implementation 'com.aventrix.jnanoid:jnanoid:2.0.0'
     implementation 'com.google.maps.android:android-maps-utils:3.4.0'
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:${corotinues_version}"
+
+    // Ktor
+    implementation "io.ktor:ktor-client-okhttp:$ktor_version"
+    implementation "io.ktor:ktor-client-websockets:$ktor_version"
 
     implementation "org.jetbrains.kotlin:kotlin-reflect:${kotlin_version}"
     testImplementation 'junit:junit:4.13.2'

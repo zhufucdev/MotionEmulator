@@ -1,6 +1,5 @@
 package com.zhufucdev.ws_plugin.hook
 
-import com.highcapable.yukihookapi.hook.log.loggerD
 import com.highcapable.yukihookapi.hook.log.loggerI
 import com.highcapable.yukihookapi.hook.param.PackageParam
 import com.zhufucdev.stub.Emulation
@@ -15,13 +14,16 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.android.Android
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.websocket.DefaultClientWebSocketSession
+import io.ktor.client.plugins.websocket.WebSockets
+import io.ktor.client.plugins.websocket.receiveDeserialized
+import io.ktor.client.plugins.websocket.sendSerialized
+import io.ktor.client.plugins.websocket.ws
 import io.ktor.client.request.get
-import io.ktor.client.request.post
-import io.ktor.client.request.setBody
-import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
-import io.ktor.http.contentType
+import io.ktor.serialization.kotlinx.KotlinxWebsocketSerializationConverter
 import io.ktor.serialization.kotlinx.json.json
+import io.ktor.websocket.Frame
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
@@ -29,6 +31,7 @@ import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
 import java.net.ConnectException
 import java.security.SecureRandom
 import javax.net.ssl.SSLContext
@@ -40,12 +43,16 @@ object Scheduler : AbstractScheduler() {
     private var port = 20230
     private var tls = false
 
-    private val providerAddr get() = (if (tls) "https://" else "http://") + "$LOCALHOST:$port"
+    private val providerUrl get() = (if (tls) "https://" else "http://") + "$LOCALHOST:$port"
 
     private val httpClient by lazy {
         HttpClient(Android) {
             install(ContentNegotiation) {
                 json()
+            }
+
+            install(WebSockets) {
+                contentConverter = KotlinxWebsocketSerializationConverter(Json)
             }
 
             engine {
@@ -75,101 +82,43 @@ object Scheduler : AbstractScheduler() {
                 Method.valueOf(it.uppercase())
             }
 
-        loggerI(tag = TAG, "service listens on $providerAddr")
+        loggerI(tag = TAG, "service listens on $providerUrl")
 
         GlobalScope.launch {
             startServer()
         }
     }
 
+    private lateinit var wsSession: DefaultClientWebSocketSession
     private suspend fun startServer() {
-        var logged = false
+        var warned = false
 
         while (true) {
-            try {
-                // query existing state
-                httpClient.get("${providerAddr}/current").apply {
-                    if (status == HttpStatusCode.OK) {
-                        val emulation = body<Emulation>()
-                        startEmulation(emulation)
-                    }
-                }
-            } catch (e: ConnectException) {
-                // ignored
+            httpClient.ws("${providerUrl}/join") {
+                send(Frame.Text(id))
+                val emulation = receiveDeserialized<Emulation>()
+                wsSession = this // this is actually dangerous,
+                // but I don't think there's way out
+                startEmulation(emulation)
             }
 
-            loggerI(TAG, "current emulation vanished. Entering event loop...")
-
-            eventLoop()
-            if (!logged) {
+            if (!warned) {
                 loggerI(tag = TAG, msg = "Provider offline. Waiting for data channel to become online")
-                logged = true
+                warned = true
             }
             delay(1.seconds)
         }
     }
 
-    private suspend fun eventLoop() = coroutineScope {
-        try {
-            loggerI(TAG, "Event loop started on $port")
-            var currentEmu: Job? = null
-
-            while (true) {
-                val res = httpClient.get("$providerAddr/next/$id")
-
-                when (res.status) {
-                    HttpStatusCode.OK -> {
-                        hooking = true
-                        val emulation = res.body<Emulation>()
-                        currentEmu = launch {
-                            startEmulation(emulation)
-                        }
-                    }
-
-                    HttpStatusCode.NoContent -> {
-                        hooking = false
-                        currentEmu?.cancelAndJoin()
-                        loggerI(tag = TAG, msg = "Emulation cancelled")
-                    }
-
-                    else -> {
-                        return@coroutineScope
-                    }
-                }
-            }
-        } catch (e: ConnectException) {
-            // ignored, or more specifically, treat it as offline
-            // who the fuck cares what's going on
-        }
+    override suspend fun notifyStarted(info: EmulationInfo) {
+        wsSession.sendSerialized(info)
     }
 
-    override suspend fun updateState(running: Boolean) {
-        runCatching {
-            if (running) {
-                val status = EmulationInfo(duration, length, packageName)
-                httpClient.post("$providerAddr/state/$id/running") {
-                    contentType(ContentType.Application.Json)
-                    setBody(status)
-                }
-            } else {
-                httpClient.get("$providerAddr/state/$id/stopped")
-            }
-            loggerD(TAG, "Updated state[$id] = $running")
-        }
+    override suspend fun notifyStopped() {
+        // left to web socket lifecycle
     }
 
-    override suspend fun notifyProgress() {
-        runCatching {
-            httpClient.post("$providerAddr/intermediate/$id") {
-                contentType(ContentType.Application.Json)
-                setBody(
-                    Intermediate(
-                        progress = progress,
-                        location = location,
-                        elapsed = elapsed / 1000.0
-                    )
-                )
-            }
-        }
+    override suspend fun notifyProgress(intermediate: Intermediate) {
+        wsSession.sendSerialized(intermediate)
     }
 }

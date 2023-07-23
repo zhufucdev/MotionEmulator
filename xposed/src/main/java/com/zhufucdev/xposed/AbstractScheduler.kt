@@ -17,6 +17,7 @@ abstract class AbstractScheduler {
     private lateinit var cellHooker: CellHooker
 
     protected lateinit var packageName: String
+        private set
     val id: String = NanoIdUtils.randomNanoId()
     var hookingMethod: Method = Method.XPOSED_ONLY
         protected set
@@ -71,7 +72,14 @@ abstract class AbstractScheduler {
      */
     var satellites: Int = 0
         private set
-    val progress get() = (elapsed / duration / 1000).toFloat()
+    private val progress get() = (elapsed / duration / 1000).toFloat()
+    private val intermediate
+        get() = Intermediate(
+            progress = progress,
+            location = location,
+            elapsed = elapsed / 1000.0
+        )
+
     val location get() = mLocation ?: Point.zero
     val cells get() = mCellMoment ?: CellMoment(0F)
     val motion = MotionMoment(0F, mutableMapOf())
@@ -83,7 +91,7 @@ abstract class AbstractScheduler {
         satellites = emulation.satelliteCount
 
         hooking = true
-        updateState(true)
+        notifyStarted(EmulationInfo(duration, length, packageName))
         for (i in 0 until emulation.repeat) {
             start = SystemClock.elapsedRealtime()
             coroutineScope {
@@ -104,7 +112,7 @@ abstract class AbstractScheduler {
             if (!hooking) break
         }
         hooking = false
-        updateState(false)
+        notifyStopped()
     }
 
     private var stepsCount: Int = -1
@@ -128,7 +136,7 @@ abstract class AbstractScheduler {
                     )
                 sensorHooker.raise(moment)
 
-                notifyProgress()
+                notifyProgress(intermediate)
                 delay(pause)
             }
         }
@@ -148,7 +156,7 @@ abstract class AbstractScheduler {
                     sensorHooker.raise(interp.moment)
                     lastIndex = interp.index
 
-                    notifyProgress()
+                    notifyProgress(intermediate)
                     delay(100)
                 }
             }
@@ -164,7 +172,7 @@ abstract class AbstractScheduler {
             mLocation = interp.point.toPoint(trace.coordinateSystem)
             locationHooker.raise(interp.point.toPoint())
 
-            notifyProgress()
+            notifyProgress(intermediate)
             delay(1000)
         }
     }
@@ -197,9 +205,9 @@ abstract class AbstractScheduler {
         }
     }
 
-    abstract suspend fun notifyProgress()
-
-    abstract suspend fun updateState(running: Boolean)
+    abstract suspend fun notifyProgress(intermediate: Intermediate)
+    abstract suspend fun notifyStarted(info: EmulationInfo)
+    abstract suspend fun notifyStopped()
 }
 
 /**
