@@ -41,9 +41,11 @@ dependencies {
     implementation "com.highcapable.yukihookapi:api:${yuki_version}"
     compileOnly 'de.robv.android.xposed:api:82'
     // Ktor
-    implementation "io.ktor:ktor-server-core-jvm:${ktor_version}"
-    implementation "io.ktor:ktor-server-netty-jvm:${ktor_version}"
-    implementation "io.ktor:ktor-server-content-negotiation:${ktor_version}"
+    implementation "io.ktor:ktor-client-core-jvm:${ktor_version}"
+    implementation "io.ktor:ktor-client-android-jvm:${ktor_version}"
+    implementation "io.ktor:ktor-client-serialization-jvm:${ktor_version}"
+    implementation "io.ktor:ktor-client-content-negotiation:${ktor_version}"
+    implementation "io.ktor:ktor-serialization-kotlinx-json:${ktor_version}"
     // Internal
     implementation project(':stub')
     implementation project(':stub_plugin')
