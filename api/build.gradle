@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
+
 plugins {
     id 'java-library'
     id 'org.jetbrains.kotlin.jvm'
@@ -8,8 +10,10 @@ java {
     targetCompatibility = JavaVersion.VERSION_11
 }
 
-kotlin {
-    jvmToolchain(11)
+tasks.withType(KotlinJvmCompile.class).configureEach {
+    kotlinOptions {
+        jvmTarget = "11"
+    }
 }
 
 dependencies {
