@@ -23,9 +23,9 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.core.content.FileProvider
 import com.zhufucdev.motion_emulator.R
 import com.zhufucdev.stub.Data
-import com.zhufucdev.motion_emulator.FILE_PROVIDER_AUTHORITY
-import com.zhufucdev.motion_emulator.dateString
-import com.zhufucdev.motion_emulator.effectiveTimeFormat
+import com.zhufucdev.motion_emulator.extension.FILE_PROVIDER_AUTHORITY
+import com.zhufucdev.motion_emulator.extension.dateString
+import com.zhufucdev.motion_emulator.extension.effectiveTimeFormat
 import com.zhufucdev.motion_emulator.ui.VerticalSpacer
 import com.zhufucdev.motion_emulator.ui.component.Expandable
 import com.zhufucdev.motion_emulator.ui.theme.paddingCommon

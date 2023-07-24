@@ -1,16 +1,12 @@
 package com.zhufucdev.motion_emulator.provider
 
 import android.content.Context
-import android.content.Intent
 import android.util.Log
-import androidx.core.content.edit
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils
-import com.zhufucdev.stub.BROADCAST_AUTHORITY
 import com.zhufucdev.stub.Emulation
 import com.zhufucdev.stub.EmulationInfo
 import com.zhufucdev.stub.Intermediate
-import com.zhufucdev.motion_emulator.lazySharedPreferences
-import com.zhufucdev.motion_emulator.plugin.Plugin
+import com.zhufucdev.motion_emulator.extension.lazySharedPreferences
 import com.zhufucdev.motion_emulator.plugin.Plugins
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.*

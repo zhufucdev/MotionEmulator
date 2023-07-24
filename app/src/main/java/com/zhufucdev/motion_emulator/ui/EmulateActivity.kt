@@ -8,8 +8,8 @@ import com.zhufucdev.motion_emulator.data.Cells
 import com.zhufucdev.motion_emulator.data.Motions
 import com.zhufucdev.motion_emulator.data.Traces
 import com.zhufucdev.motion_emulator.databinding.ActivityEmulateBinding
-import com.zhufucdev.motion_emulator.initializeToolbar
-import com.zhufucdev.motion_emulator.setUpStatusBar
+import com.zhufucdev.motion_emulator.extension.initializeToolbar
+import com.zhufucdev.motion_emulator.extension.setUpStatusBar
 
 class EmulateActivity : AppCompatActivity() {
     private lateinit var binding: ActivityEmulateBinding

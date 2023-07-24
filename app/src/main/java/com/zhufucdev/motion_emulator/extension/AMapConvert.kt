@@ -1,9 +1,10 @@
-package com.zhufucdev.motion_emulator
+package com.zhufucdev.motion_emulator.extension
 
 import android.content.Context
 import com.amap.api.maps.MapsInitializer
 import com.amap.api.maps.model.LatLng
 import com.amap.api.services.core.LatLonPoint
+import com.zhufucdev.motion_emulator.BuildConfig
 import com.zhufucdev.motion_emulator.data.AMapProjector
 import com.zhufucdev.stub.*
 import io.ktor.client.call.*

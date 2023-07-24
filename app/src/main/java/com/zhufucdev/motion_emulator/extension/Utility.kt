@@ -1,4 +1,4 @@
-package com.zhufucdev.motion_emulator
+package com.zhufucdev.motion_emulator.extension
 
 import android.app.Activity
 import android.content.Context
@@ -21,7 +21,6 @@ import androidx.preference.PreferenceManager
 import com.zhufucdev.stub.*
 import com.zhufucdev.stub.Emulation
 import com.zhufucdev.motion_emulator.provider.EmulationRef
-import com.zhufucdev.update.Updater
 import io.ktor.client.*
 import io.ktor.client.engine.android.*
 import io.ktor.client.plugins.*
@@ -29,14 +28,11 @@ import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
-import java.io.File
 import java.math.RoundingMode
 import java.text.DateFormat
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.math.pow
-import kotlin.math.sqrt
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
@@ -201,6 +197,3 @@ fun Context.lazySharedPreferences() = lazy { this.sharedPreferences() }
 
 fun Fragment.lazySharedPreferences() = lazy { requireContext().sharedPreferences() }
 
-fun Context.updater() = updater(BuildConfig.PRODUCT)
-
-fun Context.updater(product: String) = Updater(BuildConfig.SERVER_URI, product, this, File(externalCacheDir, "update"))

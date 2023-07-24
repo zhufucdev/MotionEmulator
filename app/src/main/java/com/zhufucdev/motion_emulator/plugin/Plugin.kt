@@ -3,8 +3,10 @@ package com.zhufucdev.motion_emulator.plugin
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import androidx.compose.runtime.Stable
 import com.zhufucdev.stub.BROADCAST_AUTHORITY
 
+@Stable
 class Plugin(val packageName: String, val name: String, val description: String) {
 
     private fun Context.broadcast(message: String) {
@@ -25,4 +27,23 @@ class Plugin(val packageName: String, val name: String, val description: String)
     fun notifySettingsChanged(context: Context) {
         context.broadcast("SETTINGS_CHANGED")
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Plugin
+
+        if (packageName != other.packageName) return false
+        if (name != other.name) return false
+        return description == other.description
+    }
+
+    override fun hashCode(): Int {
+        var result = packageName.hashCode()
+        result = 31 * result + name.hashCode()
+        result = 31 * result + description.hashCode()
+        return result
+    }
+
 }

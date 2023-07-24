@@ -9,6 +9,8 @@ import android.os.Build
 import android.util.Log
 import androidx.compose.runtime.*
 import androidx.core.content.getSystemService
+import com.zhufucdev.api.ReleaseAsset
+import com.zhufucdev.api.getReleaseAsset
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.android.*
@@ -17,7 +19,6 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.coroutines.*
-import kotlinx.serialization.Serializable
 import java.io.File
 import kotlin.concurrent.thread
 import kotlin.coroutines.suspendCoroutine
@@ -47,7 +48,7 @@ class Updater(
         }
     }
 
-    var update: Update? by mutableStateOf(null)
+    var update: ReleaseAsset? by mutableStateOf(null)
         private set
     var status: UpdaterStatus by mutableStateOf(StatusIdling)
         private set
@@ -66,16 +67,16 @@ class Updater(
     /**
      * Look for a new update
      */
-    suspend fun check(): Update? {
+    suspend fun check(): ReleaseAsset? {
         updateStatus(StatusChecking)
         try {
             val currentVersion = context.packageManager.getPackageInfo(context.packageName, 0).versionName
             val arch = Build.SUPPORTED_ABIS[0].standardArchitect()
-            val req = ktor.get("${apiUri}/release?product=${productAlias}&current=${currentVersion}&arch=${arch}")
-            if (!req.status.isSuccess()) {
-                return null
+            val update = ktor.getReleaseAsset(apiUri, productAlias, currentVersion, arch)
+            if (update != null) {
+                this.update = update
             }
-            return req.body<Update>().also { update = it }
+            return update
         } finally {
             updateStatus(StatusReadyToDownload)
         }
@@ -96,7 +97,7 @@ class Updater(
         updateStatus(StatusPreDownload)
 
         if (!exportedDir.exists()) exportedDir.mkdirs()
-        val result = File(exportedDir, "${productAlias}-${update.name}.apk")
+        val result = File(exportedDir, "${productAlias}-${update.versionName}.apk")
         if (result.exists()) {
             updateStatus(StatusReadyToInstall(result))
             return result // TODO Manifest verification
@@ -190,8 +191,6 @@ private fun queryDownload(
     return -1F
 }
 
-@Serializable
-data class Update(val name: String, val url: String)
 
 interface UpdaterStatus {
     fun onDestroy()

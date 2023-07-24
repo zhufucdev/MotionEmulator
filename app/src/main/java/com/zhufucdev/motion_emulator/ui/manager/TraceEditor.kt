@@ -39,9 +39,9 @@ import com.zhufucdev.stub.*
 import com.zhufucdev.motion_emulator.R
 import com.zhufucdev.motion_emulator.data.*
 import com.zhufucdev.stub.Trace
-import com.zhufucdev.motion_emulator.insert
-import com.zhufucdev.motion_emulator.toOffset
-import com.zhufucdev.motion_emulator.toVector2d
+import com.zhufucdev.motion_emulator.extension.insert
+import com.zhufucdev.motion_emulator.extension.toOffset
+import com.zhufucdev.motion_emulator.extension.toVector2d
 import com.zhufucdev.motion_emulator.ui.CaptionText
 import com.zhufucdev.motion_emulator.ui.VerticalSpacer
 import com.zhufucdev.motion_emulator.ui.component.Appendix

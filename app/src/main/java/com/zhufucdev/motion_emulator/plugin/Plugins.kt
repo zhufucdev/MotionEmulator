@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import androidx.core.content.edit
-import com.zhufucdev.motion_emulator.sharedPreferences
+import com.zhufucdev.motion_emulator.extension.sharedPreferences
 
 /**
  * The plug-in manager
@@ -13,7 +13,8 @@ import com.zhufucdev.motion_emulator.sharedPreferences
  * means it's got global lifespan
  */
 object Plugins {
-    private lateinit var available: List<Plugin>
+    lateinit var available: List<Plugin>
+        private set
     private lateinit var prefs: SharedPreferences
     fun init(context: Context) {
         prefs = context.sharedPreferences()
@@ -23,7 +24,11 @@ object Plugins {
                     it.enabled && it.metaData?.getBoolean("me_plugin") == true
                 }
                 .map {
-                    Plugin(it.packageName, it.name, it.metaData.getString("me_description", ""))
+                    Plugin(
+                        it.packageName,
+                        context.packageManager.getApplicationLabel(it).toString(),
+                        it.metaData.getString("me_description", "")
+                    )
                 }
     }
 

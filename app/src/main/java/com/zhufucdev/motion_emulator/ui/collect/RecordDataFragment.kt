@@ -20,7 +20,7 @@ import com.google.android.material.floatingactionbutton.ExtendedFloatingActionBu
 import com.zhufucdev.stub.CellMoment
 import com.zhufucdev.motion_emulator.R
 import com.zhufucdev.motion_emulator.data.*
-import com.zhufucdev.motion_emulator.getAttrColor
+import com.zhufucdev.motion_emulator.extension.getAttrColor
 
 /**
  * To display current motion data.

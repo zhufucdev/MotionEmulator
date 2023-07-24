@@ -200,4 +200,9 @@
     <string name="title_drop_to_enable">Drag &amp; drop here to enable</string>
     <string name="title_drop_to_disable">Drag &amp; drop here to disable</string>
     <string name="caption_enabled">ENABLED</string>
+    <string name="caption_disabled">DISABLED</string>
+    <string name="des_plugin_enabled">plugin enabled</string>
+    <string name="des_plugin_disabled">plugin disabled</string>
+    <string name="des_plugin_downloadable">this plugin is downloadable</string>
+    <string name="des_plugin_update">this plugin has an update</string>
 </resources>

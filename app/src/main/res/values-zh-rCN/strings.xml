@@ -191,4 +191,9 @@
     <string name="title_drop_to_enable">拖放到这里来启用</string>
     <string name="title_drop_to_disable">拖放到这里来禁用</string>
     <string name="caption_enabled">已启用</string>
+    <string name="caption_disabled">已禁用</string>
+    <string name="des_plugin_enabled">插件已启用</string>
+    <string name="des_plugin_disabled">插件已禁用</string>
+    <string name="des_plugin_downloadable">可下载该插件</string>
+    <string name="des_plugin_update">该插件有更新</string>
 </resources>

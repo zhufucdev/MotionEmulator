@@ -20,7 +20,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.core.content.edit
 import com.zhufucdev.motion_emulator.R
-import com.zhufucdev.motion_emulator.lazySharedPreferences
+import com.zhufucdev.motion_emulator.extension.lazySharedPreferences
 import com.zhufucdev.motion_emulator.ui.component.Appendix
 import com.zhufucdev.motion_emulator.ui.map.UnifiedMapFragment.Provider
 import com.zhufucdev.motion_emulator.ui.theme.paddingCommon

@@ -6,7 +6,13 @@ import com.amap.api.maps.AMap
 import com.amap.api.maps.AMapUtils
 import com.amap.api.maps.CameraUpdateFactory
 import com.amap.api.maps.model.*
-import com.zhufucdev.motion_emulator.*
+import com.google.android.material.R
+import com.zhufucdev.motion_emulator.extension.ensureAmapCoordinate
+import com.zhufucdev.motion_emulator.extension.getAddressWithAmap
+import com.zhufucdev.motion_emulator.extension.getAttrColor
+import com.zhufucdev.motion_emulator.extension.isDarkModeEnabled
+import com.zhufucdev.motion_emulator.extension.toAmapLatLng
+import com.zhufucdev.motion_emulator.extension.toPoint
 import com.zhufucdev.stub.Point
 import com.zhufucdev.stub.Trace
 import kotlin.math.pow
@@ -42,8 +48,8 @@ class AMapController(private val map: AMap, context: Context) : MapController(co
         })
     }
 
-    private val lineColor get() = getAttrColor(com.google.android.material.R.attr.colorTertiary, context)
-    private val indicatorColor get() = getAttrColor(com.google.android.material.R.attr.colorPrimary, context)
+    private val lineColor get() = getAttrColor(R.attr.colorTertiary, context)
+    private val indicatorColor get() = getAttrColor(R.attr.colorPrimary, context)
     private val indicatorStroke
         get() =
             if (map.mapType == AMap.MAP_TYPE_NORMAL)

@@ -1,4 +1,4 @@
-package com.zhufucdev.motion_emulator
+package com.zhufucdev.motion_emulator.extension
 
 import android.content.Context
 import android.location.Geocoder

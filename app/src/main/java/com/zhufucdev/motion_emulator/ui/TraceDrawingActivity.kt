@@ -30,6 +30,10 @@ import com.zhufucdev.stub.Trace
 import com.zhufucdev.stub.toPoint
 import com.zhufucdev.motion_emulator.data.Traces
 import com.zhufucdev.motion_emulator.databinding.ActivityTraceDrawingBinding
+import com.zhufucdev.motion_emulator.extension.initializeToolbar
+import com.zhufucdev.motion_emulator.extension.lazySharedPreferences
+import com.zhufucdev.motion_emulator.extension.skipAmapFuckingLicense
+import com.zhufucdev.motion_emulator.extension.toPoint
 import com.zhufucdev.motion_emulator.ui.map.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking

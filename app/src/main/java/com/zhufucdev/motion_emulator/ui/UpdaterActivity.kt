@@ -3,9 +3,9 @@ package com.zhufucdev.motion_emulator.ui
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import com.zhufucdev.motion_emulator.FILE_PROVIDER_AUTHORITY
+import com.zhufucdev.motion_emulator.extension.FILE_PROVIDER_AUTHORITY
+import com.zhufucdev.motion_emulator.extension.Updater
 import com.zhufucdev.motion_emulator.ui.theme.MotionEmulatorTheme
-import com.zhufucdev.motion_emulator.updater
 import com.zhufucdev.update.SuspendedActivityResultLauncher
 import com.zhufucdev.update.UpdaterApp
 import com.zhufucdev.update.installUpdate
@@ -21,7 +21,7 @@ class UpdaterActivity : ComponentActivity() {
             MotionEmulatorTheme {
                 UpdaterApp(
                     navigateUp = { finish() },
-                    updater = updater(),
+                    updater = Updater(this),
                     install = {
                         if (requireInstallerPermission(launcher))
                             installUpdate(it, FILE_PROVIDER_AUTHORITY)

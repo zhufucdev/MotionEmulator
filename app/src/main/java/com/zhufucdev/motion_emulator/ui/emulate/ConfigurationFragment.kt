@@ -16,11 +16,14 @@ import com.google.android.material.floatingactionbutton.ExtendedFloatingActionBu
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputEditText
 import com.zhufucdev.stub.*
-import com.zhufucdev.motion_emulator.*
 import com.zhufucdev.motion_emulator.data.*
 import com.zhufucdev.motion_emulator.databinding.FragmentConfigurationBinding
 import com.zhufucdev.stub.Emulation
 import com.zhufucdev.motion_emulator.R
+import com.zhufucdev.motion_emulator.extension.effectiveTimeFormat
+import com.zhufucdev.motion_emulator.extension.lazySharedPreferences
+import com.zhufucdev.motion_emulator.extension.ref
+import com.zhufucdev.motion_emulator.extension.skipAmapFuckingLicense
 import com.zhufucdev.motion_emulator.provider.EmulationRef
 import com.zhufucdev.motion_emulator.provider.Scheduler
 import com.zhufucdev.motion_emulator.ui.map.MapDisplayType

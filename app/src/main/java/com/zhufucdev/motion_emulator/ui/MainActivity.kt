@@ -6,15 +6,12 @@ import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.lifecycle.lifecycleScope
-import com.zhufucdev.motion_emulator.lazySharedPreferences
+import com.zhufucdev.motion_emulator.extension.Updater
+import com.zhufucdev.motion_emulator.extension.lazySharedPreferences
 import com.zhufucdev.motion_emulator.plugin.Plugins
-import com.zhufucdev.motion_emulator.setUpStatusBar
+import com.zhufucdev.motion_emulator.extension.setUpStatusBar
 import com.zhufucdev.motion_emulator.ui.home.AppHome
 import com.zhufucdev.motion_emulator.ui.theme.MotionEmulatorTheme
-import com.zhufucdev.motion_emulator.updater
-import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
     private val preferences by lazySharedPreferences()
@@ -26,13 +23,10 @@ class MainActivity : AppCompatActivity() {
             MotionEmulatorTheme {
                 val plugins = remember { Plugins.enabled.size }
                 val updater = remember {
-                    updater()
+                    Updater(this)
                 }
-                val coroutine = rememberCoroutineScope()
                 LaunchedEffect(Unit) {
-                    coroutine.launch {
-                        updater.check()
-                    }
+                    updater.check()
                 }
 
                 AppHome(updater = updater, enabledPlugins = plugins) {

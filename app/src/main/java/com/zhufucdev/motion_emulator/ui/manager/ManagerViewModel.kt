@@ -18,7 +18,7 @@ import com.zhufucdev.motion_emulator.R
 import com.zhufucdev.motion_emulator.ui.component.BottomSheetModalState
 import com.zhufucdev.motion_emulator.data.*
 import com.zhufucdev.stub.Trace
-import com.zhufucdev.motion_emulator.insert
+import com.zhufucdev.motion_emulator.extension.insert
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel

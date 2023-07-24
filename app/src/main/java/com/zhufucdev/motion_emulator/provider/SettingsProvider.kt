@@ -7,7 +7,7 @@ import android.content.UriMatcher
 import android.database.Cursor
 import android.database.MatrixCursor
 import android.net.Uri
-import com.zhufucdev.motion_emulator.sharedPreferences
+import com.zhufucdev.motion_emulator.extension.sharedPreferences
 import com.zhufucdev.stub.Method
 import com.zhufucdev.stub.SETTINGS_PROVIDER_AUTHORITY
 

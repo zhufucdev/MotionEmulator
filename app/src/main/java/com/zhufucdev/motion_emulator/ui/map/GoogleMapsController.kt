@@ -13,6 +13,12 @@ import com.google.android.gms.maps.model.PolylineOptions
 import com.google.maps.android.SphericalUtil
 import com.google.maps.android.ktx.addPolyline
 import com.zhufucdev.motion_emulator.*
+import com.zhufucdev.motion_emulator.extension.ensureGoogleCoordinate
+import com.zhufucdev.motion_emulator.extension.getAddressWithGoogle
+import com.zhufucdev.motion_emulator.extension.getAttrColor
+import com.zhufucdev.motion_emulator.extension.isDarkModeEnabled
+import com.zhufucdev.motion_emulator.extension.toGoogleLatLng
+import com.zhufucdev.motion_emulator.extension.toPoint
 import com.zhufucdev.stub.Point
 import com.zhufucdev.stub.Trace
 

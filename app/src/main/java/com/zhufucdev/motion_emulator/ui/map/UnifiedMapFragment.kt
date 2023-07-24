@@ -21,6 +21,9 @@ import com.amap.api.maps.AMap
 import com.amap.api.maps.MapView
 import com.google.android.gms.maps.SupportMapFragment
 import com.zhufucdev.motion_emulator.*
+import com.zhufucdev.motion_emulator.extension.dateString
+import com.zhufucdev.motion_emulator.extension.effectiveTimeFormat
+import com.zhufucdev.motion_emulator.extension.toPoint
 import com.zhufucdev.stub.CoordinateSystem
 import com.zhufucdev.stub.Point
 import com.zhufucdev.stub.Trace

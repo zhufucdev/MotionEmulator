@@ -13,7 +13,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.zhufucdev.motion_emulator.R
 import com.zhufucdev.stub.CellTimeline
-import com.zhufucdev.motion_emulator.effectiveTimeFormat
+import com.zhufucdev.motion_emulator.extension.effectiveTimeFormat
 import com.zhufucdev.motion_emulator.ui.theme.paddingCard
 import com.zhufucdev.motion_emulator.ui.theme.paddingSmall
 

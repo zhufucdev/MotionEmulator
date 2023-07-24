@@ -5,13 +5,10 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import com.amap.api.maps.AMapUtils
 import com.amap.api.maps.CoordinateConverter
-import com.google.maps.android.SphericalUtil
-import com.zhufucdev.stub.MapProjector
 import com.zhufucdev.stub.Projector
 import com.zhufucdev.stub.Vector2D
 import com.zhufucdev.stub.lenTo
-import com.zhufucdev.motion_emulator.toAmapLatLng
-import com.zhufucdev.motion_emulator.toGoogleLatLng
+import com.zhufucdev.motion_emulator.extension.toAmapLatLng
 import com.zhufucdev.motion_emulator.ui.manager.FactorCanvas
 import kotlin.math.pow
 import kotlin.math.sqrt

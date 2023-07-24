@@ -75,6 +75,7 @@ android {
 dependencies {
     // Internal
     implementation project(':stub')
+    implementation project(':api')
     implementation project(':update')
     // Ktor
     implementation "io.ktor:ktor-client-core-jvm:${ktor_version}"
@@ -99,7 +100,7 @@ dependencies {
     implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
     implementation "androidx.navigation:navigation-dynamic-features-fragment:$nav_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:${corotinues_version}"
-    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1'
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:${kotlinx_serialization_version}"
     implementation "androidx.work:work-runtime-ktx:2.8.1"
     // Compose
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_runtime_version"

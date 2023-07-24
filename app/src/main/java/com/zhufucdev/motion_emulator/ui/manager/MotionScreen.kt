@@ -16,6 +16,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils
 import com.zhufucdev.motion_emulator.*
+import com.zhufucdev.motion_emulator.extension.effectiveTimeFormat
+import com.zhufucdev.motion_emulator.extension.estimateSpeed
+import com.zhufucdev.motion_emulator.extension.estimateTimespan
 import com.zhufucdev.stub.Motion
 import com.zhufucdev.motion_emulator.ui.theme.paddingCard
 import com.zhufucdev.motion_emulator.ui.theme.paddingSmall

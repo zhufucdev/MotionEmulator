@@ -18,8 +18,8 @@ import com.zhufucdev.motion_emulator.databinding.FragmentEmulateStatusBinding
 import com.zhufucdev.stub.Emulation
 import com.zhufucdev.motion_emulator.provider.EmulationMonitorWorker
 import com.zhufucdev.motion_emulator.provider.Scheduler
-import com.zhufucdev.motion_emulator.lazySharedPreferences
-import com.zhufucdev.motion_emulator.skipAmapFuckingLicense
+import com.zhufucdev.motion_emulator.extension.lazySharedPreferences
+import com.zhufucdev.motion_emulator.extension.skipAmapFuckingLicense
 import com.zhufucdev.motion_emulator.ui.map.MapTraceCallback
 import com.zhufucdev.motion_emulator.ui.map.TraceBounds
 import com.zhufucdev.motion_emulator.ui.map.UnifiedMapFragment

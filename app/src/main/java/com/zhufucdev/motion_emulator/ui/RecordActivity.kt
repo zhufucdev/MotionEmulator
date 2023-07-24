@@ -16,7 +16,7 @@ import com.zhufucdev.motion_emulator.data.Motions
 import com.zhufucdev.motion_emulator.data.MotionRecorder
 import com.zhufucdev.motion_emulator.data.TelephonyRecorder
 import com.zhufucdev.motion_emulator.databinding.ActivityRecordBinding
-import com.zhufucdev.motion_emulator.initializeToolbar
+import com.zhufucdev.motion_emulator.extension.initializeToolbar
 
 class RecordActivity : AppCompatActivity() {
 

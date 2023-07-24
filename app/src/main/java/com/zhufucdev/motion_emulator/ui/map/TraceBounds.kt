@@ -1,7 +1,11 @@
 package com.zhufucdev.motion_emulator.ui.map
 
 import android.content.Context
-import com.zhufucdev.motion_emulator.*
+import com.zhufucdev.motion_emulator.extension.ensureAmapCoordinate
+import com.zhufucdev.motion_emulator.extension.ensureGoogleCoordinate
+import com.zhufucdev.motion_emulator.extension.toAmapLatLng
+import com.zhufucdev.motion_emulator.extension.toGoogleLatLng
+import com.zhufucdev.motion_emulator.extension.toPoint
 import com.zhufucdev.stub.CoordinateSystem
 import com.zhufucdev.stub.Point
 import com.zhufucdev.stub.Trace
