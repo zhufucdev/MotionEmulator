@@ -75,7 +75,6 @@ android {
 dependencies {
     // Internal
     implementation project(':stub')
-    implementation project(':api')
     implementation project(':update')
     // Ktor
     implementation "io.ktor:ktor-client-core-jvm:${ktor_version}"
