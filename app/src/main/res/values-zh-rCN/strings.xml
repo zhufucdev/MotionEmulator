@@ -187,7 +187,7 @@
     <string name="title_method_test_provider_only">仅调试提供器</string>
     <string name="title_activity_plugin">插件</string>
     <string name="title_status_no_plugin_installed">找不到插件</string>
-    <string name="text_status_no_plugin_installed">真的要做一些事情，请安装一个或更多插件</string>
+    <string name="text_status_no_plugin_installed">真的要做一些事情，请安装并启用一个或更多插件</string>
     <string name="title_drop_to_enable">拖放到这里来启用</string>
     <string name="title_drop_to_disable">拖放到这里来禁用</string>
     <string name="caption_enabled">已启用</string>

@@ -196,7 +196,7 @@
     <string name="title_method_test_provider_only">Test provider only</string>
     <string name="title_activity_plugin">Plug-ins</string>
     <string name="title_status_no_plugin_installed">No Plug-ins Found</string>
-    <string name="text_status_no_plugin_installed">To really do something, install one or more plug-ins</string>
+    <string name="text_status_no_plugin_installed">To really do something, install and enable one or more plug-ins</string>
     <string name="title_drop_to_enable">Drag &amp; drop here to enable</string>
     <string name="title_drop_to_disable">Drag &amp; drop here to disable</string>
     <string name="caption_enabled">ENABLED</string>
