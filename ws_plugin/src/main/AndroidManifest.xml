@@ -13,11 +13,15 @@
                 android:exported="true" />
 
         <meta-data
+                android:name="me_description"
+                android:value="@string/text_description" />
+
+        <meta-data
                 android:name="xposedmodule"
                 android:value="true" />
         <meta-data
                 android:name="xposeddescription"
-                android:value="Motion Emulator Websocket based Xposed plug-in" />
+                android:value="@string/text_description_xposed" />
         <meta-data
                 android:name="xposedminversion"
                 android:value="93" />
