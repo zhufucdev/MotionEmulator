@@ -3,6 +3,9 @@ package com.zhufucdev.motion_emulator.plugin
 import android.content.Context
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.setValue
 import androidx.core.content.edit
 import com.zhufucdev.motion_emulator.extension.sharedPreferences
 
@@ -30,6 +33,7 @@ object Plugins {
                         it.metaData.getString("me_description", "")
                     )
                 }
+        countEnabled = prefs.getString("plugins_enabled", "")!!.split(",").size
     }
 
     val enabled: List<Plugin>
@@ -37,9 +41,13 @@ object Plugins {
             prefs.getString("plugins_enabled", "")!!.split(",")
                 .mapNotNull { saved -> available.firstOrNull { it.packageName == saved } }
 
+    var countEnabled by mutableIntStateOf(0)
+        private set
+
     fun setPriorities(enabled: List<Plugin>) {
         prefs.edit {
             putString("plugins_enabled", enabled.joinToString(",") { it.packageName })
         }
+        countEnabled = enabled.size
     }
 }

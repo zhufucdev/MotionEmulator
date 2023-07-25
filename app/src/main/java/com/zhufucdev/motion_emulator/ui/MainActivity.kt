@@ -21,7 +21,6 @@ class MainActivity : AppCompatActivity() {
 
         setContent {
             MotionEmulatorTheme {
-                val plugins = remember { Plugins.enabled.size }
                 val updater = remember {
                     Updater(this)
                 }
@@ -29,7 +28,7 @@ class MainActivity : AppCompatActivity() {
                     updater.check()
                 }
 
-                AppHome(updater = updater, enabledPlugins = plugins) {
+                AppHome(updater = updater, enabledPlugins = Plugins.countEnabled) {
                     val target = Intent(this, it.activity)
                     if (it.mapping && !preferences.contains("map_provider")) {
                         target.setClass(this, MapPendingActivity::class.java)

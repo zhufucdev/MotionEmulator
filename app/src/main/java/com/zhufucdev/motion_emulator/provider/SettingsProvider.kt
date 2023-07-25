@@ -18,7 +18,7 @@ private val uriMatcher = UriMatcher(UriMatcher.NO_MATCH).apply {
 
 class SettingsProvider : ContentProvider() {
     private lateinit var preferences: SharedPreferences
-    private val port get() = preferences.getInt("provider_port", 20230)
+    private val port get() = preferences.getString("provider_port", "")?.toIntOrNull() ?: 20230
     private val tls get() = preferences.getBoolean("provider_tls", true)
     private val method get() = preferences.getString("method", Method.XPOSED_ONLY.name.lowercase())
     override fun onCreate(): Boolean {

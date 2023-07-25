@@ -7,6 +7,7 @@ import com.zhufucdev.stub.Emulation
 import com.zhufucdev.stub.EmulationInfo
 import com.zhufucdev.stub.Intermediate
 import com.zhufucdev.motion_emulator.extension.lazySharedPreferences
+import com.zhufucdev.motion_emulator.extension.sharedPreferences
 import com.zhufucdev.motion_emulator.plugin.Plugins
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.*
@@ -81,8 +82,8 @@ object Scheduler {
             Log.w("Scheduler", "Reinitialize a running instance")
             return
         }
-        val prefs by context.lazySharedPreferences()
-        port = prefs.getInt("provider_port", 20230)
+        val prefs = context.sharedPreferences()
+        port = prefs.getString("provider_port", "")!!.toIntOrNull() ?: 20230
         tls = prefs.getBoolean("provider_tls", true)
         server = embeddedServer(Netty, environment)
 

@@ -7,7 +7,6 @@
             app:entries="@array/emulation_methods_entries"
             app:entryValues="@array/emulation_methods_values"
             app:defaultValue="xposed_only"
-            app:dependency="use_test_provider"
             app:useSimpleSummaryProvider="true"/>
 
     <PreferenceCategory
