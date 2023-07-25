@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">ME模拟位置插件</string>
+    <string name="app_name">运动模拟器模拟位置插件</string>
     <string name="title_not_available">模拟位置不可用</string>
     <string name="text_not_available">此应用未被设为模拟位置提供器</string>
     <string name="title_alert_channel">警告</string>

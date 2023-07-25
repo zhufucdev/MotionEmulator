@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">ME Mock Location Plugin</string>
+    <string name="app_name">Motion Emulator Mock Location Plugin</string>
     <string name="title_not_available">Mock Location not Available</string>
     <string name="text_not_available">The app is not selected as the mock location provider</string>
     <string name="title_alert_channel">Alert</string>
