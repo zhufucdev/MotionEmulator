@@ -12,7 +12,7 @@ import com.zhufucdev.stub.EmulationInfo
 import com.zhufucdev.stub.Intermediate
 import com.zhufucdev.stub.Point
 import com.zhufucdev.stub.Trace
-import com.zhufucdev.stub_plugin.Server
+import com.zhufucdev.stub_plugin.WsServer
 import com.zhufucdev.stub_plugin.connect
 import io.ktor.client.*
 import io.ktor.client.call.*
@@ -25,6 +25,7 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Assert.*
 import org.junit.Test
 import org.junit.runner.RunWith
+import kotlin.jvm.optionals.getOrNull
 
 /**
  * Instrumented test, which will execute on an Android device.
@@ -55,10 +56,9 @@ class ProviderTest {
         Scheduler.emulation = targetEmulation
 
         runBlocking(Dispatchers.IO) {
-            val id =
-                NanoIdUtils.randomNanoId()
-            Server(20230, tls).connect(id) {
-                assertEquals(targetEmulation, emulation)
+            val id = NanoIdUtils.randomNanoId()
+            WsServer(20230, tls).connect(id) {
+                assertEquals(targetEmulation, emulation.getOrNull())
                 sendStarted(EmulationInfo(20.0, 10.0, id))
                 repeat(10) {
                     sendProgress(Intermediate(Point.zero, it * 2.0, (it + 1) / 10f))

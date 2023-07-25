@@ -47,7 +47,7 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:${kotlinx_serialization_version}"
     // Ktor
     implementation "io.ktor:ktor-client-core-jvm:${ktor_version}"
-    implementation "io.ktor:ktor-client-cio:$ktor_version"
+    implementation "io.ktor:ktor-client-okhttp:$ktor_version"
     implementation "io.ktor:ktor-client-serialization-jvm:${ktor_version}"
     implementation "io.ktor:ktor-client-content-negotiation:${ktor_version}"
     implementation "io.ktor:ktor-serialization-kotlinx-json:${ktor_version}"

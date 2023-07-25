@@ -17,6 +17,9 @@
       <entry key="cp_plugin">
         <State />
       </entry>
+      <entry key="useAbstractionLayer()">
+        <State />
+      </entry>
       <entry key="useAppContext()">
         <State />
       </entry>
