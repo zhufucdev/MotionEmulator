@@ -55,5 +55,4 @@
                     android:resource="@xml/shared_paths" />
         </provider>
     </application>
-
 </manifest>
