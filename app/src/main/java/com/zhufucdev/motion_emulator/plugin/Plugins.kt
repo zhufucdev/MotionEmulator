@@ -37,9 +37,9 @@ object Plugins {
             prefs.getString("plugins_enabled", "")!!.split(",")
                 .mapNotNull { saved -> available.firstOrNull { it.packageName == saved } }
 
-    fun setPriorities(list: List<Plugin>) {
+    fun setPriorities(enabled: List<Plugin>) {
         prefs.edit {
-            putString("plugins_enabled", list.joinToString(",") { it.packageName })
+            putString("plugins_enabled", enabled.joinToString(",") { it.packageName })
         }
     }
 }
