@@ -196,4 +196,6 @@
     <string name="des_plugin_disabled">插件已禁用</string>
     <string name="des_plugin_downloadable">可下载该插件</string>
     <string name="des_plugin_update">该插件有更新</string>
+    <string name="title_permission_read">获取运动模拟器设置信息</string>
+    <string name="text_permission_read">允许该应用查看运动模拟器的部分选项，例如模拟方法和服务器地址。</string>
 </resources>

@@ -205,4 +205,6 @@
     <string name="des_plugin_disabled">plugin disabled</string>
     <string name="des_plugin_downloadable">this plugin is downloadable</string>
     <string name="des_plugin_update">this plugin has an update</string>
+    <string name="title_permission_read">Insight into Settings of Motion Emulator</string>
+    <string name="text_permission_read">Allows this app to get information about settings in Motion Emulator, emulation method and server address for example.</string>
 </resources>

@@ -3,6 +3,7 @@ package com.zhufucdev.mock_location_plugin
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.zhufucdev.mock_location_plugin.MockLocationProvider
+import com.zhufucdev.stub_plugin.Server
 import kotlinx.coroutines.runBlocking
 
 import org.junit.Test
@@ -21,9 +22,9 @@ class ReceiverTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        MockLocationProvider.init(appContext, 2023, true)
+        MockLocationProvider.init(appContext, Server(20230, true))
         runBlocking {
-            MockLocationProvider.wait()
+            MockLocationProvider.emulate()
         }
     }
 }

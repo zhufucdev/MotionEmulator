@@ -1,28 +1,30 @@
 package com.zhufucdev.motion_emulator
 
+import androidx.core.content.edit
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils
-import com.highcapable.yukihookapi.hook.factory.prefs
+import com.zhufucdev.motion_emulator.extension.sharedPreferences
+import com.zhufucdev.motion_emulator.provider.Scheduler
 import com.zhufucdev.stub.EmptyBox
 import com.zhufucdev.stub.Emulation
+import com.zhufucdev.stub.EmulationInfo
+import com.zhufucdev.stub.Intermediate
+import com.zhufucdev.stub.Point
 import com.zhufucdev.stub.Trace
-import com.zhufucdev.cp_plugin.hook.TrustAllX509TrustManager
-import com.zhufucdev.motion_emulator.provider.Scheduler
+import com.zhufucdev.stub_plugin.Server
+import com.zhufucdev.stub_plugin.connect
 import io.ktor.client.*
 import io.ktor.client.call.*
-import io.ktor.client.call.body
-import io.ktor.client.engine.android.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.*
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.security.SecureRandom
-import javax.net.ssl.SSLContext
 
 /**
  * Instrumented test, which will execute on an Android device.
@@ -43,33 +45,28 @@ class ProviderTest {
 
     private fun useServerClient(tls: Boolean) {
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        appContext.prefs().edit { putBoolean("provider_tls", tls) }
+        appContext.sharedPreferences().edit {
+            putString("provider_port", "20230")
+            putBoolean("provider_tls", tls)
+        }
 
         Scheduler.init(appContext)
         val targetEmulation = randomEmulation()
         Scheduler.emulation = targetEmulation
 
-        val client = HttpClient(Android) {
-            install(ContentNegotiation) {
-                json()
-            }
-
-            engine {
-                // disable certificate verification
-                sslManager = { connection ->
-                    connection.sslSocketFactory = SSLContext.getInstance("TLS").apply {
-                        init(null, arrayOf(com.zhufucdev.cp_plugin.hook.TrustAllX509TrustManager), SecureRandom())
-                    }.socketFactory
-                }
-            }
-        }
-
-        val protocol = if (tls) "https" else "http"
-        val addr = "localhost:2023"
-
         runBlocking(Dispatchers.IO) {
-            assertEquals(targetEmulation, client.get("$protocol://$addr/current").body<Emulation>())
+            val id =
+                NanoIdUtils.randomNanoId()
+            Server(20230, tls).connect(id) {
+                assertEquals(targetEmulation, emulation)
+                sendStarted(EmulationInfo(20.0, 10.0, id))
+                repeat(10) {
+                    sendProgress(Intermediate(Point.zero, it * 2.0, (it + 1) / 10f))
+                    delay(2000)
+                }
+            }.close()
         }
+
         Scheduler.stop(appContext)
     }
 }

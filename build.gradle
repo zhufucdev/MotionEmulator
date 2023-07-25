@@ -23,7 +23,7 @@ task clean(type: Delete) {
 }
 
 ext {
-    min_sdk = 23
+    min_sdk = 24
     target_sdk = 33
 
     kotlin_version = '1.9.0'

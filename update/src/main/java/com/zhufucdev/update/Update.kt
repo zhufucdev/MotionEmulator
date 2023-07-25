@@ -13,7 +13,8 @@ import com.zhufucdev.api.ReleaseAsset
 import com.zhufucdev.api.getReleaseAsset
 import io.ktor.client.*
 import io.ktor.client.call.*
-import io.ktor.client.engine.android.*
+import io.ktor.client.engine.cio.CIO
+import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.http.*
@@ -37,10 +38,9 @@ class Updater(
     private val context: Context,
     private val exportedDir: File
 ) {
-    private val ktor = HttpClient(Android) {
-        engine {
-            connectTimeout = 10_000
-            socketTimeout = 10_000
+    private val ktor = HttpClient(CIO) {
+        install(HttpTimeout) {
+            requestTimeoutMillis = 10000
         }
 
         install(ContentNegotiation) {

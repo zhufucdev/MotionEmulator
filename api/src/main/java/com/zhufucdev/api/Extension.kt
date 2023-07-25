@@ -12,7 +12,7 @@ suspend fun HttpClient.getReleaseAsset(
     product: String,
     current: String,
     architect: String?
-): ReleaseAsset? {
+): ReleaseAsset? = runCatching {
     val req = get {
         url(apiUri)
         parameter("product", product)
@@ -22,17 +22,17 @@ suspend fun HttpClient.getReleaseAsset(
         }
     }
     if (!req.status.isSuccess()) {
-        return null
+        return@runCatching null
     }
-    return req.body<ReleaseAsset>()
-}
+    req.body<ReleaseAsset>()
+}.getOrNull()
 
 suspend fun HttpClient.findAsset(
     apiUri: String,
     vararg category: String,
     current: String? = null,
     architect: String? = null
-): List<ProductQuery> {
+): List<ProductQuery> = runCatching {
     val req = get {
         url(apiUri)
         parameter("category", category.joinToString(","))
@@ -44,7 +44,7 @@ suspend fun HttpClient.findAsset(
         }
     }
     if (!req.status.isSuccess()) {
-        return emptyList()
+        return@runCatching emptyList()
     }
-    return req.body<List<ProductQuery>>()
-}
+    req.body<List<ProductQuery>>()
+}.getOrNull() ?: emptyList()

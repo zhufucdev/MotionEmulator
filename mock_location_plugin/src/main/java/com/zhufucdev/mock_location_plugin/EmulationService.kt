@@ -10,7 +10,7 @@ class EmulationService : JobService() {
 
     override fun onStartJob(params: JobParameters?): Boolean {
         waitJob = scope.launch {
-            MockLocationProvider.wait()
+            MockLocationProvider.emulate()
             jobFinished(params, false)
         }
         return true

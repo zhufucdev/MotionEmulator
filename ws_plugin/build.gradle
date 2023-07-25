@@ -36,17 +36,11 @@ android {
 dependencies {
     implementation "androidx.core:core-ktx:${corektx_version}"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:${corotinues_version}"
+    implementation project(':stub_plugin_xposed')
     // Xposed
-    implementation project(':xposed')
     ksp "com.highcapable.yukihookapi:ksp-xposed:${yuki_version}"
     implementation "com.highcapable.yukihookapi:api:${yuki_version}"
     compileOnly 'de.robv.android.xposed:api:82'
-    // Ktor
-    implementation "io.ktor:ktor-client-core-jvm:${ktor_version}"
-    implementation "io.ktor:ktor-client-android-jvm:${ktor_version}"
-    implementation "io.ktor:ktor-client-serialization-jvm:${ktor_version}"
-    implementation "io.ktor:ktor-client-content-negotiation:${ktor_version}"
-    implementation "io.ktor:ktor-serialization-kotlinx-json:${ktor_version}"
     // Internal
     implementation project(':stub')
     implementation project(':stub_plugin')

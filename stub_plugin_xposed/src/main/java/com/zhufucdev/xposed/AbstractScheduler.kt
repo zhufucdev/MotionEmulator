@@ -7,6 +7,7 @@ import com.aventrix.jnanoid.jnanoid.NanoIdUtils
 import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.highcapable.yukihookapi.hook.param.PackageParam
 import com.zhufucdev.stub.*
+import com.zhufucdev.stub_plugin.ServerScope
 import kotlinx.coroutines.*
 import kotlin.random.Random
 import kotlin.time.Duration.Companion.seconds
@@ -85,13 +86,13 @@ abstract class AbstractScheduler {
     val motion = MotionMoment(0F, mutableMapOf())
 
     private val stepSensors = intArrayOf(Sensor.TYPE_STEP_COUNTER, Sensor.TYPE_STEP_DETECTOR)
-    protected suspend fun startEmulation(emulation: Emulation) {
+    protected suspend fun ServerScope.startEmulation(emulation: Emulation) {
         length = emulation.trace.length()
         duration = length / emulation.velocity // in seconds
         satellites = emulation.satelliteCount
 
         hooking = true
-        notifyStarted(EmulationInfo(duration, length, packageName))
+        sendStarted(EmulationInfo(duration, length, packageName))
         for (i in 0 until emulation.repeat) {
             start = SystemClock.elapsedRealtime()
             coroutineScope {
@@ -112,11 +113,10 @@ abstract class AbstractScheduler {
             if (!hooking) break
         }
         hooking = false
-        notifyStopped()
     }
 
     private var stepsCount: Int = -1
-    private suspend fun startStepsEmulation(motion: Box<Motion>, velocity: Double) {
+    private suspend fun ServerScope.startStepsEmulation(motion: Box<Motion>, velocity: Double) {
         sensorHooker.toggle = motion.status
 
         if (motion.value != null && motion.value!!.sensorsInvolved.any { it in stepSensors }) {
@@ -136,13 +136,13 @@ abstract class AbstractScheduler {
                     )
                 sensorHooker.raise(moment)
 
-                notifyProgress(intermediate)
+                sendProgress(intermediate)
                 delay(pause)
             }
         }
     }
 
-    private suspend fun startMotionSimulation(motion: Box<Motion>) {
+    private suspend fun ServerScope.startMotionSimulation(motion: Box<Motion>) {
         sensorHooker.toggle = motion.status
         val partial = motion.value?.validPart()
 
@@ -156,14 +156,14 @@ abstract class AbstractScheduler {
                     sensorHooker.raise(interp.moment)
                     lastIndex = interp.index
 
-                    notifyProgress(intermediate)
+                    sendProgress(intermediate)
                     delay(100)
                 }
             }
         }
     }
 
-    private suspend fun startTraceEmulation(trace: Trace) {
+    private suspend fun ServerScope.startTraceEmulation(trace: Trace) {
         val salted = trace.generateSaltedTrace(MapProjector)
         var traceInterp = salted.at(0F, MapProjector)
         while (hooking && progress <= 1) {
@@ -172,7 +172,7 @@ abstract class AbstractScheduler {
             mLocation = interp.point.toPoint(trace.coordinateSystem)
             locationHooker.raise(interp.point.toPoint())
 
-            notifyProgress(intermediate)
+            sendProgress(intermediate)
             delay(1000)
         }
     }
@@ -204,10 +204,6 @@ abstract class AbstractScheduler {
             }
         }
     }
-
-    abstract suspend fun notifyProgress(intermediate: Intermediate)
-    abstract suspend fun notifyStarted(info: EmulationInfo)
-    abstract suspend fun notifyStopped()
 }
 
 /**

@@ -7,9 +7,9 @@
       <module name="MotionEmulator.app" target="17" />
       <module name="MotionEmulator.cp_plugin" target="17" />
       <module name="MotionEmulator.stub_plugin" target="17" />
+      <module name="MotionEmulator.stub_plugin_xposed" target="17" />
       <module name="MotionEmulator.update" target="17" />
       <module name="MotionEmulator.ws_plugin" target="17" />
-      <module name="MotionEmulator.xposed" target="17" />
     </bytecodeTargetLevel>
   </component>
 </project>

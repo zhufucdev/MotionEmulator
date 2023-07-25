@@ -21,6 +21,9 @@ import io.ktor.server.routing.*
 import io.ktor.server.websocket.*
 import io.ktor.util.reflect.*
 import io.ktor.websocket.*
+import kotlinx.coroutines.channels.consumeEach
+import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.nio.charset.Charset
@@ -217,18 +220,26 @@ fun Application.eventServer() {
         }
 
         webSocket("/join") {
-            val id = (incoming.tryReceive().getOrNull() as Frame.Text? ?: return@webSocket).readText()
+            val id = (incoming.receive() as Frame.Text).readText()
             sendSerialized(Scheduler.emulation)
             val info = receiveDeserialized<EmulationInfo>()
             Scheduler.setInfo(id, info)
 
-            for (frame in incoming) {
-                val data = converter!!.deserialize(Charset.defaultCharset(), typeInfo<Intermediate>(), frame)
-                Scheduler.setIntermediate(id, (data ?: continue) as Intermediate)
+            try {
+                incoming.consumeAsFlow().collect {
+                    val data = converter!!.deserialize(
+                        Charset.defaultCharset(),
+                        typeInfo<Intermediate>(),
+                        it
+                    )
+                    if (data is Intermediate) {
+                        Scheduler.setIntermediate(id, data)
+                    }
+                }
+            } finally {
+                Scheduler.setInfo(id, null)
+                Scheduler.setIntermediate(id, null)
             }
-
-            Scheduler.setInfo(id, null)
-            Scheduler.setIntermediate(id, null)
         }
 
         get("/current") {

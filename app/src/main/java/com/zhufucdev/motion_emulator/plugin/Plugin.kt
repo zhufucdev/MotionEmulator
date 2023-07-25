@@ -10,8 +10,9 @@ import com.zhufucdev.stub.BROADCAST_AUTHORITY
 class Plugin(val packageName: String, val name: String, val description: String) {
 
     private fun Context.broadcast(message: String) {
+        val target = this@Plugin.packageName
         sendBroadcast(Intent("$BROADCAST_AUTHORITY.$message").apply {
-            component = ComponentName(packageName, "$packageName.PluginBroadcastReceiver")
+            component = ComponentName(target, "$target.ControllerReceiver")
             addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
         })
     }

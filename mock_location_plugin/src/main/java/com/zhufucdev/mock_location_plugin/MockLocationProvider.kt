@@ -7,7 +7,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.os.Build
-import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -26,17 +25,9 @@ import com.zhufucdev.stub.generateSaltedTrace
 import com.zhufucdev.stub.length
 import com.zhufucdev.stub.toPoint
 import com.zhufucdev.stub_plugin.Server
-import io.ktor.client.*
-import io.ktor.client.call.*
-import io.ktor.client.engine.android.*
-import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.client.request.*
-import io.ktor.http.*
-import io.ktor.serialization.kotlinx.json.*
-import kotlinx.coroutines.*
-import java.security.SecureRandom
-import javax.net.ssl.SSLContext
-import kotlin.time.Duration.Companion.seconds
+import com.zhufucdev.stub_plugin.ServerScope
+import com.zhufucdev.stub_plugin.connect
+import kotlinx.coroutines.delay
 
 /**
  * A helper class that _implements_ the Mock Location api in the
@@ -49,34 +40,13 @@ import kotlin.time.Duration.Companion.seconds
 object MockLocationProvider {
     private val TARGET_PROVIDERS = listOf(LocationManager.GPS_PROVIDER, LocationManager.NETWORK_PROVIDER)
     private const val TAG = "MockLocationProvider"
-
     private val emulationId = NanoIdUtils.randomNanoId()
-    private val scope = CoroutineScope(Dispatchers.Default)
-    private val jobs = arrayListOf<Job>()
-    private val ktor = HttpClient(Android) {
-        install(ContentNegotiation) {
-            json()
-        }
-
-        engine {
-            // disable certificate verification
-            sslManager = { connection ->
-                connection.sslSocketFactory = SSLContext.getInstance("TLS").apply {
-                    init(null, arrayOf(TrustAllX509TrustManager), SecureRandom())
-                }.socketFactory
-            }
-
-            connectTimeout = 0
-            socketTimeout = 0
-        }
-    }
 
     private lateinit var locationManager: LocationManager
+    private lateinit var server: Server
     fun init(context: Context, server: Server) {
-        val (port, tls) = server
         locationManager = context.getSystemService(LocationManager::class.java)
         val (powerUsage, accuracy) = if (Build.VERSION.SDK_INT >= 30) 1 to 2 else 0 to 5
-        val providerAddr = (if (tls) "https://" else "http://") + "127.0.0.1:$port"
 
         try {
             TARGET_PROVIDERS.forEach {
@@ -88,34 +58,19 @@ object MockLocationProvider {
             notifyNotAvailable(context)
             return
         }
+        this.server = server
+    }
 
-        jobs.add(scope.launch {
-            val current = try {
-                val response = ktor.get("$providerAddr/current")
-                Availability.notifyConnected(true)
-                response.takeIf { it.status == HttpStatusCode.OK }?.body<Emulation>()
-            } catch (_: Exception) {
-                Availability.notifyConnected(false)
-                null
-            }
-            if (current != null) {
-                startEmulation(current, providerAddr)
-            }
-        })
-
-        jobs.add(scope.launch {
-            while (true) {
-                eventLoop(providerAddr)
-                jobs.removeAll { !it.isActive }
-                delay(1.seconds)
-            }
-        })
+    suspend fun emulate() {
+        server.connect(emulationId) {
+            startEmulation(emulation)
+        }
     }
 
     var isEmulating = false
         private set
 
-    private suspend fun startEmulation(emulation: Emulation, providerAddr: String) {
+    private suspend fun ServerScope.startEmulation(emulation: Emulation) {
         if (isEmulating) return
         isEmulating = true
 
@@ -123,7 +78,7 @@ object MockLocationProvider {
         val length = trace.length()
         val duration = length / emulation.velocity
 
-        notifyStatus(EmulationInfo(duration, length, BuildConfig.APPLICATION_ID), providerAddr)
+        sendStarted(EmulationInfo(duration, length, BuildConfig.APPLICATION_ID))
 
         val salted = trace.generateSaltedTrace(MapProjector)
         var loopStart: Long
@@ -143,61 +98,15 @@ object MockLocationProvider {
                     current.push()
                 } catch (_: SecurityException) {
                     stop()
-                    break
+                    return
                 }
-                notifyProgress(Intermediate(current, elapsed, progress), providerAddr)
+                sendProgress(Intermediate(current, elapsed, progress))
                 delay(1000)
 
                 elapsed = (System.currentTimeMillis() - loopStart) / 1000.0
                 progress = (elapsed / duration).toFloat()
             }
             currentLoop++
-        }
-
-        notifyStatus(null, providerAddr)
-    }
-
-    private suspend fun eventLoop(providerAddr: String) {
-        Log.i(TAG, "event loop started")
-        try {
-            while (true) {
-                val next = ktor.get("$providerAddr/next/$emulationId").takeIf { it.status == HttpStatusCode.OK }
-                    ?.body<Emulation>()
-                if (next != null) {
-                    startEmulation(next, providerAddr)
-                } else {
-                    isEmulating = false
-                }
-                jobs.removeAll { !it.isActive }
-            }
-        } catch (_: Exception) {
-            // ignored
-        }
-    }
-
-    private suspend fun notifyStatus(status: EmulationInfo?, providerAddr: String) {
-        if (status != null) {
-            Log.i(TAG, "emulation ($status) running")
-            ktor.post("$providerAddr/state/$emulationId/running") {
-                contentType(ContentType.Application.Json)
-                setBody(status)
-            }
-        } else {
-            Log.i(TAG, "emulation stopped")
-            ktor.get("$providerAddr/state/$emulationId/stopped")
-        }
-    }
-
-    private suspend fun notifyProgress(intermediate: Intermediate, providerAddr: String) {
-        val res = ktor.post("$providerAddr/intermediate/$emulationId") {
-            contentType(ContentType.Application.Json)
-            setBody(intermediate)
-        }
-        if (!res.status.isSuccess()) {
-            Log.w(TAG, "while updating progress, server responded with ${res.status.value}")
-            Availability.notifyConnected(false)
-        } else {
-            Availability.notifyConnected(true)
         }
     }
 
@@ -251,14 +160,8 @@ object MockLocationProvider {
 
     fun stop() {
         isEmulating = false
-        jobs.forEach { it.cancel() }
-        scope.cancel()
         TARGET_PROVIDERS.forEach {
             locationManager.removeTestProvider(it)
         }
-    }
-
-    suspend fun wait() {
-        jobs.toList().joinAll() // make a copy
     }
 }

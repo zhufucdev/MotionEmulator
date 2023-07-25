@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.getSystemService
@@ -21,6 +22,7 @@ import com.zhufucdev.mock_location_plugin.CHANNEL_ID
 import com.zhufucdev.mock_location_plugin.R
 import com.zhufucdev.mock_location_plugin.databinding.ActivityMainBinding
 import com.zhufucdev.mock_location_plugin.updater
+import com.zhufucdev.stub_plugin.MePlugin
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {

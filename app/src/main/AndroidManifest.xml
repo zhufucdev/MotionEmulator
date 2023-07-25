@@ -1,18 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          xmlns:tools="http://schemas.android.com/tools">
+        xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION"/>
-    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
-    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
     <uses-permission
             android:name="android.permission.QUERY_ALL_PACKAGES"
-            tools:ignore="QueryAllPackagesPermission"/>
+            tools:ignore="QueryAllPackagesPermission" />
+
+    <permission
+            android:name="com.zhufucdev.motion_emulator.PERMISSION.READ"
+            android:protectionLevel="normal"
+            android:label="@string/title_permission_read"
+            android:description="@string/text_permission_read"/>
 
     <application
             android:name=".MeApplication"
@@ -31,14 +37,14 @@
                 android:name=".ui.UpdaterActivity"
                 android:exported="false"
                 android:label="@string/title_activity_updater"
-                android:theme="@style/Theme.MotionEmulator"/>
+                android:theme="@style/Theme.MotionEmulator" />
 
         <receiver
                 android:name=".provider.EmulationMonitorReceiver"
                 android:enabled="true"
                 android:exported="false">
             <intent-filter>
-                <action android:name="com.zhufucdev.motion_emulator.ACTION_DETERMINE"/>
+                <action android:name="com.zhufucdev.motion_emulator.ACTION_DETERMINE" />
             </intent-filter>
         </receiver>
 
@@ -46,41 +52,41 @@
                 android:name=".ui.PluginActivity"
                 android:exported="false"
                 android:label="@string/title_activity_plugin"
-                android:theme="@style/Theme.MotionEmulator"/>
+                android:theme="@style/Theme.MotionEmulator" />
         <activity
                 android:name=".ui.MapPendingActivity"
                 android:exported="false"
                 android:label="@string/title_activity_map_pending"
-                android:theme="@style/Theme.MotionEmulator"/>
+                android:theme="@style/Theme.MotionEmulator" />
         <activity
                 android:name=".ui.SettingsActivity"
                 android:exported="false"
                 android:label="@string/title_activity_settings"
-                android:theme="@style/Theme.MotionEmulator.Preference"/>
+                android:theme="@style/Theme.MotionEmulator.Preference" />
         <activity
                 android:name=".ui.EmulateActivity"
                 android:exported="false"
                 android:label="@string/title_emulate"
-                android:launchMode="singleTop"/>
+                android:launchMode="singleTop" />
         <activity
                 android:name=".ui.TraceDrawingActivity"
                 android:exported="false"
-                android:label="@string/title_draw_trace"/>
+                android:label="@string/title_draw_trace" />
         <activity
                 android:name=".ui.RecordActivity"
                 android:exported="false"
-                android:label="@string/title_activity_record"/>
+                android:label="@string/title_activity_record" />
         <activity
                 android:name=".ui.ManagerActivity"
                 android:exported="false"
-                android:label="@string/title_manage"/>
+                android:label="@string/title_manage" />
         <activity
                 android:name=".ui.MainActivity"
                 android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
@@ -91,22 +97,24 @@
                 android:grantUriPermissions="true">
             <meta-data
                     android:name="android.support.FILE_PROVIDER_PATHS"
-                    android:resource="@xml/shared_paths"/>
+                    android:resource="@xml/shared_paths" />
         </provider>
         <provider
                 android:name=".provider.SettingsProvider"
                 android:authorities="com.zhufucdev.motion_emulator.settings_provider"
-                android:exported="true"/>
+                android:exported="true"
+                android:enabled="true"
+                android:readPermission="com.zhufucdev.motion_emulator.PERMISSION.READ" />
 
         <meta-data
                 android:name="com.amap.api.v2.apikey"
-                android:value="${AMAP_SDK_KEY}"/>
+                android:value="${AMAP_SDK_KEY}" />
         <meta-data
                 android:name="com.google.android.geo.API_KEY"
-                android:value="${GCP_MAPS_KEY}"/>
+                android:value="${GCP_MAPS_KEY}" />
         <meta-data
                 android:name="com.google.android.gms.version"
-                android:value="@integer/google_play_services_version"/>
+                android:value="@integer/google_play_services_version" />
     </application>
 
 </manifest>

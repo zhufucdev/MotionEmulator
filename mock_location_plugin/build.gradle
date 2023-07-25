@@ -69,12 +69,6 @@ dependencies {
     // Internal
     implementation project(':update')
     implementation project(':stub_plugin')
-    // Ktor
-    implementation 'io.ktor:ktor-client-core-jvm:2.3.1'
-    implementation 'io.ktor:ktor-client-android-jvm:2.3.1'
-    implementation 'io.ktor:ktor-client-serialization-jvm:2.3.1'
-    implementation 'io.ktor:ktor-client-content-negotiation:2.3.1'
-    implementation 'io.ktor:ktor-serialization-kotlinx-json:2.3.1'
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'

@@ -22,7 +22,7 @@ import com.zhufucdev.stub.*
 import com.zhufucdev.stub.Emulation
 import com.zhufucdev.motion_emulator.provider.EmulationRef
 import io.ktor.client.*
-import io.ktor.client.engine.android.*
+import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
@@ -42,7 +42,7 @@ fun getAttrColor(@AttrRes id: Int, context: Context): Int {
     return typedValue.data
 }
 
-val defaultKtorClient = HttpClient(Android) {
+val defaultKtorClient = HttpClient(CIO) {
     install(ContentNegotiation) {
         json()
     }

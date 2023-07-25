@@ -5,10 +5,22 @@
       <entry key="Android.MotionEmulator.mock_location_plugin">
         <State />
       </entry>
+      <entry key="ProviderTest">
+        <State />
+      </entry>
+      <entry key="ReceiverTest">
+        <State />
+      </entry>
       <entry key="app">
         <State />
       </entry>
       <entry key="cp_plugin">
+        <State />
+      </entry>
+      <entry key="useAppContext()">
+        <State />
+      </entry>
+      <entry key="useServerAndClientTls()">
         <State />
       </entry>
       <entry key="ws_plugin">

@@ -1,7 +1,7 @@
 package com.zhufucdev.motion_emulator
 
 import com.zhufucdev.stub.Vector2D
-import com.zhufucdev.motion_emulator.data.MapProjector
+import com.zhufucdev.stub.MapProjector
 import org.junit.Assert.*
 import org.junit.Test
 import kotlin.random.Random

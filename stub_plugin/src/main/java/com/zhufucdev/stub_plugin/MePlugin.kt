@@ -18,6 +18,7 @@ object MePlugin {
 
     fun queryServer(context: Context): Server {
         with(defaultQuery(context, "server")) {
+            moveToFirst()
             val port = getInt(0)
             val tls = getInt(1)
             return Server(port, tls == 1)
@@ -26,6 +27,7 @@ object MePlugin {
 
     fun queryMethod(context: Context): Method {
         with(defaultQuery(context, "method")) {
+            moveToFirst()
             return Method.valueOf(getString(0).uppercase())
         }
     }

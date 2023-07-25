@@ -1,4 +1,4 @@
-package com.zhufucdev.xposed
+package com.zhufucdev.stub_plugin
 
 import android.annotation.SuppressLint
 import java.security.cert.X509Certificate

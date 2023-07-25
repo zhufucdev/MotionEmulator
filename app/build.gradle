@@ -78,7 +78,7 @@ dependencies {
     implementation project(':update')
     // Ktor
     implementation "io.ktor:ktor-client-core-jvm:${ktor_version}"
-    implementation "io.ktor:ktor-client-android-jvm:${ktor_version}"
+    implementation "io.ktor:ktor-client-cio:$ktor_version"
     implementation "io.ktor:ktor-client-serialization-jvm:${ktor_version}"
     implementation "io.ktor:ktor-client-content-negotiation:${ktor_version}"
     implementation "io.ktor:ktor-serialization-kotlinx-json:${ktor_version}"
@@ -133,5 +133,6 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+    androidTestImplementation project(':stub_plugin')
 }
 
