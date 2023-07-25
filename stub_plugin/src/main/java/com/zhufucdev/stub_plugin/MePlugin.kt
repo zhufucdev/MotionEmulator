@@ -16,12 +16,12 @@ object MePlugin {
             null
         )!!
 
-    fun queryServer(context: Context): Server {
+    fun queryServer(context: Context): WsServer {
         with(defaultQuery(context, "server")) {
             moveToFirst()
             val port = getInt(0)
             val tls = getInt(1)
-            return Server(port, tls == 1)
+            return WsServer(port, tls == 1)
         }
     }
 

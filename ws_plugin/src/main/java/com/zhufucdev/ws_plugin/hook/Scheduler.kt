@@ -3,7 +3,7 @@ package com.zhufucdev.ws_plugin.hook
 import com.highcapable.yukihookapi.hook.log.loggerI
 import com.highcapable.yukihookapi.hook.param.PackageParam
 import com.zhufucdev.stub.Method
-import com.zhufucdev.stub_plugin.Server
+import com.zhufucdev.stub_plugin.WsServer
 import com.zhufucdev.stub_plugin.connect
 import com.zhufucdev.xposed.AbstractScheduler
 import com.zhufucdev.xposed.PREFERENCE_NAME_BRIDGE
@@ -15,12 +15,12 @@ import kotlin.time.Duration.Companion.seconds
 
 object Scheduler : AbstractScheduler() {
     private const val TAG = "Scheduler"
-    private lateinit var server: Server
+    private lateinit var server: WsServer
 
     @OptIn(DelicateCoroutinesApi::class)
     override fun PackageParam.initialize() {
         val prefs = prefs(PREFERENCE_NAME_BRIDGE)
-        server = Server(
+        server = WsServer(
             port = prefs.getString("me_server_port").toIntOrNull() ?: 2023,
             useTls = prefs.getBoolean("me_server_tls", true)
         )
@@ -39,7 +39,8 @@ object Scheduler : AbstractScheduler() {
 
         while (true) {
             server.connect(id) {
-                startEmulation(emulation)
+                if (emulation.isPresent)
+                    startEmulation(emulation.get())
             }
 
             if (!warned) {

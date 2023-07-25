@@ -24,7 +24,7 @@ import com.zhufucdev.stub.estimateSpeed
 import com.zhufucdev.stub.generateSaltedTrace
 import com.zhufucdev.stub.length
 import com.zhufucdev.stub.toPoint
-import com.zhufucdev.stub_plugin.Server
+import com.zhufucdev.stub_plugin.WsServer
 import com.zhufucdev.stub_plugin.ServerScope
 import com.zhufucdev.stub_plugin.connect
 import kotlinx.coroutines.delay
@@ -43,8 +43,8 @@ object MockLocationProvider {
     private val emulationId = NanoIdUtils.randomNanoId()
 
     private lateinit var locationManager: LocationManager
-    private lateinit var server: Server
-    fun init(context: Context, server: Server) {
+    private lateinit var server: WsServer
+    fun init(context: Context, server: WsServer) {
         locationManager = context.getSystemService(LocationManager::class.java)
         val (powerUsage, accuracy) = if (Build.VERSION.SDK_INT >= 30) 1 to 2 else 0 to 5
 
@@ -63,7 +63,8 @@ object MockLocationProvider {
 
     suspend fun emulate() {
         server.connect(emulationId) {
-            startEmulation(emulation)
+            if (emulation.isPresent)
+                startEmulation(emulation.get())
         }
     }
 

@@ -11,6 +11,7 @@ import io.ktor.client.plugins.websocket.receiveDeserialized
 import io.ktor.client.plugins.websocket.sendSerialized
 import io.ktor.client.plugins.websocket.webSocket
 import io.ktor.http.URLProtocol
+import io.ktor.http.isSuccess
 import io.ktor.http.path
 import io.ktor.serialization.kotlinx.KotlinxWebsocketSerializationConverter
 import io.ktor.serialization.kotlinx.json.json
@@ -18,14 +19,15 @@ import io.ktor.websocket.Frame
 import kotlinx.coroutines.isActive
 import kotlinx.serialization.json.Json
 import java.security.SecureRandom
+import java.util.Optional
 import javax.net.ssl.SSLContext
 
-data class Server(val port: Int, val useTls: Boolean) {
+data class WsServer(val port: Int, val useTls: Boolean) {
     internal var previousConnection: HttpClient? = null
 }
 
 interface ServerScope {
-    val emulation: Emulation
+    val emulation: Optional<Emulation>
     suspend fun sendStarted(info: EmulationInfo)
     suspend fun sendProgress(intermediate: Intermediate)
 }
@@ -34,7 +36,7 @@ interface ServerConnection {
     fun close()
 }
 
-suspend fun Server.connect(id: String, block: suspend ServerScope.() -> Unit): ServerConnection {
+suspend fun WsServer.connect(id: String, block: suspend ServerScope.() -> Unit): ServerConnection {
     val client =
         previousConnection
             ?.takeIf { it.engine.isActive }
@@ -70,12 +72,28 @@ suspend fun Server.connect(id: String, block: suspend ServerScope.() -> Unit): S
             }
         },
         block = {
+            if (!call.response.status.isSuccess()) {
+                block.invoke(object : ServerScope {
+                    override val emulation: Optional<Emulation>
+                        get() = Optional.empty()
+
+                    override suspend fun sendStarted(info: EmulationInfo) {
+                        throw NotImplementedError()
+                    }
+
+                    override suspend fun sendProgress(intermediate: Intermediate) {
+                        throw NotImplementedError()
+                    }
+                })
+
+                return@webSocket
+            }
+
             send(Frame.Text(id))
             val received = receiveDeserialized<Emulation>()
             block.invoke(object : ServerScope {
                 private var started = false
-                override val emulation: Emulation
-                    get() = received
+                override val emulation = Optional.of(received)
 
                 override suspend fun sendStarted(info: EmulationInfo) {
                     sendSerialized(info)

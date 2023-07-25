@@ -220,6 +220,11 @@ fun Application.eventServer() {
         }
 
         webSocket("/join") {
+            val localEmulation = Scheduler.emulation
+            if (localEmulation == null) {
+                call.respond(HttpStatusCode.NoContent)
+                return@webSocket
+            }
             val id = (incoming.receive() as Frame.Text).readText()
             sendSerialized(Scheduler.emulation)
             val info = receiveDeserialized<EmulationInfo>()
