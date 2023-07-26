@@ -2,6 +2,7 @@ package com.zhufucdev.mock_location_plugin
 
 import android.app.job.JobParameters
 import android.app.job.JobService
+import com.zhufucdev.stub_plugin.MePlugin
 import kotlinx.coroutines.*
 
 class EmulationService : JobService() {
@@ -9,6 +10,8 @@ class EmulationService : JobService() {
     private lateinit var waitJob: Job
 
     override fun onStartJob(params: JobParameters?): Boolean {
+        val server = MePlugin.queryServer(applicationContext)
+        MockLocationProvider.init(applicationContext, server)
         waitJob = scope.launch {
             MockLocationProvider.emulate()
             jobFinished(params, false)

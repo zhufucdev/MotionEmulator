@@ -1,5 +1,7 @@
 package com.zhufucdev.motion_emulator.ui.emulate
 
+import android.os.Handler
+import android.os.Looper
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
@@ -11,12 +13,15 @@ import kotlinx.coroutines.runBlocking
 class EmulationCardAdapter(fragment: Fragment, private val emulation: Emulation, val map: UnifiedMapFragment) :
     FragmentStateAdapter(fragment) {
     private val emulations = arrayListOf<String>()
+    private val handler = Handler(Looper.getMainLooper())
 
     init {
         Scheduler.onEmulationStateChanged { id, start ->
-            if (start && !emulations.contains(id)) {
-                emulations.add(id)
-                notifyItemInserted(emulations.size)
+            handler.post {
+                if (start && !emulations.contains(id)) {
+                    emulations.add(id)
+                    notifyItemInserted(emulations.size)
+                }
             }
         }
     }

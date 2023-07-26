@@ -5,7 +5,6 @@ import android.app.job.JobScheduler
 import android.content.ComponentName
 import android.content.Context
 import androidx.core.content.getSystemService
-import com.zhufucdev.stub_plugin.MePlugin
 import com.zhufucdev.stub_plugin.PluginBroadcastReceiver
 
 class ControllerReceiver : PluginBroadcastReceiver() {
@@ -14,8 +13,6 @@ class ControllerReceiver : PluginBroadcastReceiver() {
 
         val job = js.allPendingJobs.firstOrNull { it.id == 0 }
             ?: JobInfo.Builder(0, ComponentName(context, EmulationService::class.java)).build()
-        val server = MePlugin.queryServer(context)
-        MockLocationProvider.init(context, server)
         js.schedule(job)
     }
 

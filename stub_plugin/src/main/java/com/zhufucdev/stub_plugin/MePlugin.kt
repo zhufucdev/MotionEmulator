@@ -21,7 +21,7 @@ object MePlugin {
             moveToFirst()
             val port = getInt(0)
             val tls = getInt(1)
-            return WsServer(port, tls == 1)
+            return WsServer(port = port, useTls = tls == 1)
         }
     }
 

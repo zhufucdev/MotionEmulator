@@ -1,7 +1,6 @@
 package com.zhufucdev.motion_emulator.ui.emulate
 
 import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
 import android.util.TypedValue
 import android.view.LayoutInflater
@@ -12,12 +11,12 @@ import androidx.core.view.isVisible
 import androidx.core.view.setPadding
 import com.zhufucdev.motion_emulator.R
 import com.zhufucdev.motion_emulator.data.AppMeta
+import com.zhufucdev.motion_emulator.databinding.FragmentEmulationAppBinding
+import com.zhufucdev.motion_emulator.provider.Scheduler
+import com.zhufucdev.motion_emulator.ui.map.MapController
 import com.zhufucdev.stub.Emulation
 import com.zhufucdev.stub.EmulationInfo
 import com.zhufucdev.stub.android
-import com.zhufucdev.motion_emulator.databinding.FragmentEmulationAppBinding
-import com.zhufucdev.motion_emulator.provider.*
-import com.zhufucdev.motion_emulator.ui.map.MapController
 import com.zhufucdev.stub.toFixed
 import kotlin.math.roundToInt
 
@@ -91,11 +90,7 @@ class EmulationAppFragment : EmulationMonitoringFragment() {
     private fun notifyProgress(progress: Float) {
         val progressBar = binding.progressEmulation
         val span = progressBar.max
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            progressBar.setProgress((span * progress).roundToInt(), true)
-        } else {
-            progressBar.progress = (span * progress).roundToInt()
-        }
+        progressBar.setProgress((span * progress).roundToInt(), true)
     }
 
     private fun notifyStopped() {
@@ -120,8 +115,7 @@ class EmulationAppFragment : EmulationMonitoringFragment() {
             context.getString(R.string.title_named_emulation_ongoing, id.substring(0..4))
         val appInfo = AppMeta.of(
             packageManager.getApplicationInfo(info.owner, PackageManager.GET_META_DATA),
-            packageManager,
-            true
+            packageManager
         )
         app.textAppPicked.text = getString(R.string.text_app_received, appInfo.name)
         app.iconView.setImageDrawable(appInfo.icon)

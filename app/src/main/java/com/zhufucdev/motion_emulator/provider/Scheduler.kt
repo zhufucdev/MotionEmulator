@@ -3,31 +3,39 @@ package com.zhufucdev.motion_emulator.provider
 import android.content.Context
 import android.util.Log
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils
+import com.zhufucdev.motion_emulator.extension.sharedPreferences
+import com.zhufucdev.motion_emulator.plugin.Plugins
 import com.zhufucdev.stub.Emulation
 import com.zhufucdev.stub.EmulationInfo
 import com.zhufucdev.stub.Intermediate
-import com.zhufucdev.motion_emulator.extension.lazySharedPreferences
-import com.zhufucdev.motion_emulator.extension.sharedPreferences
-import com.zhufucdev.motion_emulator.plugin.Plugins
-import io.ktor.http.*
-import io.ktor.serialization.kotlinx.*
-import io.ktor.serialization.kotlinx.json.*
-import io.ktor.server.application.*
-import io.ktor.server.engine.*
-import io.ktor.server.netty.*
-import io.ktor.server.plugins.contentnegotiation.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
-import io.ktor.server.websocket.*
-import io.ktor.util.reflect.*
-import io.ktor.websocket.*
-import kotlinx.coroutines.channels.consumeEach
-import kotlinx.coroutines.flow.consumeAsFlow
-import kotlinx.coroutines.flow.receiveAsFlow
+import io.ktor.http.HttpStatusCode
+import io.ktor.serialization.deserialize
+import io.ktor.serialization.kotlinx.KotlinxWebsocketSerializationConverter
+import io.ktor.serialization.kotlinx.json.json
+import io.ktor.server.application.Application
+import io.ktor.server.application.ApplicationCall
+import io.ktor.server.application.call
+import io.ktor.server.application.install
+import io.ktor.server.engine.ApplicationEngine
+import io.ktor.server.engine.ApplicationEngineEnvironmentBuilder
+import io.ktor.server.engine.applicationEngineEnvironment
+import io.ktor.server.engine.connector
+import io.ktor.server.engine.embeddedServer
+import io.ktor.server.engine.sslConnector
+import io.ktor.server.netty.Netty
+import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.server.response.respond
+import io.ktor.server.routing.get
+import io.ktor.server.routing.routing
+import io.ktor.server.websocket.WebSockets
+import io.ktor.server.websocket.converter
+import io.ktor.server.websocket.receiveDeserialized
+import io.ktor.server.websocket.webSocketRaw
+import io.ktor.websocket.Frame
+import io.ktor.websocket.readText
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import java.nio.charset.Charset
-import kotlin.coroutines.suspendCoroutine
+import kotlin.collections.set
 
 @Serializable
 data class EmulationRef(
@@ -40,7 +48,6 @@ data class EmulationRef(
 )
 
 object Scheduler {
-    private val emulationQueue = mutableMapOf<String, (Emulation?) -> Unit>()
     private val stateListeners = mutableSetOf<(String, Boolean) -> Unit>()
     private val intermediateListeners = mutableSetOf<(String, Intermediate) -> Unit>()
 
@@ -53,33 +60,6 @@ object Scheduler {
     private lateinit var server: ApplicationEngine
     private var serverRunning = false
 
-    private val environment
-        get() =
-            applicationEngineEnvironment {
-                if (tls) {
-                    val keyAlis = "motion_provider"
-                    val keyPassword = NanoIdUtils.randomNanoId().toCharArray()
-                    val keyStore = generateSelfSignedKeyStore(keyAlis, keyPassword)
-
-                    sslConnector(
-                        keyStore = keyStore,
-                        privateKeyPassword = { keyPassword },
-                        keyStorePassword = { keyPassword },
-                        keyAlias = keyAlis
-                    ) {
-                        host = "127.0.0.1"
-                        port = this@Scheduler.port
-                    }
-                } else {
-                    connector {
-                        host = "127.0.0.1"
-                        port = this@Scheduler.port
-                    }
-                }
-
-                module(Application::eventServer)
-            }
-
     fun init(context: Context) {
         if (serverRunning) {
             Log.w("Scheduler", "Reinitialize a running instance")
@@ -88,7 +68,15 @@ object Scheduler {
         val prefs = context.sharedPreferences()
         port = prefs.getString("provider_port", "")!!.toIntOrNull() ?: 20230
         tls = prefs.getBoolean("provider_tls", true)
-        server = embeddedServer(Netty, environment)
+        server = embeddedServer(Netty, applicationEngineEnvironment {
+            if (tls) {
+                configureSsl(port)
+            } else {
+                configure(port)
+            }
+
+            module(Application::eventServer)
+        })
 
         server.start(false)
         serverRunning = true
@@ -101,7 +89,14 @@ object Scheduler {
     fun setIntermediate(id: String, info: Intermediate?) {
         if (info != null) {
             mIntermediate[id] = info
-            intermediateListeners.forEach { it.invoke(id, info) }
+            intermediateListeners.forEach {
+                try {
+                    it.invoke(id, info)
+                } catch (e: Exception) {
+                    Log.w("Scheduler", "Error while notifying intermediate")
+                    e.printStackTrace()
+                }
+            }
         } else {
             mIntermediate.remove(id)
         }
@@ -112,14 +107,17 @@ object Scheduler {
     fun setInfo(id: String, info: EmulationInfo?) {
         if (info != null) {
             mInfo[id] = info
-            Log.d("Scheduler", "info[$id] updated with $info")
         } else {
             mInfo.remove(id)
-            emulationQueue[id]?.invoke(null)
-            emulationQueue.remove(id)
-            Log.d("Scheduler", "info[$id] has been removed")
         }
-        stateListeners.forEach { it.invoke(id, info != null) }
+        stateListeners.forEach {
+            try {
+                it.invoke(id, info != null)
+            } catch (e: Exception) {
+                Log.w("Scheduler", "Error while notifying changes to emulation info")
+                e.printStackTrace()
+            }
+        }
     }
 
     val info: Map<String, EmulationInfo> get() = mInfo
@@ -130,16 +128,8 @@ object Scheduler {
             if (value == null) {
                 mInfo.clear()
             }
-            emulationQueue.forEach { (_, queue) -> queue.invoke(value) }
-            emulationQueue.clear()
         }
         get() = mEmulation
-
-    suspend fun next(id: String): Emulation? = suspendCoroutine { c ->
-        emulationQueue[id] = { e ->
-            c.resumeWith(Result.success(e))
-        }
-    }
 
     fun onEmulationStateChanged(l: (String, Boolean) -> Unit): ListenCallback {
         stateListeners.add(l)
@@ -197,14 +187,35 @@ interface ListenCallback {
     fun resume()
 }
 
+fun ApplicationEngineEnvironmentBuilder.configureSsl(port: Int) {
+    val keyAlis = "motion_provider"
+    val keyPassword = NanoIdUtils.randomNanoId().toCharArray()
+    val keyStore = generateSelfSignedKeyStore(keyAlis, keyPassword)
+
+    sslConnector(
+        keyStore = keyStore,
+        privateKeyPassword = { keyPassword },
+        keyStorePassword = { keyPassword },
+        keyAlias = keyAlis
+    ) {
+        host = "0.0.0.0"
+        this.port = port
+    }
+}
+
+fun ApplicationEngineEnvironmentBuilder.configure(port: Int) {
+    connector {
+        host = "0.0.0.0"
+        this.port = port
+    }
+}
+
 fun Application.eventServer() {
     install(ContentNegotiation) {
         json()
     }
 
     install(WebSockets) {
-        pingPeriodMillis = 15_000
-        timeoutMillis = 15_000
         maxFrameSize = Long.MAX_VALUE
         masking = false
         contentConverter = KotlinxWebsocketSerializationConverter(Json)
@@ -219,28 +230,20 @@ fun Application.eventServer() {
             }
         }
 
-        webSocket("/join") {
-            val localEmulation = Scheduler.emulation
-            if (localEmulation == null) {
-                call.respond(HttpStatusCode.NoContent)
-                return@webSocket
-            }
+        webSocketRaw("/join") {
             val id = (incoming.receive() as Frame.Text).readText()
-            sendSerialized(Scheduler.emulation)
-            val info = receiveDeserialized<EmulationInfo>()
-            Scheduler.setInfo(id, info)
-
             try {
-                incoming.consumeAsFlow().collect {
-                    val data = converter!!.deserialize(
-                        Charset.defaultCharset(),
-                        typeInfo<Intermediate>(),
-                        it
-                    )
-                    if (data is Intermediate) {
-                        Scheduler.setIntermediate(id, data)
+                val info = receiveDeserialized<EmulationInfo>()
+                Scheduler.setInfo(id, info)
+                for (frame in incoming) {
+                    if (frame is Frame.Close) {
+                        break
                     }
+                    val data = converter!!.deserialize<Intermediate>(frame)
+                    Scheduler.setIntermediate(id, data)
                 }
+            } catch (e: Exception) {
+                e.printStackTrace()
             } finally {
                 Scheduler.setInfo(id, null)
                 Scheduler.setIntermediate(id, null)

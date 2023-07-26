@@ -28,7 +28,7 @@ class ReceiverTest {
     fun useMockLocationProvider() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        MockLocationProvider.init(appContext, WsServer(20230, true))
+        MockLocationProvider.init(appContext, WsServer(port = 20230, useTls = true))
         runBlocking {
             MockLocationProvider.emulate()
         }
@@ -36,12 +36,13 @@ class ReceiverTest {
 
     @Test
     fun useAbstractionLayer() {
-        val server = WsServer(20230, true)
+        val server = WsServer(port = 20230, useTls = true)
         runBlocking(Dispatchers.IO) {
             server.connect(NanoIdUtils.randomNanoId()) {
                 sendStarted(EmulationInfo(20.0, 10.0, BuildConfig.APPLICATION_ID))
                 repeat(10) {
                     sendProgress(Intermediate(Point.zero, it * 2.0, it / 10f))
+                    println("Progress sent, ${it + 1} / 10")
                     delay(2000)
                 }
             }

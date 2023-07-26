@@ -6,13 +6,11 @@ import android.content.res.Resources
 import android.graphics.drawable.Drawable
 
 /**
- * Represents strategy applied to an app.
- *
- * @param positive in bypass mode, positive means not to hook
+ * Utility class to [ApplicationInfo]
  */
-data class AppMeta(val name: String?, val icon: Drawable?, val packageName: String, val positive: Boolean) {
+data class AppMeta(val name: String?, val icon: Drawable?, val packageName: String) {
     companion object {
-        fun of(app: ApplicationInfo, pm: PackageManager, hooked: Boolean) =
+        fun of(app: ApplicationInfo, pm: PackageManager) =
             AppMeta(
                 (app.labelRes.takeIf { it != 0 }?.let { pm.getText(app.packageName, it, app) })?.toString(),
                 try {
@@ -20,8 +18,7 @@ data class AppMeta(val name: String?, val icon: Drawable?, val packageName: Stri
                 } catch (_: Resources.NotFoundException) {
                     null
                 },
-                app.packageName,
-                hooked
+                app.packageName
             )
     }
 }
