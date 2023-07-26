@@ -31,8 +31,13 @@ import io.ktor.server.websocket.WebSockets
 import io.ktor.server.websocket.converter
 import io.ktor.server.websocket.receiveDeserialized
 import io.ktor.server.websocket.webSocketRaw
+import io.ktor.websocket.CloseReason
 import io.ktor.websocket.Frame
+import io.ktor.websocket.close
 import io.ktor.websocket.readText
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlin.collections.set
@@ -48,11 +53,11 @@ data class EmulationRef(
 )
 
 object Scheduler {
-    private val stateListeners = mutableSetOf<(String, Boolean) -> Unit>()
+    private val stateListeners = mutableSetOf<(String, Boolean) -> Boolean>()
     private val intermediateListeners = mutableSetOf<(String, Intermediate) -> Unit>()
 
     private var mEmulation: Emulation? = null
-    private val mInfo: MutableMap<String, EmulationInfo> = hashMapOf()
+    private var mInfo: MutableMap<String, EmulationInfo> = hashMapOf()
     private val mIntermediate: MutableMap<String, Intermediate> = hashMapOf()
 
     private var port = 20230
@@ -110,12 +115,17 @@ object Scheduler {
         } else {
             mInfo.remove(id)
         }
-        stateListeners.forEach {
+        notifyStateChanged(id, info != null)
+    }
+
+    private fun notifyStateChanged(id: String, state: Boolean) {
+        stateListeners.removeAll {
             try {
-                it.invoke(id, info != null)
+                it.invoke(id, state)
             } catch (e: Exception) {
                 Log.w("Scheduler", "Error while notifying changes to emulation info")
                 e.printStackTrace()
+                false
             }
         }
     }
@@ -126,30 +136,48 @@ object Scheduler {
         set(value) {
             mEmulation = value
             if (value == null) {
-                mInfo.clear()
+                val original = mInfo
+                mInfo = mutableMapOf()
+                original.forEach { (id, _) ->
+                    notifyStateChanged(id, false)
+                }
             }
         }
         get() = mEmulation
 
-    fun onEmulationStateChanged(l: (String, Boolean) -> Unit): ListenCallback {
-        stateListeners.add(l)
+    fun onEmulationStateChanged(l: (id: String, state: Boolean) -> Unit): ListenCallback {
+        val actual: (String, Boolean) -> Boolean = { id, state ->
+            l.invoke(id, state)
+            false
+        }
+        stateListeners.add(actual)
 
         return object : ListenCallback {
-            override fun cancel() {
-                if (!stateListeners.contains(l)) {
-                    throw IllegalStateException("Already cancelled")
+            override fun pause() {
+                if (!stateListeners.contains(actual)) {
+                    throw IllegalStateException("Already paused")
                 }
 
-                stateListeners.remove(l)
+                stateListeners.remove(actual)
             }
 
             override fun resume() {
-                if (stateListeners.contains(l)) {
+                if (stateListeners.contains(actual)) {
                     throw IllegalStateException("Already resumed")
                 }
 
-                stateListeners.add(l)
+                stateListeners.add(actual)
             }
+        }
+    }
+
+    suspend fun nextEmulationState(targetId: String? = null) = suspendCancellableCoroutine {
+        stateListeners.add { target, b ->
+            if (targetId == null || target == targetId) {
+                it.resumeWith(Result.success(b))
+                return@add true
+            }
+            false
         }
     }
 
@@ -157,9 +185,9 @@ object Scheduler {
         intermediateListeners.add(l)
 
         return object : ListenCallback {
-            override fun cancel() {
+            override fun pause() {
                 if (!intermediateListeners.contains(l)) {
-                    throw IllegalStateException("Already cancelled")
+                    throw IllegalStateException("Already paused")
                 }
 
                 intermediateListeners.remove(l)
@@ -183,7 +211,7 @@ object Scheduler {
 }
 
 interface ListenCallback {
-    fun cancel()
+    fun pause()
     fun resume()
 }
 
@@ -198,14 +226,14 @@ fun ApplicationEngineEnvironmentBuilder.configureSsl(port: Int) {
         keyStorePassword = { keyPassword },
         keyAlias = keyAlis
     ) {
-        host = "0.0.0.0"
+        host = "127.0.0.1"
         this.port = port
     }
 }
 
 fun ApplicationEngineEnvironmentBuilder.configure(port: Int) {
     connector {
-        host = "0.0.0.0"
+        host = "127.0.0.1"
         this.port = port
     }
 }
@@ -232,6 +260,21 @@ fun Application.eventServer() {
 
         webSocketRaw("/join") {
             val id = (incoming.receive() as Frame.Text).readText()
+            val watchdog = launch {
+                while (true) {
+                    val running = Scheduler.nextEmulationState(id)
+                    if (!running) {
+                        close(
+                            CloseReason(
+                                CloseReason.Codes.GOING_AWAY,
+                                "emulation canceled"
+                            )
+                        )
+                        break
+                    }
+                }
+            }
+
             try {
                 val info = receiveDeserialized<EmulationInfo>()
                 Scheduler.setInfo(id, info)
@@ -245,6 +288,7 @@ fun Application.eventServer() {
             } catch (e: Exception) {
                 e.printStackTrace()
             } finally {
+                watchdog.cancelAndJoin()
                 Scheduler.setInfo(id, null)
                 Scheduler.setIntermediate(id, null)
             }

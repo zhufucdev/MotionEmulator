@@ -20,7 +20,9 @@ import io.ktor.http.path
 import io.ktor.serialization.kotlinx.KotlinxWebsocketSerializationConverter
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.util.InternalAPI
+import io.ktor.websocket.CloseReason
 import io.ktor.websocket.Frame
+import io.ktor.websocket.close
 import io.ktor.websocket.serialization.sendSerializedBase
 import kotlinx.coroutines.isActive
 import kotlinx.serialization.json.Json
@@ -129,7 +131,7 @@ suspend fun WsServer.connect(id: String, block: suspend ServerScope.() -> Unit):
                         }
                     })
                 } finally {
-                    send(Frame.Close())
+                    close()
                 }
             }
         )

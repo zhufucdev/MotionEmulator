@@ -24,7 +24,7 @@ abstract class EmulationMonitoringFragment : Fragment() {
         super.onPause()
         listeners.forEach {
             try {
-                it.cancel()
+                it.pause()
             } catch (e: IllegalStateException) {
                 // do nothing
             }
