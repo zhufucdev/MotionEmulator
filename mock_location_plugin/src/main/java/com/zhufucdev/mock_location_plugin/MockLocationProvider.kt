@@ -63,6 +63,7 @@ object MockLocationProvider {
 
     suspend fun emulate() {
         server.connect(emulationId) {
+            Availability.notifyConnected(true)
             if (emulation.isPresent)
                 startEmulation(emulation.get())
         }
