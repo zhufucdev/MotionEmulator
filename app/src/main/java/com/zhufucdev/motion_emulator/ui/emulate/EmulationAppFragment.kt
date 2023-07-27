@@ -14,8 +14,8 @@ import com.zhufucdev.motion_emulator.data.AppMeta
 import com.zhufucdev.motion_emulator.databinding.FragmentEmulationAppBinding
 import com.zhufucdev.motion_emulator.provider.Scheduler
 import com.zhufucdev.motion_emulator.ui.map.MapController
-import com.zhufucdev.stub.Emulation
 import com.zhufucdev.stub.EmulationInfo
+import com.zhufucdev.stub.AgentState
 import com.zhufucdev.stub.android
 import com.zhufucdev.stub.toFixed
 import kotlin.math.roundToInt
@@ -25,7 +25,6 @@ class EmulationAppFragment : EmulationMonitoringFragment() {
     private lateinit var id: String
     private lateinit var binding: FragmentEmulationAppBinding
     private lateinit var packageManager: PackageManager
-    var emulation: Emulation? = null
     var map: MapController? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -48,32 +47,31 @@ class EmulationAppFragment : EmulationMonitoringFragment() {
 
             requireActivity().runOnUiThread {
                 notifyProgress(info.progress)
-                Scheduler.info[id]?.duration?.let { t -> t - info.elapsed }?.let {
+                Scheduler.instance[id]?.duration?.let { t -> t - info.elapsed }?.let {
                     notifyTime(it)
                 }
                 map?.updateLocationIndicator(info.location.android())
             }
         }
 
-        notifyState(Scheduler.emulation != null)
-        addEmulationStateListener { id, running ->
+        notifyState(AgentState.PENDING)
+        addEmulationStateListener { id, state ->
             if (id != this.id) return@addEmulationStateListener
             requireActivity().runOnUiThread {
-                notifyState(running)
+                notifyState(state)
             }
         }
     }
 
-    private fun notifyState(running: Boolean) {
-        val info = Scheduler.info[id]
-        if (running) {
-            if (info != null) {
-                notifyStarted(info)
-            } else {
-                notifyPending()
-            }
-        } else {
-            notifyStopped()
+    private fun notifyState(state: AgentState) {
+        val info = Scheduler.instance[id]
+        when (state) {
+            AgentState.NOT_JOINED -> notifyOffline()
+            AgentState.PENDING -> notifyPending()
+            AgentState.RUNNING -> notifyStarted(info!!)
+            AgentState.CANCELED -> notifyStopped(R.string.title_emulation_canceled)
+            AgentState.PAUSED -> TODO()
+            AgentState.COMPLETED -> notifyStopped(R.string.title_emulation_completed)
         }
     }
 
@@ -93,13 +91,22 @@ class EmulationAppFragment : EmulationMonitoringFragment() {
         progressBar.setProgress((span * progress).roundToInt(), true)
     }
 
-    private fun notifyStopped() {
-        binding.titleEmulationStatus.text = getString(R.string.title_emulation_stopped)
+    private fun notifyOffline() {
+        binding.titleEmulationStatus.setText(R.string.title_agent_offline)
+        binding.textEmulationStatus.setText(R.string.text_emulation_pending)
+        binding.textEmulationStatus.isVisible = true
+        binding.stackMonitors.root.isVisible = false
+        binding.stackAppReceived.root.isVisible = false
+        binding.btnDetermine.isVisible = false
+        binding.progressEmulation.isVisible = true
+    }
+
+    private fun notifyStopped(title: Int) {
+        binding.titleEmulationStatus.text = getString(title)
         binding.textEmulationStatus.isVisible = true
         binding.stackMonitors.root.isVisible = false
         binding.stackAppReceived.root.isVisible = false
         binding.btnDetermine.setOnClickListener {
-            Scheduler.emulation = emulation
             notifyPending()
         }
         binding.btnDetermine.setText(R.string.action_restart)
@@ -134,7 +141,7 @@ class EmulationAppFragment : EmulationMonitoringFragment() {
         binding.textEmulationStatus.isVisible = false
 
         binding.btnDetermine.setOnClickListener {
-            Scheduler.setInfo(id, null)
+            Scheduler.cancelAgent(id)
         }
         binding.btnDetermine.setText(R.string.action_determine)
         binding.btnDetermine.isVisible = true
@@ -164,6 +171,6 @@ class EmulationAppFragment : EmulationMonitoringFragment() {
 
     override fun onResume() {
         super.onResume()
-        notifyState(Scheduler.emulation != null)
+        notifyState(Scheduler.currentEmulationState(id))
     }
 }

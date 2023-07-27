@@ -17,7 +17,10 @@ import io.ktor.server.application.Application
 import io.ktor.server.engine.applicationEngineEnvironment
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 
@@ -35,8 +38,18 @@ class ProviderUnitTest {
             println("Progress received, ${intermediate.progress.toFixed(2)}")
         }
 
-        runBlocking {
+        val coroutine = CoroutineScope(Dispatchers.IO)
+        val client = coroutine.launch {
             sendAndReceive(WsServer(port = 3000, useTls = true))
+        }
+        coroutine.launch {
+            delay(2500)
+            Scheduler.cancelAll()
+            delay(1000)
+            Scheduler.startAll()
+        }
+        runBlocking {
+            client.join()
         }
         server.stop()
     }
@@ -51,11 +64,11 @@ class ProviderUnitTest {
     private suspend fun sendAndReceive(server: WsServer) {
         val id = NanoIdUtils.randomNanoId()
         server.connect(id) {
-            sendStarted(EmulationInfo(20.0, 10.0, id))
+            sendStarted(EmulationInfo(10.0, 10.0, id))
             repeat(10) {
                 sendProgress(Intermediate(Point.zero, it * 2.0, (it + 1) / 10f))
                 println("Progress sent, ${it + 1} / 10")
-                delay(2000)
+                delay(1000)
             }
         }.close()
     }

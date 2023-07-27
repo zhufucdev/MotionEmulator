@@ -57,7 +57,7 @@ class ProviderTest {
 
         runBlocking(Dispatchers.IO) {
             val id = NanoIdUtils.randomNanoId()
-            WsServer(20230, tls).connect(id) {
+            WsServer(port = 20230, useTls = tls).connect(id) {
                 assertEquals(targetEmulation, emulation.getOrNull())
                 sendStarted(EmulationInfo(20.0, 10.0, id))
                 repeat(10) {

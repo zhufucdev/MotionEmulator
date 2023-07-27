@@ -4,6 +4,7 @@ import androidx.fragment.app.Fragment
 import com.zhufucdev.stub.Intermediate
 import com.zhufucdev.motion_emulator.provider.ListenCallback
 import com.zhufucdev.motion_emulator.provider.Scheduler
+import com.zhufucdev.stub.AgentState
 
 /**
  * A [Fragment] capable of receiving emulation changes
@@ -16,8 +17,8 @@ abstract class EmulationMonitoringFragment : Fragment() {
         listeners.add(Scheduler.addIntermediateListener(l))
     }
 
-    protected fun addEmulationStateListener(l: (String, Boolean) -> Unit) {
-        listeners.add(Scheduler.onEmulationStateChanged(l))
+    protected fun addEmulationStateListener(l: (String, AgentState) -> Unit) {
+        listeners.add(Scheduler.onAgentStateChanged(l))
     }
 
     override fun onPause() {

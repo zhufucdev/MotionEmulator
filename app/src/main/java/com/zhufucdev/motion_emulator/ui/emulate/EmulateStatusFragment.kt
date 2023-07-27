@@ -70,7 +70,7 @@ class EmulateStatusFragment : Fragment() {
 
     private fun initializeMonitors() {
         val viewPager = binding.viewpagerStatus
-        viewPager.adapter = EmulationCardAdapter(this, emulation, binding.mapMotionPreview)
+        viewPager.adapter = EmulationCardAdapter(this, binding.mapMotionPreview)
     }
 
     private fun addMonitorWorker() {

@@ -1,8 +1,11 @@
 package com.zhufucdev.stub_plugin
 
+import android.util.Log
+import com.zhufucdev.stub.AgentState
 import com.zhufucdev.stub.Emulation
 import com.zhufucdev.stub.EmulationInfo
 import com.zhufucdev.stub.Intermediate
+import com.zhufucdev.stub_plugin.coroutine.launchPausing
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.okhttp.OkHttp
@@ -20,10 +23,12 @@ import io.ktor.http.path
 import io.ktor.serialization.kotlinx.KotlinxWebsocketSerializationConverter
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.util.InternalAPI
-import io.ktor.websocket.CloseReason
 import io.ktor.websocket.Frame
 import io.ktor.websocket.close
+import io.ktor.websocket.readBytes
+import io.ktor.websocket.send
 import io.ktor.websocket.serialization.sendSerializedBase
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.isActive
 import kotlinx.serialization.json.Json
 import java.security.SecureRandom
@@ -41,18 +46,17 @@ interface ServerScope {
 }
 
 interface ServerConnection {
+    val successful: Boolean
     fun close()
 }
 
 private fun HttpRequestBuilder.urlTo(
     server: WsServer,
-    path: String,
     config: URLBuilder.() -> Unit
 ) {
     url {
         host = server.host
         port = server.port
-        path(path)
         config()
     }
 }
@@ -85,13 +89,23 @@ suspend fun WsServer.connect(id: String, block: suspend ServerScope.() -> Unit):
                 }
             }
 
-    val currentEmu = client.get {
-        urlTo(this@connect, "current") {
-            protocol = if (useTls) URLProtocol.HTTPS else URLProtocol.HTTP
+    val currentEmu = runCatching {
+        client.get {
+            urlTo(this@connect) {
+                protocol = if (useTls) URLProtocol.HTTPS else URLProtocol.HTTP
+                path("current")
+            }
         }
     }
 
-    if (!currentEmu.status.isSuccess()) {
+    if (currentEmu.isFailure) {
+        return object : ServerConnection {
+            override val successful: Boolean = false
+            override fun close() {
+                client.close()
+            }
+        }
+    } else if (currentEmu.getOrThrow().status.let { !it.isSuccess() }) {
         block.invoke(object : ServerScope {
             override val emulation: Optional<Emulation>
                 get() = Optional.empty()
@@ -105,31 +119,65 @@ suspend fun WsServer.connect(id: String, block: suspend ServerScope.() -> Unit):
             }
         })
     } else {
-        val emulation = currentEmu.body<Emulation>()
+        val emulation = currentEmu.getOrNull()!!.body<Emulation>()
 
         client.webSocket(
             request = {
-                urlTo(this@connect, "join") {
+                urlTo(this@connect) {
                     protocol = if (useTls) URLProtocol.WSS else URLProtocol.WS
+                    path("join", id)
                 }
             },
             block = {
-                send(Frame.Text(id))
+                val scope = object : ServerScope {
+                    private var started = false
+                    override val emulation = Optional.of(emulation)
+
+                    override suspend fun sendStarted(info: EmulationInfo) {
+                        sendSerializedBase<EmulationInfo>(info, converter!!, Charsets.UTF_8)
+                        started = true
+                    }
+
+                    override suspend fun sendProgress(intermediate: Intermediate) {
+                        if (!started) throw IllegalStateException("Sending progress before start")
+                        sendSerialized(intermediate)
+                    }
+                }
+
+                fun launchWorker() = launchPausing {
+                    block.invoke(scope)
+                    send(Frame.Close(byteArrayOf(Byte.MAX_VALUE)))
+                }
+
                 try {
-                    block.invoke(object : ServerScope {
-                        private var started = false
-                        override val emulation = Optional.of(emulation)
+                    var worker = launchWorker()
+                    for (req in incoming) {
+                        when (val state = AgentState.values()[req.readBytes().first().toInt()]) {
+                            AgentState.CANCELED -> {
+                                worker.cancelAndJoin()
+                            }
 
-                        override suspend fun sendStarted(info: EmulationInfo) {
-                            sendSerializedBase<EmulationInfo>(info, converter!!, Charsets.UTF_8)
-                            started = true
-                        }
+                            AgentState.PAUSED -> {
+                                worker.pause()
+                            }
 
-                        override suspend fun sendProgress(intermediate: Intermediate) {
-                            if (!started) throw IllegalStateException("Sending progress before start")
-                            sendSerialized(intermediate)
+                            AgentState.PENDING -> {
+                                if (worker.isPaused) {
+                                    worker.resume()
+                                } else {
+                                    worker.cancelAndJoin()
+                                    worker = launchWorker()
+                                }
+                            }
+
+                            else -> {
+                                Log.w(
+                                    "WsServer",
+                                    "Watchdog received an illegal request: ${state.name}"
+                                )
+                            }
                         }
-                    })
+                    }
                 } finally {
                     close()
                 }
@@ -137,7 +185,9 @@ suspend fun WsServer.connect(id: String, block: suspend ServerScope.() -> Unit):
         )
     }
 
+
     return object : ServerConnection {
+        override val successful: Boolean = true
         override fun close() {
             client.close()
         }
