@@ -72,7 +72,6 @@ object MockLocationProvider {
         private set
 
     private suspend fun ServerScope.startEmulation(emulation: Emulation) {
-        if (isEmulating) return
         isEmulating = true
 
         val trace = emulation.trace

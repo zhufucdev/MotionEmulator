@@ -1,5 +1,6 @@
 package com.zhufucdev.motion_emulator
 
+import android.util.Log
 import androidx.core.content.edit
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -59,10 +60,10 @@ class ProviderTest {
             val id = NanoIdUtils.randomNanoId()
             WsServer(port = 20230, useTls = tls).connect(id) {
                 assertEquals(targetEmulation, emulation.getOrNull())
-                sendStarted(EmulationInfo(20.0, 10.0, id))
+                sendStarted(EmulationInfo(10.0, 10.0, id))
                 repeat(10) {
-                    sendProgress(Intermediate(Point.zero, it * 2.0, (it + 1) / 10f))
-                    delay(2000)
+                    sendProgress(Intermediate(Point.zero, it * 1.0, (it + 1) / 10f))
+                    delay(1000)
                 }
             }.close()
         }

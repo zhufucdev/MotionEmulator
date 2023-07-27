@@ -70,6 +70,7 @@ class ProviderUnitTest {
                 println("Progress sent, ${it + 1} / 10")
                 delay(1000)
             }
+            close()
         }.close()
     }
 }

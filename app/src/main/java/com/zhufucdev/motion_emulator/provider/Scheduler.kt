@@ -5,7 +5,7 @@ import android.util.Log
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils
 import com.zhufucdev.motion_emulator.extension.sharedPreferences
 import com.zhufucdev.motion_emulator.plugin.Plugins
-import com.zhufucdev.motion_emulator.provider.Scheduler.agentStateChannelOf
+import com.zhufucdev.motion_emulator.provider.Scheduler.incomingAgentStateOf
 import com.zhufucdev.motion_emulator.provider.Scheduler.instance
 import com.zhufucdev.stub.AgentState
 import com.zhufucdev.stub.Emulation
@@ -249,7 +249,7 @@ object Scheduler {
      * In the case [targetId] is null, it waits for any state
      * change.
      *
-     * @see [agentStateChannelOf] in favor of channels
+     * @see [incomingAgentStateOf] in favor of channels
      */
     suspend fun nextStateChange(targetId: String? = null) =
         suspendCancellableCoroutine {
@@ -267,7 +267,7 @@ object Scheduler {
      * The channel way of [onAgentStateChanged].
      * @see [nextStateChange] in favor of suspend functions
      */
-    fun CoroutineScope.agentStateChannelOf(targetId: String? = null): ReceiveChannel<AgentState> {
+    fun CoroutineScope.incomingAgentStateOf(targetId: String? = null): ReceiveChannel<AgentState> {
         val channel = Channel<AgentState>()
         stateListeners.add { target, state ->
             if (targetId == null || target == targetId) {
@@ -302,6 +302,7 @@ object Scheduler {
 
     fun stop(context: Context) {
         Plugins.enabled.forEach { it.notifyStop(context) }
+        notifyAll(AgentState.NOT_JOINED)
         server.stop()
         serverRunning = false
     }
@@ -357,11 +358,11 @@ fun Application.eventServer() {
                     Scheduler.notifyEmulationStarted(id, info)
                     for (frame in incoming) {
                         if (frame is Frame.Close) {
-                            if (frame.data.singleOrNull() == Byte.MAX_VALUE) {
-                                Scheduler.notifyEmulationCompleted(id)
-                            } else {
-                                close()
-                            }
+                            close()
+                            break
+                        } else if (frame.data.singleOrNull() == Byte.MAX_VALUE) {
+                            // this is signal completion
+                            Scheduler.notifyEmulationCompleted(id)
                             break
                         }
                         val data = converter!!.deserialize<Intermediate>(frame)
@@ -374,7 +375,7 @@ fun Application.eventServer() {
 
             var worker = launchWorker()
 
-            for (req in agentStateChannelOf(id)) {
+            for (req in incomingAgentStateOf(id)) {
                 when (req) {
                     AgentState.NOT_JOINED -> {
                         worker.cancelAndJoin()

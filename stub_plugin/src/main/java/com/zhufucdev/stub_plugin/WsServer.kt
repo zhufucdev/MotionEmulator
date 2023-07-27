@@ -23,9 +23,11 @@ import io.ktor.http.path
 import io.ktor.serialization.kotlinx.KotlinxWebsocketSerializationConverter
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.util.InternalAPI
+import io.ktor.websocket.CloseReason
 import io.ktor.websocket.Frame
 import io.ktor.websocket.close
 import io.ktor.websocket.readBytes
+import io.ktor.websocket.send
 import io.ktor.websocket.serialization.sendSerializedBase
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.isActive
@@ -42,6 +44,7 @@ interface ServerScope {
     val emulation: Optional<Emulation>
     suspend fun sendStarted(info: EmulationInfo)
     suspend fun sendProgress(intermediate: Intermediate)
+    suspend fun close()
 }
 
 interface ServerConnection {
@@ -116,6 +119,10 @@ suspend fun WsServer.connect(id: String, block: suspend ServerScope.() -> Unit):
             override suspend fun sendProgress(intermediate: Intermediate) {
                 throw NotImplementedError()
             }
+
+            override suspend fun close() {
+                throw NotImplementedError()
+            }
         })
     } else {
         val emulation = currentEmu.getOrNull()!!.body<Emulation>()
@@ -141,11 +148,15 @@ suspend fun WsServer.connect(id: String, block: suspend ServerScope.() -> Unit):
                         if (!started) throw IllegalStateException("Sending progress before start")
                         sendSerialized(intermediate)
                     }
+
+                    override suspend fun close() {
+                        close(CloseReason(CloseReason.Codes.NORMAL, "canceled programmatically"))
+                    }
                 }
 
                 fun launchWorker() = launchPausing {
                     block.invoke(scope)
-                    send(Frame.Close(byteArrayOf(Byte.MAX_VALUE)))
+                    send(byteArrayOf(Byte.MAX_VALUE)) // this is signal completion
                 }
 
                 try {
@@ -164,7 +175,7 @@ suspend fun WsServer.connect(id: String, block: suspend ServerScope.() -> Unit):
                                 if (worker.isPaused) {
                                     worker.resume()
                                 } else {
-                                    worker.cancelAndJoin()
+                                    if (!worker.isCancelled) worker.cancelAndJoin()
                                     worker = launchWorker()
                                 }
                             }

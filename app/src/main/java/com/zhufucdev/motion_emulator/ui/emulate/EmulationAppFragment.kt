@@ -107,6 +107,7 @@ class EmulationAppFragment : EmulationMonitoringFragment() {
         binding.stackMonitors.root.isVisible = false
         binding.stackAppReceived.root.isVisible = false
         binding.btnDetermine.setOnClickListener {
+            Scheduler.startAgent(id)
             notifyPending()
         }
         binding.btnDetermine.setText(R.string.action_restart)
