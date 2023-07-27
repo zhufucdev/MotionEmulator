@@ -26,7 +26,6 @@ import io.ktor.util.InternalAPI
 import io.ktor.websocket.Frame
 import io.ktor.websocket.close
 import io.ktor.websocket.readBytes
-import io.ktor.websocket.send
 import io.ktor.websocket.serialization.sendSerializedBase
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.isActive

@@ -15,11 +15,10 @@ import androidx.work.WorkManager
 import com.zhufucdev.motion_emulator.R
 import com.zhufucdev.motion_emulator.data.Traces
 import com.zhufucdev.motion_emulator.databinding.FragmentEmulateStatusBinding
-import com.zhufucdev.stub.Emulation
-import com.zhufucdev.motion_emulator.provider.EmulationMonitorWorker
-import com.zhufucdev.motion_emulator.provider.Scheduler
 import com.zhufucdev.motion_emulator.extension.lazySharedPreferences
 import com.zhufucdev.motion_emulator.extension.skipAmapFuckingLicense
+import com.zhufucdev.motion_emulator.provider.EmulationMonitorWorker
+import com.zhufucdev.motion_emulator.provider.Scheduler
 import com.zhufucdev.motion_emulator.ui.map.MapTraceCallback
 import com.zhufucdev.motion_emulator.ui.map.TraceBounds
 import com.zhufucdev.motion_emulator.ui.map.UnifiedMapFragment
@@ -27,7 +26,6 @@ import kotlinx.coroutines.launch
 
 class EmulateStatusFragment : Fragment() {
     private lateinit var binding: FragmentEmulateStatusBinding
-    private val emulation: Emulation = Scheduler.emulation!!
     private val preferences by lazySharedPreferences()
 
     override fun onCreate(savedInstanceState: Bundle?) {
