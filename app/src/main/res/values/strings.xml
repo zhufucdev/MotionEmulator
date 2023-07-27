@@ -67,8 +67,13 @@
     <string name="suffix_meter">m</string>
     <string name="suffix_second">s</string>
     <string name="title_emulation_stopped">Emulation Stopped</string>
+    <string name="title_emulation_canceled">Emulation Canceled</string>
+    <string name="title_emulation_completed">Emulation Completed</string>
     <string name="title_emulation_pending">Emulation Pending</string>
     <string name="text_emulation_pending">waiting for an app to pick up</string>
+    <string name="title_agent_offline">Agent Offline</string>
+    <string name="title_controller_offline">Controller Offline</string>
+    <string name="text_controller_offline">This is not supposed to have happened. Please restart the app.</string>
     <string name="action_restart">Restart</string>
     <string name="title_unknown">Unknown</string>
     <string name="action_show_system_apps">Show system apps</string>

@@ -5,6 +5,9 @@ import android.util.Log
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils
 import com.zhufucdev.motion_emulator.extension.sharedPreferences
 import com.zhufucdev.motion_emulator.plugin.Plugins
+import com.zhufucdev.motion_emulator.provider.Scheduler.agentStateChannelOf
+import com.zhufucdev.motion_emulator.provider.Scheduler.instance
+import com.zhufucdev.stub.AgentState
 import com.zhufucdev.stub.Emulation
 import com.zhufucdev.stub.EmulationInfo
 import com.zhufucdev.stub.Intermediate
@@ -13,7 +16,6 @@ import io.ktor.serialization.deserialize
 import io.ktor.serialization.kotlinx.KotlinxWebsocketSerializationConverter
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.Application
-import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.application.install
 import io.ktor.server.engine.ApplicationEngine
@@ -27,20 +29,25 @@ import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.response.respond
 import io.ktor.server.routing.get
 import io.ktor.server.routing.routing
+import io.ktor.server.util.getOrFail
 import io.ktor.server.websocket.WebSockets
 import io.ktor.server.websocket.converter
 import io.ktor.server.websocket.receiveDeserialized
 import io.ktor.server.websocket.webSocketRaw
-import io.ktor.websocket.CloseReason
 import io.ktor.websocket.Frame
 import io.ktor.websocket.close
-import io.ktor.websocket.readText
+import io.ktor.websocket.send
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlin.collections.set
+import kotlin.coroutines.resume
 
 @Serializable
 data class EmulationRef(
@@ -52,12 +59,25 @@ data class EmulationRef(
     val satelliteCount: Int
 )
 
+/**
+ * The lifecycle of an agent:
+ * - [AgentState.NOT_JOINED] when the agent is offline and unknown to all.
+ * - [AgentState.PENDING] when it's found but doesn't respond a [EmulationInfo],
+ * so it won't appear in the [instance].
+ * - [AgentState.RUNNING] during the emulation.
+ * During [AgentState.RUNNING], two possible following states:
+ * - [AgentState.CANCELED] when the emulation is canceled by user.
+ * - [AgentState.PAUSED] when the emulation is paused by user.
+ * Finally, if no interruption occurred,
+ * - [AgentState.COMPLETED] when the agent reports itself.
+ */
 object Scheduler {
-    private val stateListeners = mutableSetOf<(String, Boolean) -> Boolean>()
+    private val stateListeners = mutableSetOf<(String, AgentState) -> Boolean>()
     private val intermediateListeners = mutableSetOf<(String, Intermediate) -> Unit>()
 
     private var mEmulation: Emulation? = null
     private var mInfo: MutableMap<String, EmulationInfo> = hashMapOf()
+    private val mState: MutableMap<String, AgentState> = hashMapOf()
     private val mIntermediate: MutableMap<String, Intermediate> = hashMapOf()
 
     private var port = 20230
@@ -91,34 +111,63 @@ object Scheduler {
         }
     }
 
-    fun setIntermediate(id: String, info: Intermediate?) {
-        if (info != null) {
-            mIntermediate[id] = info
-            intermediateListeners.forEach {
-                try {
-                    it.invoke(id, info)
-                } catch (e: Exception) {
-                    Log.w("Scheduler", "Error while notifying intermediate")
-                    e.printStackTrace()
-                }
+    fun setIntermediate(id: String, info: Intermediate) {
+        mIntermediate[id] = info
+        intermediateListeners.forEach {
+            try {
+                it.invoke(id, info)
+            } catch (e: Exception) {
+                Log.w("Scheduler", "Error while notifying intermediate")
+                e.printStackTrace()
             }
-        } else {
-            mIntermediate.remove(id)
         }
     }
 
     val intermediate: Map<String, Intermediate> get() = mIntermediate
 
-    fun setInfo(id: String, info: EmulationInfo?) {
-        if (info != null) {
-            mInfo[id] = info
-        } else {
-            mInfo.remove(id)
-        }
-        notifyStateChanged(id, info != null)
+    fun startAgent(id: String) {
+        notifyStateChanged(id, AgentState.PENDING)
     }
 
-    private fun notifyStateChanged(id: String, state: Boolean) {
+    fun cancelAgent(id: String) = stopAgent(id, AgentState.CANCELED)
+
+    fun pauseAgent(id: String) = stopAgent(id, AgentState.PAUSED)
+
+    private fun stopAgent(id: String, state: AgentState) {
+
+        if (!mInfo.containsKey(id)) {
+            throw IllegalStateException("No agent: $id")
+        }
+        mIntermediate.remove(id)
+        notifyStateChanged(id, state)
+    }
+
+    fun cancelAll() {
+        notifyAll(AgentState.CANCELED)
+    }
+
+    fun startAll() {
+        notifyAll(AgentState.PENDING)
+    }
+
+    private fun notifyAll(target: AgentState) {
+        mState.forEach { (id, state) ->
+            if (state != target)
+                notifyStateChanged(id, target)
+        }
+    }
+
+    internal fun notifyEmulationStarted(id: String, info: EmulationInfo) {
+        mInfo[id] = info
+        notifyStateChanged(id, AgentState.RUNNING)
+    }
+
+    internal fun notifyEmulationCompleted(id: String) {
+        notifyStateChanged(id, AgentState.COMPLETED)
+    }
+
+    private fun notifyStateChanged(id: String, state: AgentState) {
+        mState[id] = state
         stateListeners.removeAll {
             try {
                 it.invoke(id, state)
@@ -130,23 +179,40 @@ object Scheduler {
         }
     }
 
-    val info: Map<String, EmulationInfo> get() = mInfo
+    /**
+     * Known emulation agents
+     */
+    val instance: Map<String, EmulationInfo> get() = mInfo
 
     var emulation: Emulation?
         set(value) {
-            mEmulation = value
-            if (value == null) {
-                val original = mInfo
-                mInfo = mutableMapOf()
-                original.forEach { (id, _) ->
-                    notifyStateChanged(id, false)
+            if (mEmulation != value) {
+                if (value == null) {
+                    val original = mInfo
+                    mInfo = mutableMapOf()
+                    original.forEach { (id, _) ->
+                        notifyStateChanged(id, AgentState.CANCELED)
+                    }
                 }
+                mState.clear()
             }
+            mEmulation = value
         }
         get() = mEmulation
 
-    fun onEmulationStateChanged(l: (id: String, state: Boolean) -> Unit): ListenCallback {
-        val actual: (String, Boolean) -> Boolean = { id, state ->
+    /**
+     * Controller state is somewhat global emulation state tends to be
+     */
+    val controllerState: AgentState
+        get() =
+            if (emulation == null) AgentState.NOT_JOINED
+            else if (instance.isEmpty() || mState.size == 1 && mState.containsValue(AgentState.PENDING)) AgentState.PENDING
+            else if (mState.containsValue(AgentState.RUNNING)) AgentState.RUNNING
+            else if (mState.values.all { it == AgentState.PAUSED }) AgentState.PAUSED
+            else AgentState.CANCELED
+
+    fun onAgentStateChanged(l: (id: String, state: AgentState) -> Unit): ListenCallback {
+        val actual: (String, AgentState) -> Boolean = { id, state ->
             l.invoke(id, state)
             false
         }
@@ -171,14 +237,45 @@ object Scheduler {
         }
     }
 
-    suspend fun nextEmulationState(targetId: String? = null) = suspendCancellableCoroutine {
-        stateListeners.add { target, b ->
-            if (targetId == null || target == targetId) {
-                it.resumeWith(Result.success(b))
-                return@add true
+    fun currentEmulationState(targetId: String): AgentState {
+        return mState[targetId] ?: AgentState.NOT_JOINED
+    }
+
+    /**
+     * The coroutine way of [onAgentStateChanged],
+     * which registers a state listener and removes itself ever since
+     * a new state of the [targetId] is posted
+     *
+     * In the case [targetId] is null, it waits for any state
+     * change.
+     *
+     * @see [agentStateChannelOf] in favor of channels
+     */
+    suspend fun nextStateChange(targetId: String? = null) =
+        suspendCancellableCoroutine {
+            stateListeners.add { target, state ->
+                if (targetId == null || target == targetId) {
+                    if (!it.isCancelled)
+                        it.resume(state)
+                    return@add true
+                }
+                false
             }
-            false
         }
+
+    /**
+     * The channel way of [onAgentStateChanged].
+     * @see [nextStateChange] in favor of suspend functions
+     */
+    fun CoroutineScope.agentStateChannelOf(targetId: String? = null): ReceiveChannel<AgentState> {
+        val channel = Channel<AgentState>()
+        stateListeners.add { target, state ->
+            if (targetId == null || target == targetId) {
+                channel.trySend(state)
+            }
+            !isActive
+        }
+        return channel
     }
 
     fun addIntermediateListener(l: (String, Intermediate) -> Unit): ListenCallback {
@@ -250,53 +347,69 @@ fun Application.eventServer() {
     }
 
     routing {
-        suspend fun ApplicationCall.respondEmulation(emulation: Emulation?) {
+        webSocketRaw("/join/{id}") {
+            val id = call.parameters.getOrFail("id")
+            Scheduler.startAgent(id)
+
+            fun launchWorker() = launch {
+                try {
+                    val info = receiveDeserialized<EmulationInfo>()
+                    Scheduler.notifyEmulationStarted(id, info)
+                    for (frame in incoming) {
+                        if (frame is Frame.Close) {
+                            if (frame.data.singleOrNull() == Byte.MAX_VALUE) {
+                                Scheduler.notifyEmulationCompleted(id)
+                            } else {
+                                close()
+                            }
+                            break
+                        }
+                        val data = converter!!.deserialize<Intermediate>(frame)
+                        Scheduler.setIntermediate(id, data)
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+
+            var worker = launchWorker()
+
+            for (req in agentStateChannelOf(id)) {
+                when (req) {
+                    AgentState.NOT_JOINED -> {
+                        worker.cancelAndJoin()
+                        break
+                    }
+
+                    AgentState.PENDING -> {
+                        worker.cancelAndJoin()
+                        worker = launchWorker()
+                        send(byteArrayOf(AgentState.PENDING.ordinal.toByte()))
+                    }
+
+                    AgentState.RUNNING -> {}
+
+                    else -> {
+                        if (req != AgentState.COMPLETED) {
+                            send(byteArrayOf(req.ordinal.toByte()))
+                        }
+                        worker.cancelAndJoin()
+                    }
+                }
+            }
+        }
+        get("/current/{id?}") {
+            val id = call.parameters["id"]
+            if (id != null && Scheduler.currentEmulationState(id) != AgentState.PENDING) {
+                call.respond(HttpStatusCode.Forbidden)
+                return@get
+            }
+            val emulation = Scheduler.emulation
             if (emulation == null) {
-                respond(HttpStatusCode.NoContent)
+                call.respond(HttpStatusCode.NotFound)
             } else {
-                respond(emulation)
+                call.respond(emulation)
             }
-        }
-
-        webSocketRaw("/join") {
-            val id = (incoming.receive() as Frame.Text).readText()
-            val watchdog = launch {
-                while (true) {
-                    val running = Scheduler.nextEmulationState(id)
-                    if (!running) {
-                        close(
-                            CloseReason(
-                                CloseReason.Codes.GOING_AWAY,
-                                "emulation canceled"
-                            )
-                        )
-                        break
-                    }
-                }
-            }
-
-            try {
-                val info = receiveDeserialized<EmulationInfo>()
-                Scheduler.setInfo(id, info)
-                for (frame in incoming) {
-                    if (frame is Frame.Close) {
-                        break
-                    }
-                    val data = converter!!.deserialize<Intermediate>(frame)
-                    Scheduler.setIntermediate(id, data)
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            } finally {
-                watchdog.cancelAndJoin()
-                Scheduler.setInfo(id, null)
-                Scheduler.setIntermediate(id, null)
-            }
-        }
-
-        get("/current") {
-            // get the current emulation without blocking
-            call.respondEmulation(Scheduler.emulation)
         }
     }
 }
