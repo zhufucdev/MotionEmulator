@@ -12,6 +12,7 @@ import androidx.preference.*
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.zhufucdev.motion_emulator.R
 import com.zhufucdev.motion_emulator.databinding.ActivitySettingsBinding
+import com.zhufucdev.motion_emulator.plugin.Plugins
 
 private const val TITLE_TAG = "settingsActivityTitle"
 
@@ -123,9 +124,18 @@ class SettingsActivity : AppCompatActivity(),
     }
 
     class EmulationFragment : M3PreferenceFragment() {
+        private var changed = false
+
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.emulation_preferences, rootKey)
             init()
+        }
+
+        override fun onStop() {
+            super.onStop()
+            if (changed) {
+                Plugins.notifySettingsChanged(requireContext())
+            }
         }
 
         private fun init() {
@@ -144,16 +154,18 @@ class SettingsActivity : AppCompatActivity(),
                 }
             }
             portPreference.setOnPreferenceChangeListener { _, newValue ->
-                newValue.toString().toIntOrNull()?.isValidPort() == true
+                val valid = newValue.toString().toIntOrNull()?.isValidPort() == true
+                changed = changed || valid
+                valid
             }
 
             tlsPreference.setOnPreferenceClickListener { _ ->
-
+                changed = true
                 true
             }
 
             methodPreference.setOnPreferenceChangeListener { _, newValue ->
-
+                changed = true
                 true
             }
         }

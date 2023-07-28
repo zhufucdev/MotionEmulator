@@ -50,4 +50,16 @@ object Plugins {
         }
         countEnabled = enabled.size
     }
+
+    fun notifyStart(context: Context) {
+        enabled.forEach { it.notifyStart(context) }
+    }
+
+    fun notifyStop(context: Context) {
+        enabled.forEach { it.notifyStop(context) }
+    }
+
+    fun notifySettingsChanged(context: Context) {
+        enabled.forEach { it.notifySettingsChanged(context) }
+    }
 }

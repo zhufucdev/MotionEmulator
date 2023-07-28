@@ -31,7 +31,6 @@ import io.ktor.websocket.serialization.sendSerializedBase
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.isActive
 import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.json.Json
 import kotlinx.serialization.protobuf.ProtoBuf
 import java.security.SecureRandom
 import java.util.Optional

@@ -15,7 +15,7 @@ object HookEntry : IYukiHookXposedInit {
 
     override fun onHook() = YukiHookAPI.encase {
         loadApp {
-            loadHooker(Scheduler.hook)
+            loadHooker(Scheduler().hook)
         }
     }
 }

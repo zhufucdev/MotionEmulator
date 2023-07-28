@@ -14,7 +14,6 @@ import com.zhufucdev.stub.Intermediate
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.deserialize
 import io.ktor.serialization.kotlinx.KotlinxWebsocketSerializationConverter
-import io.ktor.serialization.kotlinx.json.json
 import io.ktor.serialization.kotlinx.protobuf.protobuf
 import io.ktor.server.application.Application
 import io.ktor.server.application.call
@@ -47,7 +46,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
 import kotlinx.serialization.protobuf.ProtoBuf
 import kotlin.collections.set
 import kotlin.coroutines.resume
@@ -109,9 +107,7 @@ object Scheduler {
         server.start(false)
         serverRunning = true
 
-        Plugins.enabled.forEach {
-            it.notifyStart(context)
-        }
+        Plugins.notifyStart(context)
     }
 
     fun setIntermediate(id: String, info: Intermediate) {
@@ -304,7 +300,7 @@ object Scheduler {
     }
 
     fun stop(context: Context) {
-        Plugins.enabled.forEach { it.notifyStop(context) }
+        Plugins.notifyStop(context)
         notifyAll(AgentState.NOT_JOINED)
         server.stop()
         serverRunning = false

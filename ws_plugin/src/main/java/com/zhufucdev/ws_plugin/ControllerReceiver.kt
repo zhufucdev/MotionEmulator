@@ -8,7 +8,7 @@ import com.zhufucdev.xposed.PREFERENCE_NAME_BRIDGE
 
 class ControllerReceiver : PluginBroadcastReceiver() {
     override fun onEmulationStart(context: Context) {
-        TODO("Not yet implemented")
+        // left to Scheduler
     }
 
     override fun onSettingsChanged(context: Context) {

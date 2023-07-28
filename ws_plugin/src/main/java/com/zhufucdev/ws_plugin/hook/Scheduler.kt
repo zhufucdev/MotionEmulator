@@ -13,15 +13,17 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.seconds
 
-object Scheduler : AbstractScheduler() {
-    private const val TAG = "Scheduler"
+class Scheduler : AbstractScheduler() {
+    companion object {
+        private const val TAG = "Scheduler"
+    }
     private lateinit var server: WsServer
 
     @OptIn(DelicateCoroutinesApi::class)
     override fun PackageParam.initialize() {
         val prefs = prefs(PREFERENCE_NAME_BRIDGE)
         server = WsServer(
-            port = prefs.getString("me_server_port").toIntOrNull() ?: 2023,
+            port = prefs.getInt("me_server_port", 20230),
             useTls = prefs.getBoolean("me_server_tls", true)
         )
         hookingMethod =
