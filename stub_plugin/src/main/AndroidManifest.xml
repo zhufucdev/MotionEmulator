@@ -8,7 +8,7 @@
         <package android:name="com.zhufucdev.motion_emulator" />
     </queries>
 
-    <application>
+    <application android:networkSecurityConfig="@xml/network_security_config">
         <meta-data
                 android:name="me_plugin"
                 android:value="true" />
