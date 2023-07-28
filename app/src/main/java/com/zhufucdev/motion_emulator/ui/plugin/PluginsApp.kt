@@ -228,15 +228,20 @@ fun PluginsApp(
     }
 
     floating?.let {
-        val offset = it.position + it.offset
-        CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurfaceVariant) {
-            with(LocalDensity.current) {
-                PluginItemView(
-                    modifier = Modifier
-                        .absoluteOffset(offset.x.toDp(), offset.y.toDp()),
-                    item = it.plugin
-                )
-            }
+        FloatingItemView(data = it)
+    }
+}
+
+@Composable
+private fun FloatingItemView(data: FloatingItem) {
+    val offset = data.position + data.offset
+    CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurfaceVariant) {
+        with(LocalDensity.current) {
+            PluginItemView(
+                modifier = Modifier
+                    .absoluteOffset(offset.x.toDp(), offset.y.toDp()),
+                item = data.plugin
+            )
         }
     }
 }
