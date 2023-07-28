@@ -60,6 +60,6 @@ object Plugins {
     }
 
     fun notifySettingsChanged(context: Context) {
-        enabled.forEach { it.notifySettingsChanged(context) }
+        available.forEach { it.notifySettingsChanged(context) }
     }
 }

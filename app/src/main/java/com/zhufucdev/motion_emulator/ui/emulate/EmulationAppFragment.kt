@@ -127,6 +127,7 @@ class EmulationAppFragment : EmulationMonitoringFragment() {
         )
         app.textAppPicked.text = getString(R.string.text_app_received, appInfo.name)
         app.iconView.setImageDrawable(appInfo.icon)
+        app.root.isVisible = true
         binding.stackMonitors.textStatusVelocity.text =
             context.getString(
                 R.string.status_velocity,

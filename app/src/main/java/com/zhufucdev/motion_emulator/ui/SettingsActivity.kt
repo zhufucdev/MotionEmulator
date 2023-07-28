@@ -131,18 +131,22 @@ class SettingsActivity : AppCompatActivity(),
             init()
         }
 
-        override fun onStop() {
-            super.onStop()
+        override fun onDetach() {
+            super.onDetach()
             if (changed) {
                 Plugins.notifySettingsChanged(requireContext())
             }
         }
 
         private fun init() {
-            val portPreference = findPreference<EditTextPreference>("provider_port")!!
-            val tlsPreference = findPreference<SwitchPreferenceCompat>("provider_tls")!!
-            val methodPreference = findPreference<ListPreference>("method")!!
+            preferenceScreen.children.forEach {
+                it.setOnPreferenceClickListener {
+                    changed = true
+                    true
+                }
+            }
 
+            val portPreference = findPreference<EditTextPreference>("provider_port")!!
             fun Int.isValidPort() = this in 1024..65535
             portPreference.setOnBindEditTextListener { input ->
                 input.inputType = InputType.TYPE_CLASS_NUMBER
@@ -157,16 +161,6 @@ class SettingsActivity : AppCompatActivity(),
                 val valid = newValue.toString().toIntOrNull()?.isValidPort() == true
                 changed = changed || valid
                 valid
-            }
-
-            tlsPreference.setOnPreferenceClickListener { _ ->
-                changed = true
-                true
-            }
-
-            methodPreference.setOnPreferenceChangeListener { _, newValue ->
-                changed = true
-                true
             }
         }
     }
