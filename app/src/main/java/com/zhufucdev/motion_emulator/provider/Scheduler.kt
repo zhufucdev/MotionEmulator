@@ -15,6 +15,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.deserialize
 import io.ktor.serialization.kotlinx.KotlinxWebsocketSerializationConverter
 import io.ktor.serialization.kotlinx.json.json
+import io.ktor.serialization.kotlinx.protobuf.protobuf
 import io.ktor.server.application.Application
 import io.ktor.server.application.call
 import io.ktor.server.application.install
@@ -44,8 +45,10 @@ import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.protobuf.ProtoBuf
 import kotlin.collections.set
 import kotlin.coroutines.resume
 
@@ -336,15 +339,16 @@ fun ApplicationEngineEnvironmentBuilder.configure(port: Int) {
     }
 }
 
+@OptIn(ExperimentalSerializationApi::class)
 fun Application.eventServer() {
     install(ContentNegotiation) {
-        json()
+        protobuf()
     }
 
     install(WebSockets) {
         maxFrameSize = Long.MAX_VALUE
         masking = false
-        contentConverter = KotlinxWebsocketSerializationConverter(Json)
+        contentConverter = KotlinxWebsocketSerializationConverter(ProtoBuf)
     }
 
     routing {

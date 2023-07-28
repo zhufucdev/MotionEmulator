@@ -21,17 +21,18 @@ import io.ktor.http.URLProtocol
 import io.ktor.http.isSuccess
 import io.ktor.http.path
 import io.ktor.serialization.kotlinx.KotlinxWebsocketSerializationConverter
-import io.ktor.serialization.kotlinx.json.json
+import io.ktor.serialization.kotlinx.protobuf.protobuf
 import io.ktor.util.InternalAPI
 import io.ktor.websocket.CloseReason
-import io.ktor.websocket.Frame
 import io.ktor.websocket.close
 import io.ktor.websocket.readBytes
 import io.ktor.websocket.send
 import io.ktor.websocket.serialization.sendSerializedBase
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.isActive
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.protobuf.ProtoBuf
 import java.security.SecureRandom
 import java.util.Optional
 import javax.net.ssl.SSLContext
@@ -63,18 +64,18 @@ private fun HttpRequestBuilder.urlTo(
     }
 }
 
-@OptIn(InternalAPI::class)
+@OptIn(InternalAPI::class, ExperimentalSerializationApi::class)
 suspend fun WsServer.connect(id: String, block: suspend ServerScope.() -> Unit): ServerConnection {
     val client =
         previousConnection
             ?.takeIf { it.engine.isActive }
             ?: HttpClient(OkHttp) {
                 install(ContentNegotiation) {
-                    json()
+                    protobuf()
                 }
 
                 install(WebSockets) {
-                    contentConverter = KotlinxWebsocketSerializationConverter(Json)
+                    contentConverter = KotlinxWebsocketSerializationConverter(ProtoBuf)
                     pingInterval = 500
                 }
 
