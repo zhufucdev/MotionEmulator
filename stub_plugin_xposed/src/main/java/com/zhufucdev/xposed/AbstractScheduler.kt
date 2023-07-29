@@ -1,57 +1,74 @@
 package com.zhufucdev.xposed
 
-import android.content.Context
 import android.hardware.Sensor
 import android.os.SystemClock
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils
 import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.highcapable.yukihookapi.hook.param.PackageParam
-import com.zhufucdev.stub.*
+import com.zhufucdev.stub.Box
+import com.zhufucdev.stub.CellMoment
+import com.zhufucdev.stub.CellTimeline
+import com.zhufucdev.stub.Emulation
+import com.zhufucdev.stub.EmulationInfo
+import com.zhufucdev.stub.Intermediate
+import com.zhufucdev.stub.MapProjector
+import com.zhufucdev.stub.Method
+import com.zhufucdev.stub.Motion
+import com.zhufucdev.stub.MotionMoment
+import com.zhufucdev.stub.Point
+import com.zhufucdev.stub.Trace
+import com.zhufucdev.stub.at
+import com.zhufucdev.stub.generateSaltedTrace
+import com.zhufucdev.stub.length
+import com.zhufucdev.stub.toPoint
 import com.zhufucdev.stub_plugin.ServerScope
-import kotlinx.coroutines.*
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlin.random.Random
 import kotlin.time.Duration.Companion.seconds
 
 abstract class AbstractScheduler {
-    private lateinit var sensorHooker: SensorHooker
-    private lateinit var locationHooker: LocationHooker
-    private lateinit var cellHooker: CellHooker
+    val sensorHooker = SensorHooker(this)
+    val locationHooker = LocationHooker(this)
+    val cellHooker = CellHooker(this)
 
     protected lateinit var packageName: String
         private set
     val id: String = NanoIdUtils.randomNanoId()
     var hookingMethod: Method = Method.XPOSED_ONLY
-        protected set
+        private set
 
-    fun PackageParam.init(context: Context) {
-        this@AbstractScheduler.packageName = context.applicationContext.packageName
-
-        initialize()
-
-        if (!hookingMethod.involveXposed) {
-            return
-        }
-
-        sensorHooker = SensorHooker(this@AbstractScheduler)
-        locationHooker = LocationHooker(this@AbstractScheduler)
-        cellHooker = CellHooker(this@AbstractScheduler)
-        loadHooker(sensorHooker)
-        loadHooker(locationHooker)
-        loadHooker(cellHooker)
-    }
-
+    /**
+     * Invoked after [getHookingMethod] returns a method with
+     * xposed involved
+     *
+     * @see [Method.involveXposed]
+     */
     abstract fun PackageParam.initialize()
+
+    /**
+     * Invoked right after the hook is loaded
+     */
+    abstract fun PackageParam.getHookingMethod(): Method
 
     /**
      * To initialize the scheduler
      */
     val hook = object : YukiBaseHooker() {
         override fun onHook() {
-            onAppLifecycle {
-                onCreate {
-                    init(applicationContext)
-                }
+            this@AbstractScheduler.packageName = packageName
+            hookingMethod = getHookingMethod()
+
+            if (!hookingMethod.involveXposed) {
+                return
             }
+
+            loadHooker(sensorHooker)
+            loadHooker(locationHooker)
+            loadHooker(cellHooker)
+
+            initialize()
         }
     }
 

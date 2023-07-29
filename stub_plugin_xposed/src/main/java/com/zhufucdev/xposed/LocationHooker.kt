@@ -548,20 +548,22 @@ class LocationHooker(private val scheduler: AbstractScheduler) : YukiBaseHooker(
                         }
                     }
 
-                    classLoader.loadClientOption().hook {
-                        injectMember {
-                            method {
-                                name = "setLocationMode"
-                                param(classLoader.loadLocationMode())
-                            }
+                    runCatching {
+                        classLoader.loadClientOption().hook {
+                            injectMember {
+                                method {
+                                    name = "setLocationMode"
+                                    param(classLoader.loadLocationMode())
+                                }
 
-                            beforeHook {
-                                try {
-                                    val enums = classLoader.loadLocationMode().enumConstants
-                                    args[0] = enums?.get(1)
-                                    loggerI(TAG, "Modified amap location mode")
-                                } catch (e: Exception) {
-                                    loggerW(TAG, "failed to modify amap location mode: $e")
+                                beforeHook {
+                                    try {
+                                        val enums = classLoader.loadLocationMode().enumConstants
+                                        args[0] = enums?.get(1)
+                                        loggerI(TAG, "Modified amap location mode")
+                                    } catch (e: Exception) {
+                                        loggerW(TAG, "failed to modify amap location mode: $e")
+                                    }
                                 }
                             }
                         }

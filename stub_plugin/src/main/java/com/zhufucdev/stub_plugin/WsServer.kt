@@ -11,7 +11,6 @@ import io.ktor.client.call.body
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.websocket.WebSockets
-import io.ktor.client.plugins.websocket.converter
 import io.ktor.client.plugins.websocket.sendSerialized
 import io.ktor.client.plugins.websocket.webSocket
 import io.ktor.client.request.HttpRequestBuilder
@@ -27,7 +26,6 @@ import io.ktor.websocket.CloseReason
 import io.ktor.websocket.close
 import io.ktor.websocket.readBytes
 import io.ktor.websocket.send
-import io.ktor.websocket.serialization.sendSerializedBase
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.isActive
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -140,7 +138,7 @@ suspend fun WsServer.connect(id: String, block: suspend ServerScope.() -> Unit):
                     override val emulation = Optional.of(emulation)
 
                     override suspend fun sendStarted(info: EmulationInfo) {
-                        sendSerializedBase<EmulationInfo>(info, converter!!, Charsets.UTF_8)
+                        sendSerialized(info)
                         started = true
                     }
 
@@ -188,6 +186,8 @@ suspend fun WsServer.connect(id: String, block: suspend ServerScope.() -> Unit):
                             }
                         }
                     }
+                } catch (e: Exception) {
+                    Log.w("WsServer", e)
                 } finally {
                     close()
                 }

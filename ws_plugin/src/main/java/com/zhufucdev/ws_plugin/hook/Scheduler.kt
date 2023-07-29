@@ -26,15 +26,16 @@ class Scheduler : AbstractScheduler() {
             port = prefs.getInt("me_server_port", 20230),
             useTls = prefs.getBoolean("me_server_tls", true)
         )
-        hookingMethod =
-            prefs.getString("me_method", "xposed_only").let {
-                Method.valueOf(it.uppercase())
-            }
 
         GlobalScope.launch {
             startServer()
         }
     }
+
+    override fun PackageParam.getHookingMethod(): Method =
+        prefs.getString("me_method", "xposed_only").let {
+            Method.valueOf(it.uppercase())
+        }
 
     private suspend fun startServer() {
         var warned = false

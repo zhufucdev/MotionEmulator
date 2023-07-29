@@ -14,6 +14,9 @@ object HookEntry : IYukiHookXposedInit {
     }
 
     override fun onHook() = YukiHookAPI.encase {
-        loadHooker(Scheduler().hook)
+        loadApp(isExcludeSelf = true) {
+            val scheduler = Scheduler()
+            loadHooker(scheduler.hook)
+        }
     }
 }
