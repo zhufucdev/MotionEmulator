@@ -38,6 +38,7 @@ class LocationHooker(private val scheduler: AbstractScheduler) : YukiBaseHooker(
     companion object {
         private const val TAG = "Location Hook"
     }
+
     private var lastLocation = scheduler.location to System.currentTimeMillis()
     private var estimatedSpeed = 0F
 
@@ -56,7 +57,12 @@ class LocationHooker(private val scheduler: AbstractScheduler) : YukiBaseHooker(
     fun raise(point: Point) {
         listeners.forEach { (_, p) ->
             estimatedSpeed =
-                estimateSpeed(point to System.currentTimeMillis(), lastLocation).toFloat()
+                runCatching {
+                    estimateSpeed(
+                        point to System.currentTimeMillis(),
+                        lastLocation
+                    ).toFloat()
+                }.getOrDefault(0f)
             p.invoke(point)
             lastLocation = point to System.currentTimeMillis()
         }
@@ -208,7 +214,10 @@ class LocationHooker(private val scheduler: AbstractScheduler) : YukiBaseHooker(
                         if (it.isEmpty()) {
                             loggerW(TAG, "active update block failed: no such method")
                         } else {
-                            loggerD(TAG, "active update block finished with ${it.size} methods hooked")
+                            loggerD(
+                                TAG,
+                                "active update block finished with ${it.size} methods hooked"
+                            )
                         }
                     })
                 replaceAny {
@@ -217,7 +226,8 @@ class LocationHooker(private val scheduler: AbstractScheduler) : YukiBaseHooker(
 
                     val listener = args.firstOrNull { it is LocationListener } as LocationListener?
                         ?: return@replaceAny callOriginal()
-                    val provider = args.firstOrNull { it is String } as String? ?: LocationManager.GPS_PROVIDER
+                    val provider =
+                        args.firstOrNull { it is String } as String? ?: LocationManager.GPS_PROVIDER
                     redirectListener(listener) {
                         val location = it.android(provider, estimatedSpeed)
                         listener.onLocationChanged(location)
