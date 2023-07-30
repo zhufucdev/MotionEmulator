@@ -18,7 +18,7 @@
             android:name="com.zhufucdev.motion_emulator.PERMISSION.READ"
             android:protectionLevel="normal"
             android:label="@string/title_permission_read"
-            android:description="@string/text_permission_read"/>
+            android:description="@string/text_permission_read" />
 
     <application
             android:name=".MeApplication"
@@ -45,6 +45,17 @@
                 android:exported="false">
             <intent-filter>
                 <action android:name="com.zhufucdev.motion_emulator.ACTION_DETERMINE" />
+            </intent-filter>
+        </receiver>
+        <receiver
+                android:name="com.zhufucdev.motion_emulator.plugin.InstallationReceiver"
+                android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.PACKAGE_ADDED" />
+                <action android:name="android.intent.action.PACKAGE_CHANGED" />
+                <action android:name="android.intent.action.PACKAGE_FULLY_REMOVED" />
+
+                <data android:scheme="package" />
             </intent-filter>
         </receiver>
 
@@ -97,7 +108,16 @@
                 android:grantUriPermissions="true">
             <meta-data
                     android:name="android.support.FILE_PROVIDER_PATHS"
-                    android:resource="@xml/shared_paths" />
+                    android:resource="@xml/update_file_paths" />
+        </provider>
+        <provider
+                android:authorities="com.zhufucdev.motion_emulator.update_provider"
+                android:name="com.zhufucdev.update.UpdateProvider"
+                android:exported="false"
+                android:grantUriPermissions="true">
+            <meta-data
+                    android:name="android.support.FILE_PROVIDER_PATHS"
+                    android:resource="@xml/update_file_paths" />
         </provider>
         <provider
                 android:name=".provider.SettingsProvider"

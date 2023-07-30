@@ -3,8 +3,8 @@ package com.zhufucdev.motion_emulator.ui
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.runtime.remember
 import com.zhufucdev.motion_emulator.plugin.Plugins
-import com.zhufucdev.motion_emulator.ui.plugin.PluginItem
 import com.zhufucdev.motion_emulator.ui.plugin.PluginsApp
 import com.zhufucdev.motion_emulator.ui.plugin.findPlugin
 import com.zhufucdev.motion_emulator.ui.plugin.toPluginItem
@@ -15,14 +15,18 @@ class PluginActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
+            val plugins = remember(Plugins.available) {
+                Plugins.enabled.let { enabled ->
+                    Plugins.available.map {
+                        it.toPluginItem(enabled.contains(it))
+                    }
+                }
+            }
+
             MotionEmulatorTheme {
                 PluginsApp(
                     onBack = this::finish,
-                    plugins = Plugins.enabled.let { enabled ->
-                        Plugins.available.map {
-                            it.toPluginItem(enabled.contains(it))
-                        }
-                    },
+                    plugins = plugins,
                     onSettingsChanged = { update ->
                         Plugins.setPriorities(
                             update.mapNotNull { it.findPlugin() }

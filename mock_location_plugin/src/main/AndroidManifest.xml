@@ -46,13 +46,13 @@
                 android:exported="true" />
 
         <provider
-                android:authorities="com.zhufucdev.mock_location_plugin.file_provider"
-                android:name="androidx.core.content.FileProvider"
+                android:authorities="com.zhufucdev.mock_location_plugin.update_provider"
+                android:name="com.zhufucdev.update.UpdateProvider"
                 android:exported="false"
                 android:grantUriPermissions="true">
             <meta-data
                     android:name="android.support.FILE_PROVIDER_PATHS"
-                    android:resource="@xml/shared_paths" />
+                    android:resource="@xml/update_file_paths" />
         </provider>
     </application>
 </manifest>

@@ -185,7 +185,7 @@
     <string name="title_use_tls">使用TLS</string>
     <string name="text_input_invalid">输入无效</string>
     <string name="title_activity_updater">软件更新</string>
-    <string name="text_update_found">找到新版本</string>
+    <string name="text_update_found">有更新版本的运动模拟器可用</string>
     <string name="action_upgrade">升级</string>
     <string name="title_emulation_method">模拟方式</string>
     <string name="title_method_xposed_only">仅Xposed</string>
@@ -204,4 +204,5 @@
     <string name="des_plugin_update">该插件有更新</string>
     <string name="title_permission_read">获取运动模拟器设置信息</string>
     <string name="text_permission_read">允许该应用查看运动模拟器的部分选项，例如模拟方法和服务器地址。</string>
+    <string name="text_asset_fetch_failed">获取更新资源失败</string>
 </resources>

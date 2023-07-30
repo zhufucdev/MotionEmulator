@@ -2,6 +2,7 @@
 
 package com.zhufucdev.motion_emulator.ui.plugin
 
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animate
 import androidx.compose.animation.expandVertically
@@ -35,6 +36,8 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -50,6 +53,7 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
@@ -67,6 +71,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -74,14 +79,25 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zhufucdev.api.ProductQuery
+import com.zhufucdev.api.ReleaseAsset
 import com.zhufucdev.api.findAsset
+import com.zhufucdev.api.getReleaseAsset
 import com.zhufucdev.motion_emulator.BuildConfig
 import com.zhufucdev.motion_emulator.R
+import com.zhufucdev.motion_emulator.extension.UPDATE_FILE_PROVIDER_AUTHORITY
+import com.zhufucdev.motion_emulator.extension.Updater
 import com.zhufucdev.motion_emulator.extension.defaultKtorClient
 import com.zhufucdev.motion_emulator.extension.insert
 import com.zhufucdev.motion_emulator.ui.CaptionText
 import com.zhufucdev.motion_emulator.ui.theme.MotionEmulatorTheme
 import com.zhufucdev.motion_emulator.ui.theme.paddingCommon
+import com.zhufucdev.update.InstallationPermissionContract
+import com.zhufucdev.update.StatusDownloading
+import com.zhufucdev.update.StatusReadyToDownload
+import com.zhufucdev.update.StatusReadyToInstall
+import com.zhufucdev.update.canInstallUpdate
+import com.zhufucdev.update.installUpdate
+import kotlinx.coroutines.launch
 import kotlin.math.max
 
 @Composable
@@ -93,20 +109,21 @@ fun PluginsApp(
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(
         rememberTopAppBarState()
     )
+    val snackbars = remember { SnackbarHostState() }
     val listState = rememberLazyListState()
     var listBounds by remember {
         mutableStateOf<Rect?>(null)
     }
-    val enabled = remember {
+    val enabled = remember(plugins) {
         plugins.filter { it.enabled }.toMutableStateList()
     }
-    val disabled = remember {
+    val disabled = remember(plugins) {
         plugins.filter { !it.enabled }.toMutableStateList()
     }
     val downloadable = remember { mutableStateListOf<PluginItem>() }
-    val disabledList by remember(downloadable) {
+    val disabledList by remember(enabled, disabled) {
         derivedStateOf {
-            disabled + downloadable.filter { edge -> !disabled.any { it.id == edge.id } }
+            disabled + downloadable.filter { edge -> !plugins.any { it.id == edge.id } }
         }
     }
 
@@ -163,7 +180,8 @@ fun PluginsApp(
                 scrollBehavior = scrollBehavior, onNavigateBack = onBack
             )
         },
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        snackbarHost = { SnackbarHost(snackbars) }
     ) { paddingValues ->
         LazyColumn(
             state = listState,
@@ -189,6 +207,7 @@ fun PluginsApp(
                     }
                 },
                 plugins = enabled,
+                snackbarHostState = snackbars,
                 isHovered = hoveringItemIndex == 1,
                 onPrepareDrag = { plugin, offset, pos ->
                     floating = FloatingItem(plugin, offset, pos)
@@ -215,6 +234,7 @@ fun PluginsApp(
                     }
                 },
                 plugins = disabledList,
+                snackbarHostState = snackbars,
                 isHovered = hoveringItemIndex == enabled.size + 3,
                 onPrepareDrag = { plugin, offset, pos ->
                     floating = FloatingItem(plugin, offset, pos)
@@ -327,17 +347,18 @@ private fun PluginsAppTopBar(scrollBehavior: TopAppBarScrollBehavior, onNavigate
 private fun LazyListScope.operativeArea(
     label: @Composable () -> Unit,
     plugins: List<PluginItem>,
+    snackbarHostState: SnackbarHostState,
     isHovered: Boolean,
     onPrepareDrag: (PluginItem, Offset, Offset) -> Unit,
     onDrag: (Offset) -> Unit,
-    onDrop: (plugin: PluginItem) -> Unit
+    onDrop: (plugin: PluginItem) -> Unit,
 ) {
     plugins.forEach {
-        item(it.id) {
-            Surface(
-                onClick = {},
-                modifier = Modifier
-                    .animateItemPlacement()
+        val mod =
+            if (it.state is PluginItemState.NotDownloaded) {
+                Modifier
+            } else {
+                Modifier
                     .dragTarget(
                         prepare = { off, pos ->
                             onPrepareDrag(it, off, pos)
@@ -347,12 +368,82 @@ private fun LazyListScope.operativeArea(
                             onDrop(it)
                         }
                     )
+            }
+
+        item(it.id) {
+            val coroutine = rememberCoroutineScope()
+            val context = LocalContext.current
+
+            val updater = remember { Updater(context) }
+            var installing by remember { mutableStateOf(false) }
+            val launcher = rememberLauncherForActivityResult(
+                remember {
+                    // this should be remembered, or
+                    // class be made into single instance
+                    InstallationPermissionContract()
+                },
+            ) { canInstall ->
+                if (canInstall) {
+                    val status = updater.status
+                    if (status is StatusReadyToInstall) {
+                        context.installUpdate(status.file, UPDATE_FILE_PROVIDER_AUTHORITY)
+                    }
+                }
+                installing = false
+            }
+            val downloadProgress by remember {
+                derivedStateOf {
+                    val status = updater.status
+                    if (status is StatusDownloading) {
+                        status.progress
+                    } else if (status is StatusReadyToDownload && installing) {
+                        0f
+                    } else {
+                        -1f
+                    }
+                }
+            }
+
+            Surface(
+                onClick = {
+                    val state = it.state
+                    if (state.containsDownloadable) {
+                        coroutine.launch {
+                            val asset = when (state) {
+                                is PluginItemState.NotDownloaded -> defaultKtorClient.getReleaseAsset(
+                                    BuildConfig.SERVER_URI,
+                                    state.query.key
+                                )
+
+                                is PluginItemState.Update -> {
+                                    state.asset
+                                }
+
+                                else -> {
+                                    throw NotImplementedError(state.toString())
+                                }
+                            }
+                            if (asset == null) {
+                                snackbarHostState.showSnackbar(context.getString(R.string.text_asset_fetch_failed))
+                                return@launch
+                            }
+                            val update = updater.download(asset)
+                            if (!context.packageManager.canInstallUpdate()) {
+                                launcher.launch(context.packageName)
+                            } else {
+                                context.installUpdate(update, UPDATE_FILE_PROVIDER_AUTHORITY)
+                            }
+                        }
+                    }
+                },
+                modifier = mod.animateItemPlacement()
             ) {
                 PluginItemView(
                     item = it,
+                    progress = downloadProgress,
                     modifier = Modifier
                         .padding(horizontal = paddingCommon * 2)
-                        .fillMaxWidth()
+                        .fillMaxWidth(),
                 )
             }
         }
@@ -404,21 +495,21 @@ private fun PluginItemView(
         ) {
             // start: front icon
             when (item.state) {
-                PluginItemState.NOT_DOWNLOADED -> {
+                is PluginItemState.NotDownloaded -> {
                     Icon(
                         painter = painterResource(id = com.zhufucdev.update.R.drawable.ic_baseline_download),
                         contentDescription = stringResource(id = R.string.des_plugin_downloadable),
                     )
                 }
 
-                PluginItemState.UPDATE -> {
+                is PluginItemState.Update -> {
                     Icon(
                         painter = painterResource(id = com.zhufucdev.update.R.drawable.ic_baseline_update),
                         contentDescription = stringResource(id = R.string.des_plugin_update),
                     )
                 }
 
-                PluginItemState.NONE -> {
+                is PluginItemState.None -> {
                     if (item.enabled) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_power_plug),
@@ -444,8 +535,8 @@ private fun PluginItemView(
                     LocalTextStyle provides MaterialTheme.typography.labelSmall
                 ) {
                     when (item.state) {
-                        PluginItemState.NOT_DOWNLOADED -> Text(stringResource(id = R.string.des_plugin_downloadable))
-                        PluginItemState.UPDATE -> Text(stringResource(id = R.string.des_plugin_update))
+                        is PluginItemState.NotDownloaded -> Text(stringResource(id = R.string.des_plugin_downloadable))
+                        is PluginItemState.Update -> Text(stringResource(id = R.string.des_plugin_update))
                         else -> {
                             if (item.subtitle.isNotBlank()) {
                                 Text(text = item.subtitle)
@@ -476,7 +567,7 @@ fun PluginItemPreview() {
                     "e1",
                     "example plug-in 1",
                     enabled = true,
-                    state = PluginItemState.NONE
+                    state = PluginItemState.None
                 )
             )
             PluginItemView(
@@ -485,7 +576,7 @@ fun PluginItemPreview() {
                     "example plug-in 2",
                     "hi",
                     enabled = true,
-                    state = PluginItemState.NONE
+                    state = PluginItemState.None
                 )
             )
             PluginItemView(
@@ -493,7 +584,7 @@ fun PluginItemPreview() {
                     "e3",
                     "example plug-in 3",
                     enabled = true,
-                    state = PluginItemState.UPDATE
+                    state = PluginItemState.Update(ReleaseAsset("", "", ""))
                 ),
                 progress = 0f,
             )

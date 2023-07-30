@@ -194,7 +194,7 @@
     <string name="title_use_tls">Use TLS</string>
     <string name="text_input_invalid">input invalid</string>
     <string name="title_activity_updater">App Updater</string>
-    <string name="text_update_found">A new version found</string>
+    <string name="text_update_found">A newer version of Motion Emulator is available</string>
     <string name="action_upgrade">Upgrade</string>
     <string name="title_emulation_method">Emulation method</string>
     <string name="title_method_xposed_only">Xposed only</string>
@@ -213,4 +213,5 @@
     <string name="des_plugin_update">this plugin has an update</string>
     <string name="title_permission_read">Insight into Settings of Motion Emulator</string>
     <string name="text_permission_read">Allows this app to get information about settings in Motion Emulator, emulation method and server address for example.</string>
+    <string name="text_asset_fetch_failed">Failed to fetch release asset</string>
 </resources>

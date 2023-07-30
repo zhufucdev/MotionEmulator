@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.core.content.edit
 import com.zhufucdev.motion_emulator.extension.sharedPreferences
@@ -16,11 +17,19 @@ import com.zhufucdev.motion_emulator.extension.sharedPreferences
  * means it's got global lifespan
  */
 object Plugins {
-    lateinit var available: List<Plugin>
+    var available: List<Plugin> by mutableStateOf(emptyList())
         private set
     private lateinit var prefs: SharedPreferences
+    var initialized = false
+        private set
     fun init(context: Context) {
         prefs = context.sharedPreferences()
+        loadAvailablePlugins(context)
+        countEnabled = prefs.getString("plugins_enabled", "")!!.split(",").size
+        initialized = true
+    }
+
+    fun loadAvailablePlugins(context: Context) {
         available =
             context.packageManager.getInstalledApplications(PackageManager.GET_META_DATA)
                 .filter {
@@ -33,7 +42,6 @@ object Plugins {
                         it.metaData.getString("me_description", "")
                     )
                 }
-        countEnabled = prefs.getString("plugins_enabled", "")!!.split(",").size
     }
 
     val enabled: List<Plugin>

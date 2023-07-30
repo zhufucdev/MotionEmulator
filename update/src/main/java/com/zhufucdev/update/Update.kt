@@ -26,6 +26,9 @@ import kotlin.coroutines.suspendCoroutine
 
 /**
  * Something checks and downloads app updates
+ *
+ * This is also a view model
+ *
  * @param apiUri See [this repo](https://github.com/zhufucdev/api.zhufucdev) to get an idea
  * @param productAlias How to call the app
  * @param context The context
@@ -36,7 +39,7 @@ class Updater(
     private val apiUri: String,
     private val productAlias: String,
     private val context: Context,
-    private val exportedDir: File
+    private val exportedDir: File = File(context.externalCacheDir, "update")
 ) {
     private val ktor = HttpClient(OkHttp) {
         install(HttpTimeout) {
@@ -65,50 +68,53 @@ class Updater(
     }
 
     /**
-     * Look for a new update
+     * Look for a new update, with the [android.content.pm.PackageInfo.versionName] of the current
+     * [context]
      */
     suspend fun check(): ReleaseAsset? {
         updateStatus(StatusChecking)
-        try {
-            val currentVersion = context.packageManager.getPackageInfo(context.packageName, 0).versionName
-            val arch = Build.SUPPORTED_ABIS[0].standardArchitect()
-            val update = ktor.getReleaseAsset(apiUri, productAlias, currentVersion, arch)
-            if (update != null) {
-                this.update = update
-            }
-            return update
-        } finally {
+        val currentVersion =
+            context.packageManager.getPackageInfo(context.packageName, 0).versionName
+        val arch = Build.SUPPORTED_ABIS[0].standardArchitect()
+        val update =
+            ktor.getReleaseAsset(apiUri, productAlias, "android", currentVersion, arch)
+        if (update != null) {
+            this.update = update
             updateStatus(StatusReadyToDownload)
         }
+        return update
     }
 
     /**
      * Download the update to the exported directory
+     * @param update Override the global [Updater.update]
      * @returns The downloaded file
      * @throws IllegalStateException if no update available
      * @throws RuntimeException if [DownloadManager] is not available
      */
     @SuppressLint("AutoboxingStateValueProperty")
-    suspend fun download(): File {
-        val update = this.update ?: throw IllegalStateException("update unavailable. Have you checked first?")
+    suspend fun download(update: ReleaseAsset? = null): File {
+        val localUpdate = update ?: this.update
+        ?: throw IllegalStateException("update unavailable. Have you checked first?")
         val manager =
-            context.getSystemService<DownloadManager>() ?: throw RuntimeException("download manager not available")
+            context.getSystemService<DownloadManager>()
+                ?: throw RuntimeException("download manager not available")
 
         updateStatus(StatusPreDownload)
 
         if (!exportedDir.exists()) exportedDir.mkdirs()
-        val result = File(exportedDir, "${productAlias}-${update.versionName}.apk")
+        val result = File(exportedDir, "${localUpdate.productName}-${localUpdate.versionName}.apk")
         if (result.exists()) {
             updateStatus(StatusReadyToInstall(result))
             return result // TODO Manifest verification
         }
-        val taskId = manager.enqueue(DownloadManager.Request(Uri.parse(update.url)).apply {
+        val taskId = manager.enqueue(DownloadManager.Request(Uri.parse(localUpdate.url)).apply {
             setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE)
             setDestinationUri(Uri.fromFile(result))
         })
 
         return suspendCoroutine { c ->
-            val progress = mutableFloatStateOf(0F)
+            var progress by mutableFloatStateOf(0F)
             val status = StatusDownloading(progress, manager, taskId)
 
             thread(start = true) {
@@ -133,7 +139,7 @@ class Updater(
                         updateStatus(StatusPreDownload)
                     } else {
                         updateStatus(status)
-                        progress.value = query
+                        progress = query
                     }
                     Thread.sleep(1000)
                 }
@@ -219,7 +225,7 @@ object StatusReadyToDownload : UpdaterStatus, HasUpdate {
 }
 
 data class StatusDownloading(
-    var progress: MutableState<Float>,
+    var progress: Float,
     private val manager: DownloadManager,
     private val taskId: Long,
 ) : Downloading {

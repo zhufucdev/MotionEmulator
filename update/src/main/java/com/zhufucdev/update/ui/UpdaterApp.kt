@@ -1,20 +1,54 @@
-package com.zhufucdev.update
+package com.zhufucdev.update.ui
 
-import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LargeTopAppBar
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.PlainTooltipBox
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.zhufucdev.update.Downloading
+import com.zhufucdev.update.HasUpdate
+import com.zhufucdev.update.R
+import com.zhufucdev.update.StatusDownloading
+import com.zhufucdev.update.StatusGenericWorking
+import com.zhufucdev.update.StatusIdling
+import com.zhufucdev.update.StatusReadyToDownload
+import com.zhufucdev.update.StatusReadyToInstall
+import com.zhufucdev.update.Updater
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
@@ -47,9 +81,12 @@ fun UpdaterApp(navigateUp: () -> Unit, updater: Updater, install: suspend (File)
                         coroutine.launch {
                             try {
                                 updater.download()
-                                Log.d("UpdaterApp", "Downloaded")
                             } catch (e: Exception) {
-                                snackbar.showSnackbar(context.getString(R.string.text_download_failed, e.message))
+                                snackbar.showSnackbar(
+                                    message = context.getString(R.string.text_download_failed, e.message),
+                                    withDismissAction = true,
+                                    duration = SnackbarDuration.Indefinite
+                                )
                                 e.printStackTrace()
                             }
                         }
@@ -87,10 +124,9 @@ fun UpdaterApp(navigateUp: () -> Unit, updater: Updater, install: suspend (File)
             Box(Modifier.fillMaxWidth().padding(12.dp)) {
                 val status = updater.status
                 if (status is StatusDownloading) {
-                    val progress by status.progress
                     LinearProgressIndicator(
                         modifier = Modifier.fillMaxWidth(),
-                        progress = progress
+                        progress = status.progress
                     )
                 } else if (updater.status is StatusGenericWorking) {
                     LinearProgressIndicator(Modifier.fillMaxWidth())
