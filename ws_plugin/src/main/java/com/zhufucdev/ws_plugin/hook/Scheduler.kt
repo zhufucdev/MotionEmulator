@@ -8,12 +8,9 @@ import com.zhufucdev.stub_plugin.connect
 import com.zhufucdev.xposed.AbstractScheduler
 import com.zhufucdev.xposed.PREFERENCE_NAME_BRIDGE
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlin.coroutines.coroutineContext
 import kotlin.time.Duration.Companion.seconds
 
 class Scheduler : AbstractScheduler() {
@@ -36,7 +33,7 @@ class Scheduler : AbstractScheduler() {
     }
 
     override fun PackageParam.getHookingMethod(): Method =
-        prefs.getString("me_method", "xposed_only").let {
+        prefs(PREFERENCE_NAME_BRIDGE).getString("me_method", "xposed_only").let {
             Method.valueOf(it.uppercase())
         }
 
