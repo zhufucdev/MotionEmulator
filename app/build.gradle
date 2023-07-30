@@ -27,8 +27,8 @@ android {
         }
 
         buildConfigField("String", "AMAP_WEB_KEY", localProperties["amap.web.key"])
-        buildConfigField("String", "PRODUCT", serverProperties["PRODUCT"])
-        buildConfigField("String", "SERVER_URI", serverProperties["SERVER_URI"])
+        buildConfigField("String", "PRODUCT", serverProperties["PRODUCT"] ?: "")
+        buildConfigField("String", "SERVER_URI", serverProperties["SERVER_URI"] ?: "")
     }
 
     viewBinding {
