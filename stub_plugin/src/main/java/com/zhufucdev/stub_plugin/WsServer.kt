@@ -23,6 +23,7 @@ import io.ktor.serialization.kotlinx.KotlinxWebsocketSerializationConverter
 import io.ktor.serialization.kotlinx.protobuf.protobuf
 import io.ktor.util.InternalAPI
 import io.ktor.websocket.CloseReason
+import io.ktor.websocket.WebSocketSession
 import io.ktor.websocket.close
 import io.ktor.websocket.readBytes
 import io.ktor.websocket.send
@@ -159,8 +160,8 @@ suspend fun WsServer.connect(id: String, block: suspend ServerScope.() -> Unit):
 
                 try {
                     var worker = launchWorker()
-                    for (req in incoming) {
-                        when (val state = AgentState.values()[req.readBytes().first().toInt()]) {
+                    while (true) {
+                        when (val state = receiveCommand()) {
                             AgentState.CANCELED -> {
                                 worker.cancelAndJoin()
                             }
@@ -187,9 +188,10 @@ suspend fun WsServer.connect(id: String, block: suspend ServerScope.() -> Unit):
                         }
                     }
                 } catch (e: Exception) {
-                    Log.w("WsServer", e)
+                    Log.w("WsServer", "Error in connection to a websocket server", e)
                 } finally {
                     close()
+                    Log.d("WsServer", "Connection closed")
                 }
             }
         )
@@ -202,4 +204,9 @@ suspend fun WsServer.connect(id: String, block: suspend ServerScope.() -> Unit):
             client.close()
         }
     }
+}
+
+private suspend fun WebSocketSession.receiveCommand(): AgentState {
+    val req = incoming.receive()
+    return AgentState.values()[req.readBytes().first().toInt()]
 }

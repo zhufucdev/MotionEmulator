@@ -30,11 +30,14 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.get
 import io.ktor.server.routing.routing
 import io.ktor.server.util.getOrFail
+import io.ktor.server.websocket.DefaultWebSocketServerSession
+import io.ktor.server.websocket.WebSocketServerSession
 import io.ktor.server.websocket.WebSockets
 import io.ktor.server.websocket.converter
 import io.ktor.server.websocket.receiveDeserialized
 import io.ktor.server.websocket.webSocketRaw
 import io.ktor.websocket.Frame
+import io.ktor.websocket.WebSocketSession
 import io.ktor.websocket.close
 import io.ktor.websocket.send
 import kotlinx.coroutines.CoroutineScope
@@ -352,28 +355,7 @@ fun Application.eventServer() {
             val id = call.parameters.getOrFail("id")
             Scheduler.startAgent(id)
 
-            fun launchWorker() = launch {
-                try {
-                    val info = receiveDeserialized<EmulationInfo>()
-                    Scheduler.notifyEmulationStarted(id, info)
-                    for (frame in incoming) {
-                        if (frame is Frame.Close) {
-                            close()
-                            break
-                        } else if (frame.data.singleOrNull() == Byte.MAX_VALUE) {
-                            // this is signal completion
-                            Scheduler.notifyEmulationCompleted(id)
-                            break
-                        }
-                        val data = converter!!.deserialize<Intermediate>(frame)
-                        Scheduler.setIntermediate(id, data)
-                    }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-            }
-
-            var worker = launchWorker()
+            var worker = launchWorker(id)
 
             for (req in incomingAgentStateOf(id)) {
                 when (req) {
@@ -384,15 +366,15 @@ fun Application.eventServer() {
 
                     AgentState.PENDING -> {
                         worker.cancelAndJoin()
-                        worker = launchWorker()
-                        send(byteArrayOf(AgentState.PENDING.ordinal.toByte()))
+                        worker = launchWorker(id)
+                        sendCommand(AgentState.PENDING)
                     }
 
                     AgentState.RUNNING -> {}
 
                     else -> {
                         if (req != AgentState.COMPLETED) {
-                            send(byteArrayOf(req.ordinal.toByte()))
+                            sendCommand(req)
                         }
                         worker.cancelAndJoin()
                     }
@@ -413,4 +395,29 @@ fun Application.eventServer() {
             }
         }
     }
+}
+
+private suspend fun WebSocketServerSession.launchWorker(id: String) = launch {
+    try {
+        val info = receiveDeserialized<EmulationInfo>()
+        Scheduler.notifyEmulationStarted(id, info)
+        for (frame in incoming) {
+            if (frame is Frame.Close) {
+                close()
+                break
+            } else if (frame.data.singleOrNull() == Byte.MAX_VALUE) {
+                // this is signal completion
+                Scheduler.notifyEmulationCompleted(id)
+                break
+            }
+            val data = converter!!.deserialize<Intermediate>(frame)
+            Scheduler.setIntermediate(id, data)
+        }
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
+}
+
+private suspend fun WebSocketSession.sendCommand(state: AgentState) {
+    send(byteArrayOf(state.ordinal.toByte()))
 }
