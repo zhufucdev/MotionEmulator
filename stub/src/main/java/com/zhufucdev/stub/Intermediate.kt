@@ -20,8 +20,11 @@ data class Intermediate(val location: Point, val elapsed: Double, val progress: 
 @Serializable
 data class EmulationInfo(val duration: Double, val length: Double, val owner: String)
 
-enum class AgentState {
-    NOT_JOINED, PENDING, CANCELED, RUNNING, PAUSED, COMPLETED
+enum class AgentState(val fin: Boolean) {
+    NOT_JOINED(false), PENDING(false),
+    CANCELED(false), RUNNING(false),
+    PAUSED(false), COMPLETED(true),
+    FAILURE(true)
 }
 
 class IntermediateSerializer : KSerializer<Intermediate> {

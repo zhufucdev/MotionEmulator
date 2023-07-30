@@ -5,11 +5,13 @@ import com.zhufucdev.stub.AgentState
 import com.zhufucdev.stub.Emulation
 import com.zhufucdev.stub.EmulationInfo
 import com.zhufucdev.stub.Intermediate
+import com.zhufucdev.stub_plugin.coroutine.PausingJob
 import com.zhufucdev.stub_plugin.coroutine.launchPausing
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.websocket.DefaultClientWebSocketSession
 import io.ktor.client.plugins.websocket.WebSockets
 import io.ktor.client.plugins.websocket.sendSerialized
 import io.ktor.client.plugins.websocket.webSocket
@@ -21,13 +23,14 @@ import io.ktor.http.isSuccess
 import io.ktor.http.path
 import io.ktor.serialization.kotlinx.KotlinxWebsocketSerializationConverter
 import io.ktor.serialization.kotlinx.protobuf.protobuf
-import io.ktor.util.InternalAPI
 import io.ktor.websocket.CloseReason
+import io.ktor.websocket.DefaultWebSocketSession
 import io.ktor.websocket.WebSocketSession
 import io.ktor.websocket.close
 import io.ktor.websocket.readBytes
 import io.ktor.websocket.send
 import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.isActive
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.protobuf.ProtoBuf
@@ -62,7 +65,7 @@ private fun HttpRequestBuilder.urlTo(
     }
 }
 
-@OptIn(InternalAPI::class, ExperimentalSerializationApi::class)
+@OptIn(ExperimentalSerializationApi::class)
 suspend fun WsServer.connect(id: String, block: suspend ServerScope.() -> Unit): ServerConnection {
     val client =
         previousConnection
@@ -74,7 +77,7 @@ suspend fun WsServer.connect(id: String, block: suspend ServerScope.() -> Unit):
 
                 install(WebSockets) {
                     contentConverter = KotlinxWebsocketSerializationConverter(ProtoBuf)
-                    pingInterval = 500
+                    maxFrameSize = Long.MAX_VALUE
                 }
 
                 engine {
@@ -134,32 +137,8 @@ suspend fun WsServer.connect(id: String, block: suspend ServerScope.() -> Unit):
                 }
             },
             block = {
-                val scope = object : ServerScope {
-                    private var started = false
-                    override val emulation = Optional.of(emulation)
-
-                    override suspend fun sendStarted(info: EmulationInfo) {
-                        sendSerialized(info)
-                        started = true
-                    }
-
-                    override suspend fun sendProgress(intermediate: Intermediate) {
-                        if (!started) throw IllegalStateException("Sending progress before start")
-                        sendSerialized(intermediate)
-                    }
-
-                    override suspend fun close() {
-                        close(CloseReason(CloseReason.Codes.NORMAL, "canceled programmatically"))
-                    }
-                }
-
-                fun launchWorker() = launchPausing {
-                    block.invoke(scope)
-                    send(byteArrayOf(Byte.MAX_VALUE)) // this is signal completion
-                }
-
                 try {
-                    var worker = launchWorker()
+                    var worker = launchWorker(emulation, block)
                     while (true) {
                         when (val state = receiveCommand()) {
                             AgentState.CANCELED -> {
@@ -175,7 +154,7 @@ suspend fun WsServer.connect(id: String, block: suspend ServerScope.() -> Unit):
                                     worker.resume()
                                 } else {
                                     if (!worker.isCancelled) worker.cancelAndJoin()
-                                    worker = launchWorker()
+                                    worker = launchWorker(emulation, block)
                                 }
                             }
 
@@ -209,4 +188,38 @@ suspend fun WsServer.connect(id: String, block: suspend ServerScope.() -> Unit):
 private suspend fun WebSocketSession.receiveCommand(): AgentState {
     val req = incoming.receive()
     return AgentState.values()[req.readBytes().first().toInt()]
+}
+
+private fun DefaultClientWebSocketSession.launchWorker(
+    emulation: Emulation,
+    block: suspend (ServerScope) -> Unit
+): PausingJob {
+    val scope = object : ServerScope {
+        private var started = false
+        override val emulation = Optional.of(emulation)
+
+        override suspend fun sendStarted(info: EmulationInfo) {
+            sendSerialized(info)
+            started = true
+        }
+
+        override suspend fun sendProgress(intermediate: Intermediate) {
+            if (!started) throw IllegalStateException("Sending progress before start")
+            sendSerialized(intermediate)
+        }
+
+        override suspend fun close() {
+            close(CloseReason(CloseReason.Codes.NORMAL, "canceled programmatically"))
+        }
+    }
+
+    return launchPausing {
+        try {
+            block.invoke(scope)
+            send(byteArrayOf(0x7f)) // this is signal completion
+        } catch (e: Exception) {
+            send(byteArrayOf(-0x7f)) // this is signal failure
+            Log.w("WsServer", "Worker finished exceptionally", e)
+        }
+    }
 }

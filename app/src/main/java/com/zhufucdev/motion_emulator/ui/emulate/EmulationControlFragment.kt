@@ -37,8 +37,8 @@ class EmulationControlFragment : EmulationMonitoringFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         notifyState(Scheduler.controllerState)
-        addEmulationStateListener { _, state ->
-            notifyState(state)
+        addEmulationStateListener { _, _ ->
+            notifyState(Scheduler.controllerState)
         }
     }
 

@@ -30,7 +30,6 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.get
 import io.ktor.server.routing.routing
 import io.ktor.server.util.getOrFail
-import io.ktor.server.websocket.DefaultWebSocketServerSession
 import io.ktor.server.websocket.WebSocketServerSession
 import io.ktor.server.websocket.WebSockets
 import io.ktor.server.websocket.converter
@@ -74,6 +73,8 @@ data class EmulationRef(
  * - [AgentState.PAUSED] when the emulation is paused by user.
  * Finally, if no interruption occurred,
  * - [AgentState.COMPLETED] when the agent reports itself.
+ * Otherwise,
+ * - [AgentState.FAILURE] when the agent returns an exception.
  */
 object Scheduler {
     private val stateListeners = mutableSetOf<(String, AgentState) -> Boolean>()
@@ -168,6 +169,10 @@ object Scheduler {
         notifyStateChanged(id, AgentState.COMPLETED)
     }
 
+    internal fun notifyEmulationFailed(id: String) {
+        notifyStateChanged(id, AgentState.FAILURE)
+    }
+
     private fun notifyStateChanged(id: String, state: AgentState) {
         mState[id] = state
         stateListeners.removeAll {
@@ -211,6 +216,7 @@ object Scheduler {
             else if (instance.isEmpty() || mState.size == 1 && mState.containsValue(AgentState.PENDING)) AgentState.PENDING
             else if (mState.containsValue(AgentState.RUNNING)) AgentState.RUNNING
             else if (mState.values.all { it == AgentState.PAUSED }) AgentState.PAUSED
+            else if (mState.values.all { it.fin }) AgentState.COMPLETED
             else AgentState.CANCELED
 
     fun onAgentStateChanged(l: (id: String, state: AgentState) -> Unit): ListenCallback {
@@ -373,7 +379,7 @@ fun Application.eventServer() {
                     AgentState.RUNNING -> {}
 
                     else -> {
-                        if (req != AgentState.COMPLETED) {
+                        if (!req.fin) {
                             sendCommand(req)
                         }
                         worker.cancelAndJoin()
@@ -381,6 +387,7 @@ fun Application.eventServer() {
                 }
             }
         }
+
         get("/current/{id?}") {
             val id = call.parameters["id"]
             if (id != null && Scheduler.currentEmulationState(id) != AgentState.PENDING) {
@@ -405,9 +412,12 @@ private suspend fun WebSocketServerSession.launchWorker(id: String) = launch {
             if (frame is Frame.Close) {
                 close()
                 break
-            } else if (frame.data.singleOrNull() == Byte.MAX_VALUE) {
+            } else if (frame.data.singleOrNull() == 0x7f.toByte()) {
                 // this is signal completion
                 Scheduler.notifyEmulationCompleted(id)
+                break
+            } else if (frame.data.singleOrNull() == (-0x7f).toByte()) {
+                Scheduler.notifyEmulationFailed(id)
                 break
             }
             val data = converter!!.deserialize<Intermediate>(frame)

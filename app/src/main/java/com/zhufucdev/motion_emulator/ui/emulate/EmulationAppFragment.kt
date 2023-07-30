@@ -72,6 +72,7 @@ class EmulationAppFragment : EmulationMonitoringFragment() {
             AgentState.CANCELED -> notifyStopped(R.string.title_emulation_canceled)
             AgentState.PAUSED -> TODO()
             AgentState.COMPLETED -> notifyStopped(R.string.title_emulation_completed)
+            AgentState.FAILURE -> notifyStopped(R.string.title_emulation_failure)
         }
     }
 

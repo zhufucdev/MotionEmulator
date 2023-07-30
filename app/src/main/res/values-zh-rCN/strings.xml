@@ -69,6 +69,7 @@
     <string name="title_emulation_canceled">模拟已取消</string>
     <string name="title_emulation_completed">模拟已完成</string>
     <string name="title_emulation_pending">正在等待模拟</string>
+    <string name="title_emulation_failure">模拟失败</string>
     <string name="text_emulation_pending">等待其他应用响应</string>
     <string name="title_agent_offline">中间件离线</string>
     <string name="title_controller_offline">控制器离线</string>
