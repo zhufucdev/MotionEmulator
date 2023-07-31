@@ -69,11 +69,11 @@ echo GCP_MAPS_KEY="<Your Key>" >> local.properties
 ```shell
 cd app
 echo SERVER_URI="<Your Server>" >> server.properties
-echo PRODUCT_NAME="<You Decide>" >> server.properties
+echo PRODUCT="<You Decide>" >> server.properties
 
 cd ../mock_location_plugin
 echo SERVER_URI="<Your Server>" >> server.properties
-echo PRODUCT_NAME="<You Decide>" >> server.properties
+echo PRODUCT="<You Decide>" >> server.properties
 ```
 
 `SERVER_URI`是一个HTTP/HTTPS的RESTful API，它实现了特定的一些协议。你可以通过

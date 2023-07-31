@@ -74,11 +74,11 @@ However, it is still possible to build with your own service
 ```shell
 cd app
 echo SERVER_URI="<Your Server>" >> server.properties
-echo PRODUCT_NAME="<You Decide>" >> server.properties
+echo PRODUCT="<You Decide>" >> server.properties
 
 cd ../mock_location_plugin
 echo SERVER_URI="<Your Server>" >> server.properties
-echo PRODUCT_NAME="<You Decide>" >> server.properties
+echo PRODUCT="<You Decide>" >> server.properties
 ```
 
 The `SERVER_URI` is supposed to be an HTTP/HTTPS RESTful that implements
