@@ -45,7 +45,7 @@ If you are curious, go ahead to
 
 If you are bored, it's possible to try something new, as I host
 a private CI for snapshot builds
-[here](https://build.zhufucdev.com/job/Motion%20Emulator/)
+[here](https://build.zhufucdev.com/buildConfiguration/ME_Snapshot)
 
 It's worth noticing that some of these are debug builds, whose
 signature is very different from the release ones. If you wanted
