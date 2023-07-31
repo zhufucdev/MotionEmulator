@@ -53,8 +53,9 @@ to install, you were about to uninstall first
 
 ## Build Instructions
 
-Build and maintain this project with Android Studio
-or Intellij IDEA.
+Build and maintain this project with the latest Android Studio Canary
+(currently Hedgehog | 2023.1.1 Canary 14) because this project is pretty
+radical
 
 This app contains sdk from Amap and Google Maps, thus **api keys** are
 required.
@@ -65,6 +66,24 @@ echo amap.web.key="<Your Key>" >> local.properties
 echo AMAP_SDK_KEY="<Your Key>" >> local.properties
 echo GCP_MAPS_KEY="<Your Key>" >> local.properties
 ```
+
+My own service is involved to provide online features like self update,
+which is optional and shouldn't be included in unofficial builds
+
+However, it is still possible to build with your own service
+```shell
+cd app
+echo SERVER_URI="<Your Server>"
+echo PRODUCT_NAME="<You Decide>"
+
+cd ../mock_location_plugin
+echo SERVER_URI="<Your Server>"
+echo PRODUCT_NAME="<You Decide>"
+```
+
+The `SERVER_URI` is supposed to be an HTTP/HTTPS RESTful that implements
+a certain protocol. You can get an example by 
+[looking at my codebase](https://github.com/zhufucdev/api.zhufucdev)
 
 By the way, in case you are not familiar with Android dev, fill in
 your own SDK like so:

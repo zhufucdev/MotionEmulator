@@ -42,17 +42,15 @@ Motion Emulator是个模拟连续定位和传感器变化的Xposed模块
 
 ## 快照版
 
-如果你无聊，可以试试一些新东西，比如我在
-[这儿](https://build.zhufucdev.com/job/Motion%20Emulator/)
+如果你无聊，可以试试一些新东西，比如我在[这儿](https://build.zhufucdev.com/job/Motion%20Emulator/)
 自建的一个快照编译器
 
-我得说，这里面很多都是调试版，它们的签名和正式版不一样。如果你想安装这些
-调试版，需要先卸载正式版
+我得说，这里面很多都是调试版，它们的签名和正式版不一样。如果你想安装这些 调试版，需要先卸载正式版
 
 ## 构建指南
 
-如果你是开发者，请使用Android Studio或Jetbrains IDEA构建和维护这个项目
-
+如果你是开发者，请使用最新的Android Studio金丝雀版（当前是Hedgehog | 2023.1.1 Canary 14）构建和维护这个项目，
+因为这个项目十分的激进
 
 项目使用了高德地图和Google Maps的API，你得申请些自己的，网址在[这儿](https://console.amap.com/dev/key/app)和
 [这儿](https://developers.google.com/maps/documentation/android-sdk/start)
@@ -63,6 +61,23 @@ echo amap.web.key="<Your Key>" >> local.properties
 echo AMAP_SDK_KEY="<Your Key>" >> local.properties
 echo GCP_MAPS_KEY="<Your Key>" >> local.properties
 ```
+
+我的私有服务被用来提供一些在线特性，例如自检查更新。这些服务是可选的，并且不会被包括在
+第三方构建中。
+
+但还是可以用你自己的服务来构建的
+```shell
+cd app
+echo SERVER_URI="<Your Server>"
+echo PRODUCT_NAME="<You Decide>"
+
+cd ../mock_location_plugin
+echo SERVER_URI="<Your Server>"
+echo PRODUCT_NAME="<You Decide>"
+```
+
+`SERVER_URI`是一个HTTP/HTTPS的RESTful API，它实现了特定的一些协议。你可以通过
+[查看我的代码库](https://github.com/zhufucdev/api.zhufucdev)来了解这是一个怎样的协议。
 
 顺便说一句，万一你不熟悉Android开发，你要把自己的SDK填进去，就像这样：
 ```shell
