@@ -115,7 +115,7 @@ class Updater(
         })
 
         return suspendCoroutine { c ->
-            var progress = mutableFloatStateOf(0F)
+            val progress = mutableFloatStateOf(0F)
             val status = StatusDownloading(progress, manager, taskId)
 
             thread(start = true) {
