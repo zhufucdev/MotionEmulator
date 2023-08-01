@@ -64,5 +64,3 @@ fun ProductQuery.toPluginItem() = PluginItem(
 )
 
 fun PluginItem.findPlugin() = Plugins.available.firstOrNull { it.packageName == id }
-
-data class UpdatingPlugin(val id: String, val asset: ReleaseAsset)
