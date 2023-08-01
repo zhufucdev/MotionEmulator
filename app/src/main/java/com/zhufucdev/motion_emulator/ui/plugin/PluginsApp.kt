@@ -51,6 +51,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -91,6 +92,7 @@ import com.zhufucdev.motion_emulator.extension.insert
 import com.zhufucdev.motion_emulator.ui.CaptionText
 import com.zhufucdev.motion_emulator.ui.theme.MotionEmulatorTheme
 import com.zhufucdev.motion_emulator.ui.theme.paddingCommon
+import com.zhufucdev.update.Downloading
 import com.zhufucdev.update.InstallationPermissionContract
 import com.zhufucdev.update.StatusDownloading
 import com.zhufucdev.update.StatusReadyToDownload
@@ -98,6 +100,7 @@ import com.zhufucdev.update.StatusReadyToInstall
 import com.zhufucdev.update.canInstallUpdate
 import com.zhufucdev.update.installUpdate
 import kotlinx.coroutines.launch
+import java.io.File
 import kotlin.math.max
 
 @Composable
@@ -121,6 +124,7 @@ fun PluginsApp(
         plugins.filter { !it.enabled }.toMutableStateList()
     }
     val downloadable = remember { mutableStateListOf<PluginItem>() }
+    val updatable = remember { mutableStateMapOf<String, ReleaseAsset>() }
     val disabledList by remember(enabled, disabled) {
         derivedStateOf {
             disabled + downloadable.filter { edge -> !plugins.any { it.id == edge.id } }
@@ -169,9 +173,33 @@ fun PluginsApp(
         }
     }
 
-    LaunchedEffect(Unit) {
-        val queries = defaultKtorClient.findAsset(BuildConfig.SERVER_URI, "me", "plugin")
-        downloadable.addAll(queries.map(ProductQuery::toPluginItem))
+    val context = LocalContext.current
+    LaunchedEffect(plugins) {
+        if (downloadable.isEmpty()) {
+            val queries = defaultKtorClient.findAsset(BuildConfig.SERVER_URI, "me", "plugin")
+            downloadable.addAll(queries.map(ProductQuery::toPluginItem))
+        }
+
+        downloadable.forEach { edge ->
+            if (!plugins.any { it.id == edge.id } || updatable.contains(edge.id)) {
+                // not creating unused / duplicated network traffic
+                return@forEach
+            }
+            val localState = edge.state
+            if (localState !is PluginItemState.NotDownloaded) {
+                return@forEach
+            }
+            val update =
+                Updater(localState.query.key, context)
+                    .check(context.packageManager.getPackageInfo(edge.id, 0).versionName)
+            if (update != null) {
+                updatable[edge.id] = update
+            }
+        }
+        plugins.forEach {
+            val update = updatable[it.id] ?: return@forEach
+            it.state = PluginItemState.Update(update)
+        }
     }
 
     Scaffold(
@@ -375,7 +403,6 @@ private fun LazyListScope.operativeArea(
             val context = LocalContext.current
 
             val updater = remember { Updater(context) }
-            var installing by remember { mutableStateOf(false) }
             val launcher = rememberLauncherForActivityResult(
                 remember {
                     // this should be remembered, or
@@ -389,23 +416,43 @@ private fun LazyListScope.operativeArea(
                         context.installUpdate(status.file, UPDATE_FILE_PROVIDER_AUTHORITY)
                     }
                 }
-                installing = false
             }
-            val downloadProgress by remember {
+            val downloadProgress by remember(updater.status) {
                 derivedStateOf {
-                    val status = updater.status
-                    if (status is StatusDownloading) {
-                        status.progress
-                    } else if (status is StatusReadyToDownload && installing) {
-                        0f
-                    } else {
-                        -1f
+                    when (val status = updater.status) {
+                        is StatusDownloading -> {
+                            status.progress
+                        }
+
+                        is StatusReadyToDownload -> {
+                            0f
+                        }
+
+                        else -> {
+                            -1f
+                        }
                     }
+                }
+            }
+
+            fun notifyInstall(update: File) {
+                if (!context.packageManager.canInstallUpdate()) {
+                    launcher.launch(context.packageName)
+                } else {
+                    context.installUpdate(update, UPDATE_FILE_PROVIDER_AUTHORITY)
                 }
             }
 
             Surface(
                 onClick = {
+                    val status = updater.status
+                    if (status is Downloading) {
+                        return@Surface
+                    } else if (status is StatusReadyToInstall) {
+                        notifyInstall(status.file)
+                        return@Surface
+                    }
+
                     val state = it.state
                     if (state.containsDownloadable) {
                         coroutine.launch {
@@ -427,12 +474,13 @@ private fun LazyListScope.operativeArea(
                                 snackbarHostState.showSnackbar(context.getString(R.string.text_asset_fetch_failed))
                                 return@launch
                             }
-                            val update = updater.download(asset)
-                            if (!context.packageManager.canInstallUpdate()) {
-                                launcher.launch(context.packageName)
-                            } else {
-                                context.installUpdate(update, UPDATE_FILE_PROVIDER_AUTHORITY)
+                            val update = try {
+                                updater.download(asset)
+                            } catch (e: Exception) {
+                                snackbarHostState.showSnackbar(context.getString(R.string.text_asset_fetch_failed))
+                                return@launch
                             }
+                            notifyInstall(update)
                         }
                     }
                 },

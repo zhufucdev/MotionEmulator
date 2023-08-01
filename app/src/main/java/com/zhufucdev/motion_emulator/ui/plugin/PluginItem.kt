@@ -10,7 +10,7 @@ import com.zhufucdev.motion_emulator.plugin.Plugin
 import com.zhufucdev.motion_emulator.plugin.Plugins
 
 /**
- * Model of items in [PluginItemView]
+ * Model of [PluginItemView]
  */
 @Stable
 class PluginItem(
@@ -64,3 +64,5 @@ fun ProductQuery.toPluginItem() = PluginItem(
 )
 
 fun PluginItem.findPlugin() = Plugins.available.firstOrNull { it.packageName == id }
+
+data class UpdatingPlugin(val id: String, val asset: ReleaseAsset)

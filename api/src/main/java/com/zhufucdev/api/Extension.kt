@@ -12,7 +12,7 @@ suspend fun HttpClient.getReleaseAsset(
     product: String,
     os: String? = null,
     current: String? = null,
-    architect: String? = null
+    architecture: String? = null
 ): ReleaseAsset? = runCatching {
     val req = get {
         url {
@@ -24,8 +24,8 @@ suspend fun HttpClient.getReleaseAsset(
             if (current != null) {
                 parameter("current", current)
             }
-            if (architect != null) {
-                parameter("arch", architect)
+            if (architecture != null) {
+                parameter("arch", architecture)
             }
         }
     }

@@ -68,16 +68,17 @@ class Updater(
     }
 
     /**
-     * Look for a new update, with the [android.content.pm.PackageInfo.versionName] of the current
-     * [context]
+     * Look for a new update, with the
+     * [android.content.pm.PackageInfo.versionName] of the current [context] as default
+     * @param currentVersion override the version name
      */
-    suspend fun check(): ReleaseAsset? {
+    suspend fun check(currentVersion: String? = null): ReleaseAsset? {
         updateStatus(StatusChecking)
-        val currentVersion =
-            context.packageManager.getPackageInfo(context.packageName, 0).versionName
+        val current = currentVersion
+            ?: context.packageManager.getPackageInfo(context.packageName, 0).versionName
         val arch = Build.SUPPORTED_ABIS[0].standardArchitect()
         val update =
-            ktor.getReleaseAsset(apiUri, productAlias, "android", currentVersion, arch)
+            ktor.getReleaseAsset(apiUri, productAlias, "android", current, arch)
         if (update != null) {
             this.update = update
             updateStatus(StatusReadyToDownload)
