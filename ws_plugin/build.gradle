@@ -12,8 +12,8 @@ android {
         applicationId "com.zhufucdev.ws_plugin"
         minSdk min_sdk
         targetSdk target_sdk
-        versionCode new Random().nextInt(100)
-        versionName "1.0"
+        versionCode 1
+        versionName "2.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
