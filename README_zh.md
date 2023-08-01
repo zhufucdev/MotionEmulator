@@ -49,7 +49,7 @@ Motion Emulator是个模拟连续定位和传感器变化的Xposed模块
 
 ## 构建指南
 
-如果你是开发者，请使用最新的Android Studio金丝雀版（当前是Hedgehog | 2023.1.1 Canary 14）构建和维护这个项目，
+如果你是开发者，请使用最新的Android Studio金丝雀版（当前是Hedgehog | 2023.1.1 Canary 15）构建和维护这个项目，
 因为这个项目十分的激进
 
 项目使用了高德地图和Google Maps的API，你得申请些自己的，网址在[这儿](https://console.amap.com/dev/key/app)和

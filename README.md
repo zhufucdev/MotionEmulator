@@ -54,7 +54,7 @@ to install, you were about to uninstall first
 ## Build Instructions
 
 Build and maintain this project with the latest Android Studio Canary
-(currently Hedgehog | 2023.1.1 Canary 14) because this project is pretty
+(currently Hedgehog | 2023.1.1 Canary 15) because this project is pretty
 radical
 
 This app contains sdk from Amap and Google Maps, thus **api keys** are
