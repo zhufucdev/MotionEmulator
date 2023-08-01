@@ -115,7 +115,7 @@ class Updater(
         })
 
         return suspendCoroutine { c ->
-            var progress by mutableFloatStateOf(0F)
+            var progress = mutableFloatStateOf(0F)
             val status = StatusDownloading(progress, manager, taskId)
 
             thread(start = true) {
@@ -140,7 +140,7 @@ class Updater(
                         updateStatus(StatusPreDownload)
                     } else {
                         updateStatus(status)
-                        progress = query
+                        progress.value = query
                     }
                     Thread.sleep(1000)
                 }
@@ -225,11 +225,13 @@ object StatusReadyToDownload : UpdaterStatus, HasUpdate {
     override fun onDestroy() {}
 }
 
-data class StatusDownloading(
-    var progress: Float,
+@Stable
+class StatusDownloading(
+    progress: MutableFloatState,
     private val manager: DownloadManager,
     private val taskId: Long,
 ) : Downloading {
+    val progress by progress
     override fun onDestroy() {
         if (queryDownload(manager, taskId) < 1) {
             manager.remove(taskId)
