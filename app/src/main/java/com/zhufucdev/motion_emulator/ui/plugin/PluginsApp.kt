@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -60,6 +61,7 @@ import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -489,9 +491,8 @@ private fun LazyListScope.operativeArea(
                 PluginItemView(
                     item = it,
                     progress = downloadProgress,
-                    modifier = Modifier
-                        .padding(horizontal = paddingCommon * 2)
-                        .fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth(),
+                    innerModifier = Modifier.padding(horizontal = paddingCommon * 2)
                 )
             }
         }
@@ -533,12 +534,26 @@ private fun LazyListScope.operativeArea(
 @Composable
 private fun PluginItemView(
     modifier: Modifier = Modifier,
+    innerModifier: Modifier = Modifier,
     item: PluginItem,
     progress: Float = -1f,
 ) {
-    Column(modifier) {
+    Box(modifier) {
+        AnimatedVisibility(
+            visible = progress >= 0,
+            enter = fadeIn(),
+            exit = fadeOut(),
+            modifier = Modifier.matchParentSize().alpha(0.5f)
+        ) {
+            if (progress > 0) {
+                LinearProgressIndicator(progress)
+            } else {
+                LinearProgressIndicator()
+            }
+        }
+
         Row(
-            modifier = Modifier.padding(paddingCommon),
+            modifier = Modifier.padding(paddingCommon).then(innerModifier),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // start: front icon
@@ -592,14 +607,6 @@ private fun PluginItemView(
                         }
                     }
                 }
-            }
-        }
-
-        if (progress >= 0) {
-            if (progress > 0) {
-                LinearProgressIndicator(progress, Modifier.fillMaxWidth())
-            } else {
-                LinearProgressIndicator(Modifier.fillMaxWidth())
             }
         }
     }
