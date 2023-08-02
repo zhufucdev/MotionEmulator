@@ -90,7 +90,6 @@ class EmulateStatusFragment : Fragment() {
 
     override fun onDestroy() {
         super.onDestroy()
-        Scheduler.emulation = null
         Scheduler.stop(requireContext())
         removeMonitorWorker()
     }

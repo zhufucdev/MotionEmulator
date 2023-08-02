@@ -158,6 +158,13 @@ suspend fun WsServer.connect(id: String, block: suspend ServerScope.() -> Unit):
                                 }
                             }
 
+                            AgentState.NOT_JOINED -> {
+                                if (!worker.isCancelled) {
+                                    worker.cancel()
+                                    break
+                                }
+                            }
+
                             else -> {
                                 Log.w(
                                     "WsServer",

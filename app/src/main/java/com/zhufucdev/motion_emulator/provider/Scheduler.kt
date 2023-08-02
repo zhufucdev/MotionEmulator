@@ -366,6 +366,7 @@ fun Application.eventServer() {
             for (req in incomingAgentStateOf(id)) {
                 when (req) {
                     AgentState.NOT_JOINED -> {
+                        sendCommand(AgentState.NOT_JOINED)
                         worker.cancelAndJoin()
                         break
                     }
