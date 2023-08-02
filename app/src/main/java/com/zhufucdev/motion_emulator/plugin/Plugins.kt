@@ -22,10 +22,14 @@ object Plugins {
     private lateinit var prefs: SharedPreferences
     var initialized = false
         private set
+
     fun init(context: Context) {
         prefs = context.sharedPreferences()
         loadAvailablePlugins(context)
-        countEnabled = prefs.getString("plugins_enabled", "")!!.split(",").size
+        countEnabled = prefs.getString("plugins_enabled", "")!!.let {
+            if (it.isNotBlank()) it.split(",").size
+            else 0
+        }
         initialized = true
     }
 
