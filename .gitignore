@@ -19,6 +19,7 @@ local.properties
 /app/src/main/res/values/api_keys.xml
 
 # Build
+/*/build
 /*/release/
 /*/src/main/resources/META-INF/yukihookapi_init
 /*/src/main/assets/xposed_init

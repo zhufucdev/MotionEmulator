@@ -5,23 +5,25 @@ pluginManagement {
         mavenCentral()
     }
 }
+
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         google()
         mavenCentral()
-        maven { url "https://www.jitpack.io" }
-        maven { url "https://api.xposed.info/" }
+        maven { setUrl("https://www.jitpack.io") }
+        maven { setUrl("https://api.xposed.info/") }
     }
 }
+
 rootProject.name = "MotionEmulator"
 
-include ':stub'
-include ':app'
-include ':mock_location_plugin'
-include ':update'
-include ':cp_plugin'
-include ':stub_plugin_xposed'
-include ':ws_plugin'
-include ':stub_plugin'
-include ':api'
+include(":stub")
+include(":app")
+include(":mock_location_plugin")
+include(":update")
+include(":cp_plugin")
+include(":stub_plugin_xposed")
+include(":ws_plugin")
+include(":stub_plugin")
+include(":api")

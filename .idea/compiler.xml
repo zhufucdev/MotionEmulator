@@ -5,6 +5,9 @@
       <module name="Android.MotionEmulator.mock_location_plugin" target="17" />
       <module name="Android.MotionEmulator.stub" target="17" />
       <module name="MotionEmulator.app" target="17" />
+      <module name="MotionEmulator.buildSrc" target="17" />
+      <module name="MotionEmulator.buildSrc.main" target="17" />
+      <module name="MotionEmulator.buildSrc.test" target="17" />
       <module name="MotionEmulator.cp_plugin" target="17" />
       <module name="MotionEmulator.stub_plugin" target="17" />
       <module name="MotionEmulator.stub_plugin_xposed" target="17" />
