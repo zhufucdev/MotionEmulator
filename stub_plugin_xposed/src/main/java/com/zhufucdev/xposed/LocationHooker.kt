@@ -34,7 +34,7 @@ import kotlin.concurrent.timer
 import kotlin.random.Random
 import kotlin.reflect.jvm.isAccessible
 
-class LocationHooker(private val scheduler: AbstractScheduler) : YukiBaseHooker() {
+class LocationHooker(private val scheduler: XposedScheduler) : YukiBaseHooker() {
     companion object {
         private const val TAG = "Location Hook"
     }

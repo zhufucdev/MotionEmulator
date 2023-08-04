@@ -17,7 +17,7 @@ class ControllerReceiver : PluginBroadcastReceiver() {
     }
 
     override fun onEmulationStop(context: Context) {
-        if (MockLocationProvider.isEmulating)
+        if (MockLocationProvider.isWorking)
             MockLocationProvider.stop()
     }
 }

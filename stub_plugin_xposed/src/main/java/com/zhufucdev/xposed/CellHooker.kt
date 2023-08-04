@@ -11,7 +11,7 @@ import com.zhufucdev.stub.CellMoment
 import com.zhufucdev.stub.Toggle
 import java.util.concurrent.Executor
 
-class CellHooker(private val scheduler: AbstractScheduler) : YukiBaseHooker() {
+class CellHooker(private val scheduler: XposedScheduler) : YukiBaseHooker() {
     private val listeners = mutableSetOf<(CellMoment) -> Unit>()
 
     var toggle = Toggle.PRESENT
@@ -25,7 +25,7 @@ class CellHooker(private val scheduler: AbstractScheduler) : YukiBaseHooker() {
                     returnType(classOf<CellLocation>())
                 }
                 afterHook {
-                    if (!hooking || toggle == Toggle.NONE)
+                    if (!scheduler.isWorking || toggle == Toggle.NONE)
                         return@afterHook
                     result = if (toggle == Toggle.BLOCK)
                         null
@@ -42,7 +42,7 @@ class CellHooker(private val scheduler: AbstractScheduler) : YukiBaseHooker() {
                     returnType(classOf<List<CellInfo>>())
                 }
                 afterHook {
-                    if (!hooking || toggle == Toggle.NONE)
+                    if (!scheduler.isWorking || toggle == Toggle.NONE)
                         return@afterHook
                     result =
                         if (toggle == Toggle.BLOCK)
@@ -59,7 +59,7 @@ class CellHooker(private val scheduler: AbstractScheduler) : YukiBaseHooker() {
                     returnType = classOf<List<NeighboringCellInfo>>()
                 }
                 afterHook {
-                    if (!hooking || toggle == Toggle.NONE)
+                    if (!scheduler.isWorking || toggle == Toggle.NONE)
                         return@afterHook
                     result =
                         if (toggle == Toggle.BLOCK)
@@ -76,7 +76,7 @@ class CellHooker(private val scheduler: AbstractScheduler) : YukiBaseHooker() {
                     returnType = UnitType
                 }
                 replaceUnit {
-                    if (!hooking || toggle == Toggle.NONE) {
+                    if (!scheduler.isWorking || toggle == Toggle.NONE) {
                         callOriginal()
                         return@replaceUnit
                     }
@@ -99,7 +99,7 @@ class CellHooker(private val scheduler: AbstractScheduler) : YukiBaseHooker() {
                     returnType = UnitType
                 }
                 replaceUnit {
-                    if (!hooking || toggle == Toggle.NONE) {
+                    if (!scheduler.isWorking || toggle == Toggle.NONE) {
                         callOriginal()
                         return@replaceUnit
                     }
@@ -124,7 +124,7 @@ class CellHooker(private val scheduler: AbstractScheduler) : YukiBaseHooker() {
                     returnType = IntType
                 }
                 replaceAny {
-                    if (!hooking || toggle == Toggle.NONE) {
+                    if (!scheduler.isWorking || toggle == Toggle.NONE) {
                         callOriginal()
                     } else if (toggle == Toggle.BLOCK) {
                         0
@@ -141,7 +141,7 @@ class CellHooker(private val scheduler: AbstractScheduler) : YukiBaseHooker() {
                     returnType = IntType
                 }
                 replaceAny {
-                    if (!hooking || toggle == Toggle.NONE) {
+                    if (!scheduler.isWorking || toggle == Toggle.NONE) {
                         callOriginal()
                     } else if (toggle == Toggle.BLOCK) {
                         0

@@ -18,7 +18,7 @@ import com.zhufucdev.stub.Toggle
 import kotlinx.coroutines.async
 import kotlinx.coroutines.supervisorScope
 
-class SensorHooker(private val scheduler: AbstractScheduler) : YukiBaseHooker() {
+class SensorHooker(private val scheduler: XposedScheduler) : YukiBaseHooker() {
     companion object {
         private const val TAG = "SensorHook"
     }

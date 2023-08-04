@@ -26,7 +26,7 @@ object Availability {
         viewModel.developerSet.postValue(TestStatus.ONGOING)
         viewModel.providerConnected.postValue(TestStatus.ONGOING)
 
-        if (MockLocationProvider.isEmulating) {
+        if (MockLocationProvider.isWorking) {
             viewModel.developerSet.postValue(TestStatus.PASSED)
         } else {
             try {

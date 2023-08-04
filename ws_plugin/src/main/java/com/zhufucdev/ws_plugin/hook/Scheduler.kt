@@ -5,7 +5,7 @@ import com.highcapable.yukihookapi.hook.param.PackageParam
 import com.zhufucdev.stub.Method
 import com.zhufucdev.stub_plugin.WsServer
 import com.zhufucdev.stub_plugin.connect
-import com.zhufucdev.xposed.AbstractScheduler
+import com.zhufucdev.xposed.XposedScheduler
 import com.zhufucdev.xposed.PREFERENCE_NAME_BRIDGE
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -13,7 +13,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.seconds
 
-class Scheduler : AbstractScheduler() {
+class Scheduler : XposedScheduler() {
     companion object {
         private const val TAG = "Scheduler"
     }

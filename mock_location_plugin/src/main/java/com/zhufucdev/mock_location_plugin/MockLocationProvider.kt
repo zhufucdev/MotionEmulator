@@ -14,16 +14,16 @@ import com.aventrix.jnanoid.jnanoid.NanoIdUtils
 import com.zhufucdev.mock_location_plugin.ui.MainActivity
 import com.zhufucdev.mock_location_plugin.ui.TestFragment
 import com.zhufucdev.stub.Emulation
-import com.zhufucdev.stub.EmulationInfo
 import com.zhufucdev.stub.Intermediate
 import com.zhufucdev.stub.MapProjector
 import com.zhufucdev.stub.Point
+import com.zhufucdev.stub.Trace
 import com.zhufucdev.stub.android
 import com.zhufucdev.stub.at
 import com.zhufucdev.stub.estimateSpeed
 import com.zhufucdev.stub.generateSaltedTrace
-import com.zhufucdev.stub.length
 import com.zhufucdev.stub.toPoint
+import com.zhufucdev.stub_plugin.AbstractScheduler
 import com.zhufucdev.stub_plugin.WsServer
 import com.zhufucdev.stub_plugin.ServerScope
 import com.zhufucdev.stub_plugin.connect
@@ -37,9 +37,12 @@ import kotlinx.coroutines.delay
  * What I did was coping
  * [FakeTraveler](https://github.com/mcastillof/FakeTraveler/blob/master/app/src/main/java/cl/coders/faketraveler/MockLocationProvider.java)
  */
-object MockLocationProvider {
-    private val TARGET_PROVIDERS = listOf(LocationManager.GPS_PROVIDER, LocationManager.NETWORK_PROVIDER)
-    private const val TAG = "MockLocationProvider"
+object MockLocationProvider : AbstractScheduler() {
+    override val packageName: String
+        get() = BuildConfig.APPLICATION_ID
+
+    private val TARGET_PROVIDERS =
+        listOf(LocationManager.GPS_PROVIDER, LocationManager.NETWORK_PROVIDER)
     private val emulationId = NanoIdUtils.randomNanoId()
 
     private lateinit var locationManager: LocationManager
@@ -51,7 +54,18 @@ object MockLocationProvider {
         try {
             TARGET_PROVIDERS.forEach {
                 // this is a perfect provider
-                locationManager.addTestProvider(it, false, false, false, false, false, true, true, powerUsage, accuracy)
+                locationManager.addTestProvider(
+                    it,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    true,
+                    true,
+                    powerUsage,
+                    accuracy
+                )
                 locationManager.setTestProviderEnabled(it, true)
             }
         } catch (_: SecurityException) {
@@ -72,42 +86,27 @@ object MockLocationProvider {
     var isEmulating = false
         private set
 
-    private suspend fun ServerScope.startEmulation(emulation: Emulation) {
+    override fun onEmulationStarted(emulation: Emulation) {
         isEmulating = true
+    }
 
-        val trace = emulation.trace
-        val length = trace.length()
-        val duration = length / emulation.velocity
-
-        sendStarted(EmulationInfo(duration, length, BuildConfig.APPLICATION_ID))
-
+    override suspend fun ServerScope.startTraceEmulation(trace: Trace) {
         val salted = trace.generateSaltedTrace(MapProjector)
-        var loopStart: Long
-        var currentLoop = 0
-        while (isEmulating && currentLoop < emulation.repeat) {
-            var progress = 0F
-            var elapsed = 0.0
-            var traceInterp = salted.at(0F, MapProjector)
-            loopStart = System.currentTimeMillis()
+        var traceInterp = salted.at(0F, MapProjector)
 
-            while (progress <= 1F && isEmulating) {
-                val interp = salted.at(progress, MapProjector, traceInterp)
-                traceInterp = interp
+        while (loopProgress <= 1F && isWorking) {
+            val interp = salted.at(loopProgress, MapProjector, traceInterp)
+            traceInterp = interp
 
-                val current = interp.point.toPoint(trace.coordinateSystem)
-                try {
-                    current.push()
-                } catch (_: SecurityException) {
-                    stop()
-                    return
-                }
-                sendProgress(Intermediate(current, elapsed, progress))
-                delay(1000)
-
-                elapsed = (System.currentTimeMillis() - loopStart) / 1000.0
-                progress = (elapsed / duration).toFloat()
+            val current = interp.point.toPoint(trace.coordinateSystem)
+            try {
+                current.push()
+            } catch (_: SecurityException) {
+                stop()
+                return
             }
-            currentLoop++
+            sendProgress(Intermediate(current, loopElapsed / 1000.0, loopProgress))
+            delay(1000)
         }
     }
 
@@ -147,7 +146,8 @@ object MockLocationProvider {
         )
 
         val notification =
-            NotificationCompat.Builder(context, CHANNEL_ID).setSmallIcon(R.drawable.ic_baseline_auto_fix_off)
+            NotificationCompat.Builder(context, CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_baseline_auto_fix_off)
                 .setContentTitle(context.getString(R.string.title_not_available))
                 .setContentText(context.getString(R.string.text_not_available))
                 .setPriority(NotificationCompat.PRIORITY_HIGH)

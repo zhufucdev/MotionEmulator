@@ -24,25 +24,26 @@ import io.ktor.http.path
 import io.ktor.serialization.kotlinx.KotlinxWebsocketSerializationConverter
 import io.ktor.serialization.kotlinx.protobuf.protobuf
 import io.ktor.websocket.CloseReason
-import io.ktor.websocket.DefaultWebSocketSession
 import io.ktor.websocket.WebSocketSession
 import io.ktor.websocket.close
 import io.ktor.websocket.readBytes
 import io.ktor.websocket.send
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancelAndJoin
-import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.isActive
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.protobuf.ProtoBuf
 import java.security.SecureRandom
 import java.util.Optional
 import javax.net.ssl.SSLContext
+import kotlin.coroutines.CoroutineContext
 
 data class WsServer(val host: String = "localhost", val port: Int, val useTls: Boolean) {
     internal var previousConnection: HttpClient? = null
 }
 
-interface ServerScope {
+interface ServerScope : CoroutineScope {
     val emulation: Optional<Emulation>
     suspend fun sendStarted(info: EmulationInfo)
     suspend fun sendProgress(intermediate: Intermediate)
@@ -110,7 +111,10 @@ suspend fun WsServer.connect(id: String, block: suspend ServerScope.() -> Unit):
             }
         }
     } else if (currentEmu.getOrThrow().status.let { !it.isSuccess() }) {
+        val context = currentCoroutineContext()
         block.invoke(object : ServerScope {
+            override val coroutineContext: CoroutineContext = context
+
             override val emulation: Optional<Emulation>
                 get() = Optional.empty()
 
@@ -200,10 +204,14 @@ private suspend fun WebSocketSession.receiveCommand(): AgentState {
 private fun DefaultClientWebSocketSession.launchWorker(
     emulation: Emulation,
     block: suspend (ServerScope) -> Unit
-): PausingJob {
+): PausingJob = launchPausing {
+    val context = currentCoroutineContext()
     val scope = object : ServerScope {
         private var started = false
         override val emulation = Optional.of(emulation)
+
+        override val coroutineContext: CoroutineContext
+            get() = context
 
         override suspend fun sendStarted(info: EmulationInfo) {
             sendSerialized(info)
@@ -220,13 +228,11 @@ private fun DefaultClientWebSocketSession.launchWorker(
         }
     }
 
-    return launchPausing {
-        try {
-            block.invoke(scope)
-            send(byteArrayOf(0x7f)) // this is signal completion
-        } catch (e: Exception) {
-            send(byteArrayOf(-0x7f)) // this is signal failure
-            Log.w("WsServer", "Worker finished exceptionally", e)
-        }
+    try {
+        block.invoke(scope)
+        send(byteArrayOf(0x7f)) // this is signal completion
+    } catch (e: Exception) {
+        send(byteArrayOf(-0x7f)) // this is signal failure
+        Log.w("WsServer", "Worker finished exceptionally", e)
     }
 }
