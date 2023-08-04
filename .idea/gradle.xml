@@ -23,6 +23,7 @@
             <option value="$PROJECT_DIR$/api" />
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/buildSrc" />
+            <option value="$PROJECT_DIR$/cgsport_plugin" />
             <option value="$PROJECT_DIR$/cp_plugin" />
             <option value="$PROJECT_DIR$/mock_location_plugin" />
             <option value="$PROJECT_DIR$/stub" />
