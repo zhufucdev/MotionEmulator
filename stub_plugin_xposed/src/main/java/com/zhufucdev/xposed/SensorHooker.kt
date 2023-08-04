@@ -19,10 +19,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.supervisorScope
 
 class SensorHooker(private val scheduler: XposedScheduler) : YukiBaseHooker() {
-    companion object {
-        private const val TAG = "SensorHook"
-    }
-
     private val listeners = mutableSetOf<SensorListener>()
 
     var toggle = Toggle.PRESENT
@@ -93,7 +89,7 @@ class SensorHooker(private val scheduler: XposedScheduler) : YukiBaseHooker() {
                 returnType = BooleanType
             }
             replaceAny {
-                if (!hooking || toggle == Toggle.NONE)
+                if (!scheduler.isWorking || toggle == Toggle.NONE)
                     return@replaceAny callOriginal()
                 if (toggle == Toggle.BLOCK)
                     return@replaceAny false
@@ -111,7 +107,7 @@ class SensorHooker(private val scheduler: XposedScheduler) : YukiBaseHooker() {
             }
 
             replaceUnit {
-                if (!hooking || toggle == Toggle.NONE) {
+                if (!scheduler.isWorking || toggle == Toggle.NONE) {
                     callOriginal()
                     return@replaceUnit
                 }
