@@ -126,7 +126,7 @@ fun PluginsApp(
     }
     val downloadable = remember { mutableStateListOf<PluginItem>() }
     val updatable = remember { mutableStateMapOf<String, ReleaseAsset>() }
-    val disabledList by remember(enabled, disabled) {
+    val disabledList by remember(disabled) {
         derivedStateOf {
             disabled + downloadable.filter { edge -> !plugins.any { it.id == edge.id } }
         }
@@ -143,7 +143,7 @@ fun PluginsApp(
             }
         }
     }
-    val onDrop: (PluginItem) -> Unit = remember {
+    val onDrop: (PluginItem) -> Unit = remember(plugins) {
         {
             val disabledRelatedIndex = hoveringItemIndex - max(1, enabled.size) - 2
             if (disabledRelatedIndex >= 0) {
