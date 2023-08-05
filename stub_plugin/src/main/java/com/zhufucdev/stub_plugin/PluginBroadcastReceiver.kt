@@ -6,7 +6,7 @@ import android.content.Intent
 import com.zhufucdev.stub.BROADCAST_AUTHORITY
 
 abstract class PluginBroadcastReceiver : BroadcastReceiver() {
-    abstract fun onEmulationStart(context: Context)
+    open fun onEmulationStart(context: Context) {}
     open fun onEmulationStop(context: Context) {}
     open fun onSettingsChanged(context: Context) {}
 
