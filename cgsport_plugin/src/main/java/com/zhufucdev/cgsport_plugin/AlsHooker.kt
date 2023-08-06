@@ -6,32 +6,32 @@ import com.highcapable.yukihookapi.hook.type.java.DoubleType
 import com.highcapable.yukihookapi.hook.type.java.ListClass
 
 class AlsHooker(private val scheduler: Scheduler) : YukiBaseHooker() {
+    private val amapClients = mutableMapOf<Any, AMapClient>()
+
     override fun onHook() {
-        "net.crigh.cgsport.mysport_.AMAPLocationService_".hook {
+        appClassLoader.amapLocationClientClass.hook {
             injectMember {
                 method {
-                    param(appClassLoader.amapLatLngClass, ListClass)
+                    name = "setLocationListener"
                 }
 
-                beforeHook {
-                    args[0] =
-                        appClassLoader.amapLatLngClass
-                            .getConstructor(DoubleType, DoubleType)
-                            .newInstance(scheduler.currentPoint.latitude, scheduler.currentPoint.longitude)
+                replaceUnit {
+                    // TODO
                 }
             }
 
-            // total length in km
             injectMember {
                 method {
-                    param(DoubleType)
-                    modifiers { isPublic }
+                    name = "startLocation"
+                    emptyParam()
                 }
 
-                beforeHook {
-                    args[0] = 10.0
+                replaceUnit {
+                    // TODO
                 }
             }
         }
     }
 }
+
+data class AMapClient(val listener: Scheduler.LocationListenerCallback, var started: Boolean)
