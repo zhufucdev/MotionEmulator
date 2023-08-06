@@ -63,7 +63,7 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling:${Versions.composeUiVersion}")
     debugImplementation("androidx.compose.ui:ui-test-manifest:${Versions.composeUiVersion}")
     // Misc
-    implementation("com.aventrix.jnanoid:jnanoid:2.0.0")
+    implementation("com.aventrix.jnanoid:jnanoid:${Versions.jnanoidVersion}")
     implementation(project(":stub"))
     // Internal
     implementation(project(":update"))

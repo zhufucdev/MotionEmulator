@@ -14,6 +14,7 @@ object Versions {
     const val kotlinxSerializationVersion = "1.5.1"
     const val lifecycleRuntimeVersion = "2.6.1"
     const val navVersion = "2.6.0"
+    const val jnanoidVersion = "2.0.0"
     const val materialVersion = "1.9.0"
     const val yukiVersion = "1.1.11"
 }

@@ -39,7 +39,7 @@ dependencies {
     // Misc
     implementation("androidx.core:core-ktx:${Versions.coreKtVersion}")
     implementation("androidx.annotation:annotation-jvm:1.6.0")
-    implementation("com.aventrix.jnanoid:jnanoid:2.0.0")
+    implementation("com.aventrix.jnanoid:jnanoid:${Versions.jnanoidVersion}")
     implementation("com.google.maps.android:android-maps-utils:3.4.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:${Versions.coroutineVersion}")
 

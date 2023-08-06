@@ -113,7 +113,7 @@ dependencies {
     implementation("net.edwardday.serialization:kprefs:0.12.0")
     implementation("com.github.Redempt:Crunch:1.1.2")
     implementation("com.google.guava:guava:31.1-android")
-    implementation("com.aventrix.jnanoid:jnanoid:2.0.0")
+    implementation("com.aventrix.jnanoid:jnanoid:${Versions.jnanoidVersion}")
     implementation("org.apache.commons:commons-compress:1.22")
 
     // AMap SDK

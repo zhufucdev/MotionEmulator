@@ -1,3 +1,5 @@
+import kotlin.random.Random
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -12,7 +14,7 @@ android {
         applicationId = "com.zhufucdev.cgsport_plugin"
         minSdk = Versions.minSdk
         targetSdk = Versions.targetSdk
-        versionCode = 1
+        versionCode = Random.nextInt(1000)
         versionName = "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -50,6 +52,7 @@ dependencies {
     implementation("androidx.core:core-ktx:${Versions.coreKtVersion}")
     implementation("androidx.appcompat:appcompat:${Versions.appcompatVersion}")
     implementation("com.google.android.material:material:${Versions.materialVersion}")
+    implementation("com.aventrix.jnanoid:jnanoid:${Versions.jnanoidVersion}")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
