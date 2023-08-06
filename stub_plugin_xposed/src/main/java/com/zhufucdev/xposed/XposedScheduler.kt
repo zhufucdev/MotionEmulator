@@ -134,7 +134,7 @@ abstract class XposedScheduler : AbstractScheduler() {
     }
 
     override suspend fun ServerScope.startTraceEmulation(trace: Trace) {
-        val salted = trace.generateSaltedTrace(MapProjector)
+        val salted = trace.generateSaltedTrace()
         var traceInterp = salted.at(0F, MapProjector)
         while (isWorking && loopProgress <= 1) {
             val interp = salted.at(loopProgress, MapProjector, traceInterp)

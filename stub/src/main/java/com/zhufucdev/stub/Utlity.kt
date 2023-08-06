@@ -60,12 +60,12 @@ fun Point.android(
  * in which points will be project to WGS84, then
  * back to GCJ02
  */
-fun Trace.generateSaltedTrace(mapProjector: MapProjector): List<Point> {
+fun Trace.generateSaltedTrace(): List<Point> {
     val salt = this.salt
     return if (salt != null) {
         val runtime = salt.runtime()
         val projector =
-            if (coordinateSystem == CoordinateSystem.GCJ02) mapProjector else BypassProjector
+            if (coordinateSystem == CoordinateSystem.GCJ02) MapProjector else BypassProjector
         points.map {
             runtime.apply(
                 point = it,

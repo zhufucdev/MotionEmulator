@@ -144,7 +144,7 @@ class SaltUnitTest {
         val center = trace2.center(MapProjector)
         val points = mutableListOf<Vector2D>()
         val references = mutableListOf<Vector2D>()
-        val salted = trace2.generateSaltedTrace(MapProjector)
+        val salted = trace2.generateSaltedTrace()
         repeat(10) {
             val p = Random.nextFloat()
             points.add(salted.at(p, MapProjector).point)

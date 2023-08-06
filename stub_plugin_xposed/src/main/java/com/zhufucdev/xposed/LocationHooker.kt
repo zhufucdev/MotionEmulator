@@ -3,13 +3,22 @@
 package com.zhufucdev.xposed
 
 import android.content.ContentResolver
-import android.location.*
+import android.location.GnssStatus
+import android.location.GpsSatellite
+import android.location.GpsStatus
+import android.location.Location
+import android.location.LocationListener
+import android.location.LocationManager
+import android.location.LocationRequest
+import android.location.OnNmeaMessageListener
 import android.net.NetworkInfo
 import android.net.wifi.ScanResult
 import android.net.wifi.WifiInfo
 import android.net.wifi.WifiManager
 import android.os.Build
 import android.os.CancellationSignal
+import android.os.Handler
+import android.os.Looper
 import android.provider.Settings
 import androidx.annotation.RequiresApi
 import com.highcapable.yukihookapi.hook.core.YukiMemberHookCreator
@@ -21,10 +30,16 @@ import com.highcapable.yukihookapi.hook.log.loggerD
 import com.highcapable.yukihookapi.hook.log.loggerE
 import com.highcapable.yukihookapi.hook.log.loggerI
 import com.highcapable.yukihookapi.hook.log.loggerW
-import com.highcapable.yukihookapi.hook.type.android.ApplicationClass
-import com.highcapable.yukihookapi.hook.type.java.*
-import com.zhufucdev.stub.*
-import java.lang.Exception
+import com.highcapable.yukihookapi.hook.type.java.BooleanType
+import com.highcapable.yukihookapi.hook.type.java.DoubleType
+import com.highcapable.yukihookapi.hook.type.java.IntType
+import com.highcapable.yukihookapi.hook.type.java.StringClass
+import com.highcapable.yukihookapi.hook.type.java.UnitType
+import com.zhufucdev.stub.Point
+import com.zhufucdev.stub.android
+import com.zhufucdev.stub.estimateSpeed
+import com.zhufucdev.stub.offsetFixed
+import com.zhufucdev.stub.toFixed
 import java.util.concurrent.Executor
 import java.util.function.Consumer
 import kotlin.collections.component1
@@ -221,16 +236,16 @@ class LocationHooker(private val scheduler: XposedScheduler) : YukiBaseHooker() 
                         }
                     })
                 replaceAny {
-                    if (scheduler.satellites <= 0)
-                        return@replaceAny callOriginal()
-
                     val listener = args.firstOrNull { it is LocationListener } as LocationListener?
                         ?: return@replaceAny callOriginal()
                     val provider =
                         args.firstOrNull { it is String } as String? ?: LocationManager.GPS_PROVIDER
+                    val handler = Handler(Looper.getMainLooper())
                     redirectListener(listener) {
                         val location = it.android(provider, estimatedSpeed)
-                        listener.onLocationChanged(location)
+                        handler.post {
+                            listener.onLocationChanged(location)
+                        }
                     }
                     listener.onLocationChanged(scheduler.location.android(provider, estimatedSpeed))
                 }
@@ -461,125 +476,74 @@ class LocationHooker(private val scheduler: XposedScheduler) : YukiBaseHooker() 
      */
     private fun hookAMap() {
         loggerI(TAG, "-- hook Amap --")
-
-        fun ClassLoader.loadLocation(): Class<*> {
-            return loadClass("com.amap.api.location.AMapLocation")
-        }
-
-        fun ClassLoader.loadListener(): Class<*> {
-            return loadClass("com.amap.api.location.AMapLocationListener")
-        }
-
-        fun ClassLoader.loadLocationClient(): Class<*> {
-            return loadClass("com.amap.api.location.AMapLocationClient")
-        }
-
-        fun ClassLoader.loadClientOption(): Class<*> {
-            return loadClass("com.amap.api.location.AMapLocationClientOption")
-        }
-
-        fun ClassLoader.loadLocationMode(): Class<*> {
-            return loadClientOption().declaredClasses.first { it.name == "AMapLocationMode" }
-        }
-
-        fun YukiMemberHookCreator.MemberHookCreator.hookListener(classloader: ClassLoader) {
-            replaceAny {
-                val listener = args[0]
-                    ?: return@replaceAny callOriginal()
-                val listenerClass = classloader.loadListener()
-                val locationClass = classloader.loadLocation()
-                val method = listenerClass.getMethod(
-                    "onLocationChanged",
-                    locationClass
-                )
-                redirectListener(listener) {
-                    val android = it.android()
-                    val amap = locationClass.constructor {
-                        param(classOf<Location>())
-                    }.get().call(android)
-
-                    method.invoke(listener, amap)
-                    loggerD(TAG, "AMap location received")
-                }
-                loggerD(TAG, "AMap location registered")
-            }
-        }
-
         // counter-proguard
-        ApplicationClass.hook {
-            injectMember {
-                method {
-                    name = "onCreate"
-                    emptyParam()
-                }
+        val classLoader = appClassLoader
 
-                beforeHook {
-                    val classLoader = instanceClass.classLoader!!
+        try {
+            classLoader.loadAMapLocation().hook {
+                locationHook()
+            }
 
-                    runCatching {
-                        classLoader.loadLocation().hook {
-                            locationHook()
-                        }
+            classLoader.loadAMapLocation().hook {
+                injectMember {
+                    method {
+                        name = "getSatellites"
+                        emptyParam()
                     }
-
-                    runCatching {
-                        classLoader.loadLocation().hook {
-                            injectMember {
-                                method {
-                                    name = "getSatellites"
-                                    emptyParam()
-                                }
-                                replaceAny {
-                                    scheduler.satellites
-                                }
-                            }
-                        }
-                    }
-
-                    runCatching {
-                        classLoader.loadLocationClient().hook {
-                            injectMember {
-                                method {
-                                    name = "setLocationListener"
-                                    param(classLoader.loadListener())
-                                }
-                                hookListener(classLoader)
-                            }
-                            injectMember {
-                                method {
-                                    name = "startLocation"
-                                    emptyParam()
-                                }
-
-                                beforeHook {
-                                    loggerI(TAG, "AMap location started")
-                                }
-                            }
-                        }
-                    }
-
-                    runCatching {
-                        classLoader.loadClientOption().hook {
-                            injectMember {
-                                method {
-                                    name = "setLocationMode"
-                                    param(classLoader.loadLocationMode())
-                                }
-
-                                beforeHook {
-                                    try {
-                                        val enums = classLoader.loadLocationMode().enumConstants
-                                        args[0] = enums?.get(1)
-                                        loggerI(TAG, "Modified amap location mode")
-                                    } catch (e: Exception) {
-                                        loggerW(TAG, "failed to modify amap location mode: $e")
-                                    }
-                                }
-                            }
-                        }
+                    replaceAny {
+                        scheduler.satellites
                     }
                 }
             }
+        } catch (e: ClassNotFoundException) {
+            loggerE(TAG, "Failed to hook AMap location", e)
+        }
+
+        try {
+            classLoader.loadAMapLocationClient().hook {
+                injectMember {
+                    method {
+                        name = "setLocationListener"
+                        param(classLoader.loadAMapListener())
+                    }
+                    replaceAny {
+                        val listener = args[0]
+                            ?: return@replaceAny callOriginal()
+                        val listenerClass = classLoader.loadAMapListener()
+                        val locationClass = classLoader.loadAMapLocation()
+                        val method = listenerClass.getMethod(
+                            "onLocationChanged",
+                            locationClass
+                        )
+                        val handler = Handler(Looper.getMainLooper())
+
+                        redirectListener(listener) {
+                            val android = it.android(speed = estimatedSpeed)
+                            val amap =
+                                locationClass.getConstructor(classOf<Location>())
+                                    .newInstance(android)
+                            handler.post {
+                                method.invoke(listener, amap)
+                            }
+                            loggerD(TAG, "AMap location redirected")
+                        }
+                        loggerD(TAG, "AMap location registered")
+                    }
+                }
+
+                injectMember {
+                    method {
+                        name = "startLocation"
+                        emptyParam()
+                    }
+
+                    replaceAny {
+                        loggerI(TAG, "AMap location started")
+                    }
+                }
+            }
+        } catch (e: ClassNotFoundException) {
+            loggerE(TAG, "Failed to hook AMap Location Client", e)
         }
     }
 
