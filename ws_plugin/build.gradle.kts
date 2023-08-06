@@ -12,8 +12,8 @@ android {
         applicationId = "com.zhufucdev.ws_plugin"
         minSdk = Versions.minSdk
         targetSdk = Versions.targetSdk
-        versionCode = 1
-        versionName = "1.2.0"
+        versionCode = 2
+        versionName = "1.2.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
