@@ -39,7 +39,6 @@ import com.zhufucdev.stub.Point
 import com.zhufucdev.stub.android
 import com.zhufucdev.stub.estimateSpeed
 import com.zhufucdev.stub.offsetFixed
-import com.zhufucdev.stub.toFixed
 import java.util.concurrent.Executor
 import java.util.function.Consumer
 import kotlin.collections.component1
@@ -51,7 +50,7 @@ import kotlin.reflect.jvm.isAccessible
 
 class LocationHooker(private val scheduler: XposedScheduler) : YukiBaseHooker() {
     companion object {
-        private const val TAG = "Location Hook"
+        private const val TAG = "LocationHook"
     }
 
     private var lastLocation = scheduler.location to System.currentTimeMillis()
@@ -500,6 +499,9 @@ class LocationHooker(private val scheduler: XposedScheduler) : YukiBaseHooker() 
         }
 
         try {
+            val listenerOf = mutableMapOf<Any, Any>()
+            val stateOf = mutableMapOf<Any, Boolean>()
+
             classLoader.loadAMapLocationClient().hook {
                 injectMember {
                     method {
@@ -509,6 +511,23 @@ class LocationHooker(private val scheduler: XposedScheduler) : YukiBaseHooker() 
                     replaceAny {
                         val listener = args[0]
                             ?: return@replaceAny callOriginal()
+
+                        listenerOf[instance] = listener
+                        loggerD(TAG, "AMap location registered")
+                    }
+                }
+
+                injectMember {
+                    method {
+                        name = "startLocation"
+                        emptyParam()
+                    }
+
+                    replaceUnit {
+                        loggerI(TAG, "AMap location started")
+                        stateOf[instance] = true
+
+                        val listener = listenerOf[instance] ?: return@replaceUnit
                         val listenerClass = classLoader.loadAMapListener()
                         val locationClass = classLoader.loadAMapLocation()
                         val method = listenerClass.getMethod(
@@ -527,18 +546,33 @@ class LocationHooker(private val scheduler: XposedScheduler) : YukiBaseHooker() 
                             }
                             loggerD(TAG, "AMap location redirected")
                         }
-                        loggerD(TAG, "AMap location registered")
                     }
                 }
 
                 injectMember {
                     method {
-                        name = "startLocation"
+                        name = "stopLocation"
                         emptyParam()
                     }
 
+                    replaceUnit {
+                        stateOf[instance] = false
+                        loggerI(TAG, "AMap location stopped")
+
+                        val listener = listenerOf[instance] ?: return@replaceUnit
+                        cancelRedirection(listener)
+                    }
+                }
+
+                injectMember {
+                    method {
+                        name = "isStarted"
+                        emptyParam()
+                        returnType(BooleanType)
+                    }
+
                     replaceAny {
-                        loggerI(TAG, "AMap location started")
+                        stateOf[instance] == true
                     }
                 }
             }
@@ -556,9 +590,7 @@ class LocationHooker(private val scheduler: XposedScheduler) : YukiBaseHooker() 
             }
 
             afterHook {
-                result = scheduler.location.offsetFixed().latitude.also {
-                    loggerD(TAG, "replaced #getLatitude to ${it.toFixed(2)}")
-                }
+                result = scheduler.location.offsetFixed().latitude
             }
         }
 
@@ -570,9 +602,7 @@ class LocationHooker(private val scheduler: XposedScheduler) : YukiBaseHooker() 
             }
 
             afterHook {
-                result = scheduler.location.offsetFixed().longitude.also {
-                    loggerD(TAG, "replaced #getLongitude to ${it.toFixed(2)}")
-                }
+                result = scheduler.location.offsetFixed().longitude
             }
         }
     }
