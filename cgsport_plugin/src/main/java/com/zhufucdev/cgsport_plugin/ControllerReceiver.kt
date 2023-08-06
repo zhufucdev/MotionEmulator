@@ -9,9 +9,9 @@ class ControllerReceiver : PluginBroadcastReceiver() {
     override fun onSettingsChanged(context: Context) {
         val server = MePlugin.queryServer(context)
         context.prefs(PREF_BRIDGE_NAME).edit {
-            putInt("server_port", server.port)
-            putString("server_host", server.host)
-            putBoolean("server_tls", server.useTls)
+            putString(PREF_KEY_SERVER, server.host)
+            putInt(PREF_KEY_PORT, server.port)
+            putBoolean(PREF_KEY_TLS, server.useTls)
         }
     }
 }

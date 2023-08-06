@@ -14,8 +14,8 @@ object HookEntry : IYukiHookXposedInit {
 
     override fun onHook() = YukiHookAPI.encase {
         loadApp("net.crigh.cgsport") {
-            val hooker = AlsHooker()
-            loadHooker(hooker)
+            val scheduler = Scheduler()
+            loadHooker(scheduler.hook)
         }
     }
 }

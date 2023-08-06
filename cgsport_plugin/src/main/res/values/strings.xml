@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Cgsport Plugin</string>
+    <string name="text_description">Based on Xposed, specifically optimized for Chuanggao Sport</string>
+    <string name="text_description_xposed">Motion Emulator plug-in for specific purpose</string>
 </resources>

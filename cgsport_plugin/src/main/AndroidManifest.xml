@@ -7,6 +7,23 @@
             android:icon="@mipmap/ic_launcher"
             android:roundIcon="@mipmap/ic_launcher_round"
             android:supportsRtl="true"
-            android:theme="@style/Theme.MotionEmulator" />
+            android:theme="@style/Theme.MotionEmulator" >
+
+        <meta-data
+                android:name="me_description"
+                android:value="@string/text_description" />
+        <meta-data
+                android:name="xposedmodule"
+                android:value="true" />
+        <meta-data
+                android:name="xposeddescription"
+                android:value="@string/text_description_xposed" />
+        <meta-data
+                android:name="xposedminversion"
+                android:value="93" />
+        <meta-data
+                android:name="xposedsharedprefs"
+                android:value="true" />
+    </application>
 
 </manifest>
