@@ -4,6 +4,7 @@ import com.aventrix.jnanoid.jnanoid.NanoIdUtils
 import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.highcapable.yukihookapi.hook.log.loggerD
 import com.highcapable.yukihookapi.hook.param.PackageParam
+import com.zhufucdev.stub.Intermediate
 import com.zhufucdev.stub.MapProjector
 import com.zhufucdev.stub.Point
 import com.zhufucdev.stub.Trace
@@ -64,6 +65,33 @@ class Scheduler : AbstractScheduler() {
         while (loopProgress <= 1) {
             cache = salted.at(loopProgress, MapProjector, cache)
             currentPoint = cache.point.toPoint(trace.coordinateSystem)
+
+            sendProgress(Intermediate(currentPoint, loopElapsed / 1000.0, loopProgress))
+            delay(1.seconds)
         }
+    }
+
+    private val listeners = mutableListOf<(Point) -> Unit>()
+    fun addLocationListener(listener: (Point) -> Unit): LocationListenerCallback {
+        if (!listeners.contains(listener)) {
+            listeners.add(listener)
+        }
+
+        return object : LocationListenerCallback {
+            override fun cancel() {
+                listeners.remove(listener)
+            }
+
+            override fun resume() {
+                if (!listeners.contains(listener)) {
+                    listeners.add(listener)
+                }
+            }
+        }
+    }
+
+    interface LocationListenerCallback {
+        fun cancel()
+        fun resume()
     }
 }

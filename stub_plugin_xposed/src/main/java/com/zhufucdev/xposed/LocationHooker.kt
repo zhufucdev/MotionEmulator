@@ -32,6 +32,7 @@ import com.highcapable.yukihookapi.hook.log.loggerI
 import com.highcapable.yukihookapi.hook.log.loggerW
 import com.highcapable.yukihookapi.hook.type.java.BooleanType
 import com.highcapable.yukihookapi.hook.type.java.DoubleType
+import com.highcapable.yukihookapi.hook.type.java.IntClass
 import com.highcapable.yukihookapi.hook.type.java.IntType
 import com.highcapable.yukihookapi.hook.type.java.StringClass
 import com.highcapable.yukihookapi.hook.type.java.UnitType
@@ -538,9 +539,13 @@ class LocationHooker(private val scheduler: XposedScheduler) : YukiBaseHooker() 
 
                         redirectListener(listener) {
                             val android = it.android(speed = estimatedSpeed)
+                            // create an AMapLocation instance via reflection
                             val amap =
                                 locationClass.getConstructor(classOf<Location>())
                                     .newInstance(android)
+                            // Location type 1 is GPS located
+                            locationClass.getMethod("setLocationType", IntType)
+                                .invoke(amap, 1)
                             handler.post {
                                 method.invoke(listener, amap)
                             }
