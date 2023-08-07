@@ -31,6 +31,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.zhufucdev.stub.Data
 import com.zhufucdev.motion_emulator.R
+import com.zhufucdev.motion_emulator.ui.TooltipHost
+import com.zhufucdev.motion_emulator.ui.TooltipScope
 import com.zhufucdev.motion_emulator.ui.component.BottomSheetModal
 import com.zhufucdev.motion_emulator.ui.component.BottomSheetModalState
 import com.zhufucdev.motion_emulator.ui.component.Swipeable
@@ -47,32 +49,36 @@ fun ManagerApp(navigateUp: () -> Unit) {
     val screenProviders = LocalScreenProviders.current
 
     BottomSheetModal(state = bottomSheetState) {
-        Scaffold(
-            modifier = Modifier.fillMaxSize().nestedScroll(appbarBehavior.nestedScrollConnection),
-            topBar = {
-                AppBar(
-                    onBackPressed = { if (!navController.navigateUp()) navigateUp() },
-                    scrollBehavior = appbarBehavior
-                )
-            },
-            bottomBar = { AppNavigationBar(navController, screenProviders) },
-            snackbarHost = { SnackbarHost(snackbarState) }
-        ) {
-            Box(Modifier.padding(it)) {
-                NavHost(
-                    navController = navController,
-                    startDestination = screenProviders.value.first().screen.name
-                ) {
-                    screenProviders.value.forEach { para ->
-                        with(para) {
-                            compose(
-                                ManagerViewModel.RuntimeArguments(
-                                    snackbarState,
-                                    navController,
-                                    context,
-                                    bottomSheetState
+        TooltipHost {
+            Scaffold(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .nestedScroll(appbarBehavior.nestedScrollConnection),
+                topBar = {
+                    AppBar(
+                        onBackPressed = { if (!navController.navigateUp()) navigateUp() },
+                        scrollBehavior = appbarBehavior
+                    )
+                },
+                bottomBar = { AppNavigationBar(navController, screenProviders) },
+                snackbarHost = { SnackbarHost(snackbarState) }
+            ) {
+                Box(Modifier.padding(it)) {
+                    NavHost(
+                        navController = navController,
+                        startDestination = screenProviders.value.first().screen.name
+                    ) {
+                        screenProviders.value.forEach { para ->
+                            with(para) {
+                                compose(
+                                    ManagerViewModel.RuntimeArguments(
+                                        snackbarState,
+                                        navController,
+                                        context,
+                                        bottomSheetState
+                                    )
                                 )
-                            )
+                            }
                         }
                     }
                 }
@@ -82,11 +88,14 @@ fun ManagerApp(navigateUp: () -> Unit) {
 }
 
 @Composable
-private fun AppBar(onBackPressed: () -> Unit, scrollBehavior: TopAppBarScrollBehavior) {
+private fun TooltipScope.AppBar(onBackPressed: () -> Unit, scrollBehavior: TopAppBarScrollBehavior) {
     TopAppBar(
         title = { Text(text = stringResource(R.string.title_manager)) },
         navigationIcon = {
-            IconButton(onClick = onBackPressed) {
+            IconButton(
+                onClick = onBackPressed,
+                modifier = Modifier.tooltip { Text(text = stringResource(R.string.action_navigate_up)) }
+            ) {
                 Icon(
                     Icons.Default.ArrowBack,
                     contentDescription = stringResource(R.string.action_navigate_up)

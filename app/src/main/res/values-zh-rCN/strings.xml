@@ -85,7 +85,7 @@
         <string name="title_manager">数据管理器</string>
     <string name="title_manage">管理</string>
     <string name="text_manage">管理采集好的数据</string>
-        <string name="action_navigate_up">向上导航</string>
+        <string name="action_navigate_up">转到上一层级</string>
     <string name="title_trace_data">路径数据</string>
         <string name="text_in_duration">时长%s</string>
     <string name="action_delete">删除</string>

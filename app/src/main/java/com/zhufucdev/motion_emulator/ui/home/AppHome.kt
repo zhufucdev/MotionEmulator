@@ -40,77 +40,79 @@ fun AppHome(enabledPlugins: Int, updater: Updater, onClick: (AppHomeDestination)
         }
     }
 
-    Scaffold(
-        topBar = {
-            HomeAppbar(
-                onClick = onClick,
-                scrollBehavior = behavior
-            )
-        },
-        modifier = Modifier.nestedScroll(behavior.nestedScrollConnection),
-        snackbarHost = { SnackbarHost(snackbar) }
-    ) {
-        LazyColumn(modifier = Modifier.padding(it)) {
-            item {
-                if (enabledPlugins > 0) {
-                    HomeCard(
-                        onClick = { onClick(AppHomeDestination.Plugins) },
-                        title = stringResource(id = R.string.title_status_ready),
-                        subtitle = pluralStringResource(
-                            id = R.plurals.text_status_ready,
-                            count = enabledPlugins,
-                            enabledPlugins
-                        ),
-                        icon = painterResource(id = R.drawable.ic_baseline_done_all_24),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer
+    TooltipHost {
+        Scaffold(
+            topBar = {
+                HomeAppbar(
+                    onClick = onClick,
+                    scrollBehavior = behavior
+                )
+            },
+            modifier = Modifier.nestedScroll(behavior.nestedScrollConnection),
+            snackbarHost = { SnackbarHost(snackbar) }
+        ) {
+            LazyColumn(modifier = Modifier.padding(it)) {
+                item {
+                    if (enabledPlugins > 0) {
+                        HomeCard(
+                            onClick = { onClick(AppHomeDestination.Plugins) },
+                            title = stringResource(id = R.string.title_status_ready),
+                            subtitle = pluralStringResource(
+                                id = R.plurals.text_status_ready,
+                                count = enabledPlugins,
+                                enabledPlugins
+                            ),
+                            icon = painterResource(id = R.drawable.ic_baseline_done_all_24),
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.primaryContainer
+                            )
                         )
-                    )
-                } else {
+                    } else {
+                        HomeCard(
+                            onClick = { onClick(AppHomeDestination.Plugins) },
+                            title = stringResource(id = R.string.title_status_no_plugin_installed),
+                            subtitle = stringResource(id = R.string.text_status_no_plugin_installed),
+                            icon = painterResource(id = R.drawable.outline_info_24),
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)
+                        )
+                    }
+                }
+
+                item {
                     HomeCard(
-                        onClick = { onClick(AppHomeDestination.Plugins) },
-                        title = stringResource(id = R.string.title_status_no_plugin_installed),
-                        subtitle = stringResource(id = R.string.text_status_no_plugin_installed),
-                        icon = painterResource(id = R.drawable.outline_info_24),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)
+                        onClick = { onClick(AppHomeDestination.Record) },
+                        title = stringResource(id = R.string.title_record),
+                        subtitle = stringResource(id = R.string.text_record),
+                        icon = painterResource(id = R.drawable.ic_baseline_smartphone_24)
                     )
                 }
-            }
 
-            item {
-                HomeCard(
-                    onClick = { onClick(AppHomeDestination.Record) },
-                    title = stringResource(id = R.string.title_record),
-                    subtitle = stringResource(id = R.string.text_record),
-                    icon = painterResource(id = R.drawable.ic_baseline_smartphone_24)
-                )
-            }
+                item {
+                    HomeCard(
+                        onClick = { onClick(AppHomeDestination.Trace) },
+                        title = stringResource(id = R.string.title_draw_trace),
+                        subtitle = stringResource(id = R.string.text_draw_trace),
+                        icon = painterResource(id = R.drawable.ic_baseline_map_24)
+                    )
+                }
 
-            item {
-                HomeCard(
-                    onClick = { onClick(AppHomeDestination.Trace) },
-                    title = stringResource(id = R.string.title_draw_trace),
-                    subtitle = stringResource(id = R.string.text_draw_trace),
-                    icon = painterResource(id = R.drawable.ic_baseline_map_24)
-                )
-            }
+                item {
+                    HomeCard(
+                        onClick = { onClick(AppHomeDestination.Management) },
+                        title = stringResource(id = R.string.title_manage),
+                        subtitle = stringResource(id = R.string.text_manage),
+                        icon = painterResource(id = R.drawable.ic_baseline_app_registration_24)
+                    )
+                }
 
-            item {
-                HomeCard(
-                    onClick = { onClick(AppHomeDestination.Management) },
-                    title = stringResource(id = R.string.title_manage),
-                    subtitle = stringResource(id = R.string.text_manage),
-                    icon = painterResource(id = R.drawable.ic_baseline_app_registration_24)
-                )
-            }
-
-            item {
-                HomeCard(
-                    onClick = { onClick(AppHomeDestination.Emulation) },
-                    title = stringResource(id = R.string.title_emulate),
-                    subtitle = stringResource(id = R.string.text_emulate),
-                    icon = painterResource(id = R.drawable.ic_baseline_auto_fix_high_24)
-                )
+                item {
+                    HomeCard(
+                        onClick = { onClick(AppHomeDestination.Emulation) },
+                        title = stringResource(id = R.string.title_emulate),
+                        subtitle = stringResource(id = R.string.text_emulate),
+                        icon = painterResource(id = R.drawable.ic_baseline_auto_fix_high_24)
+                    )
+                }
             }
         }
     }
@@ -157,23 +159,21 @@ fun HomeCard(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeAppbar(onClick: (AppHomeDestination) -> Unit, scrollBehavior: TopAppBarScrollBehavior) {
+fun TooltipScope.HomeAppbar(
+    onClick: (AppHomeDestination) -> Unit,
+    scrollBehavior: TopAppBarScrollBehavior
+) {
     LargeTopAppBar(
         title = { Text(text = stringResource(R.string.app_name)) },
         actions = {
-            PlainTooltipBox(
-                tooltip = { Text(stringResource(R.string.title_activity_settings)) },
+            IconButton(
+                onClick = { onClick(AppHomeDestination.Settings) },
+                modifier = Modifier.tooltip { Text(stringResource(R.string.title_activity_settings)) },
                 content = {
-                    IconButton(
-                        onClick = { onClick(AppHomeDestination.Settings) },
-                        modifier = Modifier.tooltipTrigger(),
-                        content = {
-                            Icon(
-                                Icons.Default.Settings,
-                                stringResource(R.string.title_activity_settings),
-                                tint = MaterialTheme.colorScheme.onSurface
-                            )
-                        }
+                    Icon(
+                        Icons.Default.Settings,
+                        stringResource(R.string.title_activity_settings),
+                        tint = MaterialTheme.colorScheme.onSurface
                     )
                 }
             )

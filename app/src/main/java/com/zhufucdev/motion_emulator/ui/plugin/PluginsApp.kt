@@ -91,6 +91,8 @@ import com.zhufucdev.motion_emulator.extension.Updater
 import com.zhufucdev.motion_emulator.extension.defaultKtorClient
 import com.zhufucdev.motion_emulator.extension.insert
 import com.zhufucdev.motion_emulator.ui.CaptionText
+import com.zhufucdev.motion_emulator.ui.TooltipHost
+import com.zhufucdev.motion_emulator.ui.TooltipScope
 import com.zhufucdev.motion_emulator.ui.theme.MotionEmulatorTheme
 import com.zhufucdev.motion_emulator.ui.theme.paddingCommon
 import com.zhufucdev.update.Downloading
@@ -203,76 +205,78 @@ fun PluginsApp(
         }
     }
 
-    Scaffold(
-        topBar = {
-            PluginsAppTopBar(
-                scrollBehavior = scrollBehavior, onNavigateBack = onBack
-            )
-        },
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-        snackbarHost = { SnackbarHost(snackbars) }
-    ) { paddingValues ->
-        LazyColumn(
-            state = listState,
-            modifier = Modifier
-                .padding(paddingValues)
-                .onGloballyPositioned {
-                    listBounds = it.boundsInWindow()
+    TooltipHost {
+        Scaffold(
+            topBar = {
+                PluginsAppTopBar(
+                    scrollBehavior = scrollBehavior, onNavigateBack = onBack
+                )
+            },
+            modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+            snackbarHost = { SnackbarHost(snackbars) }
+        ) { paddingValues ->
+            LazyColumn(
+                state = listState,
+                modifier = Modifier
+                    .padding(paddingValues)
+                    .onGloballyPositioned {
+                        listBounds = it.boundsInWindow()
+                    }
+            ) {
+                // start: enable
+                item {
+                    CaptionText(
+                        text = stringResource(id = R.string.caption_enabled),
+                        modifier = Modifier.padding(start = 16.dp)
+                    )
                 }
-        ) {
-            // start: enable
-            item {
-                CaptionText(
-                    text = stringResource(id = R.string.caption_enabled),
-                    modifier = Modifier.padding(start = 16.dp)
+
+                operativeArea(
+                    label = {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Icon(Icons.Default.Favorite, contentDescription = null)
+                            Text(text = stringResource(id = R.string.title_drop_to_enable))
+                        }
+                    },
+                    plugins = enabled,
+                    snackbarHostState = snackbars,
+                    isHovered = hoveringItemIndex == 1,
+                    onPrepareDrag = { plugin, offset, pos ->
+                        floating = FloatingItem(plugin, offset, pos)
+                    },
+                    onDrag = {
+                        floating?.position = it
+                    },
+                    onDrop = onDrop
+                )
+                // end: enable
+                // start: disable
+                item {
+                    CaptionText(
+                        text = stringResource(id = R.string.caption_disabled),
+                        modifier = Modifier.padding(start = 16.dp)
+                    )
+                }
+
+                operativeArea(
+                    label = {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Icon(Icons.Default.Build, contentDescription = null)
+                            Text(text = stringResource(id = R.string.title_drop_to_disable))
+                        }
+                    },
+                    plugins = disabledList,
+                    snackbarHostState = snackbars,
+                    isHovered = hoveringItemIndex == enabled.size + 3,
+                    onPrepareDrag = { plugin, offset, pos ->
+                        floating = FloatingItem(plugin, offset, pos)
+                    },
+                    onDrag = {
+                        floating?.position = it
+                    },
+                    onDrop = onDrop
                 )
             }
-
-            operativeArea(
-                label = {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(Icons.Default.Favorite, contentDescription = null)
-                        Text(text = stringResource(id = R.string.title_drop_to_enable))
-                    }
-                },
-                plugins = enabled,
-                snackbarHostState = snackbars,
-                isHovered = hoveringItemIndex == 1,
-                onPrepareDrag = { plugin, offset, pos ->
-                    floating = FloatingItem(plugin, offset, pos)
-                },
-                onDrag = {
-                    floating?.position = it
-                },
-                onDrop = onDrop
-            )
-            // end: enable
-            // start: disable
-            item {
-                CaptionText(
-                    text = stringResource(id = R.string.caption_disabled),
-                    modifier = Modifier.padding(start = 16.dp)
-                )
-            }
-
-            operativeArea(
-                label = {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(Icons.Default.Build, contentDescription = null)
-                        Text(text = stringResource(id = R.string.title_drop_to_disable))
-                    }
-                },
-                plugins = disabledList,
-                snackbarHostState = snackbars,
-                isHovered = hoveringItemIndex == enabled.size + 3,
-                onPrepareDrag = { plugin, offset, pos ->
-                    floating = FloatingItem(plugin, offset, pos)
-                },
-                onDrag = {
-                    floating?.position = it
-                },
-                onDrop = onDrop
-            )
         }
     }
 
@@ -359,11 +363,17 @@ private fun Modifier.dragTarget(
     }
 
 @Composable
-private fun PluginsAppTopBar(scrollBehavior: TopAppBarScrollBehavior, onNavigateBack: () -> Unit) {
+private fun TooltipScope.PluginsAppTopBar(
+    scrollBehavior: TopAppBarScrollBehavior,
+    onNavigateBack: () -> Unit
+) {
     LargeTopAppBar(title = { Text(text = stringResource(id = R.string.title_activity_plugin)) },
         scrollBehavior = scrollBehavior,
         navigationIcon = {
-            IconButton(onClick = onNavigateBack) {
+            IconButton(
+                onClick = onNavigateBack,
+                modifier = Modifier.tooltip { Text(text = stringResource(R.string.action_navigate_up)) }
+            ) {
                 Icon(
                     Icons.Default.ArrowBack,
                     contentDescription = stringResource(R.string.action_navigate_up)
@@ -542,7 +552,9 @@ private fun PluginItemView(
             visible = progress >= 0,
             enter = fadeIn(),
             exit = fadeOut(),
-            modifier = Modifier.matchParentSize().alpha(0.5f)
+            modifier = Modifier
+                .matchParentSize()
+                .alpha(0.5f)
         ) {
             if (progress > 0) {
                 LinearProgressIndicator(progress)
@@ -552,7 +564,9 @@ private fun PluginItemView(
         }
 
         Row(
-            modifier = Modifier.padding(paddingCommon).then(innerModifier),
+            modifier = Modifier
+                .padding(paddingCommon)
+                .then(innerModifier),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // start: front icon
