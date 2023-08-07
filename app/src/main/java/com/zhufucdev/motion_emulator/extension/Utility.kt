@@ -1,5 +1,6 @@
 package com.zhufucdev.motion_emulator.extension
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.SharedPreferences
@@ -9,6 +10,7 @@ import android.content.res.Resources
 import android.graphics.Color
 import android.hardware.Sensor
 import android.location.Location
+import android.os.Build
 import android.util.TypedValue
 import androidx.annotation.AttrRes
 import androidx.appcompat.app.AppCompatActivity
@@ -18,6 +20,7 @@ import androidx.core.view.WindowCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.preference.PreferenceManager
+import com.google.android.material.appbar.AppBarLayout
 import com.zhufucdev.stub.*
 import com.zhufucdev.stub.Emulation
 import com.zhufucdev.motion_emulator.provider.EmulationRef
@@ -189,6 +192,21 @@ fun Activity.setUpStatusBar() {
     WindowCompat.setDecorFitsSystemWindows(window, false)
     window.statusBarColor = Color.TRANSPARENT
     window.navigationBarColor = Color.TRANSPARENT
+}
+
+@SuppressLint("NewApi")
+fun Activity.adjustToolbarMarginForNotch(appBarLayout: AppBarLayout) {
+    // Notch is only supported by >= Android 9
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+        val windowInsets = window.decorView.rootWindowInsets
+        if (windowInsets != null) {
+            val displayCutout = windowInsets.displayCutout
+            if (displayCutout != null) {
+                val safeInsetTop = displayCutout.safeInsetTop
+                appBarLayout.setPadding(0, safeInsetTop, 0, 0)
+            }
+        }
+    }
 }
 
 fun Context.sharedPreferences() = PreferenceManager.getDefaultSharedPreferences(this)

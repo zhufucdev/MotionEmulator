@@ -16,7 +16,9 @@ import com.zhufucdev.motion_emulator.data.Motions
 import com.zhufucdev.motion_emulator.data.MotionRecorder
 import com.zhufucdev.motion_emulator.data.TelephonyRecorder
 import com.zhufucdev.motion_emulator.databinding.ActivityRecordBinding
+import com.zhufucdev.motion_emulator.extension.adjustToolbarMarginForNotch
 import com.zhufucdev.motion_emulator.extension.initializeToolbar
+import com.zhufucdev.motion_emulator.extension.setUpStatusBar
 
 class RecordActivity : AppCompatActivity() {
 
@@ -32,6 +34,7 @@ class RecordActivity : AppCompatActivity() {
         setContentView(binding.root)
         val navController = findNavController(R.id.nav_host_fragment_activity_record)
         initializeToolbar(binding.appBarToolbar, navController)
+        setUpStatusBar()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             requestPermissions(
@@ -60,5 +63,10 @@ class RecordActivity : AppCompatActivity() {
                 .setAction(R.string.action_grant) { requirePermissions() }
                 .show()
         }
+    }
+
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        adjustToolbarMarginForNotch(binding.appBarLayout)
     }
 }

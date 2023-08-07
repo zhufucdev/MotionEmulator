@@ -62,13 +62,11 @@
         <activity
                 android:name=".ui.PluginActivity"
                 android:exported="false"
-                android:label="@string/title_activity_plugin"
-                android:theme="@style/Theme.MotionEmulator" />
+                android:label="@string/title_activity_plugin" />
         <activity
                 android:name=".ui.MapPendingActivity"
                 android:exported="false"
-                android:label="@string/title_activity_map_pending"
-                android:theme="@style/Theme.MotionEmulator" />
+                android:label="@string/title_activity_map_pending" />
         <activity
                 android:name=".ui.SettingsActivity"
                 android:exported="false"
@@ -78,14 +76,17 @@
                 android:name=".ui.EmulateActivity"
                 android:exported="false"
                 android:label="@string/title_emulate"
+                android:theme="@style/Theme.MotionEmulator"
                 android:launchMode="singleTop" />
         <activity
                 android:name=".ui.TraceDrawingActivity"
                 android:exported="false"
+                android:theme="@style/Theme.MotionEmulator"
                 android:label="@string/title_draw_trace" />
         <activity
                 android:name=".ui.RecordActivity"
                 android:exported="false"
+                android:theme="@style/Theme.MotionEmulator"
                 android:label="@string/title_activity_record" />
         <activity
                 android:name=".ui.ManagerActivity"
