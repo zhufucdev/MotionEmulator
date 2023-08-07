@@ -108,7 +108,7 @@
                 android:grantUriPermissions="true">
             <meta-data
                     android:name="android.support.FILE_PROVIDER_PATHS"
-                    android:resource="@xml/update_file_paths" />
+                    android:resource="@xml/shared_paths" />
         </provider>
         <provider
                 android:authorities="com.zhufucdev.motion_emulator.update_provider"
