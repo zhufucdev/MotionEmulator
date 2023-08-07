@@ -16,8 +16,8 @@ android {
         applicationId = "com.zhufucdev.motion_emulator"
         minSdk = Versions.minSdk
         targetSdk = Versions.targetSdk
-        versionCode = 23
-        versionName = "1.2.1"
+        versionCode = 24
+        versionName = "1.2.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
