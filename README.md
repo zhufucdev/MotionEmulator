@@ -9,28 +9,18 @@ you to mock location and sensor data, but in a continuous manner.
 
 ## Scenarios
 
-Trick your fitness app or your favourite game. Make you king of the world
+Trick your fitness app or your favourite game. Make you king of the world.
 
 ## Usage
 
 To learn about the latest software and its tricks, refer to
-[Steve's Blog](https://zhufucdev.com/article/qRnydwa-LGMhGrf43tSG_)
-
-## Snapshot Builds
-
-If you are bored, it's possible to try something new, as I host
-a private CI for snapshot builds
-[here](https://build.zhufucdev.com/buildConfiguration/ME_Snapshot)
-
-It's worth noticing that some of these are debug builds, whose
-signature is very different from the release ones. If you wanted
-to install, you were about to uninstall first
+[Steve's Blog](https://zhufucdev.com/article/qRnydwa-LGMhGrf43tSG_).
 
 ## Build Instructions
 
 Build and maintain this project with the latest Android Studio Canary
 (currently Hedgehog | 2023.1.1 Canary 15) because this project is pretty
-radical
+radical.
 
 This app contains sdk from Amap and Google Maps, thus **api keys** are
 required.
@@ -43,9 +33,9 @@ echo GCP_MAPS_KEY="<Your Key>" >> local.properties
 ```
 
 My own service is involved to provide online features like self update,
-which is optional and shouldn't be included in unofficial builds
+which is optional and shouldn't be included in unofficial builds.
 
-However, it is still possible to build with your own service
+However, it is still possible to build with your own service.
 ```shell
 cd app
 echo SERVER_URI="<Your Server>" >> server.properties
@@ -58,7 +48,7 @@ echo PRODUCT="<You Decide>" >> server.properties
 
 The `SERVER_URI` is supposed to be an HTTP/HTTPS RESTful that implements
 a certain protocol. You can get an example by 
-[looking at my codebase](https://github.com/zhufucdev/api.zhufucdev)
+[looking at my codebase](https://github.com/zhufucdev/api.zhufucdev).
 
 By the way, in case you are not familiar with Android dev, fill in
 your own SDK like so:
