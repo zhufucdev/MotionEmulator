@@ -85,7 +85,7 @@ dependencies {
     implementation("com.madgag.spongycastle:bcpkix-jdk15on:1.58.0.0")
     // AndroidX
     implementation("androidx.core:core-ktx:${Versions.coreKtVersion}")
-    implementation("androidx.preference:preference-ktx:1.2.0")
+    implementation("androidx.preference:preference-ktx:1.2.1")
     implementation("androidx.appcompat:appcompat:${Versions.appcompatVersion}")
     implementation("com.google.android.material:material:${Versions.materialVersion}")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
@@ -95,7 +95,7 @@ dependencies {
     implementation("androidx.navigation:navigation-dynamic-features-fragment:${Versions.navVersion}")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:${Versions.coroutineVersion}")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${Versions.kotlinxSerializationVersion}")
-    implementation("androidx.work:work-runtime-ktx:2.8.1")
+    implementation("androidx.work:work-runtime-ktx:${Versions.workRuntimeVersion}")
     // Compose
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:${Versions.lifecycleRuntimeVersion}")
     implementation("androidx.activity:activity-compose:${Versions.composeActivityVersion}")

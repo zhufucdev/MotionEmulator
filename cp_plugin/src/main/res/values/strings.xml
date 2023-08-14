@@ -2,4 +2,6 @@
     <string name="app_name">Motion Emulator Content Provider Plugin</string>
     <string name="text_description">Based on Xposed, using a dirty way of Content Provider as transmission bridge, full functionality implemented</string>
     <string name="text_description_xposed">Motion Emulator plug-in based on Content Provider</string>
+    <string name="title_bridge_channel">Content Provider Bridge Activity</string>
+    <string name="text_bridge_channel">indicator for an active bridge</string>
 </resources>

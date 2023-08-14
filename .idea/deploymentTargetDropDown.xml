@@ -14,10 +14,10 @@
       <entry key="cp_plugin">
         <State />
       </entry>
-      <entry key="useAbstractionLayer()">
+      <entry key="useConnect()">
         <State />
       </entry>
-      <entry key="useMockLocationProvider()">
+      <entry key="useConnection()">
         <State />
       </entry>
       <entry key="useServerAndClientTls()">
