@@ -15,7 +15,7 @@
                 android:exported="true" />
 
         <provider
-                android:authorities="com.zhufucdev.motion_emulator.event_provider"
+                android:authorities="com.zhufucdev.cp_plugin.event_provider"
                 android:name=".provider.EventProvider"
                 android:exported="true" />
 

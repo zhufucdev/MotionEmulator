@@ -5,6 +5,7 @@ import android.content.ContentResolver
 import android.content.ContentValues
 import android.database.Cursor
 import android.net.Uri
+import android.util.Log
 import androidx.core.content.contentValuesOf
 import com.zhufucdev.stub.Box
 import com.zhufucdev.stub.Emulation
@@ -32,9 +33,10 @@ suspend fun ContentProviderServer.connect(
             resolver
                 .query(Uri.parse("content://$authority/next"), null, id, null, null)
                 .use(::parseEmulation)
-        }.getOrNull()
+        }
     val context = coroutineContext
-    if (emulation == null) {
+    if (emulation.isFailure) {
+        Log.w("CpServer", "Failed to establish connection", emulation.exceptionOrNull())
         val scope = object : ServerScope {
             override val emulation: Optional<Emulation> = Optional.empty()
 
@@ -62,7 +64,7 @@ suspend fun ContentProviderServer.connect(
         }
     } else {
         val scope = object : ServerScope {
-            override val emulation: Optional<Emulation> = emulation
+            override val emulation: Optional<Emulation> = emulation.getOrThrow()
 
             override val coroutineContext: CoroutineContext = context
 
@@ -92,9 +94,9 @@ suspend fun ContentProviderServer.connect(
     }
 }
 
-private fun parseEmulation(cursor: Cursor?): Optional<Emulation>? {
+private fun parseEmulation(cursor: Cursor?): Optional<Emulation> {
     if (cursor == null) {
-        return null
+        throw NullPointerException("cursor")
     }
     cursor.moveToFirst()
     if (cursor.getInt(0) == EMULATION_STOP) {

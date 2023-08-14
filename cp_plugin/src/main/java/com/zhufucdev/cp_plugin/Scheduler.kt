@@ -1,5 +1,7 @@
 package com.zhufucdev.cp_plugin
 
+import android.content.ContentResolver
+import com.highcapable.yukihookapi.hook.log.loggerW
 import com.highcapable.yukihookapi.hook.param.PackageParam
 import com.zhufucdev.stub.Method
 import com.zhufucdev.xposed.XposedScheduler
@@ -14,16 +16,28 @@ class Scheduler : XposedScheduler() {
     override fun PackageParam.initialize() {
         onAppLifecycle {
             onCreate {
+                val server = ContentProviderServer(PROVIDER_AUTHORITY, contentResolver)
                 GlobalScope.launch {
-                    while (true) {
-                        ContentProviderServer(PROVIDER_AUTHORITY, contentResolver).connect(id) {
-                            if (emulation.isPresent)
-                                startEmulation(emulation.get())
-                        }
-                        delay(2.seconds)
-                    }
+                    connectServer(server)
                 }
             }
+        }
+    }
+
+    private suspend fun connectServer(server: ContentProviderServer) {
+        var warned = false
+        while (true) {
+            val connection = server.connect(id) {
+                if (emulation.isPresent)
+                    startEmulation(emulation.get())
+            }
+
+            if (!warned && !connection.successful) {
+                loggerW("Scheduler", "Failed to establish connection to content provider server")
+                warned = true
+            }
+
+            delay(2.seconds)
         }
     }
 
