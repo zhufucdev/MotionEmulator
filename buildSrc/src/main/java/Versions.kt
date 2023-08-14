@@ -3,7 +3,7 @@ object Versions {
     const val targetSdk = 34
 
     const val appcompatVersion = "1.6.1"
-    const val coreKtVersion = "1.12.0-beta01"
+    const val coreKtVersion = "1.12.0-rc01"
     const val coroutineVersion = "1.7.1"
     const val composeUiVersion = "1.4.3"
     const val composeCompilerVersion = "1.5.0"
