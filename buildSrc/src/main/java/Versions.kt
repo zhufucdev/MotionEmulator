@@ -1,3 +1,5 @@
+import java.nio.file.Paths
+
 object Versions {
     const val minSdk = 24
     const val targetSdk = 34
@@ -18,4 +20,21 @@ object Versions {
     const val materialVersion = "1.9.0"
     const val workRuntimeVersion = "2.8.1"
     const val yukiVersion = "1.1.11"
+
+    /**
+     * Generate an increasing version code
+     * so that you don't have to worry about
+     */
+    fun next(id: String = "app"): Int {
+        val file = Paths.get("build", "version_$id").toFile()
+        val base = if (file.exists()) {
+            file.readText().toIntOrNull() ?: 0
+        } else {
+            file.parentFile.mkdirs()
+            file.createNewFile()
+            0
+        }
+        file.writeText((base + 1).toString())
+        return base + 1
+    }
 }
