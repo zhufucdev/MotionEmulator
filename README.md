@@ -13,33 +13,8 @@ Trick your fitness app or your favourite game. Make you king of the world
 
 ## Usage
 
-* Pick up your phone and turn on the motion recorder
-* Take a one-hundred-meter speed run and press `STOP`
-* Draw the path you desire to be running on
-* Set velocity and repeat count
-* Make more time
-
-### Adding salt
-Now for each emulation, the path to run on
-is exactly the same
-
-To reverse the behavior to make it not so sus
-
-* Turn to the `Manage` page and navigate to the trace
-* `Add` some `Random Factor`, saying `x`
-* Add some salt, like `Rotation`
-* Expand the salt you've just added, and put in some
-mathematics expression involving `x` as you like
-
-Note: knowledge of linear algebra may be needed
-
-### For users whose targeting location is in China mainland
-
-Due to mapping restrictions, ensure that **coordinate system**
-of the pending trace in Manage -> Trace page is set to **GCJ02**
-
-If you are curious, go ahead to
-[Restrictions on geographic data in China](https://en.wikipedia.org/wiki/Restrictions_on_geographic_data_in_China)
+To learn about the latest software and its tricks, refer to
+[Steve's Blog](https://zhufucdev.com/article/qRnydwa-LGMhGrf43tSG_)
 
 ## Snapshot Builds
 
