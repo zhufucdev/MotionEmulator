@@ -4,7 +4,8 @@
 
 [English Version](README.md) | 中文文档
 
-Motion Emulator是个模拟连续定位和传感器变化的Xposed模块
+Motion Emulator是个模拟连续定位和传感器变化的应用平台。
+它支持多种方式，如Xposed和开发者选项。
 
 ## 使用场景
 

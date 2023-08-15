@@ -3,9 +3,9 @@
 
 English Version | [中文文档](README_zh.md)
 
-Motion Emulator is an Xposed module that allows 
-you to mock location and sensor data, but in a continuous manner.
-
+Motion Emulator is an application platform that allows 
+you to mock location and sensor data using different methods,
+including Xposed and debugging options.
 
 ## Scenarios
 
