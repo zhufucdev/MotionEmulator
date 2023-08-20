@@ -14,7 +14,7 @@ Trick your fitness app or your favourite game. Make you king of the world.
 ## Usage
 
 To learn about the latest software and its tricks, refer to
-[Steve's Blog](https://zhufucdev.com/article/qRnydwa-LGMhGrf43tSG_).
+[Steve's Blog](https://zhufucdev.com/article/RTyhZArsyD2JKPbdHEviU).
 
 ## Build Instructions
 

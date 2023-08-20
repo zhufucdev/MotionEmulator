@@ -15,7 +15,7 @@ Motion Emulator是个模拟连续定位和传感器变化的应用平台。
 
 ## 使用方法
 
-要了解最新、最全面的使用方法和注意事项，请参阅[Steve的博客](https://zhufucdev.com/article/peBx_1w5Njt27VZxxQvGi)
+要了解最新、最全面的使用方法和注意事项，请参阅[Steve的博客](https://zhufucdev.com/article/G1lNhmtzI5-RQnVmYEbXm)
 
 ## 构建指南
 
