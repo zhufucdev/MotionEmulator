@@ -14,6 +14,9 @@
       <entry key="cp_plugin">
         <State />
       </entry>
+      <entry key="mock_location_plugin">
+        <State />
+      </entry>
       <entry key="useConnect()">
         <State />
       </entry>

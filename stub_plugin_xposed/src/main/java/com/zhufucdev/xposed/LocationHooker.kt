@@ -2,6 +2,7 @@
 
 package com.zhufucdev.xposed
 
+import android.app.Activity
 import android.content.ContentResolver
 import android.location.GnssStatus
 import android.location.GpsSatellite
@@ -30,9 +31,10 @@ import com.highcapable.yukihookapi.hook.log.loggerD
 import com.highcapable.yukihookapi.hook.log.loggerE
 import com.highcapable.yukihookapi.hook.log.loggerI
 import com.highcapable.yukihookapi.hook.log.loggerW
+import com.highcapable.yukihookapi.hook.type.android.ActivityClass
+import com.highcapable.yukihookapi.hook.type.android.BundleClass
 import com.highcapable.yukihookapi.hook.type.java.BooleanType
 import com.highcapable.yukihookapi.hook.type.java.DoubleType
-import com.highcapable.yukihookapi.hook.type.java.IntClass
 import com.highcapable.yukihookapi.hook.type.java.IntType
 import com.highcapable.yukihookapi.hook.type.java.StringClass
 import com.highcapable.yukihookapi.hook.type.java.UnitType
@@ -62,7 +64,21 @@ class LocationHooker(private val scheduler: XposedScheduler) : YukiBaseHooker() 
         if (scheduler.hookingMethod.directHook) {
             invalidateOthers()
             hookGPS()
-            hookAMap()
+            val appClassLoaderSucceeded = hookAMap(appClassLoader)
+            if (!appClassLoaderSucceeded) {
+                ActivityClass.hook {
+                    injectMember {
+                        method {
+                            name = "onCreate"
+                            param(BundleClass)
+                        }
+
+                        beforeHook {
+                            hookAMap((instance as Activity).classLoader, log = true)
+                        }
+                    }
+                }
+            }
             hookLocation()
         } else if (scheduler.hookingMethod.testProviderTrick) {
             testProviderTrick()
@@ -474,10 +490,9 @@ class LocationHooker(private val scheduler: XposedScheduler) : YukiBaseHooker() 
      *
      * Specially designed for it
      */
-    private fun hookAMap() {
+    private fun hookAMap(classLoader: ClassLoader, log: Boolean = false): Boolean {
         loggerI(TAG, "-- hook Amap --")
-        // counter-proguard
-        val classLoader = appClassLoader
+        var succeeded = true
 
         try {
             classLoader.loadAMapLocation().hook {
@@ -494,9 +509,20 @@ class LocationHooker(private val scheduler: XposedScheduler) : YukiBaseHooker() 
                         scheduler.satellites
                     }
                 }
+
+                injectMember {
+                    method {
+                        name = "getAccuracy"
+                        emptyParam()
+                    }
+                    replaceTo(5F)
+                }
             }
         } catch (e: ClassNotFoundException) {
-            loggerE(TAG, "Failed to hook AMap location", e)
+            succeeded = false
+            if (log) {
+                loggerE(TAG, "Failed to hook AMap location", e)
+            }
         }
 
         try {
@@ -582,8 +608,13 @@ class LocationHooker(private val scheduler: XposedScheduler) : YukiBaseHooker() 
                 }
             }
         } catch (e: ClassNotFoundException) {
-            loggerE(TAG, "Failed to hook AMap Location Client", e)
+            succeeded = false
+            if (log) {
+                loggerE(TAG, "Failed to hook AMap Location Client", e)
+            }
         }
+
+        return succeeded
     }
 
     private fun YukiMemberHookCreator.locationHook() {
