@@ -39,7 +39,6 @@ android {
 dependencies {
     implementation("androidx.core:core-ktx:${Versions.coreKtVersion}")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:${Versions.coroutineVersion}")
-    implementation(project(":stub_plugin_xposed"))
     // Xposed
     ksp("com.highcapable.yukihookapi:ksp-xposed:${Versions.yukiVersion}")
     implementation("com.highcapable.yukihookapi:api:${Versions.yukiVersion}")
@@ -47,6 +46,7 @@ dependencies {
     // Internal
     implementation(project(":stub"))
     implementation(project(":stub_plugin"))
+    implementation(project(":stub_plugin_xposed"))
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")

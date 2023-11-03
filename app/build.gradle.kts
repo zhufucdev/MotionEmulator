@@ -121,7 +121,7 @@ dependencies {
     implementation("com.amap.api:search:9.5.0")
 
     // Google Maps SDK
-    implementation("com.google.android.gms:play-services-maps:18.1.0")
+    implementation("com.google.android.gms:play-services-maps:18.2.0")
     implementation("com.google.maps.android:maps-ktx:3.2.1")
     implementation("com.google.maps.android:android-maps-utils:3.4.0")
 
