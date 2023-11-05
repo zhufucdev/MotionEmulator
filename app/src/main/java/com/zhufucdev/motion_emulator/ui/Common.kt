@@ -203,7 +203,7 @@ private class TooltipStateImpl : TooltipState {
         job?.cancel()
         job = launch {
             isVisible = true
-            animate(opacity, 1f) { value, _ ->
+            animate(opacity, 0.8f) { value, _ ->
                 opacity = value
             }
         }
