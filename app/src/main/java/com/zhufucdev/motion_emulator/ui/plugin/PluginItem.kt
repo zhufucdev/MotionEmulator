@@ -5,7 +5,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.zhufucdev.api.ProductQuery
-import com.zhufucdev.api.ReleaseAsset
 import com.zhufucdev.motion_emulator.plugin.Plugin
 import com.zhufucdev.motion_emulator.plugin.Plugins
 
@@ -17,6 +16,7 @@ class PluginItem(
     val id: String,
     val title: String,
     val subtitle: String = "",
+    val product: ProductQuery? = null,
     enabled: Boolean,
     state: PluginItemState,
 ) {
@@ -42,10 +42,12 @@ class PluginItem(
     }
 }
 
-sealed class PluginItemState(val containsDownloadable: Boolean) {
-    data object None : PluginItemState(false)
-    data class NotDownloaded(val query: ProductQuery) : PluginItemState(true)
-    data class Update(val asset: ReleaseAsset) : PluginItemState(true)
+sealed class PluginItemState {
+    data object NotInstalled : PluginItemState()
+    sealed class Installed(val plugin: Plugin) : PluginItemState() {
+        class Idle(plugin: Plugin) : Installed(plugin)
+        class Updatable(plugin: Plugin) : Installed(plugin)
+    }
 }
 
 fun Plugin.toPluginItem(enabled: Boolean) = PluginItem(
@@ -53,14 +55,15 @@ fun Plugin.toPluginItem(enabled: Boolean) = PluginItem(
     title = name,
     subtitle = description,
     enabled = enabled,
-    state = PluginItemState.None
+    state = PluginItemState.Installed.Idle(this)
 )
 
 fun ProductQuery.toPluginItem() = PluginItem(
     id = packageId ?: key,
     title = name,
     enabled = false,
-    state = PluginItemState.NotDownloaded(this)
+    state = PluginItemState.NotInstalled,
+    product = this
 )
 
 fun PluginItem.findPlugin() = Plugins.available.firstOrNull { it.packageName == id }

@@ -2,7 +2,7 @@ package com.zhufucdev.motion_emulator
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import com.zhufucdev.motion_emulator.extension.Updater
+import com.zhufucdev.motion_emulator.extension.AppUpdater
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -14,7 +14,7 @@ import org.junit.runner.RunWith
 class UpdaterTest {
     @Test
     fun check() {
-        val updater = Updater(InstrumentationRegistry.getInstrumentation().context)
+        val updater = AppUpdater(InstrumentationRegistry.getInstrumentation().context)
         val scope = CoroutineScope(Dispatchers.Default)
         scope.launch {
             val update = updater.check()

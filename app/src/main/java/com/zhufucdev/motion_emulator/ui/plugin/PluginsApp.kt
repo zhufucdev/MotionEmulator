@@ -2,6 +2,7 @@
 
 package com.zhufucdev.motion_emulator.ui.plugin
 
+import android.media.effect.Effect
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animate
@@ -24,7 +25,7 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -46,12 +47,12 @@ import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -80,28 +81,25 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.zhufucdev.api.ProductQuery
-import com.zhufucdev.api.ReleaseAsset
 import com.zhufucdev.api.findAsset
-import com.zhufucdev.api.getReleaseAsset
 import com.zhufucdev.motion_emulator.BuildConfig
 import com.zhufucdev.motion_emulator.R
 import com.zhufucdev.motion_emulator.extension.UPDATE_FILE_PROVIDER_AUTHORITY
-import com.zhufucdev.motion_emulator.extension.Updater
 import com.zhufucdev.motion_emulator.extension.defaultKtorClient
 import com.zhufucdev.motion_emulator.extension.insert
+import com.zhufucdev.motion_emulator.plugin.Plugin
+import com.zhufucdev.motion_emulator.plugin.PluginDownloader
+import com.zhufucdev.motion_emulator.plugin.PluginUpdater
 import com.zhufucdev.motion_emulator.ui.CaptionText
 import com.zhufucdev.motion_emulator.ui.TooltipHost
 import com.zhufucdev.motion_emulator.ui.TooltipScope
 import com.zhufucdev.motion_emulator.ui.theme.MotionEmulatorTheme
 import com.zhufucdev.motion_emulator.ui.theme.paddingCommon
-import com.zhufucdev.update.Downloading
 import com.zhufucdev.update.InstallationPermissionContract
-import com.zhufucdev.update.StatusDownloading
-import com.zhufucdev.update.StatusReadyToDownload
-import com.zhufucdev.update.StatusReadyToInstall
+import com.zhufucdev.update.UpdaterStatus
 import com.zhufucdev.update.canInstallUpdate
 import com.zhufucdev.update.installUpdate
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
 import kotlin.math.max
@@ -127,7 +125,6 @@ fun PluginsApp(
         plugins.filter { !it.enabled }.toMutableStateList()
     }
     val downloadable = remember { mutableStateListOf<PluginItem>() }
-    val updatable = remember { mutableStateMapOf<String, ReleaseAsset>() }
     val disabledList by remember(disabled) {
         derivedStateOf {
             disabled + downloadable.filter { edge -> !plugins.any { it.id == edge.id } }
@@ -176,32 +173,12 @@ fun PluginsApp(
         }
     }
 
-    val context = LocalContext.current
     LaunchedEffect(plugins) {
         if (downloadable.isEmpty()) {
             val queries = defaultKtorClient.findAsset(BuildConfig.SERVER_URI, "me", "plugin")
-            downloadable.addAll(queries.map(ProductQuery::toPluginItem))
-        }
-
-        downloadable.forEach { edge ->
-            if (!plugins.any { it.id == edge.id } || updatable.contains(edge.id)) {
-                // not creating unused / duplicated network traffic
-                return@forEach
-            }
-            val localState = edge.state
-            if (localState !is PluginItemState.NotDownloaded) {
-                return@forEach
-            }
-            val update =
-                Updater(localState.query.key, context)
-                    .check(context.packageManager.getPackageInfo(edge.id, 0).versionName)
-            if (update != null) {
-                updatable[edge.id] = update
-            }
-        }
-        plugins.forEach {
-            val update = updatable[it.id] ?: return@forEach
-            it.state = PluginItemState.Update(update)
+            downloadable.addAll(queries.map {
+                it.packageId?.let { plugins.firstOrNull { p -> p.id == it } } ?: it.toPluginItem()
+            })
         }
     }
 
@@ -353,7 +330,7 @@ private fun Modifier.dragTarget(
                             stop()
                             isDragging = false
                         },
-                        onDrag = { change, dragAmount ->
+                        onDrag = { _, dragAmount ->
                             offset += dragAmount
                             onDrag(offset)
                         }
@@ -375,7 +352,7 @@ private fun TooltipScope.PluginsAppTopBar(
                 modifier = Modifier.tooltip { Text(text = stringResource(R.string.action_navigate_up)) }
             ) {
                 Icon(
-                    Icons.Default.ArrowBack,
+                    Icons.AutoMirrored.Default.ArrowBack,
                     contentDescription = stringResource(R.string.action_navigate_up)
                 )
             }
@@ -394,7 +371,7 @@ private fun LazyListScope.operativeArea(
 ) {
     plugins.forEach {
         val mod =
-            if (it.state is PluginItemState.NotDownloaded) {
+            if (it.state is PluginItemState.NotInstalled) {
                 Modifier
             } else {
                 Modifier
@@ -413,7 +390,27 @@ private fun LazyListScope.operativeArea(
             val coroutine = rememberCoroutineScope()
             val context = LocalContext.current
 
-            val updater = remember { Updater(context) }
+            val updater = remember {
+                when (val sc = it.state) {
+                    is PluginItemState.NotInstalled -> PluginDownloader(it.product!!.key, context)
+                    is PluginItemState.Installed -> PluginUpdater(
+                        sc.plugin,
+                        context,
+                        it.product?.key
+                    )
+                }
+            }
+
+            LaunchedEffect(true) {
+                if (updater is PluginUpdater) {
+                    updater.check()
+                    if (updater.update != null) {
+                        it.state =
+                            PluginItemState.Installed.Updatable((it.state as PluginItemState.Installed).plugin)
+                    }
+                }
+            }
+
             val launcher = rememberLauncherForActivityResult(
                 remember {
                     // this should be remembered, or
@@ -423,7 +420,7 @@ private fun LazyListScope.operativeArea(
             ) { canInstall ->
                 if (canInstall) {
                     val status = updater.status
-                    if (status is StatusReadyToInstall) {
+                    if (status is UpdaterStatus.ReadyToInstall) {
                         context.installUpdate(status.file, UPDATE_FILE_PROVIDER_AUTHORITY)
                     }
                 }
@@ -431,11 +428,11 @@ private fun LazyListScope.operativeArea(
             val downloadProgress by remember(updater.status) {
                 derivedStateOf {
                     when (val status = updater.status) {
-                        is StatusDownloading -> {
+                        is UpdaterStatus.Working.Downloading -> {
                             status.progress
                         }
 
-                        is StatusReadyToDownload -> {
+                        is UpdaterStatus.Working.Checking, UpdaterStatus.ReadyToDownload -> {
                             0f
                         }
 
@@ -446,7 +443,7 @@ private fun LazyListScope.operativeArea(
                 }
             }
 
-            fun notifyInstall(update: File) {
+            fun installRequest(update: File) {
                 if (!context.packageManager.canInstallUpdate()) {
                     launcher.launch(context.packageName)
                 } else {
@@ -457,42 +454,29 @@ private fun LazyListScope.operativeArea(
             Surface(
                 onClick = {
                     val status = updater.status
-                    if (status is Downloading) {
+                    if (status is UpdaterStatus.Working.Downloading) {
                         return@Surface
-                    } else if (status is StatusReadyToInstall) {
-                        notifyInstall(status.file)
+                    } else if (status is UpdaterStatus.ReadyToInstall) {
+                        installRequest(status.file)
                         return@Surface
                     }
 
-                    val state = it.state
-                    if (state.containsDownloadable) {
-                        coroutine.launch {
-                            val asset = when (state) {
-                                is PluginItemState.NotDownloaded -> defaultKtorClient.getReleaseAsset(
-                                    BuildConfig.SERVER_URI,
-                                    state.query.key
-                                )
-
-                                is PluginItemState.Update -> {
-                                    state.asset
-                                }
-
-                                else -> {
-                                    throw NotImplementedError(state.toString())
-                                }
-                            }
-                            if (asset == null) {
-                                snackbarHostState.showSnackbar(context.getString(R.string.text_asset_fetch_failed))
-                                return@launch
-                            }
-                            val update = try {
-                                updater.download(asset)
-                            } catch (e: Exception) {
-                                snackbarHostState.showSnackbar(context.getString(R.string.text_asset_fetch_failed))
-                                return@launch
-                            }
-                            notifyInstall(update)
+                    coroutine.launch(Dispatchers.IO) {
+                        if (updater.update == null) {
+                            updater.check()
                         }
+
+                        if (updater.update == null) {
+                            snackbarHostState.showSnackbar(context.getString(R.string.text_asset_fetch_failed))
+                            return@launch
+                        }
+                        val file = try {
+                            updater.download()
+                        } catch (e: Exception) {
+                            snackbarHostState.showSnackbar(context.getString(R.string.text_asset_fetch_failed))
+                            return@launch
+                        }
+                        installRequest(file)
                     }
                 },
                 modifier = mod.animateItemPlacement()
@@ -557,7 +541,7 @@ private fun PluginItemView(
                 .alpha(0.5f)
         ) {
             if (progress > 0) {
-                LinearProgressIndicator(progress)
+                LinearProgressIndicator(progress = { progress })
             } else {
                 LinearProgressIndicator()
             }
@@ -571,21 +555,21 @@ private fun PluginItemView(
         ) {
             // start: front icon
             when (item.state) {
-                is PluginItemState.NotDownloaded -> {
+                is PluginItemState.NotInstalled -> {
                     Icon(
                         painter = painterResource(id = com.zhufucdev.update.R.drawable.ic_baseline_download),
                         contentDescription = stringResource(id = R.string.des_plugin_downloadable),
                     )
                 }
 
-                is PluginItemState.Update -> {
+                is PluginItemState.Installed.Updatable -> {
                     Icon(
                         painter = painterResource(id = com.zhufucdev.update.R.drawable.ic_baseline_update),
                         contentDescription = stringResource(id = R.string.des_plugin_update),
                     )
                 }
 
-                is PluginItemState.None -> {
+                is PluginItemState.Installed.Idle -> {
                     if (item.enabled) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_power_plug),
@@ -611,8 +595,8 @@ private fun PluginItemView(
                     LocalTextStyle provides MaterialTheme.typography.labelSmall
                 ) {
                     when (item.state) {
-                        is PluginItemState.NotDownloaded -> Text(stringResource(id = R.string.des_plugin_downloadable))
-                        is PluginItemState.Update -> Text(stringResource(id = R.string.des_plugin_update))
+                        is PluginItemState.NotInstalled -> Text(stringResource(id = R.string.des_plugin_downloadable))
+                        is PluginItemState.Installed.Updatable -> Text(stringResource(id = R.string.des_plugin_update))
                         else -> {
                             if (item.subtitle.isNotBlank()) {
                                 Text(text = item.subtitle)
@@ -635,7 +619,7 @@ fun PluginItemPreview() {
                     "e1",
                     "example plug-in 1",
                     enabled = true,
-                    state = PluginItemState.None
+                    state = PluginItemState.NotInstalled
                 )
             )
             PluginItemView(
@@ -644,7 +628,7 @@ fun PluginItemPreview() {
                     "example plug-in 2",
                     "hi",
                     enabled = true,
-                    state = PluginItemState.None
+                    state = PluginItemState.NotInstalled
                 )
             )
             PluginItemView(
@@ -652,7 +636,13 @@ fun PluginItemPreview() {
                     "e3",
                     "example plug-in 3",
                     enabled = true,
-                    state = PluginItemState.Update(ReleaseAsset("", "", ""))
+                    state = PluginItemState.Installed.Updatable(
+                        Plugin(
+                            "com.example.plugin",
+                            "example plug-in 3",
+                            "do stuff"
+                        )
+                    )
                 ),
                 progress = 0f,
             )

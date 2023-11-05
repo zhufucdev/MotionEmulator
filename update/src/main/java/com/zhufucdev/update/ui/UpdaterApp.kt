@@ -40,15 +40,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.zhufucdev.update.Downloading
-import com.zhufucdev.update.HasUpdate
 import com.zhufucdev.update.R
-import com.zhufucdev.update.StatusDownloading
-import com.zhufucdev.update.StatusGenericWorking
-import com.zhufucdev.update.StatusIdling
-import com.zhufucdev.update.StatusReadyToDownload
-import com.zhufucdev.update.StatusReadyToInstall
 import com.zhufucdev.update.Updater
+import com.zhufucdev.update.UpdaterStatus
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
@@ -75,7 +69,7 @@ fun UpdaterApp(navigateUp: () -> Unit, updater: Updater, install: suspend (File)
     Scaffold(
         topBar = { AppBar(TopAppBarDefaults.enterAlwaysScrollBehavior(), navigateUp) },
         floatingActionButton = {
-            if (updater.status is StatusReadyToDownload) {
+            if (updater.status is UpdaterStatus.ReadyToDownload) {
                 ExtendedFloatingActionButton(
                     onClick = {
                         coroutine.launch {
@@ -83,7 +77,10 @@ fun UpdaterApp(navigateUp: () -> Unit, updater: Updater, install: suspend (File)
                                 updater.download()
                             } catch (e: Exception) {
                                 snackbar.showSnackbar(
-                                    message = context.getString(R.string.text_download_failed, e.message),
+                                    message = context.getString(
+                                        R.string.text_download_failed,
+                                        e.message
+                                    ),
                                     withDismissAction = true,
                                     duration = SnackbarDuration.Indefinite
                                 )
@@ -91,28 +88,38 @@ fun UpdaterApp(navigateUp: () -> Unit, updater: Updater, install: suspend (File)
                             }
                         }
                     },
-                    icon = { Icon(painterResource(R.drawable.ic_baseline_download), contentDescription = null) },
+                    icon = {
+                        Icon(
+                            painterResource(R.drawable.ic_baseline_download),
+                            contentDescription = null
+                        )
+                    },
                     text = { Text(stringResource(R.string.title_download)) }
                 )
             }
         },
         snackbarHost = { SnackbarHost(snackbar) }
     ) {
-        Column(Modifier.padding(it).fillMaxWidth()) {
+        Column(
+            Modifier
+                .padding(it)
+                .fillMaxWidth()) {
             Icon(
                 painterResource(R.drawable.ic_baseline_update),
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.secondary,
-                modifier = Modifier.align(Alignment.CenterHorizontally).size(30.dp)
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .size(30.dp)
             )
             Spacer(Modifier.height(12.dp))
 
             val title =
                 when (updater.status) {
-                    is StatusReadyToInstall -> stringResource(R.string.title_ready_to_install)
-                    is Downloading -> stringResource(R.string.title_downloading)
-                    is HasUpdate -> stringResource(R.string.text_new_version)
-                    is StatusGenericWorking -> stringResource(R.string.text_looking)
+                    is UpdaterStatus.ReadyToInstall -> stringResource(R.string.title_ready_to_install)
+                    is UpdaterStatus.Working.Downloading -> stringResource(R.string.title_downloading)
+                    is UpdaterStatus.HasUpdate -> stringResource(R.string.text_new_version)
+                    is UpdaterStatus.Working -> stringResource(R.string.text_looking)
                     else -> stringResource(R.string.text_no_update)
                 }
             Text(
@@ -121,26 +128,31 @@ fun UpdaterApp(navigateUp: () -> Unit, updater: Updater, install: suspend (File)
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             )
 
-            Box(Modifier.fillMaxWidth().padding(12.dp)) {
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp)) {
                 val status = updater.status
-                if (status is StatusDownloading) {
+                if (status is UpdaterStatus.Working.Downloading) {
                     LinearProgressIndicator(
                         modifier = Modifier.fillMaxWidth(),
-                        progress = status.progress
+                        progress = { status.progress }
                     )
-                } else if (updater.status is StatusGenericWorking) {
+                } else if (updater.status is UpdaterStatus.Working) {
                     LinearProgressIndicator(Modifier.fillMaxWidth())
                 }
             }
 
             AnimatedVisibility(
-                visible = updater.status == StatusIdling || updater.status is StatusReadyToInstall,
+                visible = updater.status == UpdaterStatus.Idling || updater.status is UpdaterStatus.ReadyToInstall,
                 enter = fadeIn(),
                 exit = fadeOut(),
-                modifier = Modifier.align(Alignment.End).padding(end = 12.dp)
+                modifier = Modifier
+                    .align(Alignment.End)
+                    .padding(end = 12.dp)
             ) {
                 when (val status = updater.status) {
-                    is StatusIdling -> {
+                    is UpdaterStatus.Idling -> {
                         Button(
                             onClick = {
                                 coroutine.launch {
@@ -153,7 +165,7 @@ fun UpdaterApp(navigateUp: () -> Unit, updater: Updater, install: suspend (File)
                         )
                     }
 
-                    is StatusReadyToInstall -> {
+                    is UpdaterStatus.ReadyToInstall -> {
                         Button(
                             onClick = {
                                 coroutine.launch {
@@ -174,6 +186,8 @@ fun UpdaterApp(navigateUp: () -> Unit, updater: Updater, install: suspend (File)
                             }
                         )
                     }
+
+                    else -> {}
                 }
             }
         }

@@ -13,7 +13,7 @@ suspend fun HttpClient.getReleaseAsset(
     os: String? = null,
     current: String? = null,
     architecture: String? = null
-): ReleaseAsset? = runCatching {
+): ReleaseAsset? = try {
     val req = get {
         url {
             url("$apiUri/release")
@@ -30,10 +30,14 @@ suspend fun HttpClient.getReleaseAsset(
         }
     }
     if (!req.status.isSuccess()) {
-        return@runCatching null
+        null
+    } else {
+        req.body<ReleaseAsset>()
     }
-    req.body<ReleaseAsset>()
-}.getOrNull()
+} catch (e: Exception) {
+    e.printStackTrace()
+    null
+}
 
 suspend fun HttpClient.findAsset(
     apiUri: String,

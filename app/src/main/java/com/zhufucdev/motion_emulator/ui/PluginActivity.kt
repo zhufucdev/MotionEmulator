@@ -20,7 +20,9 @@ class PluginActivity : ComponentActivity() {
             val plugins = remember(Plugins.available) {
                 Plugins.enabled.let { enabled ->
                     Plugins.available.map {
-                        it.toPluginItem(enabled.contains(it))
+                        it.toPluginItem(
+                            enabled = enabled.contains(it)
+                        )
                     }
                 }
             }

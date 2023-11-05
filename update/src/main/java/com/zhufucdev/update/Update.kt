@@ -7,19 +7,20 @@ import android.content.Context
 import android.net.Uri
 import android.os.Build
 import android.util.Log
-import androidx.compose.runtime.*
+import androidx.compose.runtime.MutableFloatState
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.core.content.getSystemService
 import com.zhufucdev.api.ReleaseAsset
 import com.zhufucdev.api.getReleaseAsset
-import io.ktor.client.*
-import io.ktor.client.call.*
+import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.HttpTimeout
-import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.client.request.*
-import io.ktor.http.*
-import io.ktor.serialization.kotlinx.json.*
-import kotlinx.coroutines.*
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.serialization.kotlinx.json.json
 import java.io.File
 import kotlin.concurrent.thread
 import kotlin.coroutines.suspendCoroutine
@@ -29,19 +30,15 @@ import kotlin.coroutines.suspendCoroutine
  *
  * This is also a view model
  *
- * @param apiUri See [this repo](https://github.com/zhufucdev/api.zhufucdev) to get an idea
- * @param productAlias How to call the app
  * @param context The context
  * @param exportedDir The directory where to [download]
  */
 @Stable
-class Updater(
-    private val apiUri: String,
-    private val productAlias: String,
-    private val context: Context,
+abstract class Updater(
+    protected val context: Context,
     private val exportedDir: File = File(context.externalCacheDir, "update")
 ) {
-    private val ktor = HttpClient(OkHttp) {
+    protected val ktor = HttpClient(OkHttp) {
         install(HttpTimeout) {
             requestTimeoutMillis = 10000
         }
@@ -51,12 +48,12 @@ class Updater(
         }
     }
 
-    var update: ReleaseAsset? by mutableStateOf(null)
-        private set
-    var status: UpdaterStatus by mutableStateOf(StatusIdling)
+    open var update: ReleaseAsset? by mutableStateOf(null)
+        protected set
+    var status: UpdaterStatus by mutableStateOf(UpdaterStatus.Idling)
         private set
 
-    private fun updateStatus(next: UpdaterStatus) {
+    protected fun updateStatus(next: UpdaterStatus) {
         if (status == next) return
 
         try {
@@ -68,23 +65,11 @@ class Updater(
     }
 
     /**
-     * Look for a new update, with the
-     * [android.content.pm.PackageInfo.versionName] of the current [context] as default
-     * @param currentVersion override the version name
+     * Check for new update, or null if already up-to-date
+     *
+     * Note: this method mutates the global [update]
      */
-    suspend fun check(currentVersion: String? = null): ReleaseAsset? {
-        updateStatus(StatusChecking)
-        val current = currentVersion
-            ?: context.packageManager.getPackageInfo(context.packageName, 0).versionName
-        val arch = Build.SUPPORTED_ABIS[0].standardArchitect()
-        val update =
-            ktor.getReleaseAsset(apiUri, productAlias, "android", current, arch)
-        if (update != null) {
-            this.update = update
-            updateStatus(StatusReadyToDownload)
-        }
-        return update
-    }
+    abstract suspend fun check(): ReleaseAsset?
 
     /**
      * Download the update to the exported directory
@@ -101,12 +86,12 @@ class Updater(
             context.getSystemService<DownloadManager>()
                 ?: throw RuntimeException("download manager not available")
 
-        updateStatus(StatusPreDownload)
+        updateStatus(UpdaterStatus.Working.PreDownload)
 
         if (!exportedDir.exists()) exportedDir.mkdirs()
         val result = File(exportedDir, "${localUpdate.productName}-${localUpdate.versionName}.apk")
         if (result.exists()) {
-            updateStatus(StatusReadyToInstall(result))
+            updateStatus(UpdaterStatus.ReadyToInstall(result))
             return result // TODO Manifest verification
         }
         val taskId = manager.enqueue(DownloadManager.Request(Uri.parse(localUpdate.url)).apply {
@@ -116,18 +101,18 @@ class Updater(
 
         return suspendCoroutine { c ->
             val progress = mutableFloatStateOf(0F)
-            val status = StatusDownloading(progress, manager, taskId)
+            val status = UpdaterStatus.Working.Downloading(progress, manager, taskId)
 
             thread(start = true) {
-                while (this.status is HasUpdate) {
+                while (this.status is UpdaterStatus.HasUpdate) {
                     val query = queryDownload(manager, taskId)
                     Log.d("Updater", "query status $query")
                     if (query >= 1F) {
-                        updateStatus(StatusReadyToInstall(result))
+                        updateStatus(UpdaterStatus.ReadyToInstall(result))
                         c.resumeWith(Result.success(result))
                         return@thread
                     } else if (query == -2F) {
-                        updateStatus(StatusDownloadFailed(result))
+                        updateStatus(UpdaterStatus.DownloadFailed(result))
                         c.resumeWith(
                             Result.failure(
                                 IllegalStateException(
@@ -137,7 +122,7 @@ class Updater(
                             )
                         )
                     } else if (query == -1F) {
-                        updateStatus(StatusPreDownload)
+                        updateStatus(UpdaterStatus.Working.PreDownload)
                     } else {
                         updateStatus(status)
                         progress.value = query
@@ -152,13 +137,6 @@ class Updater(
         ktor.close()
         status.onDestroy()
         update = null
-    }
-
-    private fun String.standardArchitect() = when (this) {
-        "armeabi-v7a" -> "arm32"
-        "arm64-v8a" -> "arm64"
-        "x86_64" -> "amd64"
-        else -> this
     }
 }
 
@@ -198,56 +176,121 @@ private fun queryDownload(
     return -1F
 }
 
+/**
+ * An [Updater] to update the running app itself
+ *
+ * @param apiUri See [this repo](https://github.com/zhufucdev/api.zhufucdev) to get an idea
+ */
+class AppUpdater(
+    private val apiUri: String,
+    private val productAlias: String,
+    context: Context,
+    exportedDir: File = File(context.externalCacheDir, "update")
+) : Updater(context, exportedDir) {
+    /**
+     * Look for a new update, with the
+     * [android.content.pm.PackageInfo.versionName] of the current [context] as default version
+     */
+    override suspend fun check(): ReleaseAsset? {
+        updateStatus(UpdaterStatus.Working.Checking)
+        val update = checkForDevice(
+            apiUri,
+            productAlias,
+            ktor,
+            context.packageManager.getPackageInfo(context.packageName, 0).versionName
+        )
+        if (update != null) {
+            this.update = update
+            updateStatus(UpdaterStatus.ReadyToDownload)
+        } else {
+            updateStatus(UpdaterStatus.Idling)
+        }
+        return update
+    }
 
-interface UpdaterStatus {
-    fun onDestroy()
-}
-
-interface StatusGenericWorking : UpdaterStatus
-
-interface HasUpdate
-
-interface Downloading : StatusGenericWorking, HasUpdate
-
-object StatusChecking : StatusGenericWorking {
-    override fun onDestroy() {}
-}
-
-object StatusPreDownload : StatusGenericWorking, HasUpdate {
-    override fun onDestroy() {}
-}
-
-object StatusIdling : UpdaterStatus {
-    override fun onDestroy() {}
-}
-
-object StatusReadyToDownload : UpdaterStatus, HasUpdate {
-    override fun onDestroy() {}
-}
-
-@Stable
-class StatusDownloading(
-    progress: MutableFloatState,
-    private val manager: DownloadManager,
-    private val taskId: Long,
-) : Downloading {
-    val progress by progress
-    override fun onDestroy() {
-        if (queryDownload(manager, taskId) < 1) {
-            manager.remove(taskId)
+    companion object {
+        suspend fun checkForDevice(
+            apiUri: String,
+            productAlias: String,
+            ktor: HttpClient,
+            version: String? = null
+        ): ReleaseAsset? {
+            val arch = when (val a = Build.SUPPORTED_ABIS[0]) {
+                "armeabi-v7a" -> "arm32"
+                "arm64-v8a" -> "arm64"
+                "x86_64" -> "amd64"
+                else -> a
+            }
+            return ktor.getReleaseAsset(apiUri, productAlias, "android", version, arch)
         }
     }
 }
 
-data class StatusReadyToInstall(val file: File) : UpdaterStatus, HasUpdate {
-    override fun onDestroy() {
-        file.delete()
+class AssetUpdater(
+    asset: ReleaseAsset?,
+    context: Context,
+    exportedDir: File = File(context.externalCacheDir, "update")
+) : Updater(context, exportedDir) {
+    @Stable
+    override var update: ReleaseAsset? = asset
+
+    override suspend fun check(): ReleaseAsset? {
+        return update
     }
 }
 
-data class StatusDownloadFailed(private val file: File) : UpdaterStatus {
-    override fun onDestroy() {
-        if (file.exists())
+sealed class UpdaterStatus {
+    abstract fun onDestroy()
+    interface HasUpdate
+
+    sealed class Working : UpdaterStatus() {
+        @Stable
+        class Downloading(
+            progress: MutableFloatState,
+            private val manager: DownloadManager,
+            private val taskId: Long,
+        ) : Working(), HasUpdate {
+            val progress by progress
+            override fun onDestroy() {
+                if (queryDownload(manager, taskId) < 1) {
+                    manager.remove(taskId)
+                }
+            }
+        }
+
+        data object Checking : Working() {
+            override fun onDestroy() {}
+        }
+
+        data object PreDownload : Working(), HasUpdate {
+            override fun onDestroy() {}
+        }
+    }
+
+    data object Idling : UpdaterStatus() {
+        override fun onDestroy() {}
+    }
+
+    object ReadyToDownload : UpdaterStatus(), HasUpdate {
+        override fun onDestroy() {}
+    }
+
+    data class ReadyToInstall(val file: File) : UpdaterStatus(), HasUpdate {
+        override fun onDestroy() {
             file.delete()
+        }
+    }
+
+    data class DownloadFailed(private val file: File) : UpdaterStatus() {
+        override fun onDestroy() {
+            if (file.exists())
+                file.delete()
+        }
     }
 }
+
+
+
+
+
+

@@ -6,7 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
-import com.zhufucdev.motion_emulator.extension.Updater
+import com.zhufucdev.motion_emulator.extension.AppUpdater
 import com.zhufucdev.motion_emulator.extension.lazySharedPreferences
 import com.zhufucdev.motion_emulator.plugin.Plugins
 import com.zhufucdev.motion_emulator.extension.setUpStatusBar
@@ -22,7 +22,7 @@ class MainActivity : AppCompatActivity() {
         setContent {
             MotionEmulatorTheme {
                 val updater = remember {
-                    Updater(this)
+                    AppUpdater(this)
                 }
                 LaunchedEffect(Unit) {
                     updater.check()
