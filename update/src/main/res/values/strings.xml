@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="title_updater">App Update</string>
-    <string name="action_navigate_up">navigate up</string>
+    <string name="action_navigate_up">Navigate up</string>
     <string name="text_new_version">New version found</string>
     <string name="title_download">Download</string>
     <string name="text_looking">Looking for update</string>

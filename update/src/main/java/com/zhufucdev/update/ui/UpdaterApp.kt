@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -20,15 +20,17 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.PlainTooltipBox
+import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
+import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
+import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -39,7 +41,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntRect
+import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.PopupPositionProvider
 import com.zhufucdev.update.R
 import com.zhufucdev.update.Updater
 import com.zhufucdev.update.UpdaterStatus
@@ -103,7 +110,8 @@ fun UpdaterApp(navigateUp: () -> Unit, updater: Updater, install: suspend (File)
         Column(
             Modifier
                 .padding(it)
-                .fillMaxWidth()) {
+                .fillMaxWidth()
+        ) {
             Icon(
                 painterResource(R.drawable.ic_baseline_update),
                 contentDescription = null,
@@ -131,7 +139,8 @@ fun UpdaterApp(navigateUp: () -> Unit, updater: Updater, install: suspend (File)
             Box(
                 Modifier
                     .fillMaxWidth()
-                    .padding(12.dp)) {
+                    .padding(12.dp)
+            ) {
                 val status = updater.status
                 if (status is UpdaterStatus.Working.Downloading) {
                     LinearProgressIndicator(
@@ -201,13 +210,30 @@ private fun AppBar(scrollBehavior: TopAppBarScrollBehavior, finish: () -> Unit) 
         title = { Text(stringResource(R.string.title_updater)) },
         scrollBehavior = scrollBehavior,
         navigationIcon = {
-            PlainTooltipBox(
-                tooltip = { Text(stringResource(R.string.action_navigate_up)) }
+            TooltipBox(
+                tooltip = {
+                    PlainTooltip {
+                        Text(stringResource(R.string.action_navigate_up))
+                    }
+                },
+                state = rememberTooltipState(),
+                positionProvider = object : PopupPositionProvider {
+                    override fun calculatePosition(
+                        anchorBounds: IntRect,
+                        windowSize: IntSize,
+                        layoutDirection: LayoutDirection,
+                        popupContentSize: IntSize
+                    ): IntOffset {
+                        return anchorBounds.bottomCenter - IntOffset(
+                            popupContentSize.width / 2,
+                            0
+                        )
+                    }
+                }
             ) {
                 IconButton(
                     onClick = { finish() },
-                    content = { Icon(Icons.Default.ArrowBack, null) },
-                    modifier = Modifier.tooltipTrigger()
+                    content = { Icon(Icons.AutoMirrored.Filled.ArrowBack, null) },
                 )
             }
         }
