@@ -48,6 +48,15 @@ fun ManagerApp(navigateUp: () -> Unit) {
     val context = LocalContext.current
     val screenProviders = LocalScreenProviders.current
 
+    val runtimeParameters = remember {
+        ManagerViewModel.RuntimeArguments(
+            snackbarState,
+            navController,
+            context,
+            bottomSheetState
+        )
+    }
+
     BottomSheetModal(state = bottomSheetState) {
         TooltipHost {
             Scaffold(
@@ -70,14 +79,7 @@ fun ManagerApp(navigateUp: () -> Unit) {
                     ) {
                         screenProviders.value.forEach { para ->
                             with(para) {
-                                compose(
-                                    ManagerViewModel.RuntimeArguments(
-                                        snackbarState,
-                                        navController,
-                                        context,
-                                        bottomSheetState
-                                    )
-                                )
+                                compose(runtimeParameters)
                             }
                         }
                     }
