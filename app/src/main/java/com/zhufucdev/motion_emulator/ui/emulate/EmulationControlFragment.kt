@@ -11,7 +11,7 @@ import androidx.core.view.setPadding
 import com.zhufucdev.motion_emulator.R
 import com.zhufucdev.motion_emulator.databinding.FragmentEmulationControlBinding
 import com.zhufucdev.motion_emulator.provider.Scheduler
-import com.zhufucdev.stub.AgentState
+import com.zhufucdev.me.stub.AgentState
 import kotlin.math.roundToInt
 
 class EmulationControlFragment : EmulationMonitoringFragment() {

@@ -14,10 +14,10 @@ import com.zhufucdev.motion_emulator.data.AppMeta
 import com.zhufucdev.motion_emulator.databinding.FragmentEmulationAppBinding
 import com.zhufucdev.motion_emulator.provider.Scheduler
 import com.zhufucdev.motion_emulator.ui.map.MapController
-import com.zhufucdev.stub.EmulationInfo
-import com.zhufucdev.stub.AgentState
-import com.zhufucdev.stub.android
-import com.zhufucdev.stub.toFixed
+import com.zhufucdev.me.stub.EmulationInfo
+import com.zhufucdev.me.stub.AgentState
+import com.zhufucdev.me.stub.android
+import com.zhufucdev.me.stub.toFixed
 import kotlin.math.roundToInt
 
 @Suppress("DEPRECATION")

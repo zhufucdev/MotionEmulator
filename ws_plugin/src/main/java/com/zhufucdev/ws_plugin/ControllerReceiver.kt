@@ -2,9 +2,9 @@ package com.zhufucdev.ws_plugin
 
 import android.content.Context
 import com.highcapable.yukihookapi.hook.factory.prefs
-import com.zhufucdev.stub_plugin.MePlugin
-import com.zhufucdev.stub_plugin.PluginBroadcastReceiver
-import com.zhufucdev.xposed.PREFERENCE_NAME_BRIDGE
+import com.zhufucdev.me.plugin.MePlugin
+import com.zhufucdev.me.plugin.PluginBroadcastReceiver
+import com.zhufucdev.me.xposed.PREFERENCE_NAME_BRIDGE
 
 class ControllerReceiver : PluginBroadcastReceiver() {
     override fun onEmulationStart(context: Context) {

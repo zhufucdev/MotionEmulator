@@ -1,10 +1,9 @@
 package com.zhufucdev.cp_plugin
 
-import android.content.ContentResolver
 import com.highcapable.yukihookapi.hook.log.loggerW
 import com.highcapable.yukihookapi.hook.param.PackageParam
-import com.zhufucdev.stub.Method
-import com.zhufucdev.xposed.XposedScheduler
+import com.zhufucdev.me.stub.Method
+import com.zhufucdev.me.xposed.XposedScheduler
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay

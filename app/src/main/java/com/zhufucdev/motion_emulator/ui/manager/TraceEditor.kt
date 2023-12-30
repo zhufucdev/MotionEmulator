@@ -35,10 +35,10 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils
-import com.zhufucdev.stub.*
+import com.zhufucdev.me.stub.*
+import com.zhufucdev.me.stub.Trace
 import com.zhufucdev.motion_emulator.R
 import com.zhufucdev.motion_emulator.data.*
-import com.zhufucdev.stub.Trace
 import com.zhufucdev.motion_emulator.extension.insert
 import com.zhufucdev.motion_emulator.extension.toOffset
 import com.zhufucdev.motion_emulator.extension.toVector2d

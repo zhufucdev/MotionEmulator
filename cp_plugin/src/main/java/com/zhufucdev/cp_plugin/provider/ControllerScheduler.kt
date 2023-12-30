@@ -1,11 +1,11 @@
 package com.zhufucdev.cp_plugin.provider
 
 import android.util.Log
-import com.zhufucdev.stub.Emulation
-import com.zhufucdev.stub.EmulationInfo
-import com.zhufucdev.stub.Intermediate
-import com.zhufucdev.stub_plugin.WsServer
-import com.zhufucdev.stub_plugin.connect
+import com.zhufucdev.me.stub.Emulation
+import com.zhufucdev.me.stub.EmulationInfo
+import com.zhufucdev.me.stub.Intermediate
+import com.zhufucdev.me.plugin.WsServer
+import com.zhufucdev.me.plugin.connect
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import java.util.Optional

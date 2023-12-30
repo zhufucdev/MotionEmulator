@@ -2,11 +2,11 @@ package com.zhufucdev.ws_plugin.hook
 
 import com.highcapable.yukihookapi.hook.log.loggerI
 import com.highcapable.yukihookapi.hook.param.PackageParam
-import com.zhufucdev.stub.Method
-import com.zhufucdev.stub_plugin.WsServer
-import com.zhufucdev.stub_plugin.connect
-import com.zhufucdev.xposed.XposedScheduler
-import com.zhufucdev.xposed.PREFERENCE_NAME_BRIDGE
+import com.zhufucdev.me.stub.Method
+import com.zhufucdev.me.plugin.WsServer
+import com.zhufucdev.me.plugin.connect
+import com.zhufucdev.me.xposed.XposedScheduler
+import com.zhufucdev.me.xposed.PREFERENCE_NAME_BRIDGE
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay

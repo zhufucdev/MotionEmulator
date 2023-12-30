@@ -19,7 +19,8 @@ object Versions {
     const val jnanoidVersion = "2.0.0"
     const val materialVersion = "1.10.0"
     const val workRuntimeVersion = "2.8.1"
-    const val yukiVersion = "1.1.11"
+    const val yukiVersion = "1.2.0"
+    const val stubVersion = "1.0-SNAPSHOT"
 
     /**
      * Generate an increasing version code

@@ -22,7 +22,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.core.content.FileProvider
 import com.zhufucdev.motion_emulator.R
-import com.zhufucdev.stub.Data
+import com.zhufucdev.me.stub.Data
 import com.zhufucdev.motion_emulator.extension.FILE_PROVIDER_AUTHORITY
 import com.zhufucdev.motion_emulator.extension.dateString
 import com.zhufucdev.motion_emulator.extension.effectiveTimeFormat

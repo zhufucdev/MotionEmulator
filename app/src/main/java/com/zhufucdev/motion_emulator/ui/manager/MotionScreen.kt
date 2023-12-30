@@ -19,10 +19,10 @@ import com.zhufucdev.motion_emulator.*
 import com.zhufucdev.motion_emulator.extension.effectiveTimeFormat
 import com.zhufucdev.motion_emulator.extension.estimateSpeed
 import com.zhufucdev.motion_emulator.extension.estimateTimespan
-import com.zhufucdev.stub.Motion
+import com.zhufucdev.me.stub.Motion
 import com.zhufucdev.motion_emulator.ui.theme.paddingCard
 import com.zhufucdev.motion_emulator.ui.theme.paddingSmall
-import com.zhufucdev.stub.toFixed
+import com.zhufucdev.me.stub.toFixed
 import kotlin.random.Random
 import kotlin.time.DurationUnit
 

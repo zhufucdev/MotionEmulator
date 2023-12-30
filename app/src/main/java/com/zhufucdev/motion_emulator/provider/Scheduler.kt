@@ -7,10 +7,10 @@ import com.zhufucdev.motion_emulator.extension.sharedPreferences
 import com.zhufucdev.motion_emulator.plugin.Plugins
 import com.zhufucdev.motion_emulator.provider.Scheduler.incomingAgentStateOf
 import com.zhufucdev.motion_emulator.provider.Scheduler.instance
-import com.zhufucdev.stub.AgentState
-import com.zhufucdev.stub.Emulation
-import com.zhufucdev.stub.EmulationInfo
-import com.zhufucdev.stub.Intermediate
+import com.zhufucdev.me.stub.AgentState
+import com.zhufucdev.me.stub.Emulation
+import com.zhufucdev.me.stub.EmulationInfo
+import com.zhufucdev.me.stub.Intermediate
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.deserialize
 import io.ktor.serialization.kotlinx.KotlinxWebsocketSerializationConverter

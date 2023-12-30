@@ -1,7 +1,7 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
     dependencies {
-        classpath("org.jetbrains.kotlin:kotlin-serialization:1.9.0")
+        classpath("org.jetbrains.kotlin:kotlin-serialization:${Versions.kotlinVersion}")
     }
 
     repositories {
@@ -10,8 +10,8 @@ buildscript {
 }
 
 plugins {
-    id("com.android.application") version "8.1.2" apply false
-    id("com.android.library") version "8.1.2" apply false
+    id("com.android.application") version "8.4.0-alpha01" apply false
+    id("com.android.library") version "8.4.0-alpha01" apply false
     id("org.jetbrains.kotlin.jvm") version Versions.kotlinVersion apply false
     id("org.jetbrains.kotlin.android") version Versions.kotlinVersion apply false
     id("com.google.devtools.ksp") version "1.9.0-1.0.12" apply false
@@ -20,7 +20,7 @@ plugins {
 
 tasks {
     register("clean", Delete::class) {
-        delete(rootProject.buildDir)
+        delete(rootProject.layout.buildDirectory)
     }
 }
 

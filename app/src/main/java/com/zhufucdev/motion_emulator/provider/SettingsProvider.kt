@@ -8,8 +8,8 @@ import android.database.Cursor
 import android.database.MatrixCursor
 import android.net.Uri
 import com.zhufucdev.motion_emulator.extension.sharedPreferences
-import com.zhufucdev.stub.Method
-import com.zhufucdev.stub.SETTINGS_PROVIDER_AUTHORITY
+import com.zhufucdev.me.stub.Method
+import com.zhufucdev.me.stub.SETTINGS_PROVIDER_AUTHORITY
 
 private val uriMatcher = UriMatcher(UriMatcher.NO_MATCH).apply {
     addURI(SETTINGS_PROVIDER_AUTHORITY, "server", 1)

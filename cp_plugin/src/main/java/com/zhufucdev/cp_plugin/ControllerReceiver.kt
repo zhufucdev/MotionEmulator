@@ -1,15 +1,9 @@
 package com.zhufucdev.cp_plugin
 
 import android.content.Context
-import android.content.Intent
-import android.os.Build
-import androidx.work.ExistingWorkPolicy
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkManager
 import com.highcapable.yukihookapi.hook.factory.prefs
-import com.zhufucdev.cp_plugin.provider.EmulationBridgeService
-import com.zhufucdev.stub_plugin.MePlugin
-import com.zhufucdev.stub_plugin.PluginBroadcastReceiver
+import com.zhufucdev.me.plugin.MePlugin
+import com.zhufucdev.me.plugin.PluginBroadcastReceiver
 
 class ControllerReceiver : PluginBroadcastReceiver() {
     override fun onEmulationStart(context: Context) {

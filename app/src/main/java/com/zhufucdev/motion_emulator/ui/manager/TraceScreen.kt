@@ -7,12 +7,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.zhufucdev.motion_emulator.R
-import com.zhufucdev.stub.Trace
-import com.zhufucdev.stub.length
+import com.zhufucdev.me.stub.Trace
+import com.zhufucdev.me.stub.length
 import com.zhufucdev.motion_emulator.ui.theme.paddingCard
 import com.zhufucdev.motion_emulator.ui.theme.paddingSmall
-import com.zhufucdev.stub.MapProjector
-import com.zhufucdev.stub.toFixed
+import com.zhufucdev.me.stub.toFixed
 
 @Composable
 fun TraceScreen(viewModel: EditorViewModel<Trace>) {

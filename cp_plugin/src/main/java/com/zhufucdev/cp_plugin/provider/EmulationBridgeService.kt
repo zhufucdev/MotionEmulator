@@ -9,8 +9,8 @@ import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import com.zhufucdev.cp_plugin.R
-import com.zhufucdev.stub_plugin.MePlugin
-import com.zhufucdev.stub_plugin.WsServer
+import com.zhufucdev.me.plugin.MePlugin
+import com.zhufucdev.me.plugin.WsServer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job

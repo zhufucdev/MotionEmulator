@@ -1,6 +1,6 @@
 package com.zhufucdev.motion_emulator.data
 
-import com.zhufucdev.stub.Motion
+import com.zhufucdev.me.stub.Motion
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.serializer
 

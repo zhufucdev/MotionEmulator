@@ -19,8 +19,8 @@ import com.zhufucdev.motion_emulator.extension.getAttrColor
 import com.zhufucdev.motion_emulator.extension.isDarkModeEnabled
 import com.zhufucdev.motion_emulator.extension.toGoogleLatLng
 import com.zhufucdev.motion_emulator.extension.toPoint
-import com.zhufucdev.stub.Point
-import com.zhufucdev.stub.Trace
+import com.zhufucdev.me.stub.Point
+import com.zhufucdev.me.stub.Trace
 
 @SuppressLint("MissingPermission")
 class GoogleMapsController(context: Context, private val map: GoogleMap) : MapController(context) {

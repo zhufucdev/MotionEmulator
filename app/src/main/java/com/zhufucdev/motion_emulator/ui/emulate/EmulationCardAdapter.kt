@@ -7,7 +7,7 @@ import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.zhufucdev.motion_emulator.provider.Scheduler
 import com.zhufucdev.motion_emulator.ui.map.UnifiedMapFragment
-import com.zhufucdev.stub.AgentState
+import com.zhufucdev.me.stub.AgentState
 import kotlinx.coroutines.runBlocking
 
 class EmulationCardAdapter(fragment: Fragment, val map: UnifiedMapFragment) :

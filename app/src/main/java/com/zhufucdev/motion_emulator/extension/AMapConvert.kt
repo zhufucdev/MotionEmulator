@@ -6,7 +6,7 @@ import com.amap.api.maps.model.LatLng
 import com.amap.api.services.core.LatLonPoint
 import com.zhufucdev.motion_emulator.BuildConfig
 import com.zhufucdev.motion_emulator.data.AMapProjector
-import com.zhufucdev.stub.*
+import com.zhufucdev.me.stub.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*

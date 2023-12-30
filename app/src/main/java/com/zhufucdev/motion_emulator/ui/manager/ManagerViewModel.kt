@@ -11,13 +11,13 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.zhufucdev.stub.CellTimeline
-import com.zhufucdev.stub.Data
-import com.zhufucdev.stub.Motion
+import com.zhufucdev.me.stub.CellTimeline
+import com.zhufucdev.me.stub.Data
+import com.zhufucdev.me.stub.Motion
 import com.zhufucdev.motion_emulator.R
 import com.zhufucdev.motion_emulator.ui.component.BottomSheetModalState
 import com.zhufucdev.motion_emulator.data.*
-import com.zhufucdev.stub.Trace
+import com.zhufucdev.me.stub.Trace
 import com.zhufucdev.motion_emulator.extension.insert
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

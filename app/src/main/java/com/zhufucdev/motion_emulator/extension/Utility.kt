@@ -21,8 +21,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.preference.PreferenceManager
 import com.google.android.material.appbar.AppBarLayout
-import com.zhufucdev.stub.*
-import com.zhufucdev.stub.Emulation
+import com.zhufucdev.me.stub.*
 import com.zhufucdev.motion_emulator.provider.EmulationRef
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.OkHttp

@@ -9,7 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import com.zhufucdev.motion_emulator.R
-import com.zhufucdev.stub.Motion
+import com.zhufucdev.me.stub.Motion
 import com.zhufucdev.motion_emulator.extension.effectiveTimeFormat
 import com.zhufucdev.motion_emulator.ui.theme.paddingCommon
 

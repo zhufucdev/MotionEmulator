@@ -64,10 +64,10 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-test-manifest:${Versions.composeUiVersion}")
     // Misc
     implementation("com.aventrix.jnanoid:jnanoid:${Versions.jnanoidVersion}")
-    implementation(project(":stub"))
     // Internal
     implementation(project(":update"))
-    implementation(project(":stub_plugin"))
+    implementation("com.zhufucdev.me:stub:${Versions.stubVersion}")
+    implementation("com.zhufucdev.me:plugin:${Versions.stubVersion}")
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")

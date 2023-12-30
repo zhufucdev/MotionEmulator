@@ -13,17 +13,15 @@ dependencyResolutionManagement {
         mavenCentral()
         maven { setUrl("https://www.jitpack.io") }
         maven { setUrl("https://api.xposed.info/") }
+        maven { setUrl("https://s01.oss.sonatype.org/content/groups/staging/") }
     }
 }
 
 rootProject.name = "MotionEmulator"
 
-include(":stub")
 include(":app")
 include(":mock_location_plugin")
 include(":update")
 include(":cp_plugin")
-include(":stub_plugin_xposed")
 include(":ws_plugin")
-include(":stub_plugin")
 include(":api")

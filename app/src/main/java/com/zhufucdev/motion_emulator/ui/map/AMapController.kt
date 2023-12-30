@@ -13,8 +13,8 @@ import com.zhufucdev.motion_emulator.extension.getAttrColor
 import com.zhufucdev.motion_emulator.extension.isDarkModeEnabled
 import com.zhufucdev.motion_emulator.extension.toAmapLatLng
 import com.zhufucdev.motion_emulator.extension.toPoint
-import com.zhufucdev.stub.Point
-import com.zhufucdev.stub.Trace
+import com.zhufucdev.me.stub.Point
+import com.zhufucdev.me.stub.Trace
 import kotlin.math.pow
 
 class AMapController(private val map: AMap, context: Context) : MapController(context) {

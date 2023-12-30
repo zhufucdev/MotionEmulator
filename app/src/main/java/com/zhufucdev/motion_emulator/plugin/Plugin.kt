@@ -4,7 +4,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import androidx.compose.runtime.Stable
-import com.zhufucdev.stub.BROADCAST_AUTHORITY
+import com.zhufucdev.me.stub.BROADCAST_AUTHORITY
 
 @Stable
 class Plugin(val packageName: String, val name: String, val description: String) {

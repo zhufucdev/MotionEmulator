@@ -16,8 +16,8 @@ import android.telephony.TelephonyCallback
 import android.telephony.TelephonyManager
 import android.util.Log
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils
-import com.zhufucdev.stub.CellMoment
-import com.zhufucdev.stub.CellTimeline
+import com.zhufucdev.me.stub.CellMoment
+import com.zhufucdev.me.stub.CellTimeline
 import java.util.Timer
 import java.util.concurrent.Executor
 import kotlin.concurrent.timer

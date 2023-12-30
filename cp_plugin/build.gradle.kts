@@ -25,11 +25,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "17"
     }
 }
 
@@ -43,9 +43,9 @@ dependencies {
     implementation("com.highcapable.yukihookapi:api:${Versions.yukiVersion}")
     compileOnly("de.robv.android.xposed:api:82")
     // Internal
-    implementation(project(":stub"))
-    implementation(project(":stub_plugin"))
-    implementation(project(":stub_plugin_xposed"))
+    implementation("com.zhufucdev.me:stub:${Versions.stubVersion}")
+    implementation("com.zhufucdev.me:plugin:${Versions.stubVersion}")
+    implementation("com.zhufucdev.me:xposed:${Versions.stubVersion}")
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")

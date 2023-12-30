@@ -3,7 +3,7 @@ package com.zhufucdev.motion_emulator.extension
 import android.content.Context
 import android.location.Geocoder
 import com.google.android.gms.maps.model.LatLng
-import com.zhufucdev.stub.*
+import com.zhufucdev.me.stub.*
 import java.io.IOException
 import kotlin.coroutines.suspendCoroutine
 

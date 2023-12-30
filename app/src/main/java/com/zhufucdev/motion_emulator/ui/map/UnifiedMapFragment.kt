@@ -24,9 +24,9 @@ import com.zhufucdev.motion_emulator.*
 import com.zhufucdev.motion_emulator.extension.dateString
 import com.zhufucdev.motion_emulator.extension.effectiveTimeFormat
 import com.zhufucdev.motion_emulator.extension.toPoint
-import com.zhufucdev.stub.CoordinateSystem
-import com.zhufucdev.stub.Point
-import com.zhufucdev.stub.Trace
+import com.zhufucdev.me.stub.CoordinateSystem
+import com.zhufucdev.me.stub.Point
+import com.zhufucdev.me.stub.Trace
 import com.zhufucdev.motion_emulator.ui.DrawResult
 import com.zhufucdev.motion_emulator.ui.DrawToolCallback
 import com.zhufucdev.motion_emulator.ui.GpsToolCallback

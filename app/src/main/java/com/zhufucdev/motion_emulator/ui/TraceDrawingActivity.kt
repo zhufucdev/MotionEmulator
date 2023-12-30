@@ -24,10 +24,10 @@ import com.aventrix.jnanoid.jnanoid.NanoIdUtils
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.zhufucdev.motion_emulator.*
-import com.zhufucdev.stub.CoordinateSystem
-import com.zhufucdev.stub.Point
-import com.zhufucdev.stub.Trace
-import com.zhufucdev.stub.toPoint
+import com.zhufucdev.me.stub.CoordinateSystem
+import com.zhufucdev.me.stub.Point
+import com.zhufucdev.me.stub.Trace
+import com.zhufucdev.me.stub.toPoint
 import com.zhufucdev.motion_emulator.data.Traces
 import com.zhufucdev.motion_emulator.databinding.ActivityTraceDrawingBinding
 import com.zhufucdev.motion_emulator.extension.initializeToolbar

@@ -68,7 +68,7 @@ android {
 
 dependencies {
     // Internal
-    implementation(project(":stub"))
+    implementation("com.zhufucdev.me:stub:${Versions.stubVersion}")
     implementation(project(":update"))
     // Ktor
     implementation("io.ktor:ktor-client-core-jvm:${Versions.ktorVersion}")
@@ -126,9 +126,7 @@ dependencies {
     implementation("com.google.maps.android:android-maps-utils:3.4.0")
 
     testImplementation("junit:junit:4.13.2")
-    testImplementation(project(":stub_plugin"))
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-    androidTestImplementation(project(":stub_plugin"))
 }
 

@@ -7,12 +7,12 @@ import android.os.Build
 import com.amap.api.services.core.PoiItemV2
 import com.amap.api.services.poisearch.PoiResultV2
 import com.amap.api.services.poisearch.PoiSearchV2
-import com.zhufucdev.stub.Point
-import com.zhufucdev.stub.toPoint
+import com.zhufucdev.me.stub.Point
+import com.zhufucdev.me.stub.toPoint
 import com.zhufucdev.motion_emulator.BuildConfig
 import com.zhufucdev.motion_emulator.extension.defaultKtorClient
 import com.zhufucdev.motion_emulator.extension.toPoint
-import com.zhufucdev.stub.toFixed
+import com.zhufucdev.me.stub.toFixed
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
