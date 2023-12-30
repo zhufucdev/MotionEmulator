@@ -13,20 +13,20 @@ import androidx.core.app.NotificationManagerCompat
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils
 import com.zhufucdev.mock_location_plugin.ui.MainActivity
 import com.zhufucdev.mock_location_plugin.ui.TestFragment
-import com.zhufucdev.stub.Emulation
-import com.zhufucdev.stub.Intermediate
-import com.zhufucdev.stub.MapProjector
-import com.zhufucdev.stub.Point
-import com.zhufucdev.stub.Trace
-import com.zhufucdev.stub.android
-import com.zhufucdev.stub.at
-import com.zhufucdev.stub.estimateSpeed
-import com.zhufucdev.stub.generateSaltedTrace
-import com.zhufucdev.stub.toPoint
-import com.zhufucdev.stub_plugin.AbstractScheduler
-import com.zhufucdev.stub_plugin.WsServer
-import com.zhufucdev.stub_plugin.ServerScope
-import com.zhufucdev.stub_plugin.connect
+import com.zhufucdev.me.stub.Emulation
+import com.zhufucdev.me.stub.Intermediate
+import com.zhufucdev.me.stub.MapProjector
+import com.zhufucdev.me.stub.Point
+import com.zhufucdev.me.stub.Trace
+import com.zhufucdev.me.stub.android
+import com.zhufucdev.me.stub.at
+import com.zhufucdev.me.stub.estimateSpeed
+import com.zhufucdev.me.stub.generateSaltedTrace
+import com.zhufucdev.me.stub.toPoint
+import com.zhufucdev.me.plugin.AbstractScheduler
+import com.zhufucdev.me.plugin.WsServer
+import com.zhufucdev.me.plugin.ServerScope
+import com.zhufucdev.me.plugin.connect
 import kotlinx.coroutines.delay
 
 /**

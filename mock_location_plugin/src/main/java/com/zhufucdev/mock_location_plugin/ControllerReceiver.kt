@@ -5,7 +5,7 @@ import android.app.job.JobScheduler
 import android.content.ComponentName
 import android.content.Context
 import androidx.core.content.getSystemService
-import com.zhufucdev.stub_plugin.PluginBroadcastReceiver
+import com.zhufucdev.me.plugin.PluginBroadcastReceiver
 
 class ControllerReceiver : PluginBroadcastReceiver() {
     override fun onEmulationStart(context: Context) {

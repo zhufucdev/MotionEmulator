@@ -2,7 +2,7 @@ package com.zhufucdev.mock_location_plugin
 
 import android.app.job.JobParameters
 import android.app.job.JobService
-import com.zhufucdev.stub_plugin.MePlugin
+import com.zhufucdev.me.plugin.MePlugin
 import kotlinx.coroutines.*
 
 class EmulationService : JobService() {

@@ -1,6 +1,6 @@
 package com.zhufucdev.mock_location_plugin
 
 import android.content.Context
-import com.zhufucdev.update.Updater
+import com.zhufucdev.update.AppUpdater
 
-fun Context.updater() = Updater(BuildConfig.SERVER_URI, BuildConfig.PRODUCT, this)
+fun Context.updater() = AppUpdater(BuildConfig.SERVER_URI, BuildConfig.PRODUCT, this)
