@@ -1,5 +1,0 @@
-<resources>
-    <string name="app_name">Motion Emulator Websocket Plugin</string>
-    <string name="text_description">Based on Xposed, using websocket as transmission bridge, full functionality implemented</string>
-    <string name="text_description_xposed">Motion Emulator plug-in based on websocket</string>
-</resources>

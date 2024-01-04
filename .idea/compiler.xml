@@ -1,16 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="CompilerConfiguration">
-    <bytecodeTargetLevel target="11">
+    <bytecodeTargetLevel target="17">
       <module name="Android.MotionEmulator.mock_location_plugin" target="17" />
       <module name="Android.MotionEmulator.stub" target="17" />
-      <module name="MotionEmulator.app" target="17" />
-      <module name="MotionEmulator.buildSrc" target="17" />
-      <module name="MotionEmulator.buildSrc.main" target="17" />
-      <module name="MotionEmulator.buildSrc.test" target="17" />
       <module name="MotionEmulator.cgsport_plugin" target="17" />
       <module name="MotionEmulator.cp_plugin" target="17" />
-      <module name="MotionEmulator.mock_location_plugin" target="17" />
       <module name="MotionEmulator.stub" target="17" />
       <module name="MotionEmulator.stub_plugin" target="17" />
       <module name="MotionEmulator.stub_plugin_xposed" target="17" />

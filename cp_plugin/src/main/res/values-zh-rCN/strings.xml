@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="app_name">运动模拟器内容提供器插件</string>
-    <string name="text_description">基于Xposed，用内容提供器作为传输桥，实现了所有内容</string>
-    <string name="text_description_xposed">基于内容提供器的运动模拟器插件</string>
-    <string name="title_bridge_channel">内容提供器桥接活动</string>
-    <string name="text_bridge_channel">提示正在工作的桥接</string>
-</resources>

@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="app_name">运动模拟器Websocket插件</string>
-    <string name="text_description">基于Xposed，用websocket作为传输桥，实现了所有功能</string>
-    <string name="text_description_xposed">基于websocket的运动模拟器插件</string>
-</resources>

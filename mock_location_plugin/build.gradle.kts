@@ -65,7 +65,7 @@ dependencies {
     // Misc
     implementation("com.aventrix.jnanoid:jnanoid:${Versions.jnanoidVersion}")
     // Internal
-    implementation(project(":update"))
+    implementation("com.zhufucdev.update:android:${Versions.updateVersion}")
     implementation("com.zhufucdev.me:stub:${Versions.stubVersion}")
     implementation("com.zhufucdev.me:plugin:${Versions.stubVersion}")
 
