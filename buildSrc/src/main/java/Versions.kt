@@ -22,6 +22,8 @@ object Versions {
     const val yukiVersion = "1.2.0"
     const val stubVersion = "1.0.0"
     const val updateVersion = "1.0.0"
+    const val sdkVersion = "1.0.0"
+    const val pluginVersion = "1.0.0"
 
     /**
      * Generate an increasing version code

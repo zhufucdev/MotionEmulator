@@ -6,9 +6,6 @@ plugins {
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
 }
 
-val localProperties = rootProject.properties("local.properties")
-val serverProperties = properties("server.properties")
-
 android {
     compileSdk = Versions.targetSdk
 
@@ -23,10 +20,6 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
-
-        buildConfigField("String", "AMAP_WEB_KEY", localProperties.getProperty("amap.web.key"))
-        buildConfigField("String", "PRODUCT", serverProperties.getProperty("PRODUCT", ""))
-        buildConfigField("String", "SERVER_URI", serverProperties.getProperty("SERVER_URI", ""))
     }
 
     splits {
@@ -69,7 +62,9 @@ android {
 dependencies {
     // Internal
     implementation("com.zhufucdev.me:stub:${Versions.stubVersion}")
+    implementation("com.zhufucdev.sdk:kotlin:${Versions.sdkVersion}")
     implementation("com.zhufucdev.update:app:${Versions.updateVersion}")
+    androidTestImplementation("com.zhufucdev.me:plugin:${Versions.pluginVersion}")
     // Ktor
     implementation("io.ktor:ktor-client-core-jvm:${Versions.ktorVersion}")
     implementation("io.ktor:ktor-client-okhttp:${Versions.ktorVersion}")

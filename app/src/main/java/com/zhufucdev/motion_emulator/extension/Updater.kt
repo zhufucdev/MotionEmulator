@@ -4,9 +4,9 @@ import android.content.Context
 import com.zhufucdev.motion_emulator.BuildConfig
 
 fun AppUpdater(product: String, context: Context) = com.zhufucdev.update.AppUpdater(
-    BuildConfig.SERVER_URI,
+    BuildConfig.server_uri,
     product,
     context,
 )
 
-fun AppUpdater(context: Context) = AppUpdater(BuildConfig.PRODUCT, context)
+fun AppUpdater(context: Context) = AppUpdater(BuildConfig.product, context)

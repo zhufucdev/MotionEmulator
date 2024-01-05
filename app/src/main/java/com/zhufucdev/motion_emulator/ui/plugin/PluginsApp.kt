@@ -2,7 +2,6 @@
 
 package com.zhufucdev.motion_emulator.ui.plugin
 
-import android.media.effect.Effect
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animate
@@ -81,7 +80,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.zhufucdev.api.findAsset
+import com.zhufucdev.sdk.findAsset
 import com.zhufucdev.motion_emulator.BuildConfig
 import com.zhufucdev.motion_emulator.R
 import com.zhufucdev.motion_emulator.extension.UPDATE_FILE_PROVIDER_AUTHORITY
@@ -175,7 +174,7 @@ fun PluginsApp(
 
     LaunchedEffect(plugins) {
         if (downloadable.isEmpty()) {
-            val queries = defaultKtorClient.findAsset(BuildConfig.SERVER_URI, "me", "plugin")
+            val queries = defaultKtorClient.findAsset(BuildConfig.server_uri, "me", "plugin")
             downloadable.addAll(queries.map {
                 it.packageId?.let { plugins.firstOrNull { p -> p.id == it } } ?: it.toPluginItem()
             })

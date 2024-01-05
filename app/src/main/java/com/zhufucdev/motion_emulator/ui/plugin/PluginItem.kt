@@ -4,7 +4,7 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import com.zhufucdev.api.ProductQuery
+import com.zhufucdev.sdk.ProductQuery
 import com.zhufucdev.motion_emulator.plugin.Plugin
 import com.zhufucdev.motion_emulator.plugin.Plugins
 

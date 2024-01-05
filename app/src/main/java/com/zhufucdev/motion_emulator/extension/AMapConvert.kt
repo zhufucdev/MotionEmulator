@@ -40,7 +40,7 @@ operator fun LatLng.minus(other: LatLng) =
  */
 suspend fun getAddressWithAmap(location: LatLng): String? {
     val req = defaultKtorClient.get("https://restapi.amap.com/v3/geocode/regeo") {
-        parameter("key", BuildConfig.AMAP_WEB_KEY)
+        parameter("key", BuildConfig.amapwebkey)
         parameter("location", "${location.longitude.toFixed(6)},${location.latitude.toFixed(6)}")
     }
     if (!req.status.isSuccess()) return null

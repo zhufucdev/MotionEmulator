@@ -32,7 +32,7 @@ data class Poi(val city: String, val province: String, val name: String, val loc
 class AMapPoiEngine(private val context: Context) : PoiSearchEngine {
     override suspend fun search(point: Point): Poi? {
         val req = defaultKtorClient.get("https://restapi.amap.com/v3/geocode/regeo") {
-            parameter("key", BuildConfig.AMAP_WEB_KEY)
+            parameter("key", BuildConfig.amapwebkey)
             parameter("location", "${point.longitude.toFixed(6)},${point.latitude.toFixed(6)}")
         }
         if (!req.status.isSuccess()) return null

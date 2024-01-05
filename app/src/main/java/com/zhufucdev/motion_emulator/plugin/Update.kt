@@ -1,8 +1,8 @@
 package com.zhufucdev.motion_emulator.plugin
 
 import android.content.Context
-import com.zhufucdev.api.ReleaseAsset
-import com.zhufucdev.api.findAsset
+import com.zhufucdev.sdk.ReleaseAsset
+import com.zhufucdev.sdk.findAsset
 import com.zhufucdev.motion_emulator.BuildConfig
 import com.zhufucdev.update.AppUpdater
 import com.zhufucdev.update.Updater
@@ -16,7 +16,7 @@ class PluginDownloader(
 ) : Updater(context, exportedDir) {
     override suspend fun check(): ReleaseAsset? {
         updateStatus(UpdaterStatus.Working.Checking)
-        val update = AppUpdater.checkForDevice(BuildConfig.SERVER_URI, productAlias, ktor)
+        val update = AppUpdater.checkForDevice(BuildConfig.server_uri, productAlias, ktor)
         this.update = update
         if (update != null) {
             updateStatus(UpdaterStatus.ReadyToDownload)
@@ -37,14 +37,13 @@ class PluginUpdater(
         updateStatus(UpdaterStatus.Working.Checking)
         val version = context.packageManager.getPackageInfo(plugin.packageName, 0).versionName
         val key = resourceKey ?: run {
-            val queries = ktor.findAsset(BuildConfig.SERVER_URI, plugin.packageName)
+            val queries = ktor.findAsset(BuildConfig.server_uri, plugin.packageName)
             queries.firstOrNull()?.key ?: return null
         }
 
-        val update = AppUpdater.checkForDevice(BuildConfig.SERVER_URI, key, ktor, version)
+        val update = AppUpdater.checkForDevice(BuildConfig.server_uri, key, ktor, version)
         this.update = update
         updateStatus(UpdaterStatus.Idling)
         return update
     }
 }
-
