@@ -20,4 +20,3 @@ dependencyResolutionManagement {
 rootProject.name = "MotionEmulator"
 
 include(":app")
-include(":mock_location_plugin")
