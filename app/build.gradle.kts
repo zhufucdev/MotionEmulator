@@ -69,7 +69,7 @@ android {
 dependencies {
     // Internal
     implementation("com.zhufucdev.me:stub:${Versions.stubVersion}")
-    implementation("com.zhufucdev.update:android:${Versions.updateVersion}")
+    implementation("com.zhufucdev.update:app:${Versions.updateVersion}")
     // Ktor
     implementation("io.ktor:ktor-client-core-jvm:${Versions.ktorVersion}")
     implementation("io.ktor:ktor-client-okhttp:${Versions.ktorVersion}")
