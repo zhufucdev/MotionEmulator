@@ -37,16 +37,13 @@ echo GCP_MAPS_KEY="<Your Key>" >> local.properties
 
 但还是可以用你自己的服务来构建的
 ```shell
-cd app
-echo SERVER_URI="<Your Server>" >> server.properties
-echo PRODUCT="<You Decide>" >> server.properties
-
-cd ../mock_location_plugin
-echo SERVER_URI="<Your Server>" >> server.properties
-echo PRODUCT="<You Decide>" >> server.properties
+cat >> local.properties << EOF
+server_uri="<Your Server>"
+product="<You Decide>"
+EOF
 ```
 
-`SERVER_URI`是一个HTTP/HTTPS的RESTful API，它实现了特定的一些协议。你可以通过
+`server_uri`是一个HTTP/HTTPS的RESTful API，它实现了特定的一些协议。你可以通过
 [查看我的代码库](https://github.com/zhufucdev/api.zhufucdev)来了解这是一个怎样的协议。
 
 顺便说一句，万一你不熟悉Android开发，你要把自己的SDK填进去，就像这样：

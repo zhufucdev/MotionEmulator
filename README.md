@@ -37,16 +37,13 @@ which is optional and shouldn't be included in unofficial builds.
 
 However, it is still possible to build with your own service.
 ```shell
-cd app
-echo SERVER_URI="<Your Server>" >> server.properties
-echo PRODUCT="<You Decide>" >> server.properties
-
-cd ../mock_location_plugin
-echo SERVER_URI="<Your Server>" >> server.properties
-echo PRODUCT="<You Decide>" >> server.properties
+cat >> local.properties << EOF
+server_uri="<Your Server>"
+product="<You Decide>"
+EOF
 ```
 
-The `SERVER_URI` is supposed to be an HTTP/HTTPS RESTful that implements
+The `server_uri` is supposed to be an HTTP/HTTPS RESTful that implements
 a certain protocol. You can get an example by 
 [looking at my codebase](https://github.com/zhufucdev/api.zhufucdev).
 
