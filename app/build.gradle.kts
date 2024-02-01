@@ -1,18 +1,17 @@
 plugins {
-    id("com.android.application")
-    id("org.jetbrains.kotlin.android")
-    id("kotlinx-serialization")
-    id("com.google.devtools.ksp")
-    id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
+    alias(libs.plugins.androidApplication)
+    alias(libs.plugins.jetbrainsKotlinAndroid)
+    alias(libs.plugins.serialization)
+    alias(libs.plugins.secrets)
 }
 
 android {
-    compileSdk = Versions.targetSdk
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.zhufucdev.motion_emulator"
-        minSdk = Versions.minSdk
-        targetSdk = Versions.targetSdk
+        minSdk = 24
+        targetSdk = 34
         versionCode = 24
         versionName = "1.2.2"
 
@@ -45,10 +44,11 @@ android {
     buildFeatures {
         viewBinding = true
         compose = true
+        buildConfig = true
     }
     namespace = "com.zhufucdev.motion_emulator"
     composeOptions {
-        kotlinCompilerExtensionVersion = Versions.composeCompilerVersion
+        kotlinCompilerExtensionVersion = "1.5.6"
     }
     packaging {
         resources {
@@ -61,67 +61,64 @@ android {
 
 dependencies {
     // Internal
-    implementation("com.zhufucdev.me:stub:${Versions.stubVersion}")
-    implementation("com.zhufucdev.sdk:kotlin:${Versions.sdkVersion}")
-    implementation("com.zhufucdev.update:app:${Versions.updateVersion}")
-    androidTestImplementation("com.zhufucdev.me:plugin:${Versions.pluginVersion}")
+    implementation(libs.sdk)
+    implementation(libs.stub)
+    implementation(libs.plugin)
+    implementation(libs.update)
     // Ktor
-    implementation("io.ktor:ktor-client-core-jvm:${Versions.ktorVersion}")
-    implementation("io.ktor:ktor-client-okhttp:${Versions.ktorVersion}")
-    implementation("io.ktor:ktor-client-serialization-jvm:${Versions.ktorVersion}")
-    implementation("io.ktor:ktor-client-content-negotiation:${Versions.ktorVersion}")
-    implementation("io.ktor:ktor-serialization-kotlinx-json:${Versions.ktorVersion}")
-    implementation("io.ktor:ktor-serialization-kotlinx-protobuf:${Versions.ktorVersion}")
-    implementation("io.ktor:ktor-server-core-jvm:${Versions.ktorVersion}")
-    implementation("io.ktor:ktor-server-netty-jvm:${Versions.ktorVersion}")
-    implementation("io.ktor:ktor-server-content-negotiation:${Versions.ktorVersion}")
-    implementation("io.ktor:ktor-server-websockets:${Versions.ktorVersion}")
-    implementation("io.ktor:ktor-server-websockets-jvm:${Versions.ktorVersion}")
-    implementation("com.madgag.spongycastle:bcpkix-jdk15on:1.58.0.0")
+    implementation(libs.ktor.client.jvm)
+    implementation(libs.ktor.client.okhttp)
+    implementation(libs.ktor.client.serialization.jvm)
+    implementation(libs.ktor.client.contentnegotiation)
+    implementation(libs.ktor.serialization.json)
+    implementation(libs.ktor.serialization.protobuf)
+    implementation(libs.ktor.server.jvm)
+    implementation(libs.ktor.server.netty)
+    implementation(libs.ktor.server.contentnegotiation)
+    implementation(libs.ktor.server.websockets)
+    implementation(libs.ktor.server.websockets.jvm)
+    implementation(libs.madgag.spongycastle)
     // AndroidX
-    implementation("androidx.core:core-ktx:${Versions.coreKtVersion}")
-    implementation("androidx.preference:preference-ktx:1.2.1")
-    implementation("androidx.appcompat:appcompat:${Versions.appcompatVersion}")
-    implementation("com.google.android.material:material:${Versions.materialVersion}")
-    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
-    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
-    implementation("androidx.navigation:navigation-fragment-ktx:${Versions.navVersion}")
-    implementation("androidx.navigation:navigation-ui-ktx:${Versions.navVersion}")
-    implementation("androidx.navigation:navigation-dynamic-features-fragment:${Versions.navVersion}")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:${Versions.coroutineVersion}")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${Versions.kotlinxSerializationVersion}")
-    implementation("androidx.work:work-runtime-ktx:${Versions.workRuntimeVersion}")
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.preference.ktx)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.work.runtime.ktx)
+    // KotlinX
+    implementation(libs.kotlinx.coroutines)
+    implementation(libs.kotlinx.serialization.json)
     // Compose
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:${Versions.lifecycleRuntimeVersion}")
-    implementation("androidx.activity:activity-compose:${Versions.composeActivityVersion}")
-    implementation("androidx.compose.ui:ui:${Versions.composeUiVersion}")
-    implementation("androidx.compose.ui:ui-tooling-preview:${Versions.composeUiVersion}")
-    implementation("androidx.compose.material3:material3:${Versions.composeMaterialVersion}")
-    implementation("androidx.navigation:navigation-compose:${Versions.navVersion}")
-    implementation("androidx.constraintlayout:constraintlayout-compose:1.0.1")
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4:${Versions.composeUiVersion}")
-    debugImplementation("androidx.compose.ui:ui-tooling:${Versions.composeUiVersion}")
-    debugImplementation("androidx.compose.ui:ui-test-manifest:${Versions.composeUiVersion}")
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.viewmodel.compose)
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.ui)
+    implementation(libs.androidx.ui.tooling.preview)
+    implementation(libs.androidx.material3)
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.constraintlayout.compose)
+    implementation(libs.androidx.compose.mdi)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.ui.test.junit4)
+    debugImplementation(libs.androidx.ui.tooling)
+    debugImplementation(libs.androidx.ui.test.manifest)
 
-    implementation("org.jetbrains.kotlin:kotlin-reflect:${Versions.kotlinVersion}")
-    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
-    implementation("net.edwardday.serialization:kprefs:0.12.0")
-    implementation("com.github.Redempt:Crunch:1.1.2")
-    implementation("com.google.guava:guava:31.1-android")
-    implementation("com.aventrix.jnanoid:jnanoid:${Versions.jnanoidVersion}")
-    implementation("org.apache.commons:commons-compress:1.22")
+    implementation(libs.kotlin.reflect)
+    implementation(libs.redempt.crunch)
+    implementation(libs.google.guava)
+    implementation(libs.aventrix.jnanoid)
+    implementation(libs.apache.commons.compress)
 
     // AMap SDK
-    implementation("com.amap.api:3dmap:9.5.0")
-    implementation("com.amap.api:search:9.5.0")
+    implementation(libs.amap.map)
+    implementation(libs.amap.search)
 
     // Google Maps SDK
-    implementation("com.google.android.gms:play-services-maps:18.2.0")
-    implementation("com.google.maps.android:maps-ktx:3.2.1")
-    implementation("com.google.maps.android:android-maps-utils:3.4.0")
+    implementation(libs.google.maps.ktx)
+    implementation(libs.google.maps.utils)
+    implementation(libs.google.gms.maps)
 
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
 }
 

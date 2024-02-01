@@ -1,0 +1,98 @@
+[versions]
+agp = "8.4.0-alpha07"
+kotlin = "1.9.21"
+coreKtx = "1.12.0"
+preference = "1.2.1"
+junit = "4.13.2"
+junitVersion = "1.1.5"
+espressoCore = "3.5.1"
+appcompat = "1.6.1"
+ksp = "1.9.21-1.0.16"
+constraintlayout = "1.0.1"
+lifecycle = "2.7.0"
+activityCompose = "1.8.2"
+composeBom = "2024.01.00"
+coroutine = "1.7.3"
+workRuntime = "2.9.0"
+navigation = "2.7.6"
+mdi = "1.6.0"
+vico = "1.13.1"
+jsonSerialization = "1.6.2"
+secrets = "2.0.1"
+ktor = "2.3.4"
+crunch = "1.1.2"
+guava = "31.1-android"
+jnanoid = "2.0.0"
+compress = "1.22"
+amap = "9.5.0"
+playMaps = "18.2.0"
+gmaps = "3.2.1"
+mapsUtils = "3.4.0"
+spongycastle = "1.58.0.0"
+
+stub = "1.0.0"
+plugin = "1.0.0"
+update = "1.0.0"
+sdk = "1.0.0"
+
+[libraries]
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-preference-ktx = { group = "androidx.preference", name = "preference-ktx", version.ref = "preference" }
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
+androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle" }
+androidx-viewmodel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "lifecycle" }
+androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
+androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
+androidx-ui = { group = "androidx.compose.ui", name = "ui" }
+androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
+androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
+androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
+androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
+androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
+androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
+androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation" }
+androidx-compose-mdi = { group = "androidx.compose.material", name = "material-icons-extended-android", version.ref = "mdi" }
+androidx-constraintlayout-compose = { group = "androidx.constraintlayout", name = "constraintlayout-compose", version.ref = "constraintlayout" }
+androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "workRuntime" }
+vico-compose = { group = "com.patrykandpatrick.vico", name = "compose", version.ref = "vico" }
+vico-compose-m3 = { group = "com.patrykandpatrick.vico", name = "compose-m3", version.ref = "vico" }
+vico-core = { group = "com.patrykandpatrick.vico", name = "core", version.ref = "vico" }
+kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "jsonSerialization" }
+kotlinx-coroutines = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutine" }
+ktor-client-jvm = { group = "io.ktor", name = "ktor-client-core-jvm", version.ref = "ktor" }
+ktor-client-okhttp = { group = "io.ktor", name = "ktor-client-okhttp", version.ref = "ktor" }
+ktor-client-serialization-jvm = { group = "io.ktor", name = "ktor-client-serialization-jvm", version.ref = "ktor" }
+ktor-client-contentnegotiation = { group = "io.ktor", name = "ktor-client-content-negotiation", version.ref = "ktor" }
+ktor-serialization-json = { group = "io.ktor", name = "ktor-serialization-kotlinx-json", version.ref = "ktor" }
+ktor-serialization-protobuf = { group = "io.ktor", name = "ktor-serialization-kotlinx-protobuf", version.ref = "ktor" }
+ktor-server-jvm = { group = "io.ktor", name = "ktor-server-core-jvm", version.ref = "ktor" }
+ktor-server-netty = { group = "io.ktor", name = "ktor-server-netty-jvm", version.ref = "ktor" }
+ktor-server-contentnegotiation = { group = "io.ktor", name = "ktor-server-content-negotiation", version.ref = "ktor" }
+ktor-server-websockets = { group = "io.ktor", name = "ktor-server-websockets", version.ref = "ktor" }
+ktor-server-websockets-jvm = { group = "io.ktor", name = "ktor-server-websockets-jvm", version.ref = "ktor" }
+kotlin-reflect = { group = "org.jetbrains.kotlin", name = "kotlin-reflect", version.ref = "kotlin" }
+redempt-crunch = { group = "com.github.Redempt", name = "Crunch", version.ref = "crunch" }
+google-guava = { group = "com.google.guava", name = "guava", version.ref = "guava" }
+aventrix-jnanoid = { group = "com.aventrix.jnanoid", name = "jnanoid", version.ref = "jnanoid" }
+apache-commons-compress = { group = "org.apache.commons", name = "commons-compress", version.ref = "compress" }
+amap-map = { group = "com.amap.api", name = "3dmap", version.ref = "amap" }
+amap-search = { group = "com.amap.api", name = "search", version.ref = "amap" }
+google-maps-ktx = { group = "com.google.maps.android", name = "maps-ktx", version.ref = "gmaps" }
+google-maps-utils = { group = "com.google.maps.android", name = "android-maps-utils", version.ref = "mapsUtils" }
+google-gms-maps = { group = "com.google.android.gms", name = "play-services-maps", version.ref = "playMaps" }
+madgag-spongycastle = { group = "com.madgag.spongycastle", name = "bcpkix-jdk15on", version.ref = "spongycastle" }
+
+stub = { group = "com.zhufucdev.me", name = "stub", version.ref = "stub" }
+plugin = { group = "com.zhufucdev.me", name = "plugin", version.ref = "plugin" }
+update = { group = "com.zhufucdev.update", name = "app", version.ref = "update" }
+sdk = { group = "com.zhufucdev.sdk", name = "kotlin", version.ref = "sdk" }
+
+[plugins]
+androidApplication = { id = "com.android.application", version.ref = "agp" }
+jetbrainsKotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+secrets = { id = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin", version.ref = "secrets" }
