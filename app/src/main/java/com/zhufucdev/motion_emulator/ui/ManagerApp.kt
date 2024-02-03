@@ -76,13 +76,16 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.aventrix.jnanoid.jnanoid.NanoIdUtils
 import com.zhufucdev.me.stub.CellTimeline
 import com.zhufucdev.me.stub.Data
 import com.zhufucdev.me.stub.Motion
+import com.zhufucdev.me.stub.Trace
 import com.zhufucdev.motion_emulator.R
 import com.zhufucdev.motion_emulator.data.Cells
 import com.zhufucdev.motion_emulator.data.Motions
 import com.zhufucdev.motion_emulator.data.Traces
+import com.zhufucdev.motion_emulator.extension.AppUpdater
 import com.zhufucdev.motion_emulator.extension.dateString
 import com.zhufucdev.motion_emulator.extension.effectiveTimeFormat
 import com.zhufucdev.motion_emulator.ui.component.CaptionText
@@ -91,6 +94,7 @@ import com.zhufucdev.motion_emulator.ui.component.HorizontalSpacer
 import com.zhufucdev.motion_emulator.ui.component.Swipeable
 import com.zhufucdev.motion_emulator.ui.component.TooltipHost
 import com.zhufucdev.motion_emulator.ui.component.VerticalSpacer
+import com.zhufucdev.motion_emulator.ui.composition.LocalNestedScrollConnectionProvider
 import com.zhufucdev.motion_emulator.ui.composition.LocalSnackbarProvider
 import com.zhufucdev.motion_emulator.ui.composition.ScaffoldElements
 import com.zhufucdev.motion_emulator.ui.model.AppViewModel
@@ -200,9 +204,13 @@ fun ManagerApp(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .nestedScroll(appModel.scrollBehavior.nestedScrollConnection)
                 .alpha(1 - actionTransition * 0.7f)
-                .padding(paddingValues),
+                .padding(paddingValues)
+                .then(
+                    LocalNestedScrollConnectionProvider.current
+                        ?.let { Modifier.nestedScroll(it) }
+                        ?: Modifier
+                ),
         ) {
             OverviewScreen(managerModel)
         }
@@ -212,11 +220,15 @@ fun ManagerApp(
 @Composable
 @Preview
 fun ActivityPreview() {
+    val appModel = AppViewModel(AppUpdater(LocalContext.current))
     MotionEmulatorTheme {
         ManagerApp(
             paddingValues = PaddingValues(0.dp),
-
+            appModel = appModel,
+            managerModel = ManagerViewModel(
+                emptyList(), LocalContext.current, listOf()
             )
+        )
     }
 }
 
@@ -249,7 +261,7 @@ fun OverviewScreen(viewModel: ManagerViewModel = viewModel()) {
             if (it.resultCode == Activity.RESULT_OK && uri != null) {
                 coroutine.launch {
                     val count = viewModel.import(uri)
-                    snackbars.controller?.showSnackbar(
+                    snackbars?.showSnackbar(
                         message = context.getString(R.string.text_imported, count)
                     )
                 }
@@ -392,7 +404,7 @@ fun OverviewScreen(viewModel: ManagerViewModel = viewModel()) {
                         viewModel.remove(item)
 
                         coroutine.launch {
-                            val res = snackbars.controller?.showSnackbar(
+                            val res = snackbars?.showSnackbar(
                                 message = context.getString(R.string.text_deleted, displayName),
                                 actionLabel = context.getString(R.string.action_undo)
                             )

@@ -25,6 +25,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
@@ -37,35 +38,36 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.zhufucdev.motion_emulator.ui.model.AppViewModel
 import com.zhufucdev.motion_emulator.R
 import com.zhufucdev.motion_emulator.ui.component.TooltipHost
 import com.zhufucdev.motion_emulator.ui.composition.DefaultFloatingActionButtonManipulator
+import com.zhufucdev.motion_emulator.ui.composition.LocalNavControllerProvider
+import com.zhufucdev.motion_emulator.ui.composition.LocalNestedScrollConnectionProvider
 import com.zhufucdev.motion_emulator.ui.composition.LocalSnackbarProvider
-import com.zhufucdev.motion_emulator.ui.composition.SnackbarProvider
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppHome(windowSize: WindowSizeClass) {
-    val model = viewModel<AppViewModel>()
     val navController = rememberNavController()
-    model.navController = navController
     val backStackEntry by navController.currentBackStackEntryAsState()
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val snackbars = remember { SnackbarHostState() }
 
     CompositionLocalProvider(
-        LocalSnackbarProvider provides SnackbarProvider(snackbars)
+        LocalSnackbarProvider provides snackbars,
+        LocalNestedScrollConnectionProvider provides scrollBehavior.nestedScrollConnection,
+        LocalNavControllerProvider provides navController
     ) {
         when (windowSize.widthSizeClass) {
             WindowWidthSizeClass.Compact -> {
                 Scaffold(
-                    topBar = { TopBar() },
+                    topBar = { TopBar(scrollBehavior) },
                     floatingActionButton = {
                         DefaultFloatingActionButtonManipulator.CurrentFloatingActionButton()
                     },
@@ -100,7 +102,7 @@ fun AppHome(windowSize: WindowSizeClass) {
                         }
                     }
                     Scaffold(
-                        topBar = { TopBar() },
+                        topBar = { TopBar(scrollBehavior) },
                         floatingActionButton = { DefaultFloatingActionButtonManipulator.CurrentFloatingActionButton() },
                         snackbarHost = { SnackbarHost(snackbars) }
                     ) {
@@ -125,7 +127,7 @@ fun AppHome(windowSize: WindowSizeClass) {
                     }
                 ) {
                     Scaffold(
-                        topBar = { TopBar() },
+                        topBar = { TopBar(scrollBehavior) },
                         floatingActionButton = { DefaultFloatingActionButtonManipulator.CurrentFloatingActionButton() },
                         snackbarHost = { SnackbarHost(snackbars) }
                     ) {
@@ -139,10 +141,9 @@ fun AppHome(windowSize: WindowSizeClass) {
 
 @Composable
 private fun NavContent(paddingValues: PaddingValues) {
-    val model = viewModel<AppViewModel>()
     val provider = LocalViewModelStoreOwner.current!!
     NavHost(
-        navController = model.navController,
+        navController = LocalNavControllerProvider.current!!,
         startDestination = NavigationDestinations.EMULATE.name
     ) {
         composable(NavigationDestinations.PLUGINS.name) {
@@ -171,9 +172,7 @@ private fun NavContent(paddingValues: PaddingValues) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun TopBar() {
-    val model = viewModel<AppViewModel>()
-    model.scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+private fun TopBar(scrollBehavior: TopAppBarScrollBehavior) {
     TooltipHost {
         CenterAlignedTopAppBar(
             title = {
@@ -182,7 +181,7 @@ private fun TopBar() {
                     fontFamily = FontFamily.Serif
                 )
             },
-            scrollBehavior = model.scrollBehavior,
+            scrollBehavior = scrollBehavior,
             navigationIcon = {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_launcher_monochrome),

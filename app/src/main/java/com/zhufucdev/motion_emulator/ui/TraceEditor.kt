@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
-
 package com.zhufucdev.motion_emulator.ui
 
 import androidx.compose.animation.*
@@ -56,7 +54,7 @@ import kotlinx.coroutines.*
 import kotlin.math.*
 import kotlin.time.Duration.Companion.seconds
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun TraceEditor(target: Trace, viewModel: ManagerViewModel = viewModel()) {
     var rename by remember { mutableStateOf(target.name) }
@@ -205,7 +203,7 @@ fun TraceEditor(target: Trace, viewModel: ManagerViewModel = viewModel()) {
 
                             lifecycleCoroutine.launch {
                                 val result =
-                                    snackbars.controller?.showSnackbar(
+                                    snackbars?.showSnackbar(
                                         message = context.getString(R.string.text_deleted, it.name),
                                         actionLabel = context.getString(R.string.action_undo),
                                         withDismissAction = true
@@ -241,7 +239,7 @@ fun TraceEditor(target: Trace, viewModel: ManagerViewModel = viewModel()) {
 
                             lifecycleCoroutine.launch {
                                 val result =
-                                    snackbars.controller?.showSnackbar(
+                                    snackbars?.showSnackbar(
                                         message = context.getString(
                                             R.string.text_deleted,
                                             context.getString(saltTypeNames[it.type]!!)

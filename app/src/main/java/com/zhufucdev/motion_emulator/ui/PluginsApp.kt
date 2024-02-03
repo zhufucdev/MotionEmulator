@@ -35,8 +35,6 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarScrollBehavior
@@ -86,9 +84,9 @@ import com.zhufucdev.motion_emulator.plugin.PluginUpdater
 import com.zhufucdev.motion_emulator.ui.component.CaptionText
 import com.zhufucdev.motion_emulator.ui.component.TooltipHost
 import com.zhufucdev.motion_emulator.ui.component.TooltipScope
+import com.zhufucdev.motion_emulator.ui.composition.LocalNestedScrollConnectionProvider
 import com.zhufucdev.motion_emulator.ui.composition.LocalSnackbarProvider
 import com.zhufucdev.motion_emulator.ui.composition.ScaffoldElements
-import com.zhufucdev.motion_emulator.ui.model.AppViewModel
 import com.zhufucdev.motion_emulator.ui.model.PluginItem
 import com.zhufucdev.motion_emulator.ui.model.PluginItemState
 import com.zhufucdev.motion_emulator.ui.model.PluginViewModel
@@ -100,33 +98,32 @@ import com.zhufucdev.update.UpdaterStatus
 import com.zhufucdev.update.canInstallUpdate
 import com.zhufucdev.update.installUpdate
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import java.io.File
 import kotlin.math.max
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PluginsApp(paddingValues: PaddingValues) {
+fun PluginsApp(paddingValues: PaddingValues, viewModel: PluginViewModel = viewModel()) {
     ScaffoldElements {
         noFloatingButton()
     }
 
-    val model = viewModel<PluginViewModel>()
     val snackbars = LocalSnackbarProvider.current
     val listState = rememberLazyListState()
     var listBounds by remember {
         mutableStateOf<Rect?>(null)
     }
-    val enabled = remember(model.plugins) {
-        model.plugins.filter { it.enabled }.toMutableStateList()
+    val enabled = remember(viewModel.plugins) {
+        viewModel.plugins.filter { it.enabled }.toMutableStateList()
     }
-    val disabled = remember(model.plugins) {
-        model.plugins.filter { !it.enabled }.toMutableStateList()
+    val disabled = remember(viewModel.plugins) {
+        viewModel.plugins.filter { !it.enabled }.toMutableStateList()
     }
-    val downloadable by model.downloadable.collectAsState(initial = emptyList())
+    val downloadable by viewModel.downloadable.collectAsState(initial = emptyList())
     val disabledList by remember(disabled) {
         derivedStateOf {
-            disabled + downloadable.filter { edge -> !model.plugins.any { it.id == edge.id } }
+            disabled + downloadable.filter { edge -> !viewModel.plugins.any { it.id == edge.id } }
         }
     }
 
@@ -141,7 +138,7 @@ fun PluginsApp(paddingValues: PaddingValues) {
             }
         }
     }
-    val onDrop: (PluginItem) -> Unit = remember(model.plugins) {
+    val onDrop: (PluginItem) -> Unit = remember(viewModel.plugins) {
         {
             val disabledRelatedIndex = hoveringItemIndex - max(1, enabled.size) - 2
             if (disabledRelatedIndex >= 0) {
@@ -167,16 +164,17 @@ fun PluginsApp(paddingValues: PaddingValues) {
                     }
                 }
             }
-            model.save(enabled)
+            viewModel.save(enabled)
             floating = null
         }
     }
 
     TooltipHost {
-        val appModel = viewModel<AppViewModel>()
-        Scaffold(
-            modifier = Modifier.nestedScroll(appModel.scrollBehavior.nestedScrollConnection)
-        ) { _ ->
+        Box(
+            modifier = LocalNestedScrollConnectionProvider.current
+                ?.let { Modifier.nestedScroll(it) }
+                ?: Modifier
+        ) {
             LazyColumn(
                 state = listState,
                 modifier = Modifier
@@ -202,7 +200,6 @@ fun PluginsApp(paddingValues: PaddingValues) {
                         }
                     },
                     plugins = enabled,
-                    snackbarHostState = snackbars.controller!!,
                     isHovered = hoveringItemIndex == 1,
                     onPrepareDrag = { plugin, offset, pos ->
                         floating = FloatingItem(plugin, offset, pos)
@@ -229,7 +226,6 @@ fun PluginsApp(paddingValues: PaddingValues) {
                         }
                     },
                     plugins = disabledList,
-                    snackbarHostState = snackbars.controller,
                     isHovered = hoveringItemIndex == enabled.size + 3,
                     onPrepareDrag = { plugin, offset, pos ->
                         floating = FloatingItem(plugin, offset, pos)
@@ -339,7 +335,6 @@ private fun TooltipScope.PluginsAppTopBar(
 private fun LazyListScope.operativeArea(
     label: @Composable () -> Unit,
     plugins: List<PluginItem>,
-    snackbarHostState: SnackbarHostState,
     isHovered: Boolean,
     onPrepareDrag: (PluginItem, Offset, Offset) -> Unit,
     onDrag: (Offset) -> Unit,
@@ -427,6 +422,7 @@ private fun LazyListScope.operativeArea(
                 }
             }
 
+            val snackbars = LocalSnackbarProvider.current
             Surface(
                 onClick = {
                     val status = updater.status
@@ -443,13 +439,13 @@ private fun LazyListScope.operativeArea(
                         }
 
                         if (updater.update == null) {
-                            snackbarHostState.showSnackbar(context.getString(R.string.text_asset_fetch_failed))
+                            snackbars?.showSnackbar(context.getString(R.string.text_asset_fetch_failed))
                             return@launch
                         }
                         val file = try {
                             updater.download()
                         } catch (e: Exception) {
-                            snackbarHostState.showSnackbar(context.getString(R.string.text_asset_fetch_failed))
+                            snackbars?.showSnackbar(context.getString(R.string.text_asset_fetch_failed))
                             return@launch
                         }
                         installRequest(file)
@@ -676,6 +672,9 @@ private fun DropArea(
 @Composable
 fun PluginsAppPreview() {
     MotionEmulatorTheme {
-        PluginsApp(PaddingValues(0.dp))
+        PluginsApp(
+            paddingValues = PaddingValues(0.dp),
+            viewModel = PluginViewModel(emptyList(), flow {  })
+        )
     }
 }
