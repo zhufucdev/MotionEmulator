@@ -75,9 +75,17 @@ fun AppHome(windowSize: WindowSizeClass) {
                     bottomBar = {
                         NavigationBar {
                             NavigationDestinations.entries.forEach { dest ->
+                                val selected =
+                                    backStackEntry?.destination?.let { dest.selected(it) } == true
                                 NavigationBarItem(
-                                    selected = backStackEntry?.destination?.let { dest.selected(it) } == true,
-                                    onClick = { navController.navigate(dest.name) },
+                                    selected = selected,
+                                    onClick = {
+                                        if (!selected
+                                            || backStackEntry?.destination?.let { dest.isCurrent(it) } == false
+                                        ) {
+                                            navController.navigate(dest.name)
+                                        }
+                                    },
                                     icon = dest.icon,
                                     label = dest.label
                                 )
@@ -93,9 +101,17 @@ fun AppHome(windowSize: WindowSizeClass) {
                 Row {
                     NavigationRail {
                         NavigationDestinations.entries.forEach { dest ->
+                            val selected =
+                                backStackEntry?.destination?.let { dest.selected(it) } == true
                             NavigationRailItem(
-                                selected = backStackEntry?.destination?.let { dest.selected(it) } == true,
-                                onClick = { navController.navigate(dest.name) },
+                                selected = selected,
+                                onClick = {
+                                    if (!selected
+                                        || backStackEntry?.destination?.let { dest.isCurrent(it) } == false
+                                    ) {
+                                        navController.navigate(dest.name)
+                                    }
+                                },
                                 icon = dest.icon,
                                 label = dest.label
                             )
@@ -241,4 +257,6 @@ enum class NavigationDestinations(
 }
 
 fun NavigationDestinations.selected(currentDest: NavDestination): Boolean =
-    currentDest.route == name || currentDest.hierarchy.any { it.route == name }
+    isCurrent(currentDest) || currentDest.hierarchy.any { it.route == name }
+
+fun NavigationDestinations.isCurrent(currentDest: NavDestination) = currentDest.route == name
