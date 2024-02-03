@@ -420,9 +420,9 @@ fun OverviewScreen(viewModel: ManagerViewModel = viewModel()) {
                                 message = context.getString(R.string.text_deleted, displayName),
                                 actionLabel = context.getString(R.string.action_undo)
                             )
-                            Log.d("snackbars", res?.name.toString())
                             if (res == SnackbarResult.ActionPerformed) {
                                 viewModel.data.add(item)
+                                viewModel.data.sortBy { it.id }
                                 viewModel.save(item)
                             }
                         }
@@ -438,7 +438,7 @@ fun OverviewScreen(viewModel: ManagerViewModel = viewModel()) {
                                         contentDescription = null
                                     )
                                 },
-                                onClick = { },
+                                onClick = { /* TODO */ },
                                 divider = index != viewModel.data.lastIndex
                             )
                         },
@@ -453,7 +453,6 @@ fun OverviewScreen(viewModel: ManagerViewModel = viewModel()) {
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .animateItemPlacement()
                                     .heightIn(
                                         max =
                                         if (!removed) Dp.Infinity
