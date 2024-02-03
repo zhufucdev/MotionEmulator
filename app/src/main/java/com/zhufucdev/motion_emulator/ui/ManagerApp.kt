@@ -4,7 +4,6 @@ package com.zhufucdev.motion_emulator.ui
 
 import android.app.Activity
 import android.content.Intent
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.Animatable
@@ -93,6 +92,7 @@ import com.zhufucdev.motion_emulator.ui.component.HorizontalSpacer
 import com.zhufucdev.motion_emulator.ui.component.Swipeable
 import com.zhufucdev.motion_emulator.ui.component.TooltipHost
 import com.zhufucdev.motion_emulator.ui.component.VerticalSpacer
+import com.zhufucdev.motion_emulator.ui.composition.LocalNavControllerProvider
 import com.zhufucdev.motion_emulator.ui.composition.LocalNestedScrollConnectionProvider
 import com.zhufucdev.motion_emulator.ui.composition.LocalSnackbarProvider
 import com.zhufucdev.motion_emulator.ui.composition.ScaffoldElements
@@ -430,16 +430,21 @@ fun OverviewScreen(viewModel: ManagerViewModel = viewModel()) {
 
                     Swipeable(
                         foreground = {
+                            val navController = LocalNavControllerProvider.current
+                            val store = viewModel.storeByClass[item::class]!!
                             ListItem(
                                 title = { Text(displayName) },
                                 leadingIcon = {
                                     Icon(
-                                        imageVector = iconByStore[viewModel.storeByClass[item::class]]!!,
+                                        imageVector = iconByStore[store]!!,
                                         contentDescription = null
                                     )
                                 },
-                                onClick = { /* TODO */ },
-                                divider = index != viewModel.data.lastIndex
+                                onClick = {
+                                    navController?.navigate("${store.typeName}/${item.id}")
+                                },
+                                divider = index != viewModel.data.lastIndex,
+                                modifier = Modifier.fillMaxWidth()
                             )
                         },
                         fillColor = MaterialTheme.colorScheme.errorContainer,
@@ -639,18 +644,31 @@ private fun LazyItemScope.SelectableItem(
 }
 
 @Composable
-fun CellEditor(target: CellTimeline, viewModel: ManagerViewModel) {
+fun CellEditor(
+    target: CellTimeline,
+    paddingValues: PaddingValues,
+    viewModel: ManagerViewModel = viewModel()
+) {
+    ScaffoldElements {
+        noFloatingButton()
+    }
+
     val context = LocalContext.current
     val coroutine = rememberCoroutineScope()
     val formatter = remember { context.effectiveTimeFormat() }
 
-    Box(Modifier.padding(PaddingCommon)) {
+    Box(
+        Modifier
+            .padding(PaddingCommon)
+            .padding(paddingValues)) {
         BasicEdit(
             id = target.id,
             name = target.getDisplayName(formatter),
             onNameChanged = {
+                val newItem = target.copy(name = it)
+                viewModel.update(newItem)
                 coroutine.launch {
-                    viewModel.save(target.copy(name = it))
+                    viewModel.save(newItem)
                 }
             },
             icon = {
@@ -664,18 +682,31 @@ fun CellEditor(target: CellTimeline, viewModel: ManagerViewModel) {
 }
 
 @Composable
-fun MotionEditor(target: Motion, viewModel: ManagerViewModel = viewModel()) {
+fun MotionEditor(
+    target: Motion,
+    paddingValues: PaddingValues,
+    viewModel: ManagerViewModel = viewModel()
+) {
+    ScaffoldElements {
+        noFloatingButton()
+    }
+
     val context = LocalContext.current
     val coroutine = rememberCoroutineScope()
     val formatter = remember { context.effectiveTimeFormat() }
 
-    Box(Modifier.padding(PaddingCommon)) {
+    Box(
+        Modifier
+            .padding(PaddingCommon)
+            .padding(paddingValues)) {
         BasicEdit(
             id = target.id,
             name = target.getDisplayName(formatter),
             onNameChanged = {
+                val newItem = target.copy(name = it)
+                viewModel.update(newItem)
                 coroutine.launch {
-                    viewModel.save(target.copy(name = it))
+                    viewModel.save(newItem)
                 }
             },
             icon = {

@@ -50,6 +50,11 @@ class ManagerViewModel(
         }
     }
 
+    fun <T : Data> update(newValue: T) {
+        val index = data.indexOfFirst { it.id == newValue.id }
+        data[index] = newValue
+    }
+
     suspend fun writeInto(stream: OutputStream, items: Map<String, List<Data>>) {
         val bufOut = BufferedOutputStream(stream)
         val gzOut = GzipCompressorOutputStream(bufOut)

@@ -48,6 +48,7 @@ import com.zhufucdev.motion_emulator.ui.component.Swipeable
 import com.zhufucdev.motion_emulator.ui.component.VerticalSpacer
 import com.zhufucdev.motion_emulator.ui.component.dragDroppable
 import com.zhufucdev.motion_emulator.ui.composition.LocalSnackbarProvider
+import com.zhufucdev.motion_emulator.ui.composition.ScaffoldElements
 import com.zhufucdev.motion_emulator.ui.model.ManagerViewModel
 import com.zhufucdev.motion_emulator.ui.theme.*
 import kotlinx.coroutines.*
@@ -56,7 +57,11 @@ import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun TraceEditor(target: Trace, viewModel: ManagerViewModel = viewModel()) {
+fun TraceEditor(target: Trace, paddingValues: PaddingValues, viewModel: ManagerViewModel = viewModel()) {
+    ScaffoldElements {
+        noFloatingButton()
+    }
+
     var rename by remember { mutableStateOf(target.name) }
     var coordSys by remember { mutableStateOf(target.coordinateSystem) }
     var formulaToken by remember { mutableStateOf(0L) }
@@ -116,7 +121,9 @@ fun TraceEditor(target: Trace, viewModel: ManagerViewModel = viewModel()) {
     }
 
     LazyColumn(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(paddingValues),
         contentPadding = PaddingValues(PaddingCommon),
         state = listState
     ) {
@@ -1018,6 +1025,7 @@ fun TraceEditorPreview() {
     MotionEmulatorTheme {
         TraceEditor(
             target = data,
+            paddingValues = PaddingValues(0.dp),
             viewModel = ManagerViewModel(
                 data = mutableListOf(data),
                 context = LocalContext.current,

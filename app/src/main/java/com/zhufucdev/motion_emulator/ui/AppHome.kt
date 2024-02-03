@@ -40,11 +40,17 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.zhufucdev.motion_emulator.R
+import com.zhufucdev.motion_emulator.data.Cells
+import com.zhufucdev.motion_emulator.data.Motions
+import com.zhufucdev.motion_emulator.data.Traces
 import com.zhufucdev.motion_emulator.ui.component.TooltipHost
 import com.zhufucdev.motion_emulator.ui.composition.DefaultFloatingActionButtonManipulator
 import com.zhufucdev.motion_emulator.ui.composition.LocalNavControllerProvider
@@ -160,27 +166,60 @@ private fun NavContent(paddingValues: PaddingValues) {
     val provider = LocalViewModelStoreOwner.current!!
     NavHost(
         navController = LocalNavControllerProvider.current!!,
-        startDestination = NavigationDestinations.EMULATE.name
+        startDestination = NavigationDestinations.Emulate.name
     ) {
-        composable(NavigationDestinations.PLUGINS.name) {
+        composable(NavigationDestinations.Plugins.name.lowercase()) {
             CompositionLocalProvider(
                 LocalViewModelStoreOwner provides provider
             ) {
                 PluginsApp(paddingValues)
             }
         }
-        composable(NavigationDestinations.EMULATE.name) {
+        composable(NavigationDestinations.Emulate.name.lowercase()) {
             CompositionLocalProvider(
                 LocalViewModelStoreOwner provides provider
             ) {
                 EmulateHome(paddingValues)
             }
         }
-        composable(NavigationDestinations.DATA.name) {
-            CompositionLocalProvider(
-                LocalViewModelStoreOwner provides provider
+        navigation(
+            startDestination = "home",
+            route = NavigationDestinations.Data.name.lowercase()
+        ) {
+            composable("home") {
+                CompositionLocalProvider(LocalViewModelStoreOwner provides provider) {
+                    ManagerApp(paddingValues)
+                }
+            }
+            composable(
+                route = "cell/{id}",
+                arguments = listOf(navArgument("id") { type = NavType.StringType })
             ) {
-                ManagerApp(paddingValues)
+                val targetId = it.arguments?.getString("id") ?: error("invalid argument")
+                val target = Cells[targetId] ?: error("unknown datum")
+                CompositionLocalProvider(LocalViewModelStoreOwner provides provider) {
+                    CellEditor(target, paddingValues)
+                }
+            }
+            composable(
+                route = "motion/{id}",
+                arguments = listOf(navArgument("id") { type = NavType.StringType })
+            ) {
+                val targetId = it.arguments?.getString("id") ?: error("invalid argument")
+                val target = Motions[targetId] ?: error("unknown datum")
+                CompositionLocalProvider(LocalViewModelStoreOwner provides provider) {
+                    MotionEditor(target, paddingValues)
+                }
+            }
+            composable(
+                route = "trace/{id}",
+                arguments = listOf(navArgument("id") { type = NavType.StringType })
+            ) {
+                val targetId = it.arguments?.getString("id") ?: error("invalid argument")
+                val target = Traces[targetId] ?: error("unknown datum")
+                CompositionLocalProvider(LocalViewModelStoreOwner provides provider) {
+                    TraceEditor(target, paddingValues)
+                }
             }
         }
     }
@@ -227,7 +266,7 @@ enum class NavigationDestinations(
     val label: @Composable () -> Unit,
     val icon: @Composable () -> Unit,
 ) {
-    PLUGINS(
+    Plugins(
         label = { Text(text = stringResource(id = R.string.title_activity_plugin)) },
         icon = {
             Icon(
@@ -236,7 +275,7 @@ enum class NavigationDestinations(
             )
         }
     ),
-    EMULATE(
+    Emulate(
         label = { Text(text = stringResource(id = R.string.title_emulate)) },
         icon = {
             Icon(
@@ -245,7 +284,7 @@ enum class NavigationDestinations(
             )
         }
     ),
-    DATA(
+    Data(
         label = { Text(text = stringResource(id = R.string.title_data)) },
         icon = {
             Icon(
@@ -257,6 +296,6 @@ enum class NavigationDestinations(
 }
 
 fun NavigationDestinations.selected(currentDest: NavDestination): Boolean =
-    isCurrent(currentDest) || currentDest.hierarchy.any { it.route == name }
+    isCurrent(currentDest) || currentDest.hierarchy.any { isCurrent(it) }
 
-fun NavigationDestinations.isCurrent(currentDest: NavDestination) = currentDest.route == name
+fun NavigationDestinations.isCurrent(currentDest: NavDestination) = currentDest.route == name.lowercase()

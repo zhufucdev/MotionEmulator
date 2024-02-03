@@ -9,7 +9,7 @@ import kotlin.reflect.KClass
 
 
 object Cells : DataStore<CellTimeline>() {
-    override val typeName: String get() = "cells"
+    override val typeName: String get() = "cell"
     override val clazz: KClass<CellTimeline> = CellTimeline::class
     override val dataSerializer: KSerializer<CellTimeline> get() = serializer()
 }
