@@ -38,12 +38,8 @@ object DefaultFloatingActionButtonManipulator : FloatingActionButtonManipulator 
             label = "Default Floating Action Button",
             transitionSpec = {
                 ContentTransform(
-                    targetContentEnter = scaleIn(
-                        transformOrigin = TransformOrigin(-0.5f, -0.5f)
-                    ),
-                    initialContentExit = scaleOut(
-                        transformOrigin = TransformOrigin(-0.5f, -0.5f)
-                    ),
+                    targetContentEnter = scaleIn(),
+                    initialContentExit = scaleOut(),
                 )
             }
         ) {

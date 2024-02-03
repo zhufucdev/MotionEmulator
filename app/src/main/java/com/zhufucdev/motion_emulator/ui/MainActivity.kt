@@ -11,13 +11,17 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.zhufucdev.motion_emulator.BuildConfig
+import com.zhufucdev.motion_emulator.data.Cells
 import com.zhufucdev.motion_emulator.data.Emulations
+import com.zhufucdev.motion_emulator.data.Motions
+import com.zhufucdev.motion_emulator.data.Traces
 import com.zhufucdev.motion_emulator.extension.AppUpdater
 import com.zhufucdev.motion_emulator.extension.defaultKtorClient
 import com.zhufucdev.motion_emulator.extension.setUpStatusBar
 import com.zhufucdev.motion_emulator.plugin.Plugins
 import com.zhufucdev.motion_emulator.ui.model.AppViewModel
 import com.zhufucdev.motion_emulator.ui.model.EmulationsViewModel
+import com.zhufucdev.motion_emulator.ui.model.ManagerViewModel
 import com.zhufucdev.motion_emulator.ui.model.PluginViewModel
 import com.zhufucdev.motion_emulator.ui.model.emulation
 import com.zhufucdev.motion_emulator.ui.plugin.toPluginItem
@@ -78,6 +82,18 @@ class MainActivity : ComponentActivity() {
                         }
                     )
                 }
+            )
+        }
+
+        initializer {
+            val stores = listOf(Traces, Motions, Cells)
+            ManagerViewModel(
+                stores = stores,
+                data = stores.flatMap {
+                    it.require(this@MainActivity)
+                    it.list()
+                }.sortedBy { it.id },
+                context = this@MainActivity
             )
         }
     }

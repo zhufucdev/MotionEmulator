@@ -7,6 +7,7 @@ import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import java.io.File
+import kotlin.reflect.KClass
 
 /**
  * Abstraction of method set to store and read
@@ -22,6 +23,7 @@ abstract class DataStore<T : Data> {
      * Files would be saved as [typeName]_[Data.id].json (aka [Data.storeName])
      */
     abstract val typeName: String
+    abstract val clazz: KClass<T>
     protected abstract val dataSerializer: KSerializer<T>
 
     private val Data.storeName: String get() = "${typeName}_${id}.json"
@@ -89,13 +91,12 @@ abstract class DataStore<T : Data> {
     operator fun get(id: String) = data[id]
 
     override fun equals(other: Any?): Boolean =
-        other is DataStore<*> && other::class == this::class && other.typeName == this.typeName
+        other is DataStore<*> && other::class == this::class && other.clazz == this.clazz
 
     override fun hashCode(): Int {
-        var result = data.hashCode()
-        result = 31 * result + rootDir.hashCode()
+        var result = rootDir.hashCode()
         result = 31 * result + typeName.hashCode()
-        result = 31 * result + dataSerializer.hashCode()
+        result = 31 * result + clazz.hashCode()
         return result
     }
 }

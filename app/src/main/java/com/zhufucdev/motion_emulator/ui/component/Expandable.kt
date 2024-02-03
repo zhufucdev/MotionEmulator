@@ -14,7 +14,6 @@ import com.zhufucdev.motion_emulator.R
 import com.zhufucdev.motion_emulator.ui.theme.PaddingCommon
 import com.zhufucdev.motion_emulator.ui.theme.PaddingSmall
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun Expandable(
     icon: @Composable () -> Unit,

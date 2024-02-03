@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalMaterial3Api::class)
 
-package com.zhufucdev.motion_emulator.ui.manager
+package com.zhufucdev.motion_emulator.ui
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.Animatable
@@ -34,6 +34,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils
 import com.zhufucdev.me.stub.*
 import com.zhufucdev.me.stub.Trace
@@ -48,6 +49,7 @@ import com.zhufucdev.motion_emulator.ui.component.Expandable
 import com.zhufucdev.motion_emulator.ui.component.Swipeable
 import com.zhufucdev.motion_emulator.ui.component.VerticalSpacer
 import com.zhufucdev.motion_emulator.ui.component.dragDroppable
+import com.zhufucdev.motion_emulator.ui.model.ManagerViewModel
 import com.zhufucdev.motion_emulator.ui.theme.*
 import kotlinx.coroutines.*
 import kotlin.math.*
@@ -55,7 +57,7 @@ import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun TraceEditor(target: Trace, viewModel: EditorViewModel<Trace>) {
+fun TraceEditor(target: Trace, viewModel: ManagerViewModel = viewModel()) {
     var rename by remember { mutableStateOf(target.name) }
     var coordSys by remember { mutableStateOf(target.coordinateSystem) }
     var formulaToken by remember { mutableStateOf(0L) }
@@ -72,14 +74,14 @@ fun TraceEditor(target: Trace, viewModel: EditorViewModel<Trace>) {
     LaunchedEffect(rename) {
         val captured = rename
         delay(1.seconds)
-        if (rename != captured) return@LaunchedEffect
-
-        viewModel.onModify(target.copy(name = rename))
+        if (rename == captured) {
+            viewModel.save(target.copy(name = rename))
+        }
     }
 
-    fun commit() {
+    suspend fun commit() {
         val salt = target.salt ?: Salt2dData()
-        viewModel.onModify(
+        viewModel.save(
             target.copy(
                 name = rename,
                 salt =
@@ -106,7 +108,9 @@ fun TraceEditor(target: Trace, viewModel: EditorViewModel<Trace>) {
 
     DisposableEffect(Unit) {
         onDispose {
-            commit()
+            lifecycleCoroutine.launch {
+                commit()
+            }
             lifecycleCoroutine.cancel()
         }
     }
@@ -121,7 +125,9 @@ fun TraceEditor(target: Trace, viewModel: EditorViewModel<Trace>) {
             name = rename,
             onNameChanged = {
                 rename = it
-                viewModel.onModify(target.copy(name = rename))
+                lifecycleCoroutine.launch {
+                    viewModel.save(target.copy(name = rename))
+                }
             },
             icon = { Icon(painterResource(R.drawable.ic_baseline_map_24), contentDescription = null) },
             bottomMargin = PaddingCommon
@@ -180,7 +186,8 @@ fun TraceEditor(target: Trace, viewModel: EditorViewModel<Trace>) {
         factors.forEach {
             item(key = it.id, contentType = "factor") {
                 Box(
-                    Modifier.animateItemPlacement()
+                    Modifier
+                        .animateItemPlacement()
                         .dragDroppable(
                             element = it,
                             list = factors,
@@ -196,7 +203,7 @@ fun TraceEditor(target: Trace, viewModel: EditorViewModel<Trace>) {
 
                             lifecycleCoroutine.launch {
                                 val result =
-                                    viewModel.runtime.snackbarHost.showSnackbar(
+                                    viewModel.snackbars.showSnackbar(
                                         message = context.getString(R.string.text_deleted, it.name),
                                         actionLabel = context.getString(R.string.action_undo),
                                         withDismissAction = true
@@ -215,7 +222,8 @@ fun TraceEditor(target: Trace, viewModel: EditorViewModel<Trace>) {
         formulas.forEach {
             item(key = it.id, contentType = it.type) {
                 Box(
-                    Modifier.animateItemPlacement()
+                    Modifier
+                        .animateItemPlacement()
                         .dragDroppable(
                             element = it,
                             list = formulas,
@@ -231,7 +239,7 @@ fun TraceEditor(target: Trace, viewModel: EditorViewModel<Trace>) {
 
                             lifecycleCoroutine.launch {
                                 val result =
-                                    viewModel.runtime.snackbarHost.showSnackbar(
+                                    viewModel.snackbars.showSnackbar(
                                         message = context.getString(
                                             R.string.text_deleted,
                                             context.getString(saltTypeNames[it.type]!!)
@@ -273,7 +281,9 @@ fun TraceEditor(target: Trace, viewModel: EditorViewModel<Trace>) {
                 { Text(stringResource(R.string.text_salt_common)) },
                 { Text(stringResource(R.string.text_salt_trace)) },
                 iconDescription = stringResource(R.string.caption_adding_salt),
-                modifier = Modifier.fillParentMaxWidth().padding(PaddingLarge)
+                modifier = Modifier
+                    .fillParentMaxWidth()
+                    .padding(PaddingLarge)
             )
         }
     }
@@ -365,7 +375,9 @@ fun FactorCanvas(factor: MutableFactor) {
     var projector: Projector by remember { mutableStateOf(BypassProjector) }
 
     Canvas(
-        Modifier.fillMaxWidth().height(240.dp)
+        Modifier
+            .fillMaxWidth()
+            .height(240.dp)
             .pointerInput(Unit) {
                 var isStart = true
                 var isEnd = true
@@ -391,14 +403,22 @@ fun FactorCanvas(factor: MutableFactor) {
 
                         if (isStart) {
                             val newControl = controlStart + amountPx
-                            val newProjection = with(projector) { newControl.toVector2d().toIdeal() }
+                            val newProjection = with(projector) {
+                                newControl
+                                    .toVector2d()
+                                    .toIdeal()
+                            }
                             if (newProjection.isValid()) {
                                 controlStart = newControl
                                 factor.distribution.controlStart = newProjection
                             }
                         } else if (isEnd) {
                             val newControl = controlEnd + amountPx
-                            val newProjection = with(projector) { newControl.toVector2d().toIdeal() }
+                            val newProjection = with(projector) {
+                                newControl
+                                    .toVector2d()
+                                    .toIdeal()
+                            }
                             if (newProjection.isValid()) {
                                 controlEnd = newControl
                                 factor.distribution.controlEnd = newProjection
@@ -834,7 +854,9 @@ fun SaltTextField(
                 }
             }
         },
-        modifier = Modifier.fillMaxWidth().then(modifier)
+        modifier = Modifier
+            .fillMaxWidth()
+            .then(modifier)
     )
 }
 
@@ -894,7 +916,8 @@ fun SaltItemScaffold(
     }
 
     Column(
-        Modifier.fillMaxWidth()
+        Modifier
+            .fillMaxWidth()
             .heightIn(max = animator.value.dp)
             .onGloballyPositioned {
                 targetHeight = it.size.height
@@ -971,13 +994,11 @@ fun DualFieldSnippet(
 @Composable
 @Preview
 fun TraceEditorPreview() {
+    val data = randomTraceData()
     MotionEmulatorTheme {
-        val data by remember {
-            mutableStateOf(randomTraceData())
-        }
         TraceEditor(
             target = data,
-            viewModel = EditorViewModel.DummyViewModel(EditableScreen.TraceScreen, listOf(data))
+            viewModel = ManagerViewModel(listOf(data), LocalContext.current, listOf(Traces))
         )
     }
 }
