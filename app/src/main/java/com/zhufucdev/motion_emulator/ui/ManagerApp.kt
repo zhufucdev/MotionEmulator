@@ -34,6 +34,7 @@ import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Smartphone
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
@@ -50,6 +51,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -76,16 +78,13 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.aventrix.jnanoid.jnanoid.NanoIdUtils
 import com.zhufucdev.me.stub.CellTimeline
 import com.zhufucdev.me.stub.Data
 import com.zhufucdev.me.stub.Motion
-import com.zhufucdev.me.stub.Trace
 import com.zhufucdev.motion_emulator.R
 import com.zhufucdev.motion_emulator.data.Cells
 import com.zhufucdev.motion_emulator.data.Motions
 import com.zhufucdev.motion_emulator.data.Traces
-import com.zhufucdev.motion_emulator.extension.AppUpdater
 import com.zhufucdev.motion_emulator.extension.dateString
 import com.zhufucdev.motion_emulator.extension.effectiveTimeFormat
 import com.zhufucdev.motion_emulator.ui.component.CaptionText
@@ -97,10 +96,10 @@ import com.zhufucdev.motion_emulator.ui.component.VerticalSpacer
 import com.zhufucdev.motion_emulator.ui.composition.LocalNestedScrollConnectionProvider
 import com.zhufucdev.motion_emulator.ui.composition.LocalSnackbarProvider
 import com.zhufucdev.motion_emulator.ui.composition.ScaffoldElements
-import com.zhufucdev.motion_emulator.ui.model.AppViewModel
 import com.zhufucdev.motion_emulator.ui.model.ManagerViewModel
 import com.zhufucdev.motion_emulator.ui.theme.MotionEmulatorTheme
 import com.zhufucdev.motion_emulator.ui.theme.PaddingCommon
+import com.zhufucdev.motion_emulator.ui.theme.PaddingLarge
 import com.zhufucdev.motion_emulator.ui.theme.PaddingSmall
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -111,7 +110,6 @@ import kotlin.time.Duration.Companion.seconds
 @Composable
 fun ManagerApp(
     paddingValues: PaddingValues,
-    appModel: AppViewModel = viewModel(),
     managerModel: ManagerViewModel = viewModel()
 ) {
     var actionTransition by remember {
@@ -220,13 +218,11 @@ fun ManagerApp(
 @Composable
 @Preview
 fun ActivityPreview() {
-    val appModel = AppViewModel(AppUpdater(LocalContext.current))
     MotionEmulatorTheme {
         ManagerApp(
             paddingValues = PaddingValues(0.dp),
-            appModel = appModel,
             managerModel = ManagerViewModel(
-                emptyList(), LocalContext.current, listOf()
+                context = LocalContext.current, stores = listOf()
             )
         )
     }
@@ -242,6 +238,7 @@ fun OverviewScreen(viewModel: ManagerViewModel = viewModel()) {
     var openBottomModal by remember { mutableStateOf(false) }
     val formatter = remember { context.effectiveTimeFormat() }
     val snackbars = LocalSnackbarProvider.current
+    val dataReady by viewModel.dataLoader.collectAsState(initial = false)
 
     val fileCreateHintLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
@@ -377,6 +374,21 @@ fun OverviewScreen(viewModel: ManagerViewModel = viewModel()) {
                 },
                 divider = false
             )
+        }
+
+
+        if (!dataReady) {
+            item {
+                VerticalSpacer(PaddingLarge)
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    CircularProgressIndicator()
+                    VerticalSpacer()
+                    Text(text = stringResource(id = R.string.des_loading_data))
+                }
+            }
         }
 
         if (viewModel.data.isNotEmpty()) {

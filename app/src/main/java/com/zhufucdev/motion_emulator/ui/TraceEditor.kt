@@ -129,7 +129,12 @@ fun TraceEditor(target: Trace, viewModel: ManagerViewModel = viewModel()) {
                     viewModel.save(target.copy(name = rename))
                 }
             },
-            icon = { Icon(painterResource(R.drawable.ic_baseline_map_24), contentDescription = null) },
+            icon = {
+                Icon(
+                    painterResource(R.drawable.ic_baseline_map_24),
+                    contentDescription = null
+                )
+            },
             bottomMargin = PaddingCommon
         )
 
@@ -145,7 +150,12 @@ fun TraceEditor(target: Trace, viewModel: ManagerViewModel = viewModel()) {
                     label = { Text(stringResource(R.string.name_coord_sys)) },
                     readOnly = true,
                     onValueChange = {},
-                    leadingIcon = { Icon(painterResource(R.drawable.ic_baseline_satellite_alt_24), null) },
+                    leadingIcon = {
+                        Icon(
+                            painterResource(R.drawable.ic_baseline_satellite_alt_24),
+                            null
+                        )
+                    },
                     trailingIcon = {
                         ExposedDropdownMenuDefaults.TrailingIcon(expanded)
                     },
@@ -366,8 +376,14 @@ fun FactorCanvas(factor: MutableFactor) {
     }
     val boundingZero = measurer.measure(textZero).getBoundingBox(0)
     val boundingOne = measurer.measure(textOne).getBoundingBox(0)
-    val boundLeft = max(boundingZero.width, boundingOne.width) + with(LocalDensity.current) { PaddingSmall.toPx() }
-    val boundBottom = max(boundingZero.height, boundingOne.height) + with(LocalDensity.current) { PaddingSmall.toPx() }
+    val boundLeft = max(
+        boundingZero.width,
+        boundingOne.width
+    ) + with(LocalDensity.current) { PaddingSmall.toPx() }
+    val boundBottom = max(
+        boundingZero.height,
+        boundingOne.height
+    ) + with(LocalDensity.current) { PaddingSmall.toPx() }
 
     var drawingSize by remember { mutableStateOf(Size.Zero) }
     var controlStart by remember { mutableStateOf(Offset.Zero) }
@@ -431,7 +447,8 @@ fun FactorCanvas(factor: MutableFactor) {
         projector = CanvasProjector(boundLeft, boundBottom)
         drawingSize = (projector as CanvasProjector).drawingSize
         if (controlStart == Offset.Zero) {
-            controlStart = with(projector) { factor.distribution.controlStart.toTarget() }.toOffset()
+            controlStart =
+                with(projector) { factor.distribution.controlStart.toTarget() }.toOffset()
             controlEnd = with(projector) { factor.distribution.controlEnd.toTarget() }.toOffset()
         }
 
@@ -449,7 +466,10 @@ fun FactorCanvas(factor: MutableFactor) {
         drawText(
             textMeasurer = measurer,
             text = textOne,
-            topLeft = Offset(x = size.width - boundingOne.width, y = size.height - boundingOne.height),
+            topLeft = Offset(
+                x = size.width - boundingOne.width,
+                y = size.height - boundingOne.height
+            ),
         )
 
         drawPath(
@@ -998,7 +1018,11 @@ fun TraceEditorPreview() {
     MotionEmulatorTheme {
         TraceEditor(
             target = data,
-            viewModel = ManagerViewModel(listOf(data), LocalContext.current, listOf(Traces))
+            viewModel = ManagerViewModel(
+                data = mutableListOf(data),
+                context = LocalContext.current,
+                stores = listOf(Traces)
+            )
         )
     }
 }

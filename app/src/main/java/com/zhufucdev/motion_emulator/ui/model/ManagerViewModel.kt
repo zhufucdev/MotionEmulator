@@ -2,8 +2,6 @@ package com.zhufucdev.motion_emulator.ui.model
 
 import android.content.Context
 import android.net.Uri
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.runtime.*
 import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModel
 import com.zhufucdev.me.stub.Data
@@ -13,6 +11,8 @@ import com.zhufucdev.motion_emulator.extension.FILE_PROVIDER_AUTHORITY
 import com.zhufucdev.motion_emulator.extension.dateString
 import com.zhufucdev.motion_emulator.extension.effectiveTimeFormat
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.withContext
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
@@ -24,12 +24,11 @@ import java.io.File
 import java.io.OutputStream
 
 class ManagerViewModel(
-    data: List<Data>,
+    val data: MutableList<Data> = mutableListOf(),
+    val dataLoader: Flow<Boolean> = emptyFlow(),
     private val context: Context,
     val stores: List<DataStore<*>>
 ) : ViewModel() {
-    val data = data.toMutableStateList()
-
     private val storeByType by lazy { stores.associateBy { it.typeName } }
     val storeByClass by lazy { stores.associateBy { it.clazz } }
 
@@ -57,12 +56,12 @@ class ManagerViewModel(
         val tarOut = TarArchiveOutputStream(gzOut)
 
         items.forEach { (type, data) ->
-            data.forEach {
+            data.forEach { datum ->
                 val tmpFile = File.createTempFile(type, null, context.cacheDir)
                 tmpFile.outputStream().use { stream ->
-                    it.writeTo(stream)
+                    datum.writeTo(stream)
                 }
-                val entry = TarArchiveEntry(tmpFile, "${type}_${it.id}.json")
+                val entry = TarArchiveEntry(tmpFile, "${type}_${datum.id}.json")
                 tarOut.putArchiveEntry(entry)
                 tmpFile.inputStream().use {
                     it.copyTo(tarOut)

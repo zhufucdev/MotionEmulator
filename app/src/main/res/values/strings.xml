@@ -215,4 +215,5 @@
     <string name="text_permission_read">Allows this app to get information about settings in Motion Emulator, emulation method and server address for example.</string>
     <string name="text_asset_fetch_failed">Failed to fetch release asset</string>
     <string name="title_data">Data</string>
+    <string name="des_loading_data">loading data</string>
 </resources>

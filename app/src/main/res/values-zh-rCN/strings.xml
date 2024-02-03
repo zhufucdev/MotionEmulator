@@ -206,4 +206,5 @@
     <string name="text_permission_read">允许该应用查看运动模拟器的部分选项，例如模拟方法和服务器地址。</string>
     <string name="text_asset_fetch_failed">获取更新资源失败</string>
     <string name="title_data">数据</string>
+    <string name="des_loading_data">加载数据</string>
 </resources>
