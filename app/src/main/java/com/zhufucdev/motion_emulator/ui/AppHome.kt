@@ -21,6 +21,8 @@ import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.PermanentDrawerSheet
 import androidx.compose.material3.PermanentNavigationDrawer
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
@@ -28,6 +30,7 @@ import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -45,7 +48,8 @@ import com.zhufucdev.motion_emulator.ui.model.AppViewModel
 import com.zhufucdev.motion_emulator.R
 import com.zhufucdev.motion_emulator.ui.component.TooltipHost
 import com.zhufucdev.motion_emulator.ui.composition.DefaultFloatingActionButtonManipulator
-import com.zhufucdev.motion_emulator.ui.plugin.PluginsApp
+import com.zhufucdev.motion_emulator.ui.composition.LocalSnackbarProvider
+import com.zhufucdev.motion_emulator.ui.composition.SnackbarProvider
 
 @Composable
 fun AppHome(windowSize: WindowSizeClass) {
@@ -53,16 +57,41 @@ fun AppHome(windowSize: WindowSizeClass) {
     val navController = rememberNavController()
     model.navController = navController
     val backStackEntry by navController.currentBackStackEntryAsState()
+    val snackbars = remember { SnackbarHostState() }
 
-    when (windowSize.widthSizeClass) {
-        WindowWidthSizeClass.Compact -> {
-            Scaffold(
-                topBar = { TopBar() },
-                floatingActionButton = { DefaultFloatingActionButtonManipulator.CurrentFloatingActionButton() },
-                bottomBar = {
-                    NavigationBar {
+    CompositionLocalProvider(
+        LocalSnackbarProvider provides SnackbarProvider(snackbars)
+    ) {
+        when (windowSize.widthSizeClass) {
+            WindowWidthSizeClass.Compact -> {
+                Scaffold(
+                    topBar = { TopBar() },
+                    floatingActionButton = {
+                        DefaultFloatingActionButtonManipulator.CurrentFloatingActionButton()
+                    },
+                    snackbarHost = { SnackbarHost(snackbars) },
+                    bottomBar = {
+                        NavigationBar {
+                            NavigationDestinations.entries.forEach { dest ->
+                                NavigationBarItem(
+                                    selected = backStackEntry?.destination?.let { dest.selected(it) } == true,
+                                    onClick = { navController.navigate(dest.name) },
+                                    icon = dest.icon,
+                                    label = dest.label
+                                )
+                            }
+                        }
+                    }
+                ) {
+                    NavContent(it)
+                }
+            }
+
+            WindowWidthSizeClass.Medium -> {
+                Row {
+                    NavigationRail {
                         NavigationDestinations.entries.forEach { dest ->
-                            NavigationBarItem(
+                            NavigationRailItem(
                                 selected = backStackEntry?.destination?.let { dest.selected(it) } == true,
                                 onClick = { navController.navigate(dest.name) },
                                 icon = dest.icon,
@@ -70,53 +99,38 @@ fun AppHome(windowSize: WindowSizeClass) {
                             )
                         }
                     }
-                }
-            ) {
-                NavContent(it)
-            }
-        }
-
-        WindowWidthSizeClass.Medium -> {
-            Row {
-                NavigationRail {
-                    NavigationDestinations.entries.forEach { dest ->
-                        NavigationRailItem(
-                            selected = backStackEntry?.destination?.let { dest.selected(it) } == true,
-                            onClick = { navController.navigate(dest.name) },
-                            icon = dest.icon,
-                            label = dest.label
-                        )
+                    Scaffold(
+                        topBar = { TopBar() },
+                        floatingActionButton = { DefaultFloatingActionButtonManipulator.CurrentFloatingActionButton() },
+                        snackbarHost = { SnackbarHost(snackbars) }
+                    ) {
+                        NavContent(it)
                     }
                 }
-                Scaffold(
-                    topBar = { TopBar() },
-                    floatingActionButton = { DefaultFloatingActionButtonManipulator.CurrentFloatingActionButton() }
-                ) {
-                    NavContent(it)
-                }
             }
-        }
 
-        WindowWidthSizeClass.Expanded -> {
-            PermanentNavigationDrawer(
-                drawerContent = {
-                    PermanentDrawerSheet {
-                        NavigationDestinations.entries.forEach { dest ->
-                            NavigationDrawerItem(
-                                selected = backStackEntry?.destination?.let { dest.selected(it) } == true,
-                                onClick = { navController.navigate(dest.name) },
-                                icon = dest.icon,
-                                label = dest.label
-                            )
+            WindowWidthSizeClass.Expanded -> {
+                PermanentNavigationDrawer(
+                    drawerContent = {
+                        PermanentDrawerSheet {
+                            NavigationDestinations.entries.forEach { dest ->
+                                NavigationDrawerItem(
+                                    selected = backStackEntry?.destination?.let { dest.selected(it) } == true,
+                                    onClick = { navController.navigate(dest.name) },
+                                    icon = dest.icon,
+                                    label = dest.label
+                                )
+                            }
                         }
                     }
-                }
-            ) {
-                Scaffold(
-                    topBar = { TopBar() },
-                    floatingActionButton = { DefaultFloatingActionButtonManipulator.CurrentFloatingActionButton() }
                 ) {
-                    NavContent(it)
+                    Scaffold(
+                        topBar = { TopBar() },
+                        floatingActionButton = { DefaultFloatingActionButtonManipulator.CurrentFloatingActionButton() },
+                        snackbarHost = { SnackbarHost(snackbars) }
+                    ) {
+                        NavContent(it)
+                    }
                 }
             }
         }

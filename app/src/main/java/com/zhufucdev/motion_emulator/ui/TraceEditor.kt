@@ -49,6 +49,7 @@ import com.zhufucdev.motion_emulator.ui.component.Expandable
 import com.zhufucdev.motion_emulator.ui.component.Swipeable
 import com.zhufucdev.motion_emulator.ui.component.VerticalSpacer
 import com.zhufucdev.motion_emulator.ui.component.dragDroppable
+import com.zhufucdev.motion_emulator.ui.composition.LocalSnackbarProvider
 import com.zhufucdev.motion_emulator.ui.model.ManagerViewModel
 import com.zhufucdev.motion_emulator.ui.theme.*
 import kotlinx.coroutines.*
@@ -62,6 +63,7 @@ fun TraceEditor(target: Trace, viewModel: ManagerViewModel = viewModel()) {
     var coordSys by remember { mutableStateOf(target.coordinateSystem) }
     var formulaToken by remember { mutableStateOf(0L) }
     val lifecycleCoroutine = remember { CoroutineScope(Dispatchers.Main) }
+    val snackbars = LocalSnackbarProvider.current
     val context = LocalContext.current
     val formulas = remember {
         (target.salt ?: Salt2dData()).elements.map { it.mutable() }.toMutableStateList()
@@ -203,7 +205,7 @@ fun TraceEditor(target: Trace, viewModel: ManagerViewModel = viewModel()) {
 
                             lifecycleCoroutine.launch {
                                 val result =
-                                    viewModel.snackbars.showSnackbar(
+                                    snackbars.controller?.showSnackbar(
                                         message = context.getString(R.string.text_deleted, it.name),
                                         actionLabel = context.getString(R.string.action_undo),
                                         withDismissAction = true
@@ -239,7 +241,7 @@ fun TraceEditor(target: Trace, viewModel: ManagerViewModel = viewModel()) {
 
                             lifecycleCoroutine.launch {
                                 val result =
-                                    viewModel.snackbars.showSnackbar(
+                                    snackbars.controller?.showSnackbar(
                                         message = context.getString(
                                             R.string.text_deleted,
                                             context.getString(saltTypeNames[it.type]!!)
@@ -942,7 +944,7 @@ fun SaltItemScaffold(
                     )
                 )
             },
-            endActivated = { removed = true },
+            rearActivated = { removed = true },
             container = { content ->
                 Column(Modifier.fillMaxWidth()) {
                     content()

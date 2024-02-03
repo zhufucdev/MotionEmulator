@@ -28,18 +28,17 @@ class ManagerViewModel(
     private val context: Context,
     val stores: List<DataStore<*>>
 ) : ViewModel() {
-    lateinit var snackbars: SnackbarHostState
     val data = data.toMutableStateList()
 
     private val storeByType by lazy { stores.associateBy { it.typeName } }
-    private val storeByClass by lazy { stores.associateBy { it.clazz } }
+    val storeByClass by lazy { stores.associateBy { it.clazz } }
 
     suspend fun <T : Data> remove(item: T) {
         withContext(Dispatchers.IO) {
             val store =
                 storeByClass[item::class] ?: error("unsupported type ${item::class.simpleName}")
             @Suppress("UNCHECKED_CAST")
-            (store as DataStore<T>).store(item, overwrite = true)
+            (store as DataStore<T>).delete(item, context)
         }
     }
 

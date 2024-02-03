@@ -23,8 +23,7 @@ import com.zhufucdev.motion_emulator.ui.model.AppViewModel
 import com.zhufucdev.motion_emulator.ui.model.EmulationsViewModel
 import com.zhufucdev.motion_emulator.ui.model.ManagerViewModel
 import com.zhufucdev.motion_emulator.ui.model.PluginViewModel
-import com.zhufucdev.motion_emulator.ui.model.emulation
-import com.zhufucdev.motion_emulator.ui.plugin.toPluginItem
+import com.zhufucdev.motion_emulator.ui.model.toPluginItem
 import com.zhufucdev.motion_emulator.ui.theme.MotionEmulatorTheme
 import com.zhufucdev.sdk.findAsset
 import kotlinx.coroutines.flow.flow

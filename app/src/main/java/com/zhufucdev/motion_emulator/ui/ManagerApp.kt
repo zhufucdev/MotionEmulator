@@ -4,14 +4,13 @@ package com.zhufucdev.motion_emulator.ui
 
 import android.app.Activity
 import android.content.Intent
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animate
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,19 +23,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CellTower
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Smartphone
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -46,9 +42,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -67,7 +61,6 @@ import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -92,11 +85,13 @@ import com.zhufucdev.motion_emulator.data.Motions
 import com.zhufucdev.motion_emulator.data.Traces
 import com.zhufucdev.motion_emulator.extension.dateString
 import com.zhufucdev.motion_emulator.extension.effectiveTimeFormat
+import com.zhufucdev.motion_emulator.ui.component.CaptionText
 import com.zhufucdev.motion_emulator.ui.component.Expandable
 import com.zhufucdev.motion_emulator.ui.component.HorizontalSpacer
 import com.zhufucdev.motion_emulator.ui.component.Swipeable
 import com.zhufucdev.motion_emulator.ui.component.TooltipHost
 import com.zhufucdev.motion_emulator.ui.component.VerticalSpacer
+import com.zhufucdev.motion_emulator.ui.composition.LocalSnackbarProvider
 import com.zhufucdev.motion_emulator.ui.composition.ScaffoldElements
 import com.zhufucdev.motion_emulator.ui.model.AppViewModel
 import com.zhufucdev.motion_emulator.ui.model.ManagerViewModel
@@ -106,6 +101,7 @@ import com.zhufucdev.motion_emulator.ui.theme.PaddingSmall
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.text.DateFormat
 import kotlin.time.Duration.Companion.seconds
 
 @Composable
@@ -174,7 +170,10 @@ fun ManagerApp(
                                     .offset(y = ((managerModel.stores.size - index - 1) * translation).dp)
                                     .alpha(actionTransition)
                             ) {
-                                Text(text = stringResource(id = nameIdByStore[it]!!), style = MaterialTheme.typography.titleSmall)
+                                Text(
+                                    text = stringResource(id = nameIdByStore[it]!!),
+                                    style = MaterialTheme.typography.titleSmall
+                                )
                                 HorizontalSpacer()
                                 FloatingActionButton(
                                     onClick = {
@@ -197,19 +196,15 @@ fun ManagerApp(
         }
     }
 
-    val snackbarState = remember { SnackbarHostState() }
-    managerModel.snackbars = snackbarState
     TooltipHost {
-        Scaffold(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .nestedScroll(appModel.scrollBehavior.nestedScrollConnection)
-                .alpha(1 - actionTransition * 0.7f),
-            snackbarHost = { SnackbarHost(snackbarState) }
-        ) { _ ->
-            Box(Modifier.padding(paddingValues)) {
-                OverviewScreen(managerModel)
-            }
+                .alpha(1 - actionTransition * 0.7f)
+                .padding(paddingValues),
+        ) {
+            OverviewScreen(managerModel)
         }
     }
 }
@@ -225,86 +220,7 @@ fun ActivityPreview() {
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-fun <T : Data> DataList(
-    data: List<T>,
-    content: @Composable (T) -> Unit
-) {
-    if (data.isEmpty()) {
-        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Image(
-                modifier = Modifier.size(180.dp),
-                painter = painterResource(R.drawable.ic_thinking_face_72),
-                contentDescription = "empty",
-            )
-        }
-    } else {
-        val state = rememberLazyListState()
-        val model = viewModel<ManagerViewModel>()
-        val appModel = viewModel<AppViewModel>()
-
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(PaddingCommon),
-            verticalArrangement = Arrangement.spacedBy(PaddingCommon),
-            state = state
-        ) {
-            data.forEach { item ->
-                item(key = item.id) {
-                    var heightAnimator by remember { mutableStateOf(Animatable(0F)) }
-                    var removed by remember { mutableStateOf(false) }
-
-                    LaunchedEffect(removed) {
-                        if (!removed) return@LaunchedEffect
-
-                        heightAnimator.animateTo(0F)
-                        model.remove(item)
-                    }
-
-                    Swipeable(
-                        foreground = {
-                            content(item)
-                        },
-                        fillColor = MaterialTheme.colorScheme.errorContainer,
-                        backgroundEnd = {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_baseline_delete_24),
-                                contentDescription = "delete",
-                            )
-                        },
-                        endActivated = { removed = true },
-                        container = { content ->
-                            Card(
-                                shape = MaterialTheme.shapes.large,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .animateItemPlacement()
-                                    .heightIn(
-                                        max =
-                                        if (!removed) Dp.Infinity
-                                        else with(LocalDensity.current) { heightAnimator.value.toDp() }
-                                    )
-                                    .onGloballyPositioned {
-                                        if (!removed) heightAnimator =
-                                            Animatable(it.size.height.toFloat())
-                                    },
-                                onClick = {
-                                    appModel.navController.navigate("")
-                                }
-                            ) {
-                                content()
-                            }
-                        },
-                        fractionWidth = 50.dp
-                    )
-                }
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun OverviewScreen(viewModel: ManagerViewModel = viewModel()) {
     val coroutine = rememberCoroutineScope()
@@ -313,6 +229,7 @@ fun OverviewScreen(viewModel: ManagerViewModel = viewModel()) {
     var exporting by remember { mutableStateOf(mapOf<String, List<Data>>()) }
     var openBottomModal by remember { mutableStateOf(false) }
     val formatter = remember { context.effectiveTimeFormat() }
+    val snackbars = LocalSnackbarProvider.current
 
     val fileCreateHintLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
@@ -332,7 +249,7 @@ fun OverviewScreen(viewModel: ManagerViewModel = viewModel()) {
             if (it.resultCode == Activity.RESULT_OK && uri != null) {
                 coroutine.launch {
                     val count = viewModel.import(uri)
-                    viewModel.snackbars.showSnackbar(
+                    snackbars.controller?.showSnackbar(
                         message = context.getString(R.string.text_imported, count)
                     )
                 }
@@ -393,6 +310,7 @@ fun OverviewScreen(viewModel: ManagerViewModel = viewModel()) {
     }
 
     LazyColumn {
+        // Meta operations
         item {
             ListItem(
                 modifier = Modifier.fillMaxWidth(),
@@ -447,6 +365,90 @@ fun OverviewScreen(viewModel: ManagerViewModel = viewModel()) {
                 },
                 divider = false
             )
+        }
+
+        if (viewModel.data.isNotEmpty()) {
+            // Data list
+            item {
+                CaptionText(
+                    text = stringResource(id = R.string.title_data),
+                    modifier = Modifier.padding(PaddingCommon)
+                )
+            }
+
+            viewModel.data.forEachIndexed { index, item ->
+                item(item.id) {
+                    var heightAnimator by remember { mutableStateOf(Animatable(0F)) }
+                    var removed by remember { mutableStateOf(false) }
+                    val displayName = remember {
+                        item.getDisplayName(DateFormat.getDateTimeInstance())
+                    }
+
+                    LaunchedEffect(removed) {
+                        if (!removed) return@LaunchedEffect
+
+                        heightAnimator.animateTo(0F)
+                        viewModel.data.remove(item)
+                        viewModel.remove(item)
+
+                        coroutine.launch {
+                            val res = snackbars.controller?.showSnackbar(
+                                message = context.getString(R.string.text_deleted, displayName),
+                                actionLabel = context.getString(R.string.action_undo)
+                            )
+                            Log.d("snackbars", res?.name.toString())
+                            if (res == SnackbarResult.ActionPerformed) {
+                                viewModel.data.add(item)
+                                viewModel.save(item)
+                            }
+                        }
+                    }
+
+                    Swipeable(
+                        foreground = {
+                            ListItem(
+                                title = { Text(displayName) },
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = iconByStore[viewModel.storeByClass[item::class]]!!,
+                                        contentDescription = null
+                                    )
+                                },
+                                onClick = { },
+                                divider = index != viewModel.data.lastIndex
+                            )
+                        },
+                        fillColor = MaterialTheme.colorScheme.errorContainer,
+                        backgroundEnd = {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_baseline_delete_24),
+                                contentDescription = "delete",
+                            )
+                        },
+                        container = {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .animateItemPlacement()
+                                    .heightIn(
+                                        max =
+                                        if (!removed) Dp.Infinity
+                                        else with(LocalDensity.current) { heightAnimator.value.toDp() }
+                                    )
+                                    .onGloballyPositioned {
+                                        if (!removed) heightAnimator =
+                                            Animatable(it.size.height.toFloat())
+                                    },
+                                content = {
+                                    it()
+                                }
+                            )
+                        },
+                        rearActivated = { removed = true },
+                        fractionWidth = 50.dp
+                    )
+                }
+            }
         }
     }
 }
