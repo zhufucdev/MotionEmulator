@@ -14,6 +14,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.aspectRatio
@@ -24,12 +25,10 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.LocalContentColor
@@ -40,18 +39,15 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
-import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -80,20 +76,22 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.zhufucdev.sdk.findAsset
-import com.zhufucdev.motion_emulator.BuildConfig
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zhufucdev.motion_emulator.R
 import com.zhufucdev.motion_emulator.extension.UPDATE_FILE_PROVIDER_AUTHORITY
-import com.zhufucdev.motion_emulator.extension.defaultKtorClient
 import com.zhufucdev.motion_emulator.extension.insert
 import com.zhufucdev.motion_emulator.plugin.Plugin
 import com.zhufucdev.motion_emulator.plugin.PluginDownloader
 import com.zhufucdev.motion_emulator.plugin.PluginUpdater
-import com.zhufucdev.motion_emulator.ui.CaptionText
-import com.zhufucdev.motion_emulator.ui.TooltipHost
-import com.zhufucdev.motion_emulator.ui.TooltipScope
+import com.zhufucdev.motion_emulator.ui.component.CaptionText
+import com.zhufucdev.motion_emulator.ui.component.TooltipHost
+import com.zhufucdev.motion_emulator.ui.component.TooltipScope
+import com.zhufucdev.motion_emulator.ui.composition.ScaffoldElements
+import com.zhufucdev.motion_emulator.ui.model.AppViewModel
+import com.zhufucdev.motion_emulator.ui.model.PluginViewModel
 import com.zhufucdev.motion_emulator.ui.theme.MotionEmulatorTheme
-import com.zhufucdev.motion_emulator.ui.theme.paddingCommon
+import com.zhufucdev.motion_emulator.ui.theme.PaddingCommon
+import com.zhufucdev.motion_emulator.ui.theme.PaddingLarge
 import com.zhufucdev.update.InstallationPermissionContract
 import com.zhufucdev.update.UpdaterStatus
 import com.zhufucdev.update.canInstallUpdate
@@ -104,29 +102,27 @@ import java.io.File
 import kotlin.math.max
 
 @Composable
-fun PluginsApp(
-    onBack: () -> Unit,
-    plugins: List<PluginItem>,
-    onSettingsChanged: (enabled: List<PluginItem>) -> Unit = {}
-) {
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(
-        rememberTopAppBarState()
-    )
+fun PluginsApp(paddingValues: PaddingValues) {
+    ScaffoldElements {
+        noFloatingButton()
+    }
+
+    val model = viewModel<PluginViewModel>()
     val snackbars = remember { SnackbarHostState() }
     val listState = rememberLazyListState()
     var listBounds by remember {
         mutableStateOf<Rect?>(null)
     }
-    val enabled = remember(plugins) {
-        plugins.filter { it.enabled }.toMutableStateList()
+    val enabled = remember(model.plugins) {
+        model.plugins.filter { it.enabled }.toMutableStateList()
     }
-    val disabled = remember(plugins) {
-        plugins.filter { !it.enabled }.toMutableStateList()
+    val disabled = remember(model.plugins) {
+        model.plugins.filter { !it.enabled }.toMutableStateList()
     }
-    val downloadable = remember { mutableStateListOf<PluginItem>() }
+    val downloadable by model.downloadable.collectAsState(initial = emptyList())
     val disabledList by remember(disabled) {
         derivedStateOf {
-            disabled + downloadable.filter { edge -> !plugins.any { it.id == edge.id } }
+            disabled + downloadable.filter { edge -> !model.plugins.any { it.id == edge.id } }
         }
     }
 
@@ -141,7 +137,7 @@ fun PluginsApp(
             }
         }
     }
-    val onDrop: (PluginItem) -> Unit = remember(plugins) {
+    val onDrop: (PluginItem) -> Unit = remember(model.plugins) {
         {
             val disabledRelatedIndex = hoveringItemIndex - max(1, enabled.size) - 2
             if (disabledRelatedIndex >= 0) {
@@ -167,34 +163,22 @@ fun PluginsApp(
                     }
                 }
             }
-            onSettingsChanged(enabled)
+            model.save(enabled)
             floating = null
         }
     }
 
-    LaunchedEffect(plugins) {
-        if (downloadable.isEmpty()) {
-            val queries = defaultKtorClient.findAsset(BuildConfig.server_uri, "me", "plugin")
-            downloadable.addAll(queries.map {
-                it.packageId?.let { plugins.firstOrNull { p -> p.id == it } } ?: it.toPluginItem()
-            })
-        }
-    }
-
     TooltipHost {
+        val appModel = viewModel<AppViewModel>()
         Scaffold(
-            topBar = {
-                PluginsAppTopBar(
-                    scrollBehavior = scrollBehavior, onNavigateBack = onBack
-                )
-            },
-            modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-            snackbarHost = { SnackbarHost(snackbars) }
-        ) { paddingValues ->
+            snackbarHost = { SnackbarHost(snackbars) },
+            modifier = Modifier.nestedScroll(appModel.scrollBehavior.nestedScrollConnection)
+        ) { p ->
             LazyColumn(
                 state = listState,
                 modifier = Modifier
                     .padding(paddingValues)
+                    .padding(top = PaddingLarge, bottom = p.calculateBottomPadding())
                     .onGloballyPositioned {
                         listBounds = it.boundsInWindow()
                     }
@@ -341,21 +325,11 @@ private fun Modifier.dragTarget(
 @Composable
 private fun TooltipScope.PluginsAppTopBar(
     scrollBehavior: TopAppBarScrollBehavior,
-    onNavigateBack: () -> Unit
 ) {
-    LargeTopAppBar(title = { Text(text = stringResource(id = R.string.title_activity_plugin)) },
-        scrollBehavior = scrollBehavior,
-        navigationIcon = {
-            IconButton(
-                onClick = onNavigateBack,
-                modifier = Modifier.tooltip { Text(text = stringResource(R.string.action_navigate_up)) }
-            ) {
-                Icon(
-                    Icons.AutoMirrored.Default.ArrowBack,
-                    contentDescription = stringResource(R.string.action_navigate_up)
-                )
-            }
-        })
+    LargeTopAppBar(
+        title = { Text(text = stringResource(id = R.string.title_activity_plugin)) },
+        scrollBehavior = scrollBehavior
+    )
 }
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -484,7 +458,7 @@ private fun LazyListScope.operativeArea(
                     item = it,
                     progress = downloadProgress,
                     modifier = Modifier.fillMaxWidth(),
-                    innerModifier = Modifier.padding(horizontal = paddingCommon * 2)
+                    innerModifier = Modifier.padding(horizontal = PaddingCommon * 2)
                 )
             }
         }
@@ -517,7 +491,7 @@ private fun LazyListScope.operativeArea(
             visible = plugins.isEmpty(),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 36.dp, vertical = paddingCommon)
+                .padding(horizontal = 36.dp, vertical = PaddingCommon)
                 .aspectRatio(ratio)
         )
     }
@@ -548,7 +522,7 @@ private fun PluginItemView(
 
         Row(
             modifier = Modifier
-                .padding(paddingCommon)
+                .padding(PaddingCommon)
                 .then(innerModifier),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -586,7 +560,7 @@ private fun PluginItemView(
             // titles
             Column(
                 Modifier
-                    .padding(start = paddingCommon)
+                    .padding(start = PaddingCommon)
                     .fillMaxWidth()
             ) {
                 Text(text = item.title, style = MaterialTheme.typography.titleSmall)
@@ -699,6 +673,6 @@ private fun DropArea(
 @Composable
 fun PluginsAppPreview() {
     MotionEmulatorTheme {
-        PluginsApp(onBack = {}, plugins = emptyList())
+        PluginsApp(PaddingValues(0.dp))
     }
 }

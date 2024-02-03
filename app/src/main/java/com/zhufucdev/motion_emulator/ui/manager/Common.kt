@@ -11,8 +11,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import com.zhufucdev.motion_emulator.R
-import com.zhufucdev.motion_emulator.ui.VerticalSpacer
-import com.zhufucdev.motion_emulator.ui.theme.paddingCommon
+import com.zhufucdev.motion_emulator.ui.component.VerticalSpacer
+import com.zhufucdev.motion_emulator.ui.theme.PaddingCommon
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.seconds
 
@@ -20,7 +20,7 @@ fun LazyListScope.basicEditItems(
     id: String,
     name: String,
     onNameChanged: (String) -> Unit,
-    bottomMargin: Dp = paddingCommon * 2,
+    bottomMargin: Dp = PaddingCommon * 2,
     icon: @Composable () -> Unit
 ) {
     item {
@@ -103,19 +103,19 @@ fun ListItem(
     Column {
         Surface(onClick = onClick) {
             Row(
-                Modifier.padding(horizontal = paddingCommon * 2, vertical = paddingCommon)
+                Modifier.padding(horizontal = PaddingCommon * 2, vertical = PaddingCommon)
                     .then(modifier),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 leadingIcon()
-                Spacer(Modifier.width(paddingCommon * 2))
+                Spacer(Modifier.width(PaddingCommon * 2))
                 CompositionLocalProvider(LocalTextStyle provides MaterialTheme.typography.bodyLarge) {
                     title()
                 }
             }
         }
         if (divider) {
-            Divider(Modifier.padding(horizontal = paddingCommon))
+            HorizontalDivider(Modifier.padding(horizontal = PaddingCommon))
         }
     }
 }

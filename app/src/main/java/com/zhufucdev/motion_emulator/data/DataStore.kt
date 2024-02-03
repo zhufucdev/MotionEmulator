@@ -10,7 +10,7 @@ import java.io.File
 
 /**
  * Abstraction of method set to store and read
- * simulation data
+ * simulation data (or any [Data])
  */
 @Suppress("UNCHECKED_CAST")
 @OptIn(ExperimentalSerializationApi::class)
@@ -18,6 +18,9 @@ abstract class DataStore<T : Data> {
     private val data = sortedMapOf<String, T>()
     private lateinit var rootDir: File
 
+    /**
+     * Files would be saved as [typeName]_[Data.id].json (aka [Data.storeName])
+     */
     abstract val typeName: String
     protected abstract val dataSerializer: KSerializer<T>
 

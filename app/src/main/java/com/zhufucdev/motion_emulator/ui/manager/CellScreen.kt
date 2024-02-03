@@ -14,8 +14,8 @@ import androidx.compose.ui.res.stringResource
 import com.zhufucdev.me.stub.CellTimeline
 import com.zhufucdev.motion_emulator.R
 import com.zhufucdev.motion_emulator.extension.effectiveTimeFormat
-import com.zhufucdev.motion_emulator.ui.theme.paddingCard
-import com.zhufucdev.motion_emulator.ui.theme.paddingSmall
+import com.zhufucdev.motion_emulator.ui.theme.PaddingCard
+import com.zhufucdev.motion_emulator.ui.theme.PaddingSmall
 
 @Composable
 fun CellScreen(viewModel: EditorViewModel<CellTimeline>) {
@@ -23,14 +23,14 @@ fun CellScreen(viewModel: EditorViewModel<CellTimeline>) {
     val formatter = remember { context.effectiveTimeFormat() }
 
     DataList(viewModel) {
-        Column(Modifier.padding(paddingCard)) {
+        Column(Modifier.padding(PaddingCard)) {
             Text(text = it.getDisplayName(formatter), style = MaterialTheme.typography.titleMedium)
-            Spacer(modifier = Modifier.height(paddingSmall))
+            Spacer(modifier = Modifier.height(PaddingSmall))
             Text(
                 text = stringResource(R.string.text_pieces_of_record, it.moments.size),
                 style = MaterialTheme.typography.labelSmall
             )
-            Spacer(modifier = Modifier.height(paddingSmall))
+            Spacer(modifier = Modifier.height(PaddingSmall))
             Text(text = it.id, style = MaterialTheme.typography.labelSmall)
         }
     }

@@ -20,9 +20,9 @@ import com.zhufucdev.motion_emulator.extension.effectiveTimeFormat
 import com.zhufucdev.motion_emulator.extension.estimateSpeed
 import com.zhufucdev.motion_emulator.extension.estimateTimespan
 import com.zhufucdev.me.stub.Motion
-import com.zhufucdev.motion_emulator.ui.theme.paddingCard
-import com.zhufucdev.motion_emulator.ui.theme.paddingSmall
-import com.zhufucdev.me.stub.toFixed
+import com.zhufucdev.motion_emulator.extension.toFixed
+import com.zhufucdev.motion_emulator.ui.theme.PaddingCard
+import com.zhufucdev.motion_emulator.ui.theme.PaddingSmall
 import kotlin.random.Random
 import kotlin.time.DurationUnit
 
@@ -32,9 +32,9 @@ fun MotionScreen(viewModel: EditorViewModel<Motion>) {
     val formatter = remember { context.effectiveTimeFormat() }
 
     DataList(viewModel) {
-        Column(Modifier.padding(paddingCard)) {
+        Column(Modifier.padding(PaddingCard)) {
             Text(text = it.getDisplayName(formatter), style = MaterialTheme.typography.titleMedium)
-            Spacer(modifier = Modifier.height(paddingSmall))
+            Spacer(modifier = Modifier.height(PaddingSmall))
             Text(
                 text = stringResource(
                     R.string.text_in_duration,
@@ -42,12 +42,12 @@ fun MotionScreen(viewModel: EditorViewModel<Motion>) {
                 ) + (it.estimateSpeed()?.let {
                     ", " + stringResource(
                         R.string.text_estimated,
-                        it.toFixed(2) + stringResource(R.string.suffix_velocity)
+                        stringResource(R.string.suffix_velocity, it.toFloat().toFixed(2))
                     )
                 } ?: ""),
                 style = MaterialTheme.typography.labelSmall
             )
-            Spacer(modifier = Modifier.height(paddingSmall))
+            Spacer(modifier = Modifier.height(PaddingSmall))
             Text(text = it.id, style = MaterialTheme.typography.labelSmall)
         }
     }

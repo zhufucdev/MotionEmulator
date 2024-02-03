@@ -8,8 +8,8 @@ import androidx.core.app.NotificationCompat
 import androidx.work.CoroutineWorker
 import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
-import com.zhufucdev.motion_emulator.ui.EmulateActivity
 import com.zhufucdev.motion_emulator.R
+import com.zhufucdev.motion_emulator.ui.MainActivity
 import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.seconds
@@ -45,7 +45,7 @@ class EmulationMonitorWorker(appContext: Context, workerParameters: WorkerParame
         val determinePendingIntent =
             PendingIntent.getBroadcast(applicationContext, 0, determineIntent, FLAG_IMMUTABLE)
         val contentIntend =
-            Intent(applicationContext, EmulateActivity::class.java)
+            Intent(applicationContext, MainActivity::class.java)
         val contentPendingIntent =
             PendingIntent.getActivity(applicationContext, 0, contentIntend, FLAG_IMMUTABLE)
 

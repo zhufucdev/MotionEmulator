@@ -11,8 +11,8 @@ import com.zhufucdev.me.stub.Point
 import com.zhufucdev.me.stub.toPoint
 import com.zhufucdev.motion_emulator.BuildConfig
 import com.zhufucdev.motion_emulator.extension.defaultKtorClient
+import com.zhufucdev.motion_emulator.extension.toFixed
 import com.zhufucdev.motion_emulator.extension.toPoint
-import com.zhufucdev.me.stub.toFixed
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
@@ -33,7 +33,7 @@ class AMapPoiEngine(private val context: Context) : PoiSearchEngine {
     override suspend fun search(point: Point): Poi? {
         val req = defaultKtorClient.get("https://restapi.amap.com/v3/geocode/regeo") {
             parameter("key", BuildConfig.amapwebkey)
-            parameter("location", "${point.longitude.toFixed(6)},${point.latitude.toFixed(6)}")
+            parameter("location", "${point.longitude.toFloat().toFixed(6)},${point.latitude.toFloat().toFixed(6)}")
         }
         if (!req.status.isSuccess()) return null
         val res = req.body<JsonObject>()

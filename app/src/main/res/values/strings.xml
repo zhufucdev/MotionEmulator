@@ -40,7 +40,7 @@
     <string name="title_velocity">Velocity</string>
     <string name="text_field_must_not_empty">must not be empty</string>
     <string name="text_field_must_not_neg_or_zero">must not be zero or negative</string>
-    <string name="suffix_velocity" translatable="false">m/s</string>
+    <string name="suffix_velocity" translatable="false">%s m/s</string>
     <string name="title_channel_emulation">Emulation Activity</string>
     <string name="title_emulation_ongoing">Emulation Ongoing</string>
     <string name="text_emulation_ongoing">Click here to see more detail</string>
@@ -214,4 +214,5 @@
     <string name="title_permission_read">Insight into Settings of Motion Emulator</string>
     <string name="text_permission_read">Allows this app to get information about settings in Motion Emulator, emulation method and server address for example.</string>
     <string name="text_asset_fetch_failed">Failed to fetch release asset</string>
+    <string name="title_data">Data</string>
 </resources>

@@ -3,14 +3,14 @@ package com.zhufucdev.motion_emulator.provider
 import android.content.Context
 import android.util.Log
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils
-import com.zhufucdev.motion_emulator.extension.sharedPreferences
-import com.zhufucdev.motion_emulator.plugin.Plugins
-import com.zhufucdev.motion_emulator.provider.Scheduler.incomingAgentStateOf
-import com.zhufucdev.motion_emulator.provider.Scheduler.instance
 import com.zhufucdev.me.stub.AgentState
 import com.zhufucdev.me.stub.Emulation
 import com.zhufucdev.me.stub.EmulationInfo
 import com.zhufucdev.me.stub.Intermediate
+import com.zhufucdev.motion_emulator.extension.sharedPreferences
+import com.zhufucdev.motion_emulator.plugin.Plugins
+import com.zhufucdev.motion_emulator.provider.Scheduler.incomingAgentStateOf
+import com.zhufucdev.motion_emulator.provider.Scheduler.instance
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.deserialize
 import io.ktor.serialization.kotlinx.KotlinxWebsocketSerializationConverter
@@ -47,20 +47,9 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.protobuf.ProtoBuf
 import kotlin.collections.set
 import kotlin.coroutines.resume
-
-@Serializable
-data class EmulationRef(
-    val trace: String,
-    val motion: String,
-    val cells: String,
-    val velocity: Double,
-    val repeat: Int,
-    val satelliteCount: Int
-)
 
 /**
  * The lifecycle of an agent:

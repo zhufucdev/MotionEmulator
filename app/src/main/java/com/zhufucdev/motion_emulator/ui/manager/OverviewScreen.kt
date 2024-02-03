@@ -26,10 +26,10 @@ import com.zhufucdev.me.stub.Data
 import com.zhufucdev.motion_emulator.extension.FILE_PROVIDER_AUTHORITY
 import com.zhufucdev.motion_emulator.extension.dateString
 import com.zhufucdev.motion_emulator.extension.effectiveTimeFormat
-import com.zhufucdev.motion_emulator.ui.VerticalSpacer
 import com.zhufucdev.motion_emulator.ui.component.Expandable
-import com.zhufucdev.motion_emulator.ui.theme.paddingCommon
-import com.zhufucdev.motion_emulator.ui.theme.paddingSmall
+import com.zhufucdev.motion_emulator.ui.component.VerticalSpacer
+import com.zhufucdev.motion_emulator.ui.theme.PaddingCommon
+import com.zhufucdev.motion_emulator.ui.theme.PaddingSmall
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -192,7 +192,7 @@ private fun SheetContent(onClick: (Map<Data, String>) -> Unit) {
             Text(
                 text = stringResource(R.string.title_select_to_export),
                 style = MaterialTheme.typography.headlineMedium,
-                modifier = Modifier.padding(start = paddingCommon * 2, top = paddingSmall, bottom = paddingCommon)
+                modifier = Modifier.padding(start = PaddingCommon * 2, top = PaddingSmall, bottom = PaddingCommon)
             )
         }
 
@@ -251,7 +251,7 @@ private fun SheetContent(onClick: (Map<Data, String>) -> Unit) {
 
         item {
             Row(
-                modifier = Modifier.fillMaxWidth().padding(paddingCommon),
+                modifier = Modifier.fillMaxWidth().padding(PaddingCommon),
                 horizontalArrangement = Arrangement.End
             ) {
                 Button(
@@ -282,7 +282,7 @@ private fun LazyItemScope.SelectableItem(
     Column(Modifier.fillParentMaxWidth()) {
         ConstraintLayout(
             modifier = Modifier.clickable { onSelectedChanged(!selected) }
-                .padding(start = paddingCommon * 2, top = paddingCommon, bottom = paddingCommon)
+                .padding(start = PaddingCommon * 2, top = PaddingCommon, bottom = PaddingCommon)
                 .fillMaxWidth(),
         ) {
             val (content, box) = createRefs()
@@ -313,7 +313,7 @@ private fun LazyItemScope.SelectableItem(
                     end.linkTo(parent.end)
                     bottom.linkTo(parent.bottom)
                 }
-                    .padding(end = paddingCommon)
+                    .padding(end = PaddingCommon)
             )
         }
 

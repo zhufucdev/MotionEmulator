@@ -42,11 +42,11 @@ import com.zhufucdev.motion_emulator.data.*
 import com.zhufucdev.motion_emulator.extension.insert
 import com.zhufucdev.motion_emulator.extension.toOffset
 import com.zhufucdev.motion_emulator.extension.toVector2d
-import com.zhufucdev.motion_emulator.ui.CaptionText
-import com.zhufucdev.motion_emulator.ui.VerticalSpacer
 import com.zhufucdev.motion_emulator.ui.component.Appendix
+import com.zhufucdev.motion_emulator.ui.component.CaptionText
 import com.zhufucdev.motion_emulator.ui.component.Expandable
 import com.zhufucdev.motion_emulator.ui.component.Swipeable
+import com.zhufucdev.motion_emulator.ui.component.VerticalSpacer
 import com.zhufucdev.motion_emulator.ui.component.dragDroppable
 import com.zhufucdev.motion_emulator.ui.theme.*
 import kotlinx.coroutines.*
@@ -113,7 +113,7 @@ fun TraceEditor(target: Trace, viewModel: EditorViewModel<Trace>) {
 
     LazyColumn(
         modifier = Modifier.fillMaxWidth(),
-        contentPadding = PaddingValues(paddingCommon),
+        contentPadding = PaddingValues(PaddingCommon),
         state = listState
     ) {
         basicEditItems(
@@ -124,7 +124,7 @@ fun TraceEditor(target: Trace, viewModel: EditorViewModel<Trace>) {
                 viewModel.onModify(target.copy(name = rename))
             },
             icon = { Icon(painterResource(R.drawable.ic_baseline_map_24), contentDescription = null) },
-            bottomMargin = paddingCommon
+            bottomMargin = PaddingCommon
         )
 
         item {
@@ -170,7 +170,7 @@ fun TraceEditor(target: Trace, viewModel: EditorViewModel<Trace>) {
                 }
             }
 
-            VerticalSpacer(paddingCommon * 2)
+            VerticalSpacer(PaddingCommon * 2)
         }
 
         item {
@@ -251,7 +251,7 @@ fun TraceEditor(target: Trace, viewModel: EditorViewModel<Trace>) {
         }
 
         item {
-            VerticalSpacer(paddingSmall)
+            VerticalSpacer(PaddingSmall)
             NewSaltItem(
                 modifier = Modifier.fillMaxWidth(),
                 onClick = { isFormula, type ->
@@ -273,7 +273,7 @@ fun TraceEditor(target: Trace, viewModel: EditorViewModel<Trace>) {
                 { Text(stringResource(R.string.text_salt_common)) },
                 { Text(stringResource(R.string.text_salt_trace)) },
                 iconDescription = stringResource(R.string.caption_adding_salt),
-                modifier = Modifier.fillParentMaxWidth().padding(paddingLarge)
+                modifier = Modifier.fillParentMaxWidth().padding(PaddingLarge)
             )
         }
     }
@@ -356,8 +356,8 @@ fun FactorCanvas(factor: MutableFactor) {
     }
     val boundingZero = measurer.measure(textZero).getBoundingBox(0)
     val boundingOne = measurer.measure(textOne).getBoundingBox(0)
-    val boundLeft = max(boundingZero.width, boundingOne.width) + with(LocalDensity.current) { paddingSmall.toPx() }
-    val boundBottom = max(boundingZero.height, boundingOne.height) + with(LocalDensity.current) { paddingSmall.toPx() }
+    val boundLeft = max(boundingZero.width, boundingOne.width) + with(LocalDensity.current) { PaddingSmall.toPx() }
+    val boundBottom = max(boundingZero.height, boundingOne.height) + with(LocalDensity.current) { PaddingSmall.toPx() }
 
     var drawingSize by remember { mutableStateOf(Size.Zero) }
     var controlStart by remember { mutableStateOf(Offset.Zero) }
@@ -507,7 +507,7 @@ fun NewSaltItem(modifier: Modifier = Modifier, onClick: (Boolean, SaltType) -> U
                 Icon(
                     painter = painterResource(id = R.drawable.ic_baseline_add_24),
                     contentDescription = null,
-                    modifier = Modifier.padding(actionMargin)
+                    modifier = Modifier.padding(ActionMargin)
                 )
                 Text(stringResource(id = R.string.action_add))
             }
@@ -517,11 +517,11 @@ fun NewSaltItem(modifier: Modifier = Modifier, onClick: (Boolean, SaltType) -> U
             expanded = menuExpended,
             onDismissRequest = { menuExpended = false },
             offset = pressPoint,
-            modifier = Modifier.padding(paddingSmall)
+            modifier = Modifier.padding(PaddingSmall)
         ) {
             CaptionText(
                 text = stringResource(R.string.caption_adding_salt),
-                modifier = Modifier.padding(start = paddingCommon, bottom = paddingSmall)
+                modifier = Modifier.padding(start = PaddingCommon, bottom = PaddingSmall)
             )
 
             DropdownMenuItem(
@@ -638,7 +638,7 @@ fun RotationItem(formula: MutableSaltElement, onRemove: () -> Unit) {
                                 style = MaterialTheme.typography.labelLarge,
                                 color = MaterialTheme.colorScheme.onSurface,
                                 modifier = Modifier
-                                    .padding(start = paddingSmall)
+                                    .padding(start = PaddingSmall)
                                     .constrainAs(t) {
                                         top.linkTo(parent.top)
                                         start.linkTo(parent.start)
@@ -684,7 +684,7 @@ fun RotationItem(formula: MutableSaltElement, onRemove: () -> Unit) {
                                 IconButton(
                                     onClick = { expanded = true },
                                     colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
-                                    modifier = Modifier.offset(x = paddingCommon)
+                                    modifier = Modifier.offset(x = PaddingCommon)
                                 ) {
                                     Icon(
                                         painter = painterResource(R.drawable.ic_baseline_functions_24),
@@ -768,7 +768,7 @@ fun CustomMatrixItem(formula: MutableSaltElement, onRemove: () -> Unit) {
                         onValueChange = { formula.values[0] = it },
                         modifier = Modifier
                             .weight(1F)
-                            .padding(end = paddingSmall)
+                            .padding(end = PaddingSmall)
                     )
 
                     SaltTextField(
@@ -786,7 +786,7 @@ fun CustomMatrixItem(formula: MutableSaltElement, onRemove: () -> Unit) {
                         onValueChange = { formula.values[2] = it },
                         modifier = Modifier
                             .weight(1F)
-                            .padding(end = paddingSmall)
+                            .padding(end = PaddingSmall)
                     )
 
                     SaltTextField(
@@ -842,7 +842,7 @@ fun SaltTextField(
 fun FormulaMenuContent(onClick: (FormulaExpress) -> Unit) {
     CaptionText(
         text = stringResource(R.string.caption_insert_formula),
-        modifier = Modifier.padding(start = paddingCommon, bottom = paddingSmall)
+        modifier = Modifier.padding(start = PaddingCommon, bottom = PaddingSmall)
     )
     FormulaExpress.values().forEach {
         DropdownMenuItem(

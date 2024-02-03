@@ -18,8 +18,8 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
-import com.zhufucdev.motion_emulator.ui.theme.paddingCommon
-import com.zhufucdev.motion_emulator.ui.theme.paddingSmall
+import com.zhufucdev.motion_emulator.ui.theme.PaddingCommon
+import com.zhufucdev.motion_emulator.ui.theme.PaddingSmall
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.seconds
@@ -108,7 +108,7 @@ fun BottomSheetModal(
                     ) {
                         Box(
                             Modifier
-                                .padding(top = paddingCommon, bottom = paddingSmall)
+                                .padding(top = PaddingCommon, bottom = PaddingSmall)
                                 .size(width = 24.dp, height = 4.dp)
                                 .background(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,

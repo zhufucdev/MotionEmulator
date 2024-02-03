@@ -63,7 +63,6 @@ dependencies {
     // Internal
     implementation(libs.sdk)
     implementation(libs.stub)
-    implementation(libs.plugin)
     implementation(libs.update)
     // Ktor
     implementation(libs.ktor.client.jvm)
@@ -97,6 +96,7 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.constraintlayout.compose)
     implementation(libs.androidx.compose.mdi)
+    implementation(libs.androidx.material3.window.size)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)

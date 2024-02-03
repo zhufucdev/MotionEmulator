@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -23,6 +24,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -31,17 +33,22 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.zhufucdev.me.stub.Data
 import com.zhufucdev.motion_emulator.R
-import com.zhufucdev.motion_emulator.ui.TooltipHost
-import com.zhufucdev.motion_emulator.ui.TooltipScope
 import com.zhufucdev.motion_emulator.ui.component.BottomSheetModal
 import com.zhufucdev.motion_emulator.ui.component.BottomSheetModalState
 import com.zhufucdev.motion_emulator.ui.component.Swipeable
+import com.zhufucdev.motion_emulator.ui.component.TooltipHost
+import com.zhufucdev.motion_emulator.ui.component.TooltipScope
+import com.zhufucdev.motion_emulator.ui.composition.ScaffoldElements
+import com.zhufucdev.motion_emulator.ui.model.AppViewModel
 import com.zhufucdev.motion_emulator.ui.theme.MotionEmulatorTheme
-import com.zhufucdev.motion_emulator.ui.theme.paddingCommon
+import com.zhufucdev.motion_emulator.ui.theme.PaddingCommon
 
 @Composable
-fun ManagerApp(navigateUp: () -> Unit) {
-    val appbarBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+fun ManagerApp(paddingValues: PaddingValues) {
+    ScaffoldElements {
+        noFloatingButton()
+    }
+
     val navController = rememberNavController()
     val snackbarState = remember { SnackbarHostState() }
     val bottomSheetState = remember { BottomSheetModalState() }
@@ -59,53 +66,28 @@ fun ManagerApp(navigateUp: () -> Unit) {
 
     BottomSheetModal(state = bottomSheetState) {
         TooltipHost {
+            val appModel = viewModel<AppViewModel>()
             Scaffold(
                 modifier = Modifier
                     .fillMaxSize()
-                    .nestedScroll(appbarBehavior.nestedScrollConnection),
-                topBar = {
-                    AppBar(
-                        onBackPressed = { if (!navController.navigateUp()) navigateUp() },
-                        scrollBehavior = appbarBehavior
-                    )
-                },
-                bottomBar = { AppNavigationBar(navController, screenProviders) },
+                    .nestedScroll(appModel.scrollBehavior.nestedScrollConnection),
                 snackbarHost = { SnackbarHost(snackbarState) }
-            ) {
-                Box(Modifier.padding(it)) {
-                    NavHost(
-                        navController = navController,
-                        startDestination = screenProviders.value.first().screen.name
-                    ) {
-                        screenProviders.value.forEach { para ->
-                            with(para) {
-                                compose(runtimeParameters)
-                            }
-                        }
-                    }
+            ) { _ ->
+                Box(Modifier.padding(paddingValues)) {
+//                    NavHost(
+//                        navController = navController,
+//                        startDestination = screenProviders.value.first().screen.name
+//                    ) {
+//                        screenProviders.value.forEach { para ->
+//                            with(para) {
+//                                compose(runtimeParameters)
+//                            }
+//                        }
+//                    }
                 }
             }
         }
     }
-}
-
-@Composable
-private fun TooltipScope.AppBar(onBackPressed: () -> Unit, scrollBehavior: TopAppBarScrollBehavior) {
-    TopAppBar(
-        title = { Text(text = stringResource(R.string.title_manager)) },
-        navigationIcon = {
-            IconButton(
-                onClick = onBackPressed,
-                modifier = Modifier.tooltip { Text(text = stringResource(R.string.action_navigate_up)) }
-            ) {
-                Icon(
-                    Icons.Default.ArrowBack,
-                    contentDescription = stringResource(R.string.action_navigate_up)
-                )
-            }
-        },
-        scrollBehavior = scrollBehavior
-    )
 }
 
 @Composable
@@ -142,7 +124,7 @@ private fun AppNavigationBar(navController: NavController, provider: ScreenProvi
 fun ActivityPreview() {
     MotionEmulatorTheme {
         CompositionLocalProvider(LocalScreenProviders provides ScreenProviders(listOf(randomizedMotionData()))) {
-            ManagerApp(navigateUp = {})
+            ManagerApp(PaddingValues(0.dp))
         }
     }
 }
@@ -168,8 +150,8 @@ fun <T : Data> DataList(
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(paddingCommon),
-        verticalArrangement = Arrangement.spacedBy(paddingCommon),
+        contentPadding = PaddingValues(PaddingCommon),
+        verticalArrangement = Arrangement.spacedBy(PaddingCommon),
         state = state
     ) {
         viewModel.data.forEach { item ->

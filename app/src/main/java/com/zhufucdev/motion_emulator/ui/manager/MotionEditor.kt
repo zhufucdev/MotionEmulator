@@ -11,14 +11,14 @@ import androidx.compose.ui.res.painterResource
 import com.zhufucdev.motion_emulator.R
 import com.zhufucdev.me.stub.Motion
 import com.zhufucdev.motion_emulator.extension.effectiveTimeFormat
-import com.zhufucdev.motion_emulator.ui.theme.paddingCommon
+import com.zhufucdev.motion_emulator.ui.theme.PaddingCommon
 
 @Composable
 fun MotionEditor(target: Motion, viewModel: EditorViewModel<Motion>) {
     val context = LocalContext.current
     val formatter = remember { context.effectiveTimeFormat() }
 
-    Box(Modifier.padding(paddingCommon)) {
+    Box(Modifier.padding(PaddingCommon)) {
         BasicEdit(
             id = target.id,
             name = target.getDisplayName(formatter),

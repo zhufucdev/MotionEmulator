@@ -208,7 +208,7 @@ sealed class Screen(
     @Composable
     abstract fun <M : ManagerViewModel> List(viewModel: M)
 
-    object OverviewScreen :
+    data object OverviewScreen :
         Screen(
             name = "overview",
             titleId = R.string.title_overview,

@@ -4,7 +4,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import androidx.work.WorkManager
-import com.zhufucdev.motion_emulator.ui.emulate.WORK_NAME_MONITOR
 
 class EmulationMonitorReceiver : BroadcastReceiver() {
 
@@ -20,3 +19,4 @@ class EmulationMonitorReceiver : BroadcastReceiver() {
 }
 
 const val INTENT_ACTION_DETERMINE = "com.zhufucdev.motion_emulator.ACTION_DETERMINE"
+const val WORK_NAME_MONITOR = "com.zhufucdev.motion_emulator.monitor"
