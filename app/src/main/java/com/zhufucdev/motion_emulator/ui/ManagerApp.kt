@@ -198,7 +198,7 @@ fun ManagerApp(
     }
 
     val snackbarState = remember { SnackbarHostState() }
-
+    managerModel.snackbars = snackbarState
     TooltipHost {
         Scaffold(
             modifier = Modifier
