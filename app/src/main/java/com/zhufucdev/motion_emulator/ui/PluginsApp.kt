@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalMaterial3Api::class)
 
-package com.zhufucdev.motion_emulator.ui.plugin
+package com.zhufucdev.motion_emulator.ui
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.animation.AnimatedVisibility
@@ -86,8 +86,11 @@ import com.zhufucdev.motion_emulator.plugin.PluginUpdater
 import com.zhufucdev.motion_emulator.ui.component.CaptionText
 import com.zhufucdev.motion_emulator.ui.component.TooltipHost
 import com.zhufucdev.motion_emulator.ui.component.TooltipScope
+import com.zhufucdev.motion_emulator.ui.composition.LocalSnackbarProvider
 import com.zhufucdev.motion_emulator.ui.composition.ScaffoldElements
 import com.zhufucdev.motion_emulator.ui.model.AppViewModel
+import com.zhufucdev.motion_emulator.ui.model.PluginItem
+import com.zhufucdev.motion_emulator.ui.model.PluginItemState
 import com.zhufucdev.motion_emulator.ui.model.PluginViewModel
 import com.zhufucdev.motion_emulator.ui.theme.MotionEmulatorTheme
 import com.zhufucdev.motion_emulator.ui.theme.PaddingCommon
@@ -101,6 +104,7 @@ import kotlinx.coroutines.launch
 import java.io.File
 import kotlin.math.max
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PluginsApp(paddingValues: PaddingValues) {
     ScaffoldElements {
@@ -108,7 +112,7 @@ fun PluginsApp(paddingValues: PaddingValues) {
     }
 
     val model = viewModel<PluginViewModel>()
-    val snackbars = remember { SnackbarHostState() }
+    val snackbars = LocalSnackbarProvider.current
     val listState = rememberLazyListState()
     var listBounds by remember {
         mutableStateOf<Rect?>(null)
@@ -171,14 +175,13 @@ fun PluginsApp(paddingValues: PaddingValues) {
     TooltipHost {
         val appModel = viewModel<AppViewModel>()
         Scaffold(
-            snackbarHost = { SnackbarHost(snackbars) },
             modifier = Modifier.nestedScroll(appModel.scrollBehavior.nestedScrollConnection)
-        ) { p ->
+        ) { _ ->
             LazyColumn(
                 state = listState,
                 modifier = Modifier
                     .padding(paddingValues)
-                    .padding(top = PaddingLarge, bottom = p.calculateBottomPadding())
+                    .padding(top = PaddingLarge)
                     .onGloballyPositioned {
                         listBounds = it.boundsInWindow()
                     }
@@ -199,7 +202,7 @@ fun PluginsApp(paddingValues: PaddingValues) {
                         }
                     },
                     plugins = enabled,
-                    snackbarHostState = snackbars,
+                    snackbarHostState = snackbars.controller!!,
                     isHovered = hoveringItemIndex == 1,
                     onPrepareDrag = { plugin, offset, pos ->
                         floating = FloatingItem(plugin, offset, pos)
@@ -226,7 +229,7 @@ fun PluginsApp(paddingValues: PaddingValues) {
                         }
                     },
                     plugins = disabledList,
-                    snackbarHostState = snackbars,
+                    snackbarHostState = snackbars.controller,
                     isHovered = hoveringItemIndex == enabled.size + 3,
                     onPrepareDrag = { plugin, offset, pos ->
                         floating = FloatingItem(plugin, offset, pos)

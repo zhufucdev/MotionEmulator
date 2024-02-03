@@ -1,4 +1,4 @@
-package com.zhufucdev.motion_emulator.ui.plugin
+package com.zhufucdev.motion_emulator.ui.model
 
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
