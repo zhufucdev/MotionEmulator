@@ -95,13 +95,15 @@ class MainActivity : ComponentActivity() {
                 data = data,
                 dataLoader = flow {
                     emit(false)
-                    withContext(Dispatchers.IO) {
-                        data.addAll(
-                            stores.flatMap {
-                                it.require(this@MainActivity)
-                                it.list()
-                            }.sortedBy { it.id }
-                        )
+                    if (data.isEmpty()) {
+                        withContext(Dispatchers.IO) {
+                            data.addAll(
+                                stores.flatMap {
+                                    it.require(this@MainActivity)
+                                    it.list()
+                                }.sortedBy { it.id }
+                            )
+                        }
                     }
                     emit(true)
                 },
