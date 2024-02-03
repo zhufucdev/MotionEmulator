@@ -6,10 +6,12 @@ import android.app.Activity
 import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animate
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,6 +22,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -36,7 +39,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
@@ -52,6 +56,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -61,6 +66,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -72,6 +79,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupProperties
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zhufucdev.me.stub.CellTimeline
@@ -84,6 +93,7 @@ import com.zhufucdev.motion_emulator.data.Traces
 import com.zhufucdev.motion_emulator.extension.dateString
 import com.zhufucdev.motion_emulator.extension.effectiveTimeFormat
 import com.zhufucdev.motion_emulator.ui.component.Expandable
+import com.zhufucdev.motion_emulator.ui.component.HorizontalSpacer
 import com.zhufucdev.motion_emulator.ui.component.Swipeable
 import com.zhufucdev.motion_emulator.ui.component.TooltipHost
 import com.zhufucdev.motion_emulator.ui.component.VerticalSpacer
@@ -104,34 +114,86 @@ fun ManagerApp(
     appModel: AppViewModel = viewModel(),
     managerModel: ManagerViewModel = viewModel()
 ) {
+    var actionTransition by remember {
+        mutableFloatStateOf(0f)
+    }
+    var showActions by remember {
+        mutableStateOf(false)
+    }
     ScaffoldElements {
         floatingActionButton {
-            var rotation by remember {
-                mutableFloatStateOf(0f)
-            }
-            var expanded by remember { mutableStateOf(true) }
-            LaunchedEffect(expanded) {
-                animate(
-                    initialValue = rotation,
-                    targetValue = if (!expanded) 45f else 0f
-                ) { v, _ ->
-                    rotation = v
+            val rotation by remember {
+                derivedStateOf {
+                    actionTransition * 135f
                 }
             }
-            ExtendedFloatingActionButton(
-                text = { Text(text = stringResource(id = R.string.action_add)) },
-                icon = {
+            val translation by remember {
+                derivedStateOf {
+                    (1 - actionTransition) * 24f
+                }
+            }
+            var expanded by remember { mutableStateOf(false) }
+            LaunchedEffect(expanded) {
+                if (expanded) {
+                    showActions = true
+                }
+                animate(
+                    initialValue = actionTransition,
+                    targetValue = if (expanded) 1f else 0f
+                ) { v, _ ->
+                    actionTransition = v
+                }
+                if (!expanded) {
+                    showActions = false
+                }
+            }
+            FloatingActionButton(
+                content = {
                     Icon(
                         imageVector = Icons.Default.Add,
                         contentDescription = "",
                         modifier = Modifier.rotate(rotation)
                     )
                 },
-                onClick = {
-                    expanded = !expanded
-                },
-                expanded = expanded
+                onClick = { expanded = !expanded }
             )
+
+            if (showActions) {
+                Popup(
+                    alignment = Alignment.BottomEnd,
+                    onDismissRequest = { expanded = false },
+                    properties = PopupProperties(focusable = true)
+                ) {
+                    Column(modifier = Modifier, horizontalAlignment = Alignment.End) {
+                        managerModel.stores.forEachIndexed { index, it ->
+                            VerticalSpacer()
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.End,
+                                modifier = Modifier
+                                    .offset(y = ((managerModel.stores.size - index - 1) * translation).dp)
+                                    .alpha(actionTransition)
+                            ) {
+                                Text(text = stringResource(id = nameIdByStore[it]!!), style = MaterialTheme.typography.titleSmall)
+                                HorizontalSpacer()
+                                FloatingActionButton(
+                                    onClick = {
+
+                                    },
+                                    content = {
+                                        Icon(
+                                            imageVector = iconByStore[it]!!,
+                                            contentDescription = null
+                                        )
+                                    },
+                                    elevation = FloatingActionButtonDefaults.elevation(0.dp),
+                                    modifier = Modifier.rotate(if (index == managerModel.stores.lastIndex) rotation - 135f else 0f)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -141,7 +203,8 @@ fun ManagerApp(
         Scaffold(
             modifier = Modifier
                 .fillMaxSize()
-                .nestedScroll(appModel.scrollBehavior.nestedScrollConnection),
+                .nestedScroll(appModel.scrollBehavior.nestedScrollConnection)
+                .alpha(1 - actionTransition * 0.7f),
             snackbarHost = { SnackbarHost(snackbarState) }
         ) { _ ->
             Box(Modifier.padding(paddingValues)) {
