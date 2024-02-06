@@ -11,7 +11,6 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.encodeToStream
 import java.io.OutputStream
-import java.text.DateFormat
 
 @Serializable
 data class EmulationRef(
@@ -23,16 +22,7 @@ data class EmulationRef(
     val velocity: Double,
     val repeat: Int,
     val satelliteCount: Int,
-) : Data {
-    override fun getDisplayName(format: DateFormat): String {
-        return name
-    }
-
-    @OptIn(ExperimentalSerializationApi::class)
-    override fun writeTo(stream: OutputStream) {
-        Json.encodeToStream(this, stream)
-    }
-}
+) : Data
 
 fun EmulationRef.emulation() = Emulation(
     trace = StoredBox(trace, Traces),

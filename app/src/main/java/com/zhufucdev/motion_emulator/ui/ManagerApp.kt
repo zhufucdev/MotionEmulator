@@ -78,13 +78,14 @@ import androidx.compose.ui.window.PopupProperties
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zhufucdev.me.stub.CellTimeline
-import com.zhufucdev.me.stub.Data
 import com.zhufucdev.me.stub.Motion
 import com.zhufucdev.motion_emulator.R
 import com.zhufucdev.motion_emulator.data.Cells
+import com.zhufucdev.motion_emulator.data.DataLoader
 import com.zhufucdev.motion_emulator.data.Motions
 import com.zhufucdev.motion_emulator.data.Traces
 import com.zhufucdev.motion_emulator.extension.dateString
+import com.zhufucdev.motion_emulator.extension.displayName
 import com.zhufucdev.motion_emulator.extension.effectiveTimeFormat
 import com.zhufucdev.motion_emulator.ui.component.CaptionText
 import com.zhufucdev.motion_emulator.ui.component.Expandable
@@ -104,7 +105,6 @@ import com.zhufucdev.motion_emulator.ui.theme.PaddingSmall
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.text.DateFormat
 import kotlin.time.Duration.Companion.seconds
 
 @Composable
@@ -234,7 +234,7 @@ fun OverviewScreen(viewModel: ManagerViewModel = viewModel()) {
     val coroutine = rememberCoroutineScope()
     val context = LocalContext.current
     var operation by remember { mutableStateOf(ExportType.File) }
-    var exporting by remember { mutableStateOf(mapOf<String, List<Data>>()) }
+    var exporting by remember { mutableStateOf(mapOf<String, List<DataLoader<*>>>()) }
     var openBottomModal by remember { mutableStateOf(false) }
     val formatter = remember { context.effectiveTimeFormat() }
     val snackbars = LocalSnackbarProvider.current
@@ -405,7 +405,7 @@ fun OverviewScreen(viewModel: ManagerViewModel = viewModel()) {
                     var heightAnimator by remember { mutableStateOf(Animatable(0F)) }
                     var removed by remember { mutableStateOf(false) }
                     val displayName = remember {
-                        item.getDisplayName(DateFormat.getDateTimeInstance())
+                        item.metadata.displayName(context)
                     }
 
                     LaunchedEffect(removed) {
@@ -431,7 +431,7 @@ fun OverviewScreen(viewModel: ManagerViewModel = viewModel()) {
                     Swipeable(
                         foreground = {
                             val navController = LocalNavControllerProvider.current
-                            val store = viewModel.storeByClass[item::class]!!
+                            val store = viewModel.storeByClass[item.clazz]!!
                             ListItem(
                                 title = { Text(displayName) },
                                 leadingIcon = {
@@ -488,10 +488,9 @@ private enum class ExportType {
 @Composable
 private fun SheetContent(
     viewModel: ManagerViewModel = viewModel(),
-    onClick: (Map<String, List<Data>>) -> Unit
+    onClick: (Map<String, List<DataLoader<*>>>) -> Unit
 ) {
     val context = LocalContext.current
-    val formatter = remember { context.effectiveTimeFormat() }
     val items = remember {
         viewModel.stores.associateWith { store ->
             viewModel.data.filter { it::class == store.clazz }.toMutableStateList()
@@ -529,7 +528,7 @@ private fun SheetContent(
                                 data.forEachIndexed { index, datum ->
                                     var selected by remember { mutableStateOf(true) }
                                     SelectableItem(
-                                        title = datum.getDisplayName(formatter),
+                                        title = datum.metadata.displayName(context),
                                         subtitle = datum.id,
                                         selected = selected,
                                         onSelectedChanged = { s ->
@@ -645,7 +644,7 @@ private fun LazyItemScope.SelectableItem(
 
 @Composable
 fun CellEditor(
-    target: CellTimeline,
+    target: DataLoader<CellTimeline>,
     paddingValues: PaddingValues,
     viewModel: ManagerViewModel = viewModel()
 ) {
@@ -655,7 +654,6 @@ fun CellEditor(
 
     val context = LocalContext.current
     val coroutine = rememberCoroutineScope()
-    val formatter = remember { context.effectiveTimeFormat() }
 
     Box(
         Modifier
@@ -663,12 +661,12 @@ fun CellEditor(
             .padding(paddingValues)) {
         BasicEdit(
             id = target.id,
-            name = target.getDisplayName(formatter),
+            name = target.metadata.displayName(context),
             onNameChanged = {
-                val newItem = target.copy(name = it)
-                viewModel.update(newItem)
+                val newValue = target.copy(metadata = target.metadata.copy(name = it))
+                viewModel.update(newValue)
                 coroutine.launch {
-                    viewModel.save(newItem)
+                    viewModel.save(newValue)
                 }
             },
             icon = {
@@ -683,7 +681,7 @@ fun CellEditor(
 
 @Composable
 fun MotionEditor(
-    target: Motion,
+    target: DataLoader<Motion>,
     paddingValues: PaddingValues,
     viewModel: ManagerViewModel = viewModel()
 ) {
@@ -693,7 +691,6 @@ fun MotionEditor(
 
     val context = LocalContext.current
     val coroutine = rememberCoroutineScope()
-    val formatter = remember { context.effectiveTimeFormat() }
 
     Box(
         Modifier
@@ -701,12 +698,12 @@ fun MotionEditor(
             .padding(paddingValues)) {
         BasicEdit(
             id = target.id,
-            name = target.getDisplayName(formatter),
+            name = target.metadata.displayName(context),
             onNameChanged = {
-                val newItem = target.copy(name = it)
-                viewModel.update(newItem)
+                val newValue = target.copy(metadata = target.metadata.copy(name = it))
+                viewModel.update(newValue)
                 coroutine.launch {
-                    viewModel.save(newItem)
+                    viewModel.save(newValue)
                 }
             },
             icon = {

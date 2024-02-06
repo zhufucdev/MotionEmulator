@@ -12,5 +12,5 @@ fun <T : Data> StoredBox(ref: String, store: DataStore<T>) =
     when (ref) {
         EMPTY_REF -> EmptyBox()
         BLOCK_REF -> BlockBox()
-        else -> store[ref]?.let { Box(it) } ?: EmptyBox()
+        else -> store[ref]?.let { Box(it.value) } ?: EmptyBox()
     }

@@ -14,7 +14,9 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.zhufucdev.me.stub.Data
 import com.zhufucdev.motion_emulator.BuildConfig
 import com.zhufucdev.motion_emulator.data.Cells
+import com.zhufucdev.motion_emulator.data.DataLoader
 import com.zhufucdev.motion_emulator.data.Emulations
+import com.zhufucdev.motion_emulator.data.LazyData
 import com.zhufucdev.motion_emulator.data.Motions
 import com.zhufucdev.motion_emulator.data.Traces
 import com.zhufucdev.motion_emulator.extension.AppUpdater
@@ -90,7 +92,7 @@ class MainActivity : ComponentActivity() {
 
         initializer {
             val stores = listOf(Traces, Motions, Cells)
-            val data = mutableStateListOf<Data>()
+            val data = mutableStateListOf<DataLoader<*>>()
             ManagerViewModel(
                 data = data,
                 dataLoader = flow {

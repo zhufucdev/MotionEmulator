@@ -135,7 +135,7 @@ object TelephonyRecorder {
 
             override fun summarize(): CellTimeline {
                 cancel()
-                return CellTimeline(NanoIdUtils.randomNanoId(), null, start, timeline)
+                return CellTimeline(NanoIdUtils.randomNanoId(), timeline)
             }
         }
     }
@@ -155,7 +155,7 @@ object TelephonyRecorder {
         }
 
         override fun summarize(): CellTimeline {
-            return CellTimeline(NanoIdUtils.randomNanoId(), null, 0, emptyList())
+            return CellTimeline(NanoIdUtils.randomNanoId(), emptyList())
         }
     }
 }

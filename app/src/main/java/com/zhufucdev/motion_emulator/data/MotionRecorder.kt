@@ -75,7 +75,7 @@ object MotionRecorder {
                     callbacks.remove(this)
                 }
 
-                return Motion(NanoIdUtils.randomNanoId(), null, start, moments, sensorsRequired)
+                return Motion(NanoIdUtils.randomNanoId(), moments, sensorsRequired)
             }
 
             override fun onUpdate(l: (MotionMoment) -> Unit) {

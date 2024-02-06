@@ -35,9 +35,11 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils
 import com.zhufucdev.me.stub.*
+import com.zhufucdev.me.stub.Metadata
 import com.zhufucdev.me.stub.Trace
 import com.zhufucdev.motion_emulator.R
 import com.zhufucdev.motion_emulator.data.*
+import com.zhufucdev.motion_emulator.extension.displayName
 import com.zhufucdev.motion_emulator.extension.insert
 import com.zhufucdev.motion_emulator.extension.toOffset
 import com.zhufucdev.motion_emulator.extension.toVector2d
@@ -57,22 +59,26 @@ import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun TraceEditor(target: Trace, paddingValues: PaddingValues, viewModel: ManagerViewModel = viewModel()) {
+fun TraceEditor(
+    target: DataLoader<Trace>,
+    paddingValues: PaddingValues,
+    viewModel: ManagerViewModel = viewModel()
+) {
     ScaffoldElements {
         noFloatingButton()
     }
 
-    var rename by remember { mutableStateOf(target.name) }
-    var coordSys by remember { mutableStateOf(target.coordinateSystem) }
     var formulaToken by remember { mutableStateOf(0L) }
     val lifecycleCoroutine = remember { CoroutineScope(Dispatchers.Main) }
-    val snackbars = LocalSnackbarProvider.current
     val context = LocalContext.current
+    val snackbars = LocalSnackbarProvider.current
+    var rename by remember { mutableStateOf(target.metadata.displayName(context)) }
+    var coordSys by remember { mutableStateOf(target.value.coordinateSystem) }
     val formulas = remember {
-        (target.salt ?: Salt2dData()).elements.map { it.mutable() }.toMutableStateList()
+        (target.value.salt ?: Salt2dData()).elements.map { it.mutable() }.toMutableStateList()
     }
     val factors = remember {
-        (target.salt ?: Salt2dData()).factors.map { it.mutable() }.toMutableStateList()
+        (target.value.salt ?: Salt2dData()).factors.map { it.mutable() }.toMutableStateList()
     }
     val listState = rememberLazyListState()
 
@@ -80,24 +86,26 @@ fun TraceEditor(target: Trace, paddingValues: PaddingValues, viewModel: ManagerV
         val captured = rename
         delay(1.seconds)
         if (rename == captured) {
-            viewModel.save(target.copy(name = rename))
+            viewModel.save(target.copy(metadata = target.metadata.copy(name = rename)))
         }
     }
 
     suspend fun commit() {
-        val salt = target.salt ?: Salt2dData()
+        val salt = target.value.salt ?: Salt2dData()
         viewModel.save(
-            target.copy(
-                name = rename,
-                salt =
-                if (factors.isEmpty() && formulas.isEmpty())
-                    null
-                else
-                    salt.copy(
-                        factors = factors.map { it.immutable() },
-                        elements = formulas.map { it.immutable() }
-                    ),
-                coordinateSystem = coordSys
+            WorkingData(
+                target.value.copy(
+                    salt =
+                    if (factors.isEmpty() && formulas.isEmpty())
+                        null
+                    else
+                        salt.copy(
+                            factors = factors.map { it.immutable() },
+                            elements = formulas.map { it.immutable() }
+                        ),
+                    coordinateSystem = coordSys
+                ),
+                target.metadata.copy(name = rename)
             )
         )
     }
@@ -133,7 +141,7 @@ fun TraceEditor(target: Trace, paddingValues: PaddingValues, viewModel: ManagerV
             onNameChanged = {
                 rename = it
                 lifecycleCoroutine.launch {
-                    viewModel.save(target.copy(name = rename))
+                    viewModel.save(target.copy(metadata = target.metadata.copy(name = rename)))
                 }
             },
             icon = {
@@ -181,7 +189,7 @@ fun TraceEditor(target: Trace, paddingValues: PaddingValues, viewModel: ManagerV
                         with(LocalDensity.current) { textfieldWidth.toDp() }
                     )
                 ) {
-                    CoordinateSystem.values().forEach {
+                    CoordinateSystem.entries.forEach {
                         DropdownMenuItem(
                             text = { Text(it.name) },
                             onClick = {
@@ -1035,7 +1043,9 @@ fun TraceEditorPreview() {
     }
 }
 
-private fun randomTraceData() = Trace(NanoIdUtils.randomNanoId(), "Near the moon", emptyList())
+private fun randomTraceData() =
+    WorkingData(Trace(NanoIdUtils.randomNanoId(), emptyList()), Metadata(0, name = "Near the moon"))
+
 private val saltTypeNames = mapOf(
     SaltType.Anchor to R.string.name_anchor,
     SaltType.Translation to R.string.name_translation,
