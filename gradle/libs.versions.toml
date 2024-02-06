@@ -1,5 +1,5 @@
 [versions]
-agp = "8.4.0-alpha07"
+agp = "8.4.0-alpha08"
 kotlin = "1.9.21"
 coreKtx = "1.12.0"
 preference = "1.2.1"
@@ -31,7 +31,7 @@ gmaps = "3.2.1"
 mapsUtils = "3.4.0"
 spongycastle = "1.58.0.0"
 
-stub = "1.1.1"
+stub = "1.1.2"
 update = "1.0.0"
 sdk = "1.0.0"
 
