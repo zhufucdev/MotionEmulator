@@ -522,7 +522,7 @@ private fun SheetContent(
                     },
                     body = {
                         val targetList = items[store]!!
-                        val data = targetList.toList()
+                        val data = remember { targetList.toList() }
                         if (data.isNotEmpty()) {
                             Column(Modifier.fillMaxWidth()) {
                                 data.forEachIndexed { index, datum ->
@@ -658,7 +658,8 @@ fun CellEditor(
     Box(
         Modifier
             .padding(PaddingCommon)
-            .padding(paddingValues)) {
+            .padding(paddingValues)
+    ) {
         BasicEdit(
             id = target.id,
             name = target.metadata.displayName(context),
@@ -695,7 +696,8 @@ fun MotionEditor(
     Box(
         Modifier
             .padding(PaddingCommon)
-            .padding(paddingValues)) {
+            .padding(paddingValues)
+    ) {
         BasicEdit(
             id = target.id,
             name = target.metadata.displayName(context),
