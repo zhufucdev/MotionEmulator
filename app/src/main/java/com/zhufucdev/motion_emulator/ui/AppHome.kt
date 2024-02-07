@@ -86,9 +86,7 @@ fun AppHome(windowSize: WindowSizeClass) {
                                 NavigationBarItem(
                                     selected = selected,
                                     onClick = {
-                                        if (!selected
-                                            || backStackEntry?.destination?.let { dest.isCurrent(it) } == false
-                                        ) {
+                                        if (!selected) {
                                             navController.navigate(dest.name)
                                         }
                                     },
@@ -112,9 +110,7 @@ fun AppHome(windowSize: WindowSizeClass) {
                             NavigationRailItem(
                                 selected = selected,
                                 onClick = {
-                                    if (!selected
-                                        || backStackEntry?.destination?.let { dest.isCurrent(it) } == false
-                                    ) {
+                                    if (!selected) {
                                         navController.navigate(dest.name)
                                     }
                                 },
@@ -138,9 +134,15 @@ fun AppHome(windowSize: WindowSizeClass) {
                     drawerContent = {
                         PermanentDrawerSheet {
                             NavigationDestinations.entries.forEach { dest ->
+                                val selected =
+                                    backStackEntry?.destination?.let { dest.selected(it) } == true
                                 NavigationDrawerItem(
-                                    selected = backStackEntry?.destination?.let { dest.selected(it) } == true,
-                                    onClick = { navController.navigate(dest.name) },
+                                    selected = selected,
+                                    onClick = {
+                                        if (!selected) {
+                                            navController.navigate(dest.name)
+                                        }
+                                    },
                                     icon = dest.icon,
                                     label = dest.label
                                 )
@@ -168,14 +170,14 @@ private fun NavContent(paddingValues: PaddingValues) {
         navController = LocalNavControllerProvider.current!!,
         startDestination = NavigationDestinations.Emulate.name
     ) {
-        composable(NavigationDestinations.Plugins.name.lowercase()) {
+        composable(NavigationDestinations.Plugins.route) {
             CompositionLocalProvider(
                 LocalViewModelStoreOwner provides provider
             ) {
                 PluginsApp(paddingValues)
             }
         }
-        composable(NavigationDestinations.Emulate.name.lowercase()) {
+        composable(NavigationDestinations.Emulate.route) {
             CompositionLocalProvider(
                 LocalViewModelStoreOwner provides provider
             ) {
@@ -184,7 +186,7 @@ private fun NavContent(paddingValues: PaddingValues) {
         }
         navigation(
             startDestination = "home",
-            route = NavigationDestinations.Data.name.lowercase()
+            route = NavigationDestinations.Data.route
         ) {
             composable("home") {
                 CompositionLocalProvider(LocalViewModelStoreOwner provides provider) {
@@ -265,6 +267,7 @@ private fun TopBar(scrollBehavior: TopAppBarScrollBehavior) {
 enum class NavigationDestinations(
     val label: @Composable () -> Unit,
     val icon: @Composable () -> Unit,
+    val route: String
 ) {
     Plugins(
         label = { Text(text = stringResource(id = R.string.title_activity_plugin)) },
@@ -273,7 +276,8 @@ enum class NavigationDestinations(
                 imageVector = Icons.Default.Extension,
                 contentDescription = null
             )
-        }
+        },
+        route = "plugins"
     ),
     Emulate(
         label = { Text(text = stringResource(id = R.string.title_emulate)) },
@@ -282,7 +286,8 @@ enum class NavigationDestinations(
                 imageVector = Icons.Default.AutoFixHigh,
                 contentDescription = null
             )
-        }
+        },
+        route = "emulate"
     ),
     Data(
         label = { Text(text = stringResource(id = R.string.title_data)) },
@@ -291,11 +296,13 @@ enum class NavigationDestinations(
                 imageVector = Icons.Default.Storage,
                 contentDescription = null
             )
-        }
+        },
+        route = "data"
     )
 }
 
 fun NavigationDestinations.selected(currentDest: NavDestination): Boolean =
     isCurrent(currentDest) || currentDest.hierarchy.any { isCurrent(it) }
 
-fun NavigationDestinations.isCurrent(currentDest: NavDestination) = currentDest.route == name.lowercase()
+fun NavigationDestinations.isCurrent(currentDest: NavDestination) =
+    currentDest.route == name.lowercase()
