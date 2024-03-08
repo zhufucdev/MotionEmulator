@@ -36,7 +36,6 @@ abstract class DataStore<T : Data> {
     protected abstract val dataSerializer: KSerializer<T>
 
     private val DataLoader<T>.storeName get() = "${typeName}_${id}.json"
-    private val DataLoader<T>.metaStoreName get() = "meta_${id}.json"
 
     /**
      * Make sure it works

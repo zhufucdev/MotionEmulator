@@ -11,12 +11,10 @@ import androidx.compose.runtime.remember
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.zhufucdev.me.stub.Data
 import com.zhufucdev.motion_emulator.BuildConfig
-import com.zhufucdev.motion_emulator.data.Cells
+import com.zhufucdev.motion_emulator.data.Telephonies
 import com.zhufucdev.motion_emulator.data.DataLoader
 import com.zhufucdev.motion_emulator.data.Emulations
-import com.zhufucdev.motion_emulator.data.LazyData
 import com.zhufucdev.motion_emulator.data.Motions
 import com.zhufucdev.motion_emulator.data.Traces
 import com.zhufucdev.motion_emulator.extension.AppUpdater
@@ -91,7 +89,7 @@ class MainActivity : ComponentActivity() {
         }
 
         initializer {
-            val stores = listOf(Traces, Motions, Cells)
+            val stores = listOf(Traces, Motions, Telephonies)
             val data = mutableStateListOf<DataLoader<*>>()
             ManagerViewModel(
                 data = data,

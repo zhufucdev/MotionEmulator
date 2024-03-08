@@ -8,5 +8,5 @@ import kotlin.reflect.KClass
 object Traces : DataStore<Trace>() {
     override val typeName: String get() = "trace"
     override val clazz: KClass<Trace> = Trace::class
-    override val dataSerializer: KSerializer<Trace> get() = serializer()
+    override val dataSerializer: KSerializer<Trace> = serializer()
 }

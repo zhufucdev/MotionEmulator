@@ -80,7 +80,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zhufucdev.me.stub.CellTimeline
 import com.zhufucdev.me.stub.Motion
 import com.zhufucdev.motion_emulator.R
-import com.zhufucdev.motion_emulator.data.Cells
+import com.zhufucdev.motion_emulator.data.Telephonies
 import com.zhufucdev.motion_emulator.data.DataLoader
 import com.zhufucdev.motion_emulator.data.Motions
 import com.zhufucdev.motion_emulator.data.Traces
@@ -825,7 +825,7 @@ fun ListItem(
 private val iconByStore by lazy {
     mapOf(
         Motions to Icons.Default.Smartphone,
-        Cells to Icons.Default.CellTower,
+        Telephonies to Icons.Default.CellTower,
         Traces to Icons.Default.Map
     )
 }
@@ -833,7 +833,7 @@ private val iconByStore by lazy {
 private val nameIdByStore by lazy {
     mapOf(
         Motions to R.string.title_motion,
-        Cells to R.string.title_cells,
+        Telephonies to R.string.title_cells,
         Traces to R.string.title_trace
     )
 }

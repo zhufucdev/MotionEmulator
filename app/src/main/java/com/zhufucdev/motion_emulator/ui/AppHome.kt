@@ -48,7 +48,7 @@ import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.zhufucdev.motion_emulator.R
-import com.zhufucdev.motion_emulator.data.Cells
+import com.zhufucdev.motion_emulator.data.Telephonies
 import com.zhufucdev.motion_emulator.data.Motions
 import com.zhufucdev.motion_emulator.data.Traces
 import com.zhufucdev.motion_emulator.ui.component.TooltipHost
@@ -198,7 +198,7 @@ private fun NavContent(paddingValues: PaddingValues) {
                 arguments = listOf(navArgument("id") { type = NavType.StringType })
             ) {
                 val targetId = it.arguments?.getString("id") ?: error("invalid argument")
-                val target = Cells[targetId] ?: error("unknown datum")
+                val target = Telephonies[targetId] ?: error("unknown datum")
                 CompositionLocalProvider(LocalViewModelStoreOwner provides provider) {
                     CellEditor(target, paddingValues)
                 }
