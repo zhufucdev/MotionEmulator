@@ -7,16 +7,13 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils
 import com.zhufucdev.me.stub.Motion
-import com.zhufucdev.me.stub.MotionMoment
-import kotlin.math.abs
+import com.zhufucdev.me.stub.SensorMoment
 
 interface MotionCallback {
     fun summarize(): Motion
-    fun onUpdate(l: (MotionMoment) -> Unit)
-    fun onUpdate(type: Int, l: (MotionMoment) -> Unit)
+    fun onUpdate(l: (SensorMoment) -> Unit)
+    fun onUpdate(type: Int, l: (SensorMoment) -> Unit)
 }
-
-const val VERTICAL_PERIOD = 0.05F
 
 object MotionRecorder {
     private lateinit var sensors: SensorManager
@@ -29,35 +26,23 @@ object MotionRecorder {
 
     fun start(sensorsRequired: List<Int>): MotionCallback {
         val start = System.currentTimeMillis()
-        val moments = arrayListOf<MotionMoment>()
-        var callbackListener: ((MotionMoment) -> Unit)? = null
-        val typedListeners = hashMapOf<Int, (MotionMoment) -> Unit>()
+        val timelines = sensorsRequired.associateWith { arrayListOf<SensorMoment>() }
+        var callbackListener: ((SensorMoment) -> Unit)? = null
+        val typedListeners = hashMapOf<Int, (SensorMoment) -> Unit>()
 
         val listener = object : SensorEventListener {
             override fun onSensorChanged(event: SensorEvent) {
-                fun typedFeedback(moment: MotionMoment) {
+                fun invokeTypedListener(moment: SensorMoment) {
                     typedListeners[event.sensor.type]?.invoke(moment)
                 }
 
                 val elapsed = (System.currentTimeMillis() - start) / 1000F
-                if (moments.isNotEmpty()) {
-                    val last = moments.last()
-                    if (
-                        abs(last.elapsed - elapsed) < VERTICAL_PERIOD
-                        && !last.data.containsKey(event.sensor.type)
-                    ) {
-                        last.data[event.sensor.type] = event.values
-                        typedFeedback(last)
-                        if (last.data.size == sensorsRequired.size) {
-                            callbackListener?.invoke(last)
-                        }
-                        return
-                    }
-                }
+                val timeline = timelines[event.sensor.type]!!
+                val moment = SensorMoment(elapsed, event.values)
 
-                val newMoment = MotionMoment(elapsed, mutableMapOf(event.sensor.type to event.values.clone()))
-                moments.add(newMoment)
-                typedFeedback(newMoment)
+                timeline.add(moment)
+                invokeTypedListener(moment)
+                callbackListener?.invoke(moment)
             }
 
             override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
@@ -75,14 +60,14 @@ object MotionRecorder {
                     callbacks.remove(this)
                 }
 
-                return Motion(NanoIdUtils.randomNanoId(), moments, sensorsRequired)
+                return Motion(NanoIdUtils.randomNanoId(), timelines)
             }
 
-            override fun onUpdate(l: (MotionMoment) -> Unit) {
+            override fun onUpdate(l: (SensorMoment) -> Unit) {
                 callbackListener = l
             }
 
-            override fun onUpdate(type: Int, l: (MotionMoment) -> Unit) {
+            override fun onUpdate(type: Int, l: (SensorMoment) -> Unit) {
                 typedListeners[type] = l
             }
         }

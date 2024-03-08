@@ -8,4 +8,5 @@ fun Activity.setUpStatusBar() {
     WindowCompat.setDecorFitsSystemWindows(window, false)
     window.statusBarColor = Color.TRANSPARENT
     window.navigationBarColor = Color.TRANSPARENT
+
 }
